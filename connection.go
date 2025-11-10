@@ -2,6 +2,7 @@ package strom
 
 import (
 	"bytes"
+	"compress/zlib"
 	"errors"
 	"io"
 	"net"
@@ -42,7 +43,7 @@ func (a Actor) ReceiveDirection() queser.Direction {
 }
 
 type Connection struct {
-	io.ReadWriteCloser
+	net.Conn
 	CompressionThreshold int32
 	State                queser.State
 	Actor                Actor
@@ -62,7 +63,26 @@ func (c *Connection) Send(packet any) (err error) {
 	}
 	var packetBytes []byte
 	if c.CompressionThreshold > 0 {
-		panic("todo")
+		packetBuffer := bytes.NewBuffer(nil)
+		if int32(len(packetBytes)) >= c.CompressionThreshold {
+			err = queser.VarInt(len(packetBytes)).Encode(packetBuffer)
+			if err != nil {
+				return
+			}
+			_, err = zlib.NewWriter(packetBuffer).Write(packetBytes)
+			if err != nil {
+				return
+			}
+		} else {
+			err = queser.VarInt(0).Encode(packetBuffer)
+			if err != nil {
+				return
+			}
+			_, err = packetBuffer.Write(packetBytes)
+			if err != nil {
+				return
+			}
+		}
 	} else {
 		packetBytes = rawPacketBuffer.Bytes()
 	}
@@ -75,18 +95,37 @@ func (c *Connection) Send(packet any) (err error) {
 }
 
 func (c *Connection) Receive() (packet any, err error) {
-	var packetLen queser.VarInt
-	packetLen, err = packetLen.Decode(c)
+	var rawPacketLen queser.VarInt
+	rawPacketLen, err = rawPacketLen.Decode(c)
 	if err != nil {
 		return
 	}
-	rawPacketBytes, err := io.ReadAll(io.LimitReader(c, int64(packetLen)))
+	rawPacketBytes, err := io.ReadAll(io.LimitReader(c, int64(rawPacketLen)))
 	if err != nil {
 		return
 	}
+	rawPacketBuffer := bytes.NewBuffer(rawPacketBytes)
 	var packetBytes []byte
 	if c.CompressionThreshold > 0 {
-		panic("todo")
+		var packetLen queser.VarInt
+		packetLen, err = packetLen.Decode(rawPacketBuffer)
+		if err != nil {
+			return
+		}
+		if packetLen == 0 {
+			packetBytes, err = io.ReadAll(rawPacketBuffer)
+		} else {
+			var zReader io.ReadCloser
+			zReader, err = zlib.NewReader(rawPacketBuffer)
+			if err != nil {
+				return
+			}
+			defer zReader.Close()
+			packetBytes, err = io.ReadAll(zReader)
+			if err != nil {
+				return
+			}
+		}
 	} else {
 		packetBytes = rawPacketBytes
 	}
@@ -100,9 +139,18 @@ func ClientConnect(addr string) (ret *Connection, err error) {
 	ret.State = queser.Handshaking
 	ret.CompressionThreshold = -1
 	ret.Actor = Client
-	ret.ReadWriteCloser, err = net.Dial("tcp", addr)
+	ret.Conn, err = net.Dial("tcp", addr)
 	if err != nil {
 		return
 	}
+	return
+}
+
+func ConnectAndStart(addr string, inst HandlerInst) (ret *Connection, err error) {
+	ret, err = ClientConnect(addr)
+	if err != nil {
+		return
+	}
+	err = ret.Start(inst)
 	return
 }
