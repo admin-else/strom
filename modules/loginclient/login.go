@@ -1,0 +1,197 @@
+package loginclient
+
+import (
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha1"
+	"crypto/x509"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strconv"
+	"strings"
+	"strom"
+
+	"github.com/admin-else/queser"
+	"github.com/admin-else/queser/data"
+	"github.com/admin-else/queser/generated/v1_21_8"
+	"github.com/google/uuid"
+)
+
+type Account struct {
+	Username string
+	Uuid     uuid.UUID
+	Token    string
+}
+type LoginClient struct {
+	*strom.Connection
+	Account Account
+}
+
+func (s *LoginClient) Default(event any) (err error) {
+	err = fmt.Errorf("unexpected event: %T%v", event, event)
+	return
+}
+
+func (s *LoginClient) OnStart(_ strom.OnStart) (err error) {
+	parts := strings.Split(s.RemoteAddr().String(), ":")
+	versionData, err := data.LookUpProtocolVersionByName(s.Version)
+	if err != nil {
+		return
+	}
+	port, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return
+	}
+	err = s.Send(v1_21_8.HandshakingToServerPacketSetProtocol{
+		ProtocolVersion: queser.VarInt(versionData.Version),
+		ServerHost:      parts[0],
+		ServerPort:      uint16(port),
+		NextState:       queser.VarInt(queser.Login),
+	})
+	if err != nil {
+		return
+	}
+	s.State = queser.Login
+	err = s.Send(v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Username, PlayerUUID: s.Account.Uuid})
+	return
+}
+
+func (s *LoginClient) OnCompress(compress v1_21_8.LoginToClientPacketCompress) (err error) {
+	s.CompressionThreshold = int32(compress.Threshold)
+	return
+}
+
+func twosComplement(p []byte) []byte {
+	carry := true
+	for i := len(p) - 1; i >= 0; i-- {
+		p[i] = byte(^p[i])
+		if carry {
+			carry = p[i] == 0xff
+			p[i]++
+		}
+	}
+	return p
+}
+
+// AuthDigest stolen from https://gist.github.com/toqueteos/5372776
+func AuthDigest(elems ...[]byte) string {
+	h := sha1.New()
+	for _, elem := range elems {
+		h.Write(elem)
+	}
+	hash := h.Sum(nil)
+
+	negative := (hash[0] & 0x80) == 0x80
+	if negative {
+		hash = twosComplement(hash)
+	}
+
+	res := strings.TrimLeft(hex.EncodeToString(hash), "0")
+	if negative {
+		res = "-" + res
+	}
+
+	return res
+}
+
+func JoinServerAPI(a Account, serverId string) (err error) {
+	var body []byte
+	body, err = json.Marshal(struct {
+		AccessToken     string `json:"accessToken"`
+		SelectedProfile string `json:"selectedProfile"`
+		ServerId        string `json:"serverId"`
+	}{
+		AccessToken:     a.Token,
+		SelectedProfile: strings.ReplaceAll(a.Uuid.String(), "-", ""),
+		ServerId:        serverId,
+	})
+	if err != nil {
+		return
+	}
+	var resp *http.Response
+	resp, err = http.Post("https://sessionserver.mojang.com/session/minecraft/join", "application/json", bytes.NewReader(body))
+	if err != nil {
+		return
+	}
+	if resp.StatusCode != 204 {
+		body, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return
+		}
+		err = fmt.Errorf("bad status code %v body %v", resp.StatusCode, string(body))
+		return
+	}
+	return
+}
+
+func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegin) (err error) {
+	sharedSecret := make([]byte, 16)
+	_, _ = rand.Read(sharedSecret) //never fails
+
+	if packet.ShouldAuthenticate {
+		if s.Account.Token == "" {
+			err = fmt.Errorf("the account has no token so we cant join online servers")
+			return
+		}
+		serverId := AuthDigest([]byte(packet.ServerId), sharedSecret, packet.PublicKey)
+		err = JoinServerAPI(s.Account, serverId)
+		if err != nil {
+			return
+		}
+	}
+
+	pubAny, err := x509.ParsePKIXPublicKey(packet.PublicKey)
+	if err != nil {
+		return
+	}
+	pub, ok := pubAny.(*rsa.PublicKey)
+	if !ok {
+		err = fmt.Errorf("public key is not rsa")
+		return
+	}
+	verifyTokenEnc, err := rsa.EncryptPKCS1v15(rand.Reader, pub, packet.VerifyToken)
+	if err != nil {
+		return
+	}
+
+	sharedSecretEnc, err := rsa.EncryptPKCS1v15(rand.Reader, pub, sharedSecret)
+	if err != nil {
+		return
+	}
+	err = s.Send(v1_21_8.LoginToServerPacketEncryptionBegin{SharedSecret: sharedSecretEnc, VerifyToken: verifyTokenEnc})
+	if err != nil {
+		return
+	}
+
+	var b cipher.Block
+	b, err = aes.NewCipher(sharedSecret)
+	if err != nil {
+		return
+	}
+	s.R = cipher.StreamReader{
+		S: strom.NewCFB8Decrypt(b, sharedSecret),
+		R: s.Conn,
+	}
+	s.W = cipher.StreamWriter{
+		S: strom.NewCFB8Encrypt(b, sharedSecret),
+		W: s.Conn,
+	}
+	return
+
+}
+
+func (s *LoginClient) OnSuccess(success v1_21_8.LoginToClientPacketSuccess) (err error) {
+	fmt.Println("login success", success)
+	err = s.Send(v1_21_8.LoginToServerPacketLoginAcknowledged{})
+	if err != nil {
+		return
+	}
+	s.State = queser.Configuration
+	return
+}

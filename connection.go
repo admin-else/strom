@@ -44,6 +44,8 @@ func (a Actor) ReceiveDirection() queser.Direction {
 
 type Connection struct {
 	net.Conn
+	R                    io.Reader
+	W                    io.Writer
 	CompressionThreshold int32
 	State                queser.State
 	Actor                Actor
@@ -69,7 +71,7 @@ func (c *Connection) Send(packet any) (err error) {
 			if err != nil {
 				return
 			}
-			_, err = zlib.NewWriter(packetBuffer).Write(packetBytes)
+			_, err = zlib.NewWriter(packetBuffer).Write(rawPacketBuffer.Bytes())
 			if err != nil {
 				return
 			}
@@ -78,29 +80,30 @@ func (c *Connection) Send(packet any) (err error) {
 			if err != nil {
 				return
 			}
-			_, err = packetBuffer.Write(packetBytes)
+			_, err = packetBuffer.Write(rawPacketBuffer.Bytes())
 			if err != nil {
 				return
 			}
 		}
+		packetBytes = packetBuffer.Bytes()
 	} else {
 		packetBytes = rawPacketBuffer.Bytes()
 	}
-	err = queser.VarInt(len(packetBytes)).Encode(c)
+	err = queser.VarInt(len(packetBytes)).Encode(c.W)
 	if err != nil {
 		return
 	}
-	_, err = c.Write(packetBytes)
+	_, err = c.W.Write(packetBytes)
 	return
 }
 
 func (c *Connection) Receive() (packet any, err error) {
 	var rawPacketLen queser.VarInt
-	rawPacketLen, err = rawPacketLen.Decode(c)
+	rawPacketLen, err = rawPacketLen.Decode(c.R)
 	if err != nil {
 		return
 	}
-	rawPacketBytes, err := io.ReadAll(io.LimitReader(c, int64(rawPacketLen)))
+	rawPacketBytes, err := io.ReadAll(io.LimitReader(c.R, int64(rawPacketLen)))
 	if err != nil {
 		return
 	}
@@ -143,14 +146,7 @@ func ClientConnect(addr string) (ret *Connection, err error) {
 	if err != nil {
 		return
 	}
-	return
-}
-
-func ConnectAndStart(addr string, inst HandlerInst) (ret *Connection, err error) {
-	ret, err = ClientConnect(addr)
-	if err != nil {
-		return
-	}
-	err = ret.Start(inst)
+	ret.R = ret.Conn
+	ret.W = ret.Conn
 	return
 }
