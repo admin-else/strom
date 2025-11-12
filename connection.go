@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 
@@ -42,7 +43,7 @@ func (a Actor) ReceiveDirection() queser.Direction {
 	}
 }
 
-type Connection struct {
+type Conn struct {
 	net.Conn
 	R                    io.Reader
 	W                    io.Writer
@@ -52,7 +53,7 @@ type Connection struct {
 	Version              string
 }
 
-func (c *Connection) Send(packet any) (err error) {
+func (c *Conn) Send(packet any) (err error) {
 	packetIdentifier := generated.TypeToPacketIdentifier(c.Version, c.Actor.SendDirection(), c.State, packet)
 	if packetIdentifier == "" {
 		err = BadPacketTypeError
@@ -97,7 +98,7 @@ func (c *Connection) Send(packet any) (err error) {
 	return
 }
 
-func (c *Connection) Receive() (packet any, err error) {
+func (c *Conn) Receive() (packet any, err error) {
 	var rawPacketLen queser.VarInt
 	rawPacketLen, err = rawPacketLen.Decode(c.R)
 	if err != nil {
@@ -132,12 +133,17 @@ func (c *Connection) Receive() (packet any, err error) {
 	} else {
 		packetBytes = rawPacketBytes
 	}
-	packet, err = generated.DecodePacket(c.Version, c.Actor.ReceiveDirection(), c.State, bytes.NewReader(packetBytes))
+	packetBuff := bytes.NewBuffer(packetBytes)
+	packet, err = generated.DecodePacket(c.Version, c.Actor.ReceiveDirection(), c.State, packetBuff)
+	if err != nil {
+		fmt.Printf("%#v\n", packetBytes)
+		return
+	}
 	return
 }
 
-func ClientConnect(addr string) (ret *Connection, err error) {
-	ret = &Connection{}
+func Connect(addr string) (ret *Conn, err error) {
+	ret = &Conn{}
 	ret.Version = "1.21.8"
 	ret.State = queser.Handshaking
 	ret.CompressionThreshold = -1
@@ -148,5 +154,17 @@ func ClientConnect(addr string) (ret *Connection, err error) {
 	}
 	ret.R = ret.Conn
 	ret.W = ret.Conn
+	return
+}
+
+func Servee(c net.Conn) (ret *Conn) {
+	ret = &Conn{}
+	ret.Version = "1.21.8"
+	ret.State = queser.Handshaking
+	ret.CompressionThreshold = -1
+	ret.Actor = Server
+	ret.Conn = c
+	ret.R = c
+	ret.W = c
 	return
 }

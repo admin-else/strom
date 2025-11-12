@@ -29,8 +29,10 @@ type Account struct {
 	Token    string
 }
 type LoginClient struct {
-	*strom.Connection
+	*strom.Conn
 	Account Account
+
+	GivenAccount v1_21_8.LoginToClientPacketSuccess
 }
 
 func (s *LoginClient) Default(event any) (err error) {
@@ -124,7 +126,7 @@ func JoinServerAPI(a Account, serverId string) (err error) {
 		if err != nil {
 			return
 		}
-		err = fmt.Errorf("bad status code %v body %v", resp.StatusCode, string(body))
+		err = fmt.Errorf("bad client code %v body %v", resp.StatusCode, string(body))
 		return
 	}
 	return
@@ -187,11 +189,19 @@ func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegi
 }
 
 func (s *LoginClient) OnSuccess(success v1_21_8.LoginToClientPacketSuccess) (err error) {
-	fmt.Println("login success", success)
+	s.GivenAccount = success
 	err = s.Send(v1_21_8.LoginToServerPacketLoginAcknowledged{})
 	if err != nil {
 		return
 	}
 	s.State = queser.Configuration
+	err = strom.HandlerDone
 	return
+}
+
+func Login(c *strom.Conn, account Account) (err error) {
+	return c.Start(&LoginClient{
+		Conn:    c,
+		Account: account,
+	})
 }

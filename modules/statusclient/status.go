@@ -12,7 +12,7 @@ import (
 )
 
 type StatusClient struct {
-	*strom.Connection
+	*strom.Conn
 	Status string
 }
 

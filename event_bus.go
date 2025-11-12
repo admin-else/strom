@@ -43,7 +43,7 @@ func FireEvent(inst HandlerInst, event any, handlers map[reflect.Type]reflect.Va
 	return
 }
 
-func (c *Connection) Start(inst HandlerInst) (err error) {
+func (c *Conn) Start(inst HandlerInst) (err error) {
 	handlers := FindHandlers(inst)
 	err = FireEvent(inst, OnStart{}, handlers)
 	for err == nil {
