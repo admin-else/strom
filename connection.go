@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 
@@ -13,6 +12,12 @@ import (
 )
 
 var BadPacketTypeError = errors.New("bad packet type")
+
+// UnCodablePacket represents a packet that could not be decoded due to querser not supporting all packets.
+type UnCodablePacket struct {
+	Err  error
+	Data []byte
+}
 
 type Actor int
 
@@ -54,15 +59,22 @@ type Conn struct {
 }
 
 func (c *Conn) Send(packet any) (err error) {
-	packetIdentifier := generated.TypeToPacketIdentifier(c.Version, c.Actor.SendDirection(), c.State, packet)
-	if packetIdentifier == "" {
-		err = BadPacketTypeError
-		return
-	}
-	rawPacketBuffer := bytes.NewBuffer(nil)
-	err = generated.EncodePacket(c.Version, c.Actor.SendDirection(), c.State, packetIdentifier, packet, rawPacketBuffer)
-	if err != nil {
-		return
+	var rawPacketBytes []byte
+	switch packet := packet.(type) {
+	case UnCodablePacket:
+		rawPacketBytes = packet.Data
+	default:
+		packetIdentifier := generated.TypeToPacketIdentifier(c.Version, c.Actor.SendDirection(), c.State, packet)
+		if packetIdentifier == "" {
+			err = BadPacketTypeError
+			return
+		}
+		rawPacketBuffer := bytes.NewBuffer(nil)
+		err = generated.EncodePacket(c.Version, c.Actor.SendDirection(), c.State, packetIdentifier, packet, rawPacketBuffer)
+		if err != nil {
+			return
+		}
+		rawPacketBytes = rawPacketBuffer.Bytes()
 	}
 	var packetBytes []byte
 	if c.CompressionThreshold > 0 {
@@ -72,7 +84,7 @@ func (c *Conn) Send(packet any) (err error) {
 			if err != nil {
 				return
 			}
-			_, err = zlib.NewWriter(packetBuffer).Write(rawPacketBuffer.Bytes())
+			_, err = zlib.NewWriter(packetBuffer).Write(rawPacketBytes)
 			if err != nil {
 				return
 			}
@@ -81,14 +93,14 @@ func (c *Conn) Send(packet any) (err error) {
 			if err != nil {
 				return
 			}
-			_, err = packetBuffer.Write(rawPacketBuffer.Bytes())
+			_, err = packetBuffer.Write(rawPacketBytes)
 			if err != nil {
 				return
 			}
 		}
 		packetBytes = packetBuffer.Bytes()
 	} else {
-		packetBytes = rawPacketBuffer.Bytes()
+		packetBytes = rawPacketBytes
 	}
 	err = queser.VarInt(len(packetBytes)).Encode(c.W)
 	if err != nil {
@@ -136,7 +148,7 @@ func (c *Conn) Receive() (packet any, err error) {
 	packetBuff := bytes.NewBuffer(packetBytes)
 	packet, err = generated.DecodePacket(c.Version, c.Actor.ReceiveDirection(), c.State, packetBuff)
 	if err != nil {
-		fmt.Printf("%#v\n", packetBytes)
+		packet = UnCodablePacket{Err: err, Data: packetBytes}
 		return
 	}
 	return

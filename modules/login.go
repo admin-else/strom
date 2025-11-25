@@ -1,4 +1,4 @@
-package loginclient
+package modules
 
 import (
 	"bytes"

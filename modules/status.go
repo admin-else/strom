@@ -1,4 +1,4 @@
-package statusclient
+package modules
 
 import (
 	"fmt"
