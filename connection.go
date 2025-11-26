@@ -15,8 +15,9 @@ var BadPacketTypeError = errors.New("bad packet type")
 
 // UnCodablePacket represents a packet that could not be decoded due to querser not supporting all packets.
 type UnCodablePacket struct {
-	Err  error
-	Data []byte
+	Err     error
+	Partial any
+	Data    []byte
 }
 
 type Actor int
@@ -148,8 +149,8 @@ func (c *Conn) Receive() (packet any, err error) {
 	packetBuff := bytes.NewBuffer(packetBytes)
 	packet, err = generated.DecodePacket(c.Version, c.Actor.ReceiveDirection(), c.State, packetBuff)
 	if err != nil {
-		packet = UnCodablePacket{Err: err, Data: packetBytes}
-		return
+		packet = UnCodablePacket{Err: err, Data: packetBytes, Partial: packet}
+		err = nil
 	}
 	return
 }

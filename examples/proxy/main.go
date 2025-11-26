@@ -16,8 +16,11 @@ type ProxyClient struct {
 }
 
 func (p *ProxyClient) Default(event any) (err error) {
-	fmt.Printf("1 %T%v\n", event, event)
+	fmt.Printf("S2C %#v\n", event)
 	err = p.Proxy.Send(event)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -41,7 +44,7 @@ type Proxy struct {
 }
 
 func (p *Proxy) Default(event any) (err error) {
-	fmt.Printf("2 %T%v\n", event, event)
+	fmt.Printf("C2S LastTrigger%#v\n", event)
 	err = p.ProxyClient.Send(event)
 	return
 }
@@ -91,10 +94,10 @@ func handleConn(conn net.Conn) {
 	p.ProxyClient = &ProxyClient{Conn: c, Proxy: p}
 	errChan := make(chan error)
 	go func() {
-		errChan <- c.Start(p.ProxyClient)
+		errChan <- fmt.Errorf("client error: %v", c.Start(p.ProxyClient))
 	}()
 	go func() {
-		errChan <- s.Start(p)
+		errChan <- fmt.Errorf("server error: %v", s.Start(p))
 	}()
 	err = <-errChan
 	if err != nil {

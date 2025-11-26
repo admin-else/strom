@@ -10,6 +10,7 @@ type HandlerInst interface {
 }
 
 type OnStart struct{}
+type OnLoopCycle struct{}
 
 var HandlerDone = errors.New("handler done")
 
@@ -53,6 +54,13 @@ func (c *Conn) Start(inst HandlerInst) (err error) {
 			return
 		}
 		err = FireEvent(inst, event, handlers)
+		if err != nil {
+			break
+		}
+		err = FireEvent(inst, OnLoopCycle{}, handlers)
+	}
+	if errors.Is(err, HandlerDone) {
+		err = nil
 	}
 	return
 }

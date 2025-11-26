@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -9,10 +8,7 @@ import (
 	"crypto/sha1"
 	"crypto/x509"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"strconv"
 	"strings"
 	"strom"
@@ -20,23 +16,21 @@ import (
 	"github.com/admin-else/queser"
 	"github.com/admin-else/queser/data"
 	"github.com/admin-else/queser/generated/v1_21_8"
-	"github.com/google/uuid"
 )
 
-type Account struct {
-	Username string
-	Uuid     uuid.UUID
-	Token    string
-}
 type LoginClient struct {
 	*strom.Conn
-	Account Account
+	Account strom.Account
 
 	GivenAccount v1_21_8.LoginToClientPacketSuccess
 }
 
 func (s *LoginClient) Default(event any) (err error) {
-	err = fmt.Errorf("unexpected event: %T%v", event, event)
+	err = fmt.Errorf("unexpected event: %#v", event)
+	return
+}
+
+func (s *LoginClient) OnCycle(_ strom.OnLoopCycle) (err error) {
 	return
 }
 
@@ -60,7 +54,7 @@ func (s *LoginClient) OnStart(_ strom.OnStart) (err error) {
 		return
 	}
 	s.State = queser.Login
-	err = s.Send(v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Username, PlayerUUID: s.Account.Uuid})
+	err = s.Send(v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Name, PlayerUUID: s.Account.Uuid})
 	return
 }
 
@@ -102,47 +96,17 @@ func AuthDigest(elems ...[]byte) string {
 	return res
 }
 
-func JoinServerAPI(a Account, serverId string) (err error) {
-	var body []byte
-	body, err = json.Marshal(struct {
-		AccessToken     string `json:"accessToken"`
-		SelectedProfile string `json:"selectedProfile"`
-		ServerId        string `json:"serverId"`
-	}{
-		AccessToken:     a.Token,
-		SelectedProfile: strings.ReplaceAll(a.Uuid.String(), "-", ""),
-		ServerId:        serverId,
-	})
-	if err != nil {
-		return
-	}
-	var resp *http.Response
-	resp, err = http.Post("https://sessionserver.mojang.com/session/minecraft/join", "application/json", bytes.NewReader(body))
-	if err != nil {
-		return
-	}
-	if resp.StatusCode != 204 {
-		body, err = io.ReadAll(resp.Body)
-		if err != nil {
-			return
-		}
-		err = fmt.Errorf("bad client code %v body %v", resp.StatusCode, string(body))
-		return
-	}
-	return
-}
-
 func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegin) (err error) {
 	sharedSecret := make([]byte, 16)
 	_, _ = rand.Read(sharedSecret) //never fails
 
 	if packet.ShouldAuthenticate {
-		if s.Account.Token == "" {
+		if s.Account.Ygg == "" {
 			err = fmt.Errorf("the account has no token so we cant join online servers")
 			return
 		}
 		serverId := AuthDigest([]byte(packet.ServerId), sharedSecret, packet.PublicKey)
-		err = JoinServerAPI(s.Account, serverId)
+		err = s.Account.JoinServer(serverId)
 		if err != nil {
 			return
 		}
@@ -199,7 +163,7 @@ func (s *LoginClient) OnSuccess(success v1_21_8.LoginToClientPacketSuccess) (err
 	return
 }
 
-func Login(c *strom.Conn, account Account) (err error) {
+func Login(c *strom.Conn, account strom.Account) (err error) {
 	return c.Start(&LoginClient{
 		Conn:    c,
 		Account: account,

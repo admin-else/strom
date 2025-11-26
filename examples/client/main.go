@@ -1,45 +1,110 @@
 package main
 
 import (
-	"errors"
-	"fmt"
+	"bytes"
+	"encoding/json"
+	"math/rand/v2"
+	"net/http"
 	"strom"
 	"strom/modules"
+	"sync"
+	"time"
 
-	"github.com/google/uuid"
+	"github.com/admin-else/queser/generated/v1_21_8"
 )
-
-var altAccount = modules.Account{
-	Username: "laibergraceful70",
-	Uuid:     uuid.MustParse("3a863af533e5452591e913e021bfa724"),
-	Token:    "eyJraWQiOiIwNDkxODEiLCJhbGciOiJSUzI1NiJ9.eyJ4dWlkIjoiMjc3NzIxOTc3MDIzMjM1OCIsImFnZyI6IkFkdWx0Iiwic3ViIjoiMzczMjI0OTktZTAwYS0…JRnCbAsBJl5zg-GAu6NkX1JCvpWdQkgFb0H5RYi2dIUKhNpP57WG2gh562T3BoPELVXDQZQVUBzDFeDuVDGGSkKmSmhzO7l-fEPBt2CjnaLCyr1FmYFSRzDBy1w",
-}
 
 type Client struct {
 	*strom.Conn
+	Ticker     *modules.Ticker
+	Message    string
+	AltAccount strom.Account
 }
 
 func (c *Client) Default(event any) (err error) {
-	fmt.Printf("%T%v\n", event, event)
 	return
 }
 
+func (c *Client) SendUnReportableChat(message string) (err error) {
+	return c.Send(v1_21_8.PlayToServerPacketChatMessage{Message: message, Timestamp: time.Now().Unix(), Salt: rand.Int64(), Signature: nil, Offset: 0, Acknowledged: [3]uint8{0x0, 0x0, 0x0}, Checksum: 0x1})
+}
+
 func (c *Client) OnStart(_ strom.OnStart) (err error) {
-	err = modules.Login(c.Conn, altAccount)
-	if errors.Is(err, strom.HandlerDone) {
-		return nil
+	err = modules.Login(c.Conn, c.AltAccount)
+	if err != nil {
+		return
 	}
+	err = modules.IgnoreConfig(c.Conn)
+	if err != nil {
+		return
+	}
+	c.Ticker.Active = true
+	return
+}
+
+func (c *Client) OnLoopCycle(strom.OnLoopCycle) (err error) {
+	err = c.Ticker.Tick()
+	return
+}
+
+func (c *Client) KeepAlive(packet v1_21_8.PlayToClientPacketKeepAlive) (err error) {
+	return c.Send(v1_21_8.PlayToServerPacketKeepAlive(packet))
+}
+
+func (c *Client) Spam() (err error) {
+	err = c.SendUnReportableChat(c.Message)
+	return
+}
+
+func spawnSpammer(message, connectTo string, account strom.Account, wg *sync.WaitGroup) {
+	conn, err := strom.Connect(connectTo)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	c := &Client{Conn: conn, Message: message}
+	t := modules.Ticker{}
+	t.Interval = append(t.Interval, modules.IntervalTask{
+		F:        c.Spam,
+		Interval: time.Second,
+	})
+	c.Ticker = &t
+	c.AltAccount = account
+	err = conn.Start(c)
+	wg.Done()
+}
+
+func DownloadAccounts(token string) (accounts []strom.Account, err error) {
+	r, err := http.NewRequest("GET", "https://griefing.homes/api/list/active", nil)
+	if err != nil {
+		return
+	}
+	r.Header.Set("Accept", "application/json")
+	r.Header.Set("Authorization", token)
+	resp, err := http.DefaultClient.Do(r)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	b := bytes.NewBuffer(nil)
+	_, err = b.ReadFrom(resp.Body)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(b.Bytes(), &accounts)
 	return
 }
 
 func main() {
-	c, err := strom.Connect("127.0.0.1:25566")
+	accounts, err := DownloadAccounts("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDBjNWIzMS02MmEzLTRjODUtYTE5ZC1lZjcxMWVkYzY3ZWQifQ.M_gwEK2HyyY6d4RFY7JzyeuqGVvmqmPK-13wNP0AxGc")
 	if err != nil {
 		panic(err)
 	}
-	defer c.Close()
-	err = c.Start(&Client{c})
-	if err != nil {
-		panic(err)
+
+	wg := &sync.WaitGroup{}
+	wg.Add(len(accounts))
+	for _, account := range accounts {
+		go spawnSpammer("LOBA ONTOP XD", "127.0.0.1:25566", account, wg)
+		time.Sleep(time.Second * 6)
 	}
+	wg.Wait()
 }
