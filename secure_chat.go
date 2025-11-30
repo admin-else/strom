@@ -1,8 +1,36 @@
 package strom
 
-type SecureChat struct {
+import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+
+	"github.com/google/uuid"
+)
+
+type SecureChatSession struct {
+	Account    *Account
+	PlayerKeys PlayerKeys
+	Private    *rsa.PrivateKey
+	SessionId  uuid.UUID
 }
 
-func FetchSecureChat(account Account) {
+func NewSecureChat(a *Account) (s *SecureChatSession, err error) {
+	s = &SecureChatSession{Account: a}
+	s.PlayerKeys, err = a.FetchKeys()
 
+	if err != nil {
+		return
+	}
+	block, _ := pem.Decode([]byte(s.PlayerKeys.KeyPair.PrivateKey))
+
+	k, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return
+	}
+
+	s.Private = k.(*rsa.PrivateKey)
+
+	s.SessionId, err = uuid.NewRandom()
+	return
 }
