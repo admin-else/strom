@@ -8,10 +8,13 @@ import (
 	"crypto/sha1"
 	"crypto/x509"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
-	"strom"
+
+	"github.com/admin-else/strom"
 
 	"github.com/admin-else/queser"
 	"github.com/admin-else/queser/data"
@@ -35,18 +38,21 @@ func (s *LoginClient) OnCycle(_ strom.OnLoopCycle) (err error) {
 }
 
 func (s *LoginClient) OnStart(_ strom.OnStart) (err error) {
-	parts := strings.Split(s.RemoteAddr().String(), ":")
+	host, portStr, err := net.SplitHostPort(s.RemoteAddr().String())
+	if err != nil {
+		return
+	}
 	versionData, err := data.LookUpProtocolVersionByName(s.Version)
 	if err != nil {
 		return
 	}
-	port, err := strconv.Atoi(parts[1])
+	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		return
 	}
 	err = s.Send(v1_21_8.HandshakingToServerPacketSetProtocol{
 		ProtocolVersion: queser.VarInt(versionData.Version),
-		ServerHost:      parts[0],
+		ServerHost:      host,
 		ServerPort:      uint16(port),
 		NextState:       queser.VarInt(queser.Login),
 	})
@@ -164,8 +170,12 @@ func (s *LoginClient) OnSuccess(success v1_21_8.LoginToClientPacketSuccess) (err
 }
 
 func Login(c *strom.Conn, account strom.Account) (err error) {
-	return c.Start(&LoginClient{
+	err = c.Start(&LoginClient{
 		Conn:    c,
 		Account: account,
 	})
+	if err != nil {
+		err = errors.Join(err, errors.New("failed to login"))
+	}
+	return
 }

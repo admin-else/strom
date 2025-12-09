@@ -5,17 +5,18 @@ import (
 	"encoding/json"
 	"math/rand/v2"
 	"net/http"
-	"strom"
-	"strom/modules"
 	"sync"
 	"time"
+
+	"github.com/admin-else/strom"
+	"github.com/admin-else/strom/modules"
 
 	"github.com/admin-else/queser/generated/v1_21_8"
 )
 
 type Client struct {
 	*strom.Conn
-	Ticker     *modules.Ticker
+	Ticker     *modules.Timer
 	Message    string
 	AltAccount strom.Account
 }
@@ -62,7 +63,7 @@ func spawnSpammer(message, connectTo string, account strom.Account, wg *sync.Wai
 	}
 	defer conn.Close()
 	c := &Client{Conn: conn, Message: message}
-	t := modules.Ticker{}
+	t := modules.Timer{}
 	t.Interval = append(t.Interval, modules.IntervalTask{
 		F:        c.Spam,
 		Interval: time.Second,

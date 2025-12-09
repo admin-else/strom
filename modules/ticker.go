@@ -13,13 +13,13 @@ type OnceTask struct {
 	Trigger time.Time
 }
 
-type Ticker struct {
+type Timer struct {
 	Once     []OnceTask
 	Interval []IntervalTask
 	Active   bool
 }
 
-func (t *Ticker) Tick() (err error) {
+func (t *Timer) Tick() (err error) {
 	if !t.Active {
 		return
 	}
@@ -46,4 +46,18 @@ func (t *Ticker) Tick() (err error) {
 	}
 	t.Once = triggerLater
 	return
+}
+
+func (t *Timer) Every(interval time.Duration, f func() error) {
+	t.Interval = append(t.Interval, IntervalTask{
+		F:        f,
+		Interval: interval,
+	})
+}
+
+func (t *Timer) In(interval time.Duration, f func() error) {
+	t.Once = append(t.Once, OnceTask{
+		F:       f,
+		Trigger: time.Now().Add(interval),
+	})
 }

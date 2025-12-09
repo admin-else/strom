@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
-	"strom"
+
+	"github.com/admin-else/strom"
 
 	"github.com/admin-else/queser"
 	"github.com/admin-else/queser/generated/v1_21_8"
@@ -13,6 +15,10 @@ import (
 type ProxyClient struct {
 	*strom.Conn
 	Proxy *Proxy
+}
+
+func (p *ProxyClient) OnLoopCycle(event strom.OnLoopCycle) (err error) {
+	return
 }
 
 func (p *ProxyClient) Default(event any) (err error) {
@@ -43,8 +49,12 @@ type Proxy struct {
 	ProxyClient *ProxyClient
 }
 
+func (p *Proxy) OnLastTrigger(event strom.OnLoopCycle) (err error) {
+	return
+}
+
 func (p *Proxy) Default(event any) (err error) {
-	fmt.Printf("C2S LastTrigger%#v\n", event)
+	fmt.Printf("C2S %#v\n", event)
 	err = p.ProxyClient.Send(event)
 	return
 }
@@ -53,6 +63,9 @@ func (p *Proxy) OnHandshake(packet v1_21_8.HandshakingToServerPacketSetProtocol)
 	err = p.ProxyClient.Send(packet)
 	if err != nil {
 		return
+	}
+	if packet.NextState != queser.VarInt(queser.Status) && packet.NextState != queser.VarInt(queser.Login) {
+		err = errors.New("invalid next state")
 	}
 	p.State = queser.State(packet.NextState)
 	p.ProxyClient.State = queser.State(packet.NextState)

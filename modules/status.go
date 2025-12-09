@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"strom"
+
+	"github.com/admin-else/strom"
 
 	"github.com/admin-else/queser"
 	"github.com/admin-else/queser/data"

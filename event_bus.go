@@ -45,6 +45,7 @@ func FireEvent(inst HandlerInst, event any, handlers map[reflect.Type]reflect.Va
 }
 
 func (c *Conn) Start(inst HandlerInst) (err error) {
+	_ = *c // exit early on nil connection
 	handlers := FindHandlers(inst)
 	err = FireEvent(inst, OnStart{}, handlers)
 	for err == nil {

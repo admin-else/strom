@@ -1,7 +1,10 @@
 package modules
 
 import (
-	"strom"
+	"errors"
+	"fmt"
+
+	"github.com/admin-else/strom"
 
 	"github.com/admin-else/queser"
 	"github.com/admin-else/queser/generated/v1_21_8"
@@ -12,6 +15,7 @@ type ConfigIgnorer struct {
 }
 
 func (c *ConfigIgnorer) Default(event any) (err error) {
+	fmt.Printf("%#v\n", event)
 	return
 }
 
@@ -29,6 +33,20 @@ func (c *ConfigIgnorer) OnFinish(packet v1_21_8.ConfigurationToClientPacketFinis
 	return
 }
 
+func (c *ConfigIgnorer) OnPing(packet v1_21_8.ConfigurationToClientPacketPing) (err error) {
+	err = c.Send(v1_21_8.ConfigurationToServerPacketPong(packet))
+	return
+}
+
+func (c *ConfigIgnorer) OnKeepAlive(packet v1_21_8.ConfigurationToClientPacketKeepAlive) (err error) {
+	err = c.Send(v1_21_8.ConfigurationToServerPacketKeepAlive(packet))
+	return
+}
+
 func IgnoreConfig(c *strom.Conn) (err error) {
-	return c.Start(&ConfigIgnorer{c})
+	err = c.Start(&ConfigIgnorer{c})
+	if err != nil {
+		err = errors.Join(err, errors.New("failed to ignore config"))
+	}
+	return
 }
