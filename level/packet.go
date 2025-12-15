@@ -2,6 +2,7 @@ package level
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -91,9 +92,12 @@ func UnpackBlockData(r io.Reader) (blocks [BlocksPerChunkSection]int32, err erro
 	case 1, 2, 3, 4:
 		blocksSlice, err = UnpackArrayPalette(r, bitsPerEntry, BlocksPerChunkSection)
 	case 5, 6, 7, 8:
-		panic("unimplemented")
+		err = errors.New("unimplemented")
 	default:
 		blocksSlice, err = UnpackLongData(r, bitsPerEntry, BlocksPerChunkSection)
+	}
+	if err != nil {
+		return
 	}
 	blocks = [BlocksPerChunkSection]int32(blocksSlice)
 	return
