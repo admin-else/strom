@@ -19,7 +19,7 @@ type Account struct {
 }
 
 const (
-	ApiBase = "https://api.minecraftservices.com"
+	BaseUrlApi = "https://api.minecraftservices.com"
 )
 
 func (a *Account) doMcApiRequest(method string, url string, from any, to any) (err error) {
@@ -72,7 +72,7 @@ type PlayerKeys struct {
 }
 
 func (a *Account) FetchKeys() (keys PlayerKeys, err error) {
-	err = a.doMcApiRequest("POST", ApiBase+"/player/certificates", nil, &keys)
+	err = a.doMcApiRequest("POST", BaseUrlApi+"/player/certificates", nil, &keys)
 	return
 }
 

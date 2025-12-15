@@ -360,7 +360,7 @@ func writePayload(v any, w io.Writer) (err error) {
 		}
 		err = binary.Write(w, Order, End)
 	default:
-		err = errors.New("unkown nbt type")
+		err = errors.New("unknown nbt type")
 	}
 	return
 }
