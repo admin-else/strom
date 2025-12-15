@@ -5,17 +5,18 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 
+	"github.com/admin-else/strom/api"
 	"github.com/google/uuid"
 )
 
 type SecureChatSession struct {
-	Account    *Account
-	PlayerKeys PlayerKeys
+	Account    *api.Account
+	PlayerKeys api.PlayerKeys
 	Private    *rsa.PrivateKey
 	SessionId  uuid.UUID
 }
 
-func NewSecureChat(a *Account) (s *SecureChatSession, err error) {
+func NewSecureChat(a *api.Account) (s *SecureChatSession, err error) {
 	s = &SecureChatSession{Account: a}
 	s.PlayerKeys, err = a.FetchKeys()
 

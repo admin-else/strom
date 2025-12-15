@@ -10,7 +10,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/admin-else/queser/data"
+	"github.com/admin-else/strom/data"
 )
 
 var ToDoError = errors.New("to do")
@@ -208,7 +208,7 @@ func (g *Generator) GenerateTypes(prefix string, types Types) error {
 		g.Depth = 0
 		e, err := g.VisitType(v)
 		if errors.Is(err, ToDoError) {
-			e = Selector("queser", "ToDo")
+			e = Selector("proto_base", "ToDo")
 			err = nil
 		}
 		if err != nil {
@@ -303,7 +303,7 @@ func Generate(version string, w io.Writer) (err error) {
 	g.Settings.ReplaceWithTodoNames = []string{"packet_scoreboard_score", "packet_advancements"}
 
 	g.File = NewFile("v" + strings.ReplaceAll(version, ".", "_"))
-	AppendDecl(g.File, Import("encoding/binary", "io", "github.com/admin-else/queser", "github.com/admin-else/queser/nbt", "github.com/google/uuid"))
+	AppendDecl(g.File, Import("encoding/binary", "io", "github.com/admin-else/strom/proto_base", "github.com/admin-else/strom/nbt", "github.com/google/uuid"))
 	g.RegisterNatives()
 	g.RegisterDecoderNatives()
 	g.RegisterEncoderNatives()
@@ -317,11 +317,11 @@ func Generate(version string, w io.Writer) (err error) {
 
 func generateVersion(v string) (err error) {
 	vUnderscore := strings.ReplaceAll(v, ".", "_")
-	err = os.MkdirAll("generated/v"+vUnderscore, 0755)
+	err = os.MkdirAll("proto_generated/v"+vUnderscore, 0755)
 	if err != nil {
 		return
 	}
-	f, err := os.Create("generated/v" + vUnderscore + "/proto.go")
+	f, err := os.Create("proto_generated/v" + vUnderscore + "/proto.go")
 	if err != nil {
 		return
 	}
@@ -330,7 +330,7 @@ func generateVersion(v string) (err error) {
 	if err != nil {
 		return
 	}
-	helperF, err := os.Create("generated/v" + vUnderscore + "/helpers.go")
+	helperF, err := os.Create("proto_generated/v" + vUnderscore + "/helpers.go")
 	if err != nil {
 		return
 	}
@@ -340,15 +340,15 @@ func generateVersion(v string) (err error) {
 }
 
 func GenerateVersions(versions []string) (err error) {
-	err = os.RemoveAll("generated/")
+	err = os.RemoveAll("proto_generated/")
 	if err != nil {
 		return
 	}
-	err = os.MkdirAll("generated/", 0755)
+	err = os.MkdirAll("proto_generated/", 0755)
 	if err != nil {
 		return
 	}
-	f, err := os.Create("generated/version_switcher.go")
+	f, err := os.Create("proto_generated/version_switcher.go")
 	if err != nil {
 		return
 	}

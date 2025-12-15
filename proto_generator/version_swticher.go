@@ -16,8 +16,8 @@ func GeneratePacketIdentifierToType(versions []string) (decl ast.Decl) {
 	s = append(s, Case(nil, Stmts()))
 	fn := NewFunc("PacketIdentifierToType", []NameAndType{
 		{"v", Ident("string")},
-		{"d", Ident("queser.Direction")},
-		{"s", Ident("queser.State")},
+		{"d", Ident("proto_base.Direction")},
+		{"s", Ident("proto_base.State")},
 		{"i", Ident("string")},
 	}, []NameAndType{
 		{"t", Ident("any")},
@@ -28,7 +28,7 @@ func GeneratePacketIdentifierToType(versions []string) (decl ast.Decl) {
 }
 
 /*
-func PacketIdentifierToType(v string, d queser.Direction, s queser.State, i string) (t any) {
+func PacketIdentifierToType(v string, d proto_base.Direction, s proto_base.State, i string) (t any) {
 	switch v {
 	case "1.21.8":
 		t = v1_21_8.PacketIdentifierToType(d, s, i)
@@ -38,7 +38,7 @@ func PacketIdentifierToType(v string, d queser.Direction, s queser.State, i stri
 	return
 }
 
-func TypeToPacketIdentifier(v string, d queser.Direction, s queser.State, t any) (i string) {
+func TypeToPacketIdentifier(v string, d proto_base.Direction, s proto_base.State, t any) (i string) {
 	switch v {
 	case "1.21.8":
 		i = v1_21_8.TypeToPacketIdentifier(d, s, t)
@@ -46,7 +46,7 @@ func TypeToPacketIdentifier(v string, d queser.Direction, s queser.State, t any)
 	return
 }
 
-func DecodePacket(v string, d queser.Direction, s queser.State, r io.Reader) (packet any, err error) {
+func DecodePacket(v string, d proto_base.Direction, s proto_base.State, r io.Reader) (packet any, err error) {
 	switch v {
 	case "1.21.8":
 		packet, err = v1_21_8.DecodePacket(d, s, r)
@@ -54,7 +54,7 @@ func DecodePacket(v string, d queser.Direction, s queser.State, r io.Reader) (pa
 	return
 }
 
-func EncodePacket(v string, d queser.Direction, s queser.State, i string, p any, w io.Writer) (err error) {
+func EncodePacket(v string, d proto_base.Direction, s proto_base.State, i string, p any, w io.Writer) (err error) {
 	switch v {
 	case "1.21.8":
 		err = v1_21_8.EncodePacket(d, s, i, p, w)
@@ -74,8 +74,8 @@ func GenerateTypeToPacketIdentifier(versions []string) (decl ast.Decl) {
 	}
 	fn := NewFunc("TypeToPacketIdentifier", []NameAndType{
 		{"v", Ident("string")},
-		{"d", Ident("queser.Direction")},
-		{"s", Ident("queser.State")},
+		{"d", Ident("proto_base.Direction")},
+		{"s", Ident("proto_base.State")},
 		{"t", Ident("any")},
 	}, []NameAndType{
 		{"i", Ident("string")},
@@ -94,8 +94,8 @@ func GenerateDecodePacket(versions []string) (decl ast.Decl) {
 	}
 	fn := NewFunc("DecodePacket", []NameAndType{
 		{"v", Ident("string")},
-		{"d", Ident("queser.Direction")},
-		{"s", Ident("queser.State")},
+		{"d", Ident("proto_base.Direction")},
+		{"s", Ident("proto_base.State")},
 		{"r", Ident("io.Reader")},
 	}, []NameAndType{
 		{"packet", Ident("any")},
@@ -115,8 +115,8 @@ func GenerateEncodePacket(versions []string) (decl ast.Decl) {
 	}
 	fn := NewFunc("EncodePacket", []NameAndType{
 		{"v", Ident("string")},
-		{"d", Ident("queser.Direction")},
-		{"s", Ident("queser.State")},
+		{"d", Ident("proto_base.Direction")},
+		{"s", Ident("proto_base.State")},
 		{"i", Ident("string")},
 		{"p", Ident("any")},
 		{"w", Ident("io.Writer")},
@@ -129,11 +129,12 @@ func GenerateEncodePacket(versions []string) (decl ast.Decl) {
 }
 
 func GenerateVersionSwitcher(versions []string, printTo io.Writer) (err error) {
-	f := NewFile("generated")
-	AppendDecl(f, Import(
-		"io",
-		"github.com/admin-else/queser",
-		"github.com/admin-else/queser/generated/v1_21_8"))
+	f := NewFile("proto_generated")
+	importPaths := []string{"io", "github.com/admin-else/strom/proto_base"}
+	for _, version := range versions {
+		importPaths = append(importPaths, "github.com/admin-else/strom/proto_generated/v"+strings.ReplaceAll(version, ".", "_"))
+	}
+	AppendDecl(f, Import(importPaths...))
 	AppendDecl(f, GeneratePacketIdentifierToType(versions))
 	AppendDecl(f, GenerateTypeToPacketIdentifier(versions))
 	AppendDecl(f, GenerateDecodePacket(versions))

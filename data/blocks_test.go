@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/admin-else/queser/data"
+	"github.com/admin-else/strom/data"
 )
 
 func TestLookupBlockByStateId(t *testing.T) {

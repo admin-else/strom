@@ -7,7 +7,7 @@ import (
 
 	_ "embed"
 
-	"github.com/admin-else/queser/data"
+	"github.com/admin-else/strom/data"
 )
 
 //go:embed helper_append.txt
@@ -25,7 +25,7 @@ func GenerateHelperTypes(t Types, prefix string, f *ast.File) (err error) {
 			if strings.HasPrefix(v2, "packet_common") {
 				m[k2] = CamelCase(v2)
 			} else if v2 == "void" {
-				m[k2] = "queser.Void"
+				m[k2] = "proto_base.Void"
 			} else {
 				m[k2] = prefix + CamelCase(v2)
 			}
@@ -115,7 +115,7 @@ func GenerateHelpers(version string, w io.Writer) (err error) {
 		return
 	}
 	f := NewFile("v" + strings.ReplaceAll(version, ".", "_"))
-	AppendDecl(f, Import("io", "github.com/admin-else/queser"))
+	AppendDecl(f, Import("io", "github.com/admin-else/strom/proto_base"))
 	err = GenerateHelperProtocol(protocol, f)
 	if err != nil {
 		return

@@ -3,7 +3,7 @@ package data_test
 import (
 	"testing"
 
-	"github.com/admin-else/queser/data"
+	"github.com/admin-else/strom/data"
 )
 
 func TestLookupBiomeById(t *testing.T) {

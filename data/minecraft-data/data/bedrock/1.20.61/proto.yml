@@ -25,7 +25,7 @@ nbtLoop: native
 enum_size_based_on_values_len: native                 # Packet-specific custom logic  
 MapInfo: native
 
-# load the packet map file (auto-generated)
+# load the packet map file (auto-proto_generated)
 !import: packet_map.yml
 
 !StartDocs: Packets
@@ -254,7 +254,7 @@ packet_start_game:
       0: overworld
       1: nether
       2: end
-   # Generator is the generator used for the world. It is a value from 0-4, with 0 being old
+   # Generator is the proto_generator used for the world. It is a value from 0-4, with 0 being old
    # limited worlds, 1 being infinite worlds, 2 being flat worlds, 3 being nether worlds and 
    # 4 being end worlds. A value of 0 will actually make the client stop rendering chunks you 
    # send beyond the world limit.

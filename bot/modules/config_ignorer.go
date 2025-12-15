@@ -4,14 +4,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/admin-else/strom"
-
-	"github.com/admin-else/queser"
-	"github.com/admin-else/queser/generated/v1_21_8"
+	"github.com/admin-else/strom/bot"
+	"github.com/admin-else/strom/proto_base"
+	"github.com/admin-else/strom/proto_generated/v1_21_8"
 )
 
 type ConfigIgnorer struct {
-	*strom.Conn
+	*bot.Conn
 }
 
 func (c *ConfigIgnorer) Default(event any) (err error) {
@@ -23,13 +22,13 @@ func (c *ConfigIgnorer) OnKnownPacks(packet v1_21_8.PacketCommonSelectKnownPacks
 	return c.Send(packet)
 }
 
-func (c *ConfigIgnorer) OnFinish(packet v1_21_8.ConfigurationToClientPacketFinishConfiguration) (err error) {
+func (c *ConfigIgnorer) OnFinish(_ v1_21_8.ConfigurationToClientPacketFinishConfiguration) (err error) {
 	err = c.Send(v1_21_8.ConfigurationToServerPacketFinishConfiguration{})
 	if err != nil {
 		return
 	}
-	c.State = queser.Play
-	err = strom.HandlerDone
+	c.State = proto_base.Play
+	err = bot.HandlerDone
 	return
 }
 
@@ -43,7 +42,7 @@ func (c *ConfigIgnorer) OnKeepAlive(packet v1_21_8.ConfigurationToClientPacketKe
 	return
 }
 
-func IgnoreConfig(c *strom.Conn) (err error) {
+func IgnoreConfig(c *bot.Conn) (err error) {
 	err = c.Start(&ConfigIgnorer{c})
 	if err != nil {
 		err = errors.Join(err, errors.New("failed to ignore config"))

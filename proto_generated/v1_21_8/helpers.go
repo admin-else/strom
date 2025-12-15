@@ -1,8 +1,8 @@
 package v1_21_8
 
 import (
+	"github.com/admin-else/strom/proto_base"
 	"io"
-	"github.com/admin-else/queser"
 )
 
 func HandshakingToServerPacketIdentifierToType(s string) (t any) {
@@ -582,7 +582,7 @@ func PlayToClientPacketIdentifierToType(s string) (t any) {
 	case "boss_bar":
 		t = PlayToClientPacketBossBar{}
 	case "bundle_delimiter":
-		t = queser.Void{}
+		t = proto_base.Void{}
 	case "camera":
 		t = PlayToClientPacketCamera{}
 	case "chat_suggestions":
@@ -1100,109 +1100,109 @@ func PlayToClientTypeToPacketIdentifier(t any) (s string) {
 		s = "world_event"
 	case PlayToClientPacketWorldParticles:
 		s = "world_particles"
-	case queser.Void:
+	case proto_base.Void:
 		s = "bundle_delimiter"
 	}
 	return
 }
 
-func TypeToPacketIdentifier(d queser.Direction, s queser.State, t any) (i string) {
+func TypeToPacketIdentifier(d proto_base.Direction, s proto_base.State, t any) (i string) {
 	switch d {
-	case queser.ToServer:
+	case proto_base.ToServer:
 		switch s {
-		case queser.Handshaking:
+		case proto_base.Handshaking:
 			i = HandshakingToServerTypeToPacketIdentifier(t)
-		case queser.Status:
+		case proto_base.Status:
 			i = StatusToServerTypeToPacketIdentifier(t)
-		case queser.Login:
+		case proto_base.Login:
 			i = LoginToServerTypeToPacketIdentifier(t)
-		case queser.Configuration:
+		case proto_base.Configuration:
 			i = ConfigurationToServerTypeToPacketIdentifier(t)
-		case queser.Play:
+		case proto_base.Play:
 			i = PlayToServerTypeToPacketIdentifier(t)
 		}
-	case queser.ToClient:
+	case proto_base.ToClient:
 		switch s {
-		case queser.Handshaking:
+		case proto_base.Handshaking:
 			i = HandshakingToClientTypeToPacketIdentifier(t)
-		case queser.Status:
+		case proto_base.Status:
 			i = StatusToClientTypeToPacketIdentifier(t)
-		case queser.Login:
+		case proto_base.Login:
 			i = LoginToClientTypeToPacketIdentifier(t)
-		case queser.Configuration:
+		case proto_base.Configuration:
 			i = ConfigurationToClientTypeToPacketIdentifier(t)
-		case queser.Play:
+		case proto_base.Play:
 			i = PlayToClientTypeToPacketIdentifier(t)
 		}
 	}
 	return
 }
 
-func PacketIdentifierToType(d queser.Direction, s queser.State, i string) (t any) {
+func PacketIdentifierToType(d proto_base.Direction, s proto_base.State, i string) (t any) {
 	switch d {
-	case queser.ToServer:
+	case proto_base.ToServer:
 		switch s {
-		case queser.Handshaking:
+		case proto_base.Handshaking:
 			t = HandshakingToServerPacketIdentifierToType(i)
-		case queser.Status:
+		case proto_base.Status:
 			t = StatusToServerPacketIdentifierToType(i)
-		case queser.Login:
+		case proto_base.Login:
 			t = LoginToServerPacketIdentifierToType(i)
-		case queser.Configuration:
+		case proto_base.Configuration:
 			t = ConfigurationToServerPacketIdentifierToType(i)
-		case queser.Play:
+		case proto_base.Play:
 			t = PlayToServerPacketIdentifierToType(i)
 		}
-	case queser.ToClient:
+	case proto_base.ToClient:
 		switch s {
-		case queser.Handshaking:
+		case proto_base.Handshaking:
 			t = HandshakingToClientPacketIdentifierToType(i)
-		case queser.Status:
+		case proto_base.Status:
 			t = StatusToClientPacketIdentifierToType(i)
-		case queser.Login:
+		case proto_base.Login:
 			t = LoginToClientPacketIdentifierToType(i)
-		case queser.Configuration:
+		case proto_base.Configuration:
 			t = ConfigurationToClientPacketIdentifierToType(i)
-		case queser.Play:
+		case proto_base.Play:
 			t = PlayToClientPacketIdentifierToType(i)
 		}
 	}
 	return
 }
 
-func DecodePacket(d queser.Direction, s queser.State, r io.Reader) (params any, err error) {
+func DecodePacket(d proto_base.Direction, s proto_base.State, r io.Reader) (params any, err error) {
 	switch d {
-	case queser.ToServer:
+	case proto_base.ToServer:
 		switch s {
-		case queser.Handshaking:
+		case proto_base.Handshaking:
 			var packet HandshakingToServerPacket
 			packet, err = HandshakingToServerPacket{}.Decode(r)
 			if err != nil {
 				return
 			}
 			params = packet.Params
-		case queser.Status:
+		case proto_base.Status:
 			var packet StatusToServerPacket
 			packet, err = StatusToServerPacket{}.Decode(r)
 			if err != nil {
 				return
 			}
 			params = packet.Params
-		case queser.Login:
+		case proto_base.Login:
 			var packet LoginToServerPacket
 			packet, err = LoginToServerPacket{}.Decode(r)
 			if err != nil {
 				return
 			}
 			params = packet.Params
-		case queser.Configuration:
+		case proto_base.Configuration:
 			var packet ConfigurationToServerPacket
 			packet, err = ConfigurationToServerPacket{}.Decode(r)
 			if err != nil {
 				return
 			}
 			params = packet.Params
-		case queser.Play:
+		case proto_base.Play:
 			var packet PlayToServerPacket
 			packet, err = PlayToServerPacket{}.Decode(r)
 			if err != nil {
@@ -1210,37 +1210,37 @@ func DecodePacket(d queser.Direction, s queser.State, r io.Reader) (params any, 
 			}
 			params = packet.Params
 		}
-	case queser.ToClient:
+	case proto_base.ToClient:
 		switch s {
-		case queser.Handshaking:
+		case proto_base.Handshaking:
 			var packet HandshakingToClientPacket
 			packet, err = HandshakingToClientPacket{}.Decode(r)
 			if err != nil {
 				return
 			}
 			params = packet.Params
-		case queser.Status:
+		case proto_base.Status:
 			var packet StatusToClientPacket
 			packet, err = StatusToClientPacket{}.Decode(r)
 			if err != nil {
 				return
 			}
 			params = packet.Params
-		case queser.Login:
+		case proto_base.Login:
 			var packet LoginToClientPacket
 			packet, err = LoginToClientPacket{}.Decode(r)
 			if err != nil {
 				return
 			}
 			params = packet.Params
-		case queser.Configuration:
+		case proto_base.Configuration:
 			var packet ConfigurationToClientPacket
 			packet, err = ConfigurationToClientPacket{}.Decode(r)
 			if err != nil {
 				return
 			}
 			params = packet.Params
-		case queser.Play:
+		case proto_base.Play:
 			var packet PlayToClientPacket
 			packet, err = PlayToClientPacket{}.Decode(r)
 			if err != nil {
@@ -1252,32 +1252,32 @@ func DecodePacket(d queser.Direction, s queser.State, r io.Reader) (params any, 
 	return
 }
 
-func EncodePacket(d queser.Direction, s queser.State, i string, p any, w io.Writer) (err error) {
+func EncodePacket(d proto_base.Direction, s proto_base.State, i string, p any, w io.Writer) (err error) {
 	switch d {
-	case queser.ToServer:
+	case proto_base.ToServer:
 		switch s {
-		case queser.Handshaking:
+		case proto_base.Handshaking:
 			err = HandshakingToServerPacket{i, p}.Encode(w)
-		case queser.Status:
+		case proto_base.Status:
 			err = StatusToServerPacket{i, p}.Encode(w)
-		case queser.Login:
+		case proto_base.Login:
 			err = LoginToServerPacket{i, p}.Encode(w)
-		case queser.Configuration:
+		case proto_base.Configuration:
 			err = ConfigurationToServerPacket{i, p}.Encode(w)
-		case queser.Play:
+		case proto_base.Play:
 			err = PlayToServerPacket{i, p}.Encode(w)
 		}
-	case queser.ToClient:
+	case proto_base.ToClient:
 		switch s {
-		case queser.Handshaking:
+		case proto_base.Handshaking:
 			err = HandshakingToClientPacket{i, p}.Encode(w)
-		case queser.Status:
+		case proto_base.Status:
 			err = StatusToClientPacket{i, p}.Encode(w)
-		case queser.Login:
+		case proto_base.Login:
 			err = LoginToClientPacket{i, p}.Encode(w)
-		case queser.Configuration:
+		case proto_base.Configuration:
 			err = ConfigurationToClientPacket{i, p}.Encode(w)
-		case queser.Play:
+		case proto_base.Play:
 			err = PlayToClientPacket{i, p}.Encode(w)
 		}
 	}

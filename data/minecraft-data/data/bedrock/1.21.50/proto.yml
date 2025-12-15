@@ -25,7 +25,7 @@ nbtLoop: native
 enum_size_based_on_values_len: native                 # Packet-specific custom logic  
 MapInfo: native
 
-# load the packet map file (auto-generated)
+# load the packet map file (auto-proto_generated)
 !import: packet_map.yml
 
 !StartDocs: Packets
@@ -140,11 +140,11 @@ packet_resource_packs_info:
    has_scripts: bool
    world_template:
       # WorldTemplateUUID is teh UUID of the template that has been used to generate the world. Templates can
-      # be downloaded from the marketplace or installed via '.mctemplate' files. If the world was not generated
+      # be downloaded from the marketplace or installed via '.mctemplate' files. If the world was not proto_generated
       # from a template, this field is empty.
       uuid: uuid
       # WorldTemplateVersion is the version of the world template that has been used to generate the world. If
-      # the world was not generated from a template, this field is empty.
+      # the world was not proto_generated from a template, this field is empty.
       version: string
    # A list of resource packs that the client needs to download before joining the server. 
    # The order of these resource packs is not relevant in this packet. It is however important in the Resource Pack Stack packet.
@@ -265,7 +265,7 @@ packet_start_game:
       0: overworld
       1: nether
       2: end
-   # Generator is the generator used for the world. It is a value from 0-4, with 0 being old
+   # Generator is the proto_generator used for the world. It is a value from 0-4, with 0 being old
    # limited worlds, 1 being infinite worlds, 2 being flat worlds, 3 being nether worlds and 
    # 4 being end worlds. A value of 0 will actually make the client stop rendering chunks you 
    # send beyond the world limit.

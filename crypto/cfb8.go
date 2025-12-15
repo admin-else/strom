@@ -1,4 +1,4 @@
-package bot
+package crypto
 
 // https://github.com/Tnze/go-mc/blob/master/net/CFB8/cfb8.go
 // Package CFB8 implements CFB8 block cipher mode of operation used by Minecraft protocol.

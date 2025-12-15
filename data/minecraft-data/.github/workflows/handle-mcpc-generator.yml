@@ -1,16 +1,16 @@
-name: handle-mcpc-generator
+name: handle-mcpc-proto_generator
 on:
   workflow_dispatch:
     inputs:
       versions:
-        description: 'JSON stringified list of known versions in generator (last is expected to be latest)'
+        description: 'JSON stringified list of known versions in proto_generator (last is expected to be latest)'
         required: true
         default: '["1.21.6"]'
       mergedArtifactURL:
         description: 'Merged artifact download URL'
         required: true
       prNumber:
-        description: 'Relevant minecraft-data-generator PR #'
+        description: 'Relevant minecraft-data-proto_generator PR #'
         required: false
       createPr:
         description: 'Whether to create a new PR if none exists'

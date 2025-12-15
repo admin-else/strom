@@ -5,15 +5,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/admin-else/strom"
+	"github.com/admin-else/strom/bot"
+	"github.com/admin-else/strom/proto_base"
 
-	"github.com/admin-else/queser"
-	"github.com/admin-else/queser/data"
-	"github.com/admin-else/queser/generated/v1_21_8"
+	"github.com/admin-else/strom/data"
+	"github.com/admin-else/strom/proto_generated/v1_21_8"
 )
 
 type StatusClient struct {
-	*strom.Conn
+	*bot.Conn
 	Status string
 }
 
@@ -22,7 +22,7 @@ func (s *StatusClient) Default(event any) (err error) {
 	return
 }
 
-func (s *StatusClient) OnStart(_ strom.OnStart) (err error) {
+func (s *StatusClient) OnStart(_ bot.OnStart) (err error) {
 	parts := strings.Split(s.RemoteAddr().String(), ":")
 	versionData, err := data.LookUpProtocolVersionByName(s.Version)
 	if err != nil {
@@ -33,21 +33,21 @@ func (s *StatusClient) OnStart(_ strom.OnStart) (err error) {
 		return
 	}
 	err = s.Send(v1_21_8.HandshakingToServerPacketSetProtocol{
-		ProtocolVersion: queser.VarInt(versionData.Version),
+		ProtocolVersion: proto_base.VarInt(versionData.Version),
 		ServerHost:      parts[0],
 		ServerPort:      uint16(port),
-		NextState:       queser.VarInt(queser.Status),
+		NextState:       proto_base.VarInt(proto_base.Status),
 	})
 	if err != nil {
 		return
 	}
-	s.State = queser.Status
+	s.State = proto_base.Status
 	err = s.Send(v1_21_8.StatusToServerPacketPingStart{})
 	return
 }
 
 func (s *StatusClient) OnStatus(p v1_21_8.StatusToClientPacketServerInfo) (err error) {
 	s.Status = p.Response
-	err = strom.HandlerDone
+	err = bot.HandlerDone
 	return
 }

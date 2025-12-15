@@ -5,25 +5,24 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha1"
 	"crypto/x509"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 
-	"github.com/admin-else/strom"
+	"github.com/admin-else/strom/api"
+	"github.com/admin-else/strom/bot"
+	"github.com/admin-else/strom/crypto"
+	"github.com/admin-else/strom/proto_base"
 
-	"github.com/admin-else/queser"
-	"github.com/admin-else/queser/data"
-	"github.com/admin-else/queser/generated/v1_21_8"
+	"github.com/admin-else/strom/data"
+	"github.com/admin-else/strom/proto_generated/v1_21_8"
 )
 
 type LoginClient struct {
-	*strom.Conn
-	Account strom.Account
+	*bot.Conn
+	Account api.Account
 
 	GivenAccount v1_21_8.LoginToClientPacketSuccess
 }
@@ -33,11 +32,11 @@ func (s *LoginClient) Default(event any) (err error) {
 	return
 }
 
-func (s *LoginClient) OnCycle(_ strom.OnLoopCycle) (err error) {
+func (s *LoginClient) OnCycle(_ bot.OnLoopCycle) (err error) {
 	return
 }
 
-func (s *LoginClient) OnStart(_ strom.OnStart) (err error) {
+func (s *LoginClient) OnStart(_ bot.OnStart) (err error) {
 	host, portStr, err := net.SplitHostPort(s.RemoteAddr().String())
 	if err != nil {
 		return
@@ -51,15 +50,15 @@ func (s *LoginClient) OnStart(_ strom.OnStart) (err error) {
 		return
 	}
 	err = s.Send(v1_21_8.HandshakingToServerPacketSetProtocol{
-		ProtocolVersion: queser.VarInt(versionData.Version),
+		ProtocolVersion: proto_base.VarInt(versionData.Version),
 		ServerHost:      host,
 		ServerPort:      uint16(port),
-		NextState:       queser.VarInt(queser.Login),
+		NextState:       proto_base.VarInt(proto_base.Login),
 	})
 	if err != nil {
 		return
 	}
-	s.State = queser.Login
+	s.State = proto_base.Login
 	err = s.Send(v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Name, PlayerUUID: s.Account.Uuid})
 	return
 }
@@ -67,39 +66,6 @@ func (s *LoginClient) OnStart(_ strom.OnStart) (err error) {
 func (s *LoginClient) OnCompress(compress v1_21_8.LoginToClientPacketCompress) (err error) {
 	s.CompressionThreshold = int32(compress.Threshold)
 	return
-}
-
-func twosComplement(p []byte) []byte {
-	carry := true
-	for i := len(p) - 1; i >= 0; i-- {
-		p[i] = byte(^p[i])
-		if carry {
-			carry = p[i] == 0xff
-			p[i]++
-		}
-	}
-	return p
-}
-
-// AuthDigest stolen from https://gist.github.com/toqueteos/5372776
-func AuthDigest(elems ...[]byte) string {
-	h := sha1.New()
-	for _, elem := range elems {
-		h.Write(elem)
-	}
-	hash := h.Sum(nil)
-
-	negative := (hash[0] & 0x80) == 0x80
-	if negative {
-		hash = twosComplement(hash)
-	}
-
-	res := strings.TrimLeft(hex.EncodeToString(hash), "0")
-	if negative {
-		res = "-" + res
-	}
-
-	return res
 }
 
 func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegin) (err error) {
@@ -111,7 +77,7 @@ func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegi
 			err = fmt.Errorf("the account has no token so we cant join online servers")
 			return
 		}
-		serverId := AuthDigest([]byte(packet.ServerId), sharedSecret, packet.PublicKey)
+		serverId := crypto.AuthDigest([]byte(packet.ServerId), sharedSecret, packet.PublicKey)
 		err = s.Account.JoinServer(serverId)
 		if err != nil {
 			return
@@ -147,11 +113,11 @@ func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegi
 		return
 	}
 	s.R = cipher.StreamReader{
-		S: strom.NewCFB8Decrypt(b, sharedSecret),
+		S: crypto.NewCFB8Decrypt(b, sharedSecret),
 		R: s.Conn,
 	}
 	s.W = cipher.StreamWriter{
-		S: strom.NewCFB8Encrypt(b, sharedSecret),
+		S: crypto.NewCFB8Encrypt(b, sharedSecret),
 		W: s.Conn,
 	}
 	return
@@ -164,12 +130,12 @@ func (s *LoginClient) OnSuccess(success v1_21_8.LoginToClientPacketSuccess) (err
 	if err != nil {
 		return
 	}
-	s.State = queser.Configuration
-	err = strom.HandlerDone
+	s.State = proto_base.Configuration
+	err = bot.HandlerDone
 	return
 }
 
-func Login(c *strom.Conn, account strom.Account) (err error) {
+func Login(c *bot.Conn, account api.Account) (err error) {
 	err = c.Start(&LoginClient{
 		Conn:    c,
 		Account: account,

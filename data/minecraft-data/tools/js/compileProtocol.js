@@ -80,7 +80,7 @@ function validate (edition, ver, path) {
     ? JSON.stringify({ types: json }, visitor, 2)
     : JSON.stringify(json, visitor, 2)
 
-  // If you crash here, no protocol.json was generated - run `npm run build`
+  // If you crash here, no protocol.json was proto_generated - run `npm run build`
   const actual = JSON.stringify(getJSON(`../${version}/protocol.json`), null, 2)
 
   // Make sure the protocol_expected.json file equals the protocol.json file; otherwise the JSON must be rebuilt

@@ -75,7 +75,7 @@ func SimpleTypeDecoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []as
 
 func StringDecoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.Stmt, err error) {
 	s = Stmts(
-		Assign(Exprs(varToSet, Ident("err")), Exprs(Call(Selector("queser", "DecodeString"), Ident("r")))),
+		Assign(Exprs(varToSet, Ident("err")), Exprs(Call(Selector("proto_base", "DecodeString"), Ident("r")))),
 		IfErrNil(),
 	)
 	return
@@ -276,7 +276,7 @@ func SwitchDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	return
 }
 
-var ToDoStmts = Stmts(Assign121(Ident("err"), Selector("queser", "ToDoError")))
+var ToDoStmts = Stmts(Assign121(Ident("err"), Selector("proto_base", "ToDoError")))
 
 func ToDoDecoder(_ *Generator, _ ast.Expr, _ any, _ string) (s []ast.Stmt, err error) {
 	err = ToDoError
@@ -311,7 +311,7 @@ func MapperDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 		expressions = append(expressions, KeyValueExpr(NumLitStr(k), StrLit(v)))
 	}
 	g.Decl(mName, token.VAR, CompLit(MapType(kType, Ident("string")), expressions))
-	s3 := Assign(Exprs(varToSet, Ident("err")), Exprs(Call(Selector("queser", "ErroringIndex"), Ident(mName), Ident(kName))))
+	s3 := Assign(Exprs(varToSet, Ident("err")), Exprs(Call(Selector("proto_base", "ErroringIndex"), Ident(mName), Ident(kName))))
 	s = append(s, s1)
 	s = append(s, s2...)
 	s = append(s, s3)
@@ -453,7 +453,7 @@ func RegistryEntryHolderDecoder(g *Generator, varToSet ast.Expr, dataRaw any, na
 		return
 	}
 	idName := name + "Id"
-	IdVar := VarStmt(idName, Selector("queser", "VarInt"))
+	IdVar := VarStmt(idName, Selector("proto_base", "VarInt"))
 	idDecodeStatements, err := g.VisitDecoder(Ident(idName), "varint", name)
 	if err != nil {
 		return

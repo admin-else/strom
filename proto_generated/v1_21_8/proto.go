@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/admin-else/queser"
-	"github.com/admin-else/queser/nbt"
+	"github.com/admin-else/strom/nbt"
+	"github.com/admin-else/strom/proto_base"
 	"github.com/google/uuid"
 )
 
@@ -19,11 +19,11 @@ type ArmorTrimMaterial struct {
 }
 
 func (_ ArmorTrimMaterial) Decode(r io.Reader) (ret ArmorTrimMaterial, err error) {
-	ret.AssetBase, err = queser.DecodeString(r)
+	ret.AssetBase, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	var lArmorTrimMaterialOverrideArmorAssets queser.VarInt
+	var lArmorTrimMaterialOverrideArmorAssets proto_base.VarInt
 	lArmorTrimMaterialOverrideArmorAssets, err = lArmorTrimMaterialOverrideArmorAssets.Decode(r)
 	if err != nil {
 		return
@@ -37,11 +37,11 @@ func (_ ArmorTrimMaterial) Decode(r io.Reader) (ret ArmorTrimMaterial, err error
 			Key   string
 			Value string
 		}
-		ArmorTrimMaterialOverrideArmorAssetsElement.Key, err = queser.DecodeString(r)
+		ArmorTrimMaterialOverrideArmorAssetsElement.Key, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		ArmorTrimMaterialOverrideArmorAssetsElement.Value, err = queser.DecodeString(r)
+		ArmorTrimMaterialOverrideArmorAssetsElement.Value, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -54,20 +54,20 @@ func (_ ArmorTrimMaterial) Decode(r io.Reader) (ret ArmorTrimMaterial, err error
 	return
 }
 func (ret ArmorTrimMaterial) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.AssetBase)
+	err = proto_base.EncodeString(w, ret.AssetBase)
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.OverrideArmorAssets)).Encode(w)
+	err = proto_base.VarInt(len(ret.OverrideArmorAssets)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iArmorTrimMaterialOverrideArmorAssets := range len(ret.OverrideArmorAssets) {
-		err = queser.EncodeString(w, ret.OverrideArmorAssets[iArmorTrimMaterialOverrideArmorAssets].Key)
+		err = proto_base.EncodeString(w, ret.OverrideArmorAssets[iArmorTrimMaterialOverrideArmorAssets].Key)
 		if err != nil {
 			return
 		}
-		err = queser.EncodeString(w, ret.OverrideArmorAssets[iArmorTrimMaterialOverrideArmorAssets].Value)
+		err = proto_base.EncodeString(w, ret.OverrideArmorAssets[iArmorTrimMaterialOverrideArmorAssets].Value)
 		if err != nil {
 			return
 		}
@@ -86,7 +86,7 @@ type ArmorTrimPattern struct {
 }
 
 func (_ ArmorTrimPattern) Decode(r io.Reader) (ret ArmorTrimPattern, err error) {
-	ret.AssetId, err = queser.DecodeString(r)
+	ret.AssetId, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -101,7 +101,7 @@ func (_ ArmorTrimPattern) Decode(r io.Reader) (ret ArmorTrimPattern, err error) 
 	return
 }
 func (ret ArmorTrimPattern) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.AssetId)
+	err = proto_base.EncodeString(w, ret.AssetId)
 	if err != nil {
 		return
 	}
@@ -122,22 +122,22 @@ type BannerPattern struct {
 }
 
 func (_ BannerPattern) Decode(r io.Reader) (ret BannerPattern, err error) {
-	ret.AssetId, err = queser.DecodeString(r)
+	ret.AssetId, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.TranslationKey, err = queser.DecodeString(r)
+	ret.TranslationKey, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
 	return
 }
 func (ret BannerPattern) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.AssetId)
+	err = proto_base.EncodeString(w, ret.AssetId)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.TranslationKey)
+	err = proto_base.EncodeString(w, ret.TranslationKey)
 	if err != nil {
 		return
 	}
@@ -146,11 +146,11 @@ func (ret BannerPattern) Encode(w io.Writer) (err error) {
 
 type BannerPatternLayer struct {
 	Pattern any
-	ColorId queser.VarInt
+	ColorId proto_base.VarInt
 }
 
 func (_ BannerPatternLayer) Decode(r io.Reader) (ret BannerPatternLayer, err error) {
-	var BannerPatternLayerPatternId queser.VarInt
+	var BannerPatternLayerPatternId proto_base.VarInt
 	BannerPatternLayerPatternId, err = BannerPatternLayerPatternId.Decode(r)
 	if err != nil {
 		return
@@ -173,7 +173,7 @@ func (_ BannerPatternLayer) Decode(r io.Reader) (ret BannerPatternLayer, err err
 }
 func (ret BannerPatternLayer) Encode(w io.Writer) (err error) {
 	switch BannerPatternLayerPatternKnownType := ret.Pattern.(type) {
-	case queser.VarInt:
+	case proto_base.VarInt:
 		err = BannerPatternLayerPatternKnownType.Encode(w)
 		if err != nil {
 			return
@@ -184,7 +184,7 @@ func (ret BannerPatternLayer) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		err = queser.BadTypeError
+		err = proto_base.BadTypeError
 	}
 	err = ret.ColorId.Encode(w)
 	if err != nil {
@@ -198,7 +198,7 @@ type ByteArray struct {
 }
 
 func (_ ByteArray) Decode(r io.Reader) (ret ByteArray, err error) {
-	var lByteArray queser.VarInt
+	var lByteArray proto_base.VarInt
 	lByteArray, err = lByteArray.Decode(r)
 	if err != nil {
 		return
@@ -210,7 +210,7 @@ func (_ ByteArray) Decode(r io.Reader) (ret ByteArray, err error) {
 	return
 }
 func (ret ByteArray) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Val)).Encode(w)
+	err = proto_base.VarInt(len(ret.Val)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -222,7 +222,7 @@ func (ret ByteArray) Encode(w io.Writer) (err error) {
 }
 
 type ContainerID struct {
-	Val queser.VarInt
+	Val proto_base.VarInt
 }
 
 func (_ ContainerID) Decode(r io.Reader) (ret ContainerID, err error) {
@@ -242,7 +242,7 @@ func (ret ContainerID) Encode(w io.Writer) (err error) {
 
 type DataComponentMatchers struct {
 	ExactMatchers   ExactComponentMatcher
-	PartialMatchers []queser.VarInt
+	PartialMatchers []proto_base.VarInt
 }
 
 func (_ DataComponentMatchers) Decode(r io.Reader) (ret DataComponentMatchers, err error) {
@@ -250,14 +250,14 @@ func (_ DataComponentMatchers) Decode(r io.Reader) (ret DataComponentMatchers, e
 	if err != nil {
 		return
 	}
-	var lDataComponentMatchersPartialMatchers queser.VarInt
+	var lDataComponentMatchersPartialMatchers proto_base.VarInt
 	lDataComponentMatchersPartialMatchers, err = lDataComponentMatchersPartialMatchers.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.PartialMatchers = []queser.VarInt{}
+	ret.PartialMatchers = []proto_base.VarInt{}
 	for range lDataComponentMatchersPartialMatchers {
-		var DataComponentMatchersPartialMatchersElement queser.VarInt
+		var DataComponentMatchersPartialMatchersElement proto_base.VarInt
 		DataComponentMatchersPartialMatchersElement, err = DataComponentMatchersPartialMatchersElement.Decode(r)
 		if err != nil {
 			return
@@ -271,7 +271,7 @@ func (ret DataComponentMatchers) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.PartialMatchers)).Encode(w)
+	err = proto_base.VarInt(len(ret.PartialMatchers)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -301,7 +301,7 @@ func (_ EntityMetadataPaintingVariant) Decode(r io.Reader) (ret EntityMetadataPa
 	if err != nil {
 		return
 	}
-	ret.AssetId, err = queser.DecodeString(r)
+	ret.AssetId, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -342,7 +342,7 @@ func (ret EntityMetadataPaintingVariant) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.AssetId)
+	err = proto_base.EncodeString(w, ret.AssetId)
 	if err != nil {
 		return
 	}
@@ -374,7 +374,7 @@ type ExactComponentMatcher struct {
 }
 
 func (_ ExactComponentMatcher) Decode(r io.Reader) (ret ExactComponentMatcher, err error) {
-	var lExactComponentMatcher queser.VarInt
+	var lExactComponentMatcher proto_base.VarInt
 	lExactComponentMatcher, err = lExactComponentMatcher.Decode(r)
 	if err != nil {
 		return
@@ -391,7 +391,7 @@ func (_ ExactComponentMatcher) Decode(r io.Reader) (ret ExactComponentMatcher, e
 	return
 }
 func (ret ExactComponentMatcher) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Val)).Encode(w)
+	err = proto_base.VarInt(len(ret.Val)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -405,8 +405,8 @@ func (ret ExactComponentMatcher) Encode(w io.Writer) (err error) {
 }
 
 type HashedSlot struct {
-	ItemId     queser.VarInt
-	ItemCount  queser.VarInt
+	ItemId     proto_base.VarInt
+	ItemCount  proto_base.VarInt
 	Components []struct {
 		Type SlotComponentType
 		Hash int32
@@ -425,7 +425,7 @@ func (_ HashedSlot) Decode(r io.Reader) (ret HashedSlot, err error) {
 	if err != nil {
 		return
 	}
-	var lHashedSlotComponents queser.VarInt
+	var lHashedSlotComponents proto_base.VarInt
 	lHashedSlotComponents, err = lHashedSlotComponents.Decode(r)
 	if err != nil {
 		return
@@ -449,7 +449,7 @@ func (_ HashedSlot) Decode(r io.Reader) (ret HashedSlot, err error) {
 		}
 		ret.Components = append(ret.Components, HashedSlotComponentsElement)
 	}
-	var lHashedSlotRemoveComponents queser.VarInt
+	var lHashedSlotRemoveComponents proto_base.VarInt
 	lHashedSlotRemoveComponents, err = lHashedSlotRemoveComponents.Decode(r)
 	if err != nil {
 		return
@@ -478,7 +478,7 @@ func (ret HashedSlot) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Components)).Encode(w)
+	err = proto_base.VarInt(len(ret.Components)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -492,7 +492,7 @@ func (ret HashedSlot) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.RemoveComponents)).Encode(w)
+	err = proto_base.VarInt(len(ret.RemoveComponents)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -510,7 +510,7 @@ type IDSet struct {
 }
 
 func (_ IDSet) Decode(r io.Reader) (ret IDSet, err error) {
-	var lIDSet queser.VarInt
+	var lIDSet proto_base.VarInt
 	lIDSet, err = lIDSet.Decode(r)
 	if err != nil {
 		return
@@ -518,16 +518,16 @@ func (_ IDSet) Decode(r io.Reader) (ret IDSet, err error) {
 	lIDSet = lIDSet - 1
 	if lIDSet == -1 {
 		var IDSetResult string
-		IDSetResult, err = queser.DecodeString(r)
+		IDSetResult, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
 		ret.Val = IDSetResult
 		return
 	}
-	var IDSetResult []queser.VarInt
+	var IDSetResult []proto_base.VarInt
 	for range lIDSet {
-		var IDSetElement queser.VarInt
+		var IDSetElement proto_base.VarInt
 		IDSetElement, err = IDSetElement.Decode(r)
 		if err != nil {
 			return
@@ -537,7 +537,7 @@ func (_ IDSet) Decode(r io.Reader) (ret IDSet, err error) {
 	return
 }
 func (ret IDSet) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
@@ -602,7 +602,7 @@ func (_ ItemBlockPredicate) Decode(r io.Reader) (ret ItemBlockPredicate, err err
 	}
 	if ItemBlockPredicateBlockSetPresent {
 		var ItemBlockPredicateBlockSetPresentValue any
-		var lItemBlockPredicateBlockSet queser.VarInt
+		var lItemBlockPredicateBlockSet proto_base.VarInt
 		lItemBlockPredicateBlockSet, err = lItemBlockPredicateBlockSet.Decode(r)
 		if err != nil {
 			return
@@ -610,16 +610,16 @@ func (_ ItemBlockPredicate) Decode(r io.Reader) (ret ItemBlockPredicate, err err
 		lItemBlockPredicateBlockSet = lItemBlockPredicateBlockSet - 1
 		if lItemBlockPredicateBlockSet == -1 {
 			var ItemBlockPredicateBlockSetResult string
-			ItemBlockPredicateBlockSetResult, err = queser.DecodeString(r)
+			ItemBlockPredicateBlockSetResult, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
 			ItemBlockPredicateBlockSetPresentValue = ItemBlockPredicateBlockSetResult
 			return
 		}
-		var ItemBlockPredicateBlockSetResult []queser.VarInt
+		var ItemBlockPredicateBlockSetResult []proto_base.VarInt
 		for range lItemBlockPredicateBlockSet {
-			var ItemBlockPredicateBlockSetElement queser.VarInt
+			var ItemBlockPredicateBlockSetElement proto_base.VarInt
 			ItemBlockPredicateBlockSetElement, err = ItemBlockPredicateBlockSetElement.Decode(r)
 			if err != nil {
 				return
@@ -635,7 +635,7 @@ func (_ ItemBlockPredicate) Decode(r io.Reader) (ret ItemBlockPredicate, err err
 	}
 	if ItemBlockPredicatePropertiesPresent {
 		var ItemBlockPredicatePropertiesPresentValue []ItemBlockProperty
-		var lItemBlockPredicateProperties queser.VarInt
+		var lItemBlockPredicateProperties proto_base.VarInt
 		lItemBlockPredicateProperties, err = lItemBlockPredicateProperties.Decode(r)
 		if err != nil {
 			return
@@ -662,7 +662,7 @@ func (_ ItemBlockPredicate) Decode(r io.Reader) (ret ItemBlockPredicate, err err
 	return
 }
 func (ret ItemBlockPredicate) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
@@ -673,7 +673,7 @@ type ItemBlockProperty struct {
 }
 
 func (_ ItemBlockProperty) Decode(r io.Reader) (ret ItemBlockProperty, err error) {
-	ret.Name, err = queser.DecodeString(r)
+	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -687,11 +687,11 @@ func (_ ItemBlockProperty) Decode(r io.Reader) (ret ItemBlockProperty, err error
 			MinValue string
 			MaxValue string
 		}
-		ItemBlockPropertyValueTmp.MinValue, err = queser.DecodeString(r)
+		ItemBlockPropertyValueTmp.MinValue, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		ItemBlockPropertyValueTmp.MaxValue, err = queser.DecodeString(r)
+		ItemBlockPropertyValueTmp.MaxValue, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -700,7 +700,7 @@ func (_ ItemBlockProperty) Decode(r io.Reader) (ret ItemBlockProperty, err error
 		var ItemBlockPropertyValueTmp struct {
 			ExactValue string
 		}
-		ItemBlockPropertyValueTmp.ExactValue, err = queser.DecodeString(r)
+		ItemBlockPropertyValueTmp.ExactValue, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -709,7 +709,7 @@ func (_ ItemBlockProperty) Decode(r io.Reader) (ret ItemBlockProperty, err error
 	return
 }
 func (ret ItemBlockProperty) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Name)
+	err = proto_base.EncodeString(w, ret.Name)
 	if err != nil {
 		return
 	}
@@ -724,14 +724,14 @@ func (ret ItemBlockProperty) Encode(w io.Writer) (err error) {
 			MaxValue string
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, ItemBlockPropertyValue.MinValue)
+		err = proto_base.EncodeString(w, ItemBlockPropertyValue.MinValue)
 		if err != nil {
 			return
 		}
-		err = queser.EncodeString(w, ItemBlockPropertyValue.MaxValue)
+		err = proto_base.EncodeString(w, ItemBlockPropertyValue.MaxValue)
 		if err != nil {
 			return
 		}
@@ -740,10 +740,10 @@ func (ret ItemBlockProperty) Encode(w io.Writer) (err error) {
 			ExactValue string
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, ItemBlockPropertyValue.ExactValue)
+		err = proto_base.EncodeString(w, ItemBlockPropertyValue.ExactValue)
 		if err != nil {
 			return
 		}
@@ -757,7 +757,7 @@ type ItemBookPage struct {
 }
 
 func (_ ItemBookPage) Decode(r io.Reader) (ret ItemBookPage, err error) {
-	ret.Content, err = queser.DecodeString(r)
+	ret.Content, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -768,7 +768,7 @@ func (_ ItemBookPage) Decode(r io.Reader) (ret ItemBookPage, err error) {
 	}
 	if ItemBookPageFilteredContentPresent {
 		var ItemBookPageFilteredContentPresentValue string
-		ItemBookPageFilteredContentPresentValue, err = queser.DecodeString(r)
+		ItemBookPageFilteredContentPresentValue, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -777,7 +777,7 @@ func (_ ItemBookPage) Decode(r io.Reader) (ret ItemBookPage, err error) {
 	return
 }
 func (ret ItemBookPage) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Content)
+	err = proto_base.EncodeString(w, ret.Content)
 	if err != nil {
 		return
 	}
@@ -786,7 +786,7 @@ func (ret ItemBookPage) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.FilteredContent != nil {
-		err = queser.EncodeString(w, *ret.FilteredContent)
+		err = proto_base.EncodeString(w, *ret.FilteredContent)
 		if err != nil {
 			return
 		}
@@ -799,15 +799,15 @@ type ItemConsumeEffect struct {
 	Anon any
 }
 
-var ItemConsumeEffectTypeMap = map[queser.VarInt]string{0: "apply_effects", 1: "remove_effects", 2: "clear_all_effects", 3: "teleport_randomly", 4: "play_sound"}
+var ItemConsumeEffectTypeMap = map[proto_base.VarInt]string{0: "apply_effects", 1: "remove_effects", 2: "clear_all_effects", 3: "teleport_randomly", 4: "play_sound"}
 
 func (_ ItemConsumeEffect) Decode(r io.Reader) (ret ItemConsumeEffect, err error) {
-	var ItemConsumeEffectTypeKey queser.VarInt
+	var ItemConsumeEffectTypeKey proto_base.VarInt
 	ItemConsumeEffectTypeKey, err = ItemConsumeEffectTypeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Type, err = queser.ErroringIndex(ItemConsumeEffectTypeMap, ItemConsumeEffectTypeKey)
+	ret.Type, err = proto_base.ErroringIndex(ItemConsumeEffectTypeMap, ItemConsumeEffectTypeKey)
 	if err != nil {
 		return
 	}
@@ -817,7 +817,7 @@ func (_ ItemConsumeEffect) Decode(r io.Reader) (ret ItemConsumeEffect, err error
 			Effects     []ItemPotionEffect
 			Probability float32
 		}
-		var lItemConsumeEffectAnonEffects queser.VarInt
+		var lItemConsumeEffectAnonEffects proto_base.VarInt
 		lItemConsumeEffectAnonEffects, err = lItemConsumeEffectAnonEffects.Decode(r)
 		if err != nil {
 			return
@@ -837,7 +837,7 @@ func (_ ItemConsumeEffect) Decode(r io.Reader) (ret ItemConsumeEffect, err error
 		}
 		ret.Anon = ItemConsumeEffectAnonTmp
 	case "clear_all_effects":
-		var ItemConsumeEffectAnonTmp queser.Void
+		var ItemConsumeEffectAnonTmp proto_base.Void
 		ItemConsumeEffectAnonTmp, err = ItemConsumeEffectAnonTmp.Decode(r)
 		if err != nil {
 			return
@@ -874,11 +874,11 @@ func (_ ItemConsumeEffect) Decode(r io.Reader) (ret ItemConsumeEffect, err error
 	return
 }
 
-var ItemConsumeEffectTypeReverseMap = map[string]queser.VarInt{"apply_effects": 0, "remove_effects": 1, "clear_all_effects": 2, "teleport_randomly": 3, "play_sound": 4}
+var ItemConsumeEffectTypeReverseMap = map[string]proto_base.VarInt{"apply_effects": 0, "remove_effects": 1, "clear_all_effects": 2, "teleport_randomly": 3, "play_sound": 4}
 
 func (ret ItemConsumeEffect) Encode(w io.Writer) (err error) {
-	var vItemConsumeEffectType queser.VarInt
-	vItemConsumeEffectType, err = queser.ErroringIndex(ItemConsumeEffectTypeReverseMap, ret.Type)
+	var vItemConsumeEffectType proto_base.VarInt
+	vItemConsumeEffectType, err = proto_base.ErroringIndex(ItemConsumeEffectTypeReverseMap, ret.Type)
 	if err != nil {
 		return
 	}
@@ -893,10 +893,10 @@ func (ret ItemConsumeEffect) Encode(w io.Writer) (err error) {
 			Probability float32
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.VarInt(len(ItemConsumeEffectAnon.Effects)).Encode(w)
+		err = proto_base.VarInt(len(ItemConsumeEffectAnon.Effects)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -911,9 +911,9 @@ func (ret ItemConsumeEffect) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "clear_all_effects":
-		ItemConsumeEffectAnon, ok := ret.Anon.(queser.Void)
+		ItemConsumeEffectAnon, ok := ret.Anon.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ItemConsumeEffectAnon.Encode(w)
@@ -925,7 +925,7 @@ func (ret ItemConsumeEffect) Encode(w io.Writer) (err error) {
 			Sound ItemSoundHolder
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ItemConsumeEffectAnon.Sound.Encode(w)
@@ -937,7 +937,7 @@ func (ret ItemConsumeEffect) Encode(w io.Writer) (err error) {
 			Effects IDSet
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ItemConsumeEffectAnon.Effects.Encode(w)
@@ -949,7 +949,7 @@ func (ret ItemConsumeEffect) Encode(w io.Writer) (err error) {
 			Diameter float32
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ItemConsumeEffectAnon.Diameter)
@@ -961,8 +961,8 @@ func (ret ItemConsumeEffect) Encode(w io.Writer) (err error) {
 }
 
 type ItemEffectDetail struct {
-	Amplifier     queser.VarInt
-	Duration      queser.VarInt
+	Amplifier     proto_base.VarInt
+	Duration      proto_base.VarInt
 	Ambient       bool
 	ShowParticles bool
 	ShowIcon      bool
@@ -1047,19 +1047,19 @@ type ItemFireworkExplosion struct {
 	HasTwinkle bool
 }
 
-var ItemFireworkExplosionShapeMap = map[queser.VarInt]string{0: "small_ball", 1: "large_ball", 2: "star", 3: "creeper", 4: "burst"}
+var ItemFireworkExplosionShapeMap = map[proto_base.VarInt]string{0: "small_ball", 1: "large_ball", 2: "star", 3: "creeper", 4: "burst"}
 
 func (_ ItemFireworkExplosion) Decode(r io.Reader) (ret ItemFireworkExplosion, err error) {
-	var ItemFireworkExplosionShapeKey queser.VarInt
+	var ItemFireworkExplosionShapeKey proto_base.VarInt
 	ItemFireworkExplosionShapeKey, err = ItemFireworkExplosionShapeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Shape, err = queser.ErroringIndex(ItemFireworkExplosionShapeMap, ItemFireworkExplosionShapeKey)
+	ret.Shape, err = proto_base.ErroringIndex(ItemFireworkExplosionShapeMap, ItemFireworkExplosionShapeKey)
 	if err != nil {
 		return
 	}
-	var lItemFireworkExplosionColors queser.VarInt
+	var lItemFireworkExplosionColors proto_base.VarInt
 	lItemFireworkExplosionColors, err = lItemFireworkExplosionColors.Decode(r)
 	if err != nil {
 		return
@@ -1073,7 +1073,7 @@ func (_ ItemFireworkExplosion) Decode(r io.Reader) (ret ItemFireworkExplosion, e
 		}
 		ret.Colors = append(ret.Colors, ItemFireworkExplosionColorsElement)
 	}
-	var lItemFireworkExplosionFadeColors queser.VarInt
+	var lItemFireworkExplosionFadeColors proto_base.VarInt
 	lItemFireworkExplosionFadeColors, err = lItemFireworkExplosionFadeColors.Decode(r)
 	if err != nil {
 		return
@@ -1098,11 +1098,11 @@ func (_ ItemFireworkExplosion) Decode(r io.Reader) (ret ItemFireworkExplosion, e
 	return
 }
 
-var ItemFireworkExplosionShapeReverseMap = map[string]queser.VarInt{"small_ball": 0, "large_ball": 1, "star": 2, "creeper": 3, "burst": 4}
+var ItemFireworkExplosionShapeReverseMap = map[string]proto_base.VarInt{"small_ball": 0, "large_ball": 1, "star": 2, "creeper": 3, "burst": 4}
 
 func (ret ItemFireworkExplosion) Encode(w io.Writer) (err error) {
-	var vItemFireworkExplosionShape queser.VarInt
-	vItemFireworkExplosionShape, err = queser.ErroringIndex(ItemFireworkExplosionShapeReverseMap, ret.Shape)
+	var vItemFireworkExplosionShape proto_base.VarInt
+	vItemFireworkExplosionShape, err = proto_base.ErroringIndex(ItemFireworkExplosionShapeReverseMap, ret.Shape)
 	if err != nil {
 		return
 	}
@@ -1110,7 +1110,7 @@ func (ret ItemFireworkExplosion) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Colors)).Encode(w)
+	err = proto_base.VarInt(len(ret.Colors)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -1120,7 +1120,7 @@ func (ret ItemFireworkExplosion) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.FadeColors)).Encode(w)
+	err = proto_base.VarInt(len(ret.FadeColors)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -1142,7 +1142,7 @@ func (ret ItemFireworkExplosion) Encode(w io.Writer) (err error) {
 }
 
 type ItemPotionEffect struct {
-	Id      queser.VarInt
+	Id      proto_base.VarInt
 	Details ItemEffectDetail
 }
 
@@ -1175,7 +1175,7 @@ type ItemSoundEvent struct {
 }
 
 func (_ ItemSoundEvent) Decode(r io.Reader) (ret ItemSoundEvent, err error) {
-	ret.SoundName, err = queser.DecodeString(r)
+	ret.SoundName, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -1195,7 +1195,7 @@ func (_ ItemSoundEvent) Decode(r io.Reader) (ret ItemSoundEvent, err error) {
 	return
 }
 func (ret ItemSoundEvent) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.SoundName)
+	err = proto_base.EncodeString(w, ret.SoundName)
 	if err != nil {
 		return
 	}
@@ -1217,7 +1217,7 @@ type ItemSoundHolder struct {
 }
 
 func (_ ItemSoundHolder) Decode(r io.Reader) (ret ItemSoundHolder, err error) {
-	var ItemSoundHolderId queser.VarInt
+	var ItemSoundHolderId proto_base.VarInt
 	ItemSoundHolderId, err = ItemSoundHolderId.Decode(r)
 	if err != nil {
 		return
@@ -1236,7 +1236,7 @@ func (_ ItemSoundHolder) Decode(r io.Reader) (ret ItemSoundHolder, err error) {
 }
 func (ret ItemSoundHolder) Encode(w io.Writer) (err error) {
 	switch ItemSoundHolderKnownType := ret.Val.(type) {
-	case queser.VarInt:
+	case proto_base.VarInt:
 		err = ItemSoundHolderKnownType.Encode(w)
 		if err != nil {
 			return
@@ -1247,7 +1247,7 @@ func (ret ItemSoundHolder) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		err = queser.BadTypeError
+		err = proto_base.BadTypeError
 	}
 	return
 }
@@ -1284,7 +1284,7 @@ type JukeboxSongData struct {
 	SoundEvent       ItemSoundHolder
 	Description      nbt.Anon
 	LengthInSeconds  float32
-	ComparatorOutput queser.VarInt
+	ComparatorOutput proto_base.VarInt
 }
 
 func (_ JukeboxSongData) Decode(r io.Reader) (ret JukeboxSongData, err error) {
@@ -1331,36 +1331,36 @@ type Particle struct {
 	Data any
 }
 
-var ParticleTypeMap = map[queser.VarInt]string{0: "angry_villager", 1: "block", 10: "landing_lava", 100: "electric_spark", 101: "scrape", 102: "shriek", 103: "egg_crack", 104: "dust_plume", 105: "trial_spawner_detected_player", 106: "trial_spawner_detected_player_ominous", 107: "vault_connection", 108: "dust_pillar", 109: "ominous_spawning", 11: "dripping_water", 110: "raid_omen", 111: "trial_omen", 112: "block_crumble", 113: "firefly", 12: "falling_water", 13: "dust", 14: "dust_color_transition", 15: "effect", 16: "elder_guardian", 17: "enchanted_hit", 18: "enchant", 19: "end_rod", 2: "block_marker", 20: "entity_effect", 21: "explosion_emitter", 22: "explosion", 23: "gust", 24: "small_gust", 25: "gust_emitter_large", 26: "gust_emitter_small", 27: "sonic_boom", 28: "falling_dust", 29: "firework", 3: "bubble", 30: "fishing", 31: "flame", 32: "infested", 33: "cherry_leaves", 34: "pale_oak_leaves", 35: "tinted_leaves", 36: "sculk_soul", 37: "sculk_charge", 38: "sculk_charge_pop", 39: "soul_fire_flame", 4: "cloud", 40: "soul", 41: "flash", 42: "happy_villager", 43: "composter", 44: "heart", 45: "instant_effect", 46: "item", 47: "vibration", 48: "trail", 49: "item_slime", 5: "crit", 50: "item_cobweb", 51: "item_snowball", 52: "large_smoke", 53: "lava", 54: "mycelium", 55: "note", 56: "poof", 57: "portal", 58: "rain", 59: "smoke", 6: "damage_indicator", 60: "white_smoke", 61: "sneeze", 62: "spit", 63: "squid_ink", 64: "sweep_attack", 65: "totem_of_undying", 66: "underwater", 67: "splash", 68: "witch", 69: "bubble_pop", 7: "dragon_breath", 70: "current_down", 71: "bubble_column_up", 72: "nautilus", 73: "dolphin", 74: "campfire_cosy_smoke", 75: "campfire_signal_smoke", 76: "dripping_honey", 77: "falling_honey", 78: "landing_honey", 79: "falling_nectar", 8: "dripping_lava", 80: "falling_spore_blossom", 81: "ash", 82: "crimson_spore", 83: "warped_spore", 84: "spore_blossom_air", 85: "dripping_obsidian_tear", 86: "falling_obsidian_tear", 87: "landing_obsidian_tear", 88: "reverse_portal", 89: "white_ash", 9: "falling_lava", 90: "small_flame", 91: "snowflake", 92: "dripping_dripstone_lava", 93: "falling_dripstone_lava", 94: "dripping_dripstone_water", 95: "falling_dripstone_water", 96: "glow_squid_ink", 97: "glow", 98: "wax_on", 99: "wax_off"}
-var ParticleDataPositionTypeMap = map[queser.VarInt]string{0: "block", 1: "entity"}
+var ParticleTypeMap = map[proto_base.VarInt]string{0: "angry_villager", 1: "block", 10: "landing_lava", 100: "electric_spark", 101: "scrape", 102: "shriek", 103: "egg_crack", 104: "dust_plume", 105: "trial_spawner_detected_player", 106: "trial_spawner_detected_player_ominous", 107: "vault_connection", 108: "dust_pillar", 109: "ominous_spawning", 11: "dripping_water", 110: "raid_omen", 111: "trial_omen", 112: "block_crumble", 113: "firefly", 12: "falling_water", 13: "dust", 14: "dust_color_transition", 15: "effect", 16: "elder_guardian", 17: "enchanted_hit", 18: "enchant", 19: "end_rod", 2: "block_marker", 20: "entity_effect", 21: "explosion_emitter", 22: "explosion", 23: "gust", 24: "small_gust", 25: "gust_emitter_large", 26: "gust_emitter_small", 27: "sonic_boom", 28: "falling_dust", 29: "firework", 3: "bubble", 30: "fishing", 31: "flame", 32: "infested", 33: "cherry_leaves", 34: "pale_oak_leaves", 35: "tinted_leaves", 36: "sculk_soul", 37: "sculk_charge", 38: "sculk_charge_pop", 39: "soul_fire_flame", 4: "cloud", 40: "soul", 41: "flash", 42: "happy_villager", 43: "composter", 44: "heart", 45: "instant_effect", 46: "item", 47: "vibration", 48: "trail", 49: "item_slime", 5: "crit", 50: "item_cobweb", 51: "item_snowball", 52: "large_smoke", 53: "lava", 54: "mycelium", 55: "note", 56: "poof", 57: "portal", 58: "rain", 59: "smoke", 6: "damage_indicator", 60: "white_smoke", 61: "sneeze", 62: "spit", 63: "squid_ink", 64: "sweep_attack", 65: "totem_of_undying", 66: "underwater", 67: "splash", 68: "witch", 69: "bubble_pop", 7: "dragon_breath", 70: "current_down", 71: "bubble_column_up", 72: "nautilus", 73: "dolphin", 74: "campfire_cosy_smoke", 75: "campfire_signal_smoke", 76: "dripping_honey", 77: "falling_honey", 78: "landing_honey", 79: "falling_nectar", 8: "dripping_lava", 80: "falling_spore_blossom", 81: "ash", 82: "crimson_spore", 83: "warped_spore", 84: "spore_blossom_air", 85: "dripping_obsidian_tear", 86: "falling_obsidian_tear", 87: "landing_obsidian_tear", 88: "reverse_portal", 89: "white_ash", 9: "falling_lava", 90: "small_flame", 91: "snowflake", 92: "dripping_dripstone_lava", 93: "falling_dripstone_lava", 94: "dripping_dripstone_water", 95: "falling_dripstone_water", 96: "glow_squid_ink", 97: "glow", 98: "wax_on", 99: "wax_off"}
+var ParticleDataPositionTypeMap = map[proto_base.VarInt]string{0: "block", 1: "entity"}
 
 func (_ Particle) Decode(r io.Reader) (ret Particle, err error) {
-	var ParticleTypeKey queser.VarInt
+	var ParticleTypeKey proto_base.VarInt
 	ParticleTypeKey, err = ParticleTypeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Type, err = queser.ErroringIndex(ParticleTypeMap, ParticleTypeKey)
+	ret.Type, err = proto_base.ErroringIndex(ParticleTypeMap, ParticleTypeKey)
 	if err != nil {
 		return
 	}
 	switch ret.Type {
 	case "block":
-		var ParticleDataTmp queser.VarInt
+		var ParticleDataTmp proto_base.VarInt
 		ParticleDataTmp, err = ParticleDataTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Data = ParticleDataTmp
 	case "block_crumble":
-		var ParticleDataTmp queser.VarInt
+		var ParticleDataTmp proto_base.VarInt
 		ParticleDataTmp, err = ParticleDataTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Data = ParticleDataTmp
 	case "block_marker":
-		var ParticleDataTmp queser.VarInt
+		var ParticleDataTmp proto_base.VarInt
 		ParticleDataTmp, err = ParticleDataTmp.Decode(r)
 		if err != nil {
 			return
@@ -1430,7 +1430,7 @@ func (_ Particle) Decode(r io.Reader) (ret Particle, err error) {
 		}
 		ret.Data = ParticleDataTmp
 	case "dust_pillar":
-		var ParticleDataTmp queser.VarInt
+		var ParticleDataTmp proto_base.VarInt
 		ParticleDataTmp, err = ParticleDataTmp.Decode(r)
 		if err != nil {
 			return
@@ -1444,14 +1444,14 @@ func (_ Particle) Decode(r io.Reader) (ret Particle, err error) {
 		}
 		ret.Data = ParticleDataTmp
 	case "falling_dust":
-		var ParticleDataTmp queser.VarInt
+		var ParticleDataTmp proto_base.VarInt
 		ParticleDataTmp, err = ParticleDataTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Data = ParticleDataTmp
 	case "firefly":
-		var ParticleDataTmp queser.Void
+		var ParticleDataTmp proto_base.Void
 		ParticleDataTmp, err = ParticleDataTmp.Decode(r)
 		if err != nil {
 			return
@@ -1472,7 +1472,7 @@ func (_ Particle) Decode(r io.Reader) (ret Particle, err error) {
 		}
 		ret.Data = ParticleDataTmp
 	case "shriek":
-		var ParticleDataTmp queser.VarInt
+		var ParticleDataTmp proto_base.VarInt
 		ParticleDataTmp, err = ParticleDataTmp.Decode(r)
 		if err != nil {
 			return
@@ -1503,14 +1503,14 @@ func (_ Particle) Decode(r io.Reader) (ret Particle, err error) {
 		var ParticleDataTmp struct {
 			PositionType string
 			Position     any
-			Ticks        queser.VarInt
+			Ticks        proto_base.VarInt
 		}
-		var ParticleDataPositionTypeKey queser.VarInt
+		var ParticleDataPositionTypeKey proto_base.VarInt
 		ParticleDataPositionTypeKey, err = ParticleDataPositionTypeKey.Decode(r)
 		if err != nil {
 			return
 		}
-		ParticleDataTmp.PositionType, err = queser.ErroringIndex(ParticleDataPositionTypeMap, ParticleDataPositionTypeKey)
+		ParticleDataTmp.PositionType, err = proto_base.ErroringIndex(ParticleDataPositionTypeMap, ParticleDataPositionTypeKey)
 		if err != nil {
 			return
 		}
@@ -1524,7 +1524,7 @@ func (_ Particle) Decode(r io.Reader) (ret Particle, err error) {
 			ParticleDataTmp.Position = ParticleDataPositionTmp
 		case "entity":
 			var ParticleDataPositionTmp struct {
-				EntityId        queser.VarInt
+				EntityId        proto_base.VarInt
 				EntityEyeHeight float32
 			}
 			ParticleDataPositionTmp.EntityId, err = ParticleDataPositionTmp.EntityId.Decode(r)
@@ -1546,12 +1546,12 @@ func (_ Particle) Decode(r io.Reader) (ret Particle, err error) {
 	return
 }
 
-var ParticleTypeReverseMap = map[string]queser.VarInt{"angry_villager": 0, "block": 1, "landing_lava": 10, "electric_spark": 100, "scrape": 101, "shriek": 102, "egg_crack": 103, "dust_plume": 104, "trial_spawner_detected_player": 105, "trial_spawner_detected_player_ominous": 106, "vault_connection": 107, "dust_pillar": 108, "ominous_spawning": 109, "dripping_water": 11, "raid_omen": 110, "trial_omen": 111, "block_crumble": 112, "firefly": 113, "falling_water": 12, "dust": 13, "dust_color_transition": 14, "effect": 15, "elder_guardian": 16, "enchanted_hit": 17, "enchant": 18, "end_rod": 19, "block_marker": 2, "entity_effect": 20, "explosion_emitter": 21, "explosion": 22, "gust": 23, "small_gust": 24, "gust_emitter_large": 25, "gust_emitter_small": 26, "sonic_boom": 27, "falling_dust": 28, "firework": 29, "bubble": 3, "fishing": 30, "flame": 31, "infested": 32, "cherry_leaves": 33, "pale_oak_leaves": 34, "tinted_leaves": 35, "sculk_soul": 36, "sculk_charge": 37, "sculk_charge_pop": 38, "soul_fire_flame": 39, "cloud": 4, "soul": 40, "flash": 41, "happy_villager": 42, "composter": 43, "heart": 44, "instant_effect": 45, "item": 46, "vibration": 47, "trail": 48, "item_slime": 49, "crit": 5, "item_cobweb": 50, "item_snowball": 51, "large_smoke": 52, "lava": 53, "mycelium": 54, "note": 55, "poof": 56, "portal": 57, "rain": 58, "smoke": 59, "damage_indicator": 6, "white_smoke": 60, "sneeze": 61, "spit": 62, "squid_ink": 63, "sweep_attack": 64, "totem_of_undying": 65, "underwater": 66, "splash": 67, "witch": 68, "bubble_pop": 69, "dragon_breath": 7, "current_down": 70, "bubble_column_up": 71, "nautilus": 72, "dolphin": 73, "campfire_cosy_smoke": 74, "campfire_signal_smoke": 75, "dripping_honey": 76, "falling_honey": 77, "landing_honey": 78, "falling_nectar": 79, "dripping_lava": 8, "falling_spore_blossom": 80, "ash": 81, "crimson_spore": 82, "warped_spore": 83, "spore_blossom_air": 84, "dripping_obsidian_tear": 85, "falling_obsidian_tear": 86, "landing_obsidian_tear": 87, "reverse_portal": 88, "white_ash": 89, "falling_lava": 9, "small_flame": 90, "snowflake": 91, "dripping_dripstone_lava": 92, "falling_dripstone_lava": 93, "dripping_dripstone_water": 94, "falling_dripstone_water": 95, "glow_squid_ink": 96, "glow": 97, "wax_on": 98, "wax_off": 99}
-var ParticleDataPositionTypeReverseMap = map[string]queser.VarInt{"block": 0, "entity": 1}
+var ParticleTypeReverseMap = map[string]proto_base.VarInt{"angry_villager": 0, "block": 1, "landing_lava": 10, "electric_spark": 100, "scrape": 101, "shriek": 102, "egg_crack": 103, "dust_plume": 104, "trial_spawner_detected_player": 105, "trial_spawner_detected_player_ominous": 106, "vault_connection": 107, "dust_pillar": 108, "ominous_spawning": 109, "dripping_water": 11, "raid_omen": 110, "trial_omen": 111, "block_crumble": 112, "firefly": 113, "falling_water": 12, "dust": 13, "dust_color_transition": 14, "effect": 15, "elder_guardian": 16, "enchanted_hit": 17, "enchant": 18, "end_rod": 19, "block_marker": 2, "entity_effect": 20, "explosion_emitter": 21, "explosion": 22, "gust": 23, "small_gust": 24, "gust_emitter_large": 25, "gust_emitter_small": 26, "sonic_boom": 27, "falling_dust": 28, "firework": 29, "bubble": 3, "fishing": 30, "flame": 31, "infested": 32, "cherry_leaves": 33, "pale_oak_leaves": 34, "tinted_leaves": 35, "sculk_soul": 36, "sculk_charge": 37, "sculk_charge_pop": 38, "soul_fire_flame": 39, "cloud": 4, "soul": 40, "flash": 41, "happy_villager": 42, "composter": 43, "heart": 44, "instant_effect": 45, "item": 46, "vibration": 47, "trail": 48, "item_slime": 49, "crit": 5, "item_cobweb": 50, "item_snowball": 51, "large_smoke": 52, "lava": 53, "mycelium": 54, "note": 55, "poof": 56, "portal": 57, "rain": 58, "smoke": 59, "damage_indicator": 6, "white_smoke": 60, "sneeze": 61, "spit": 62, "squid_ink": 63, "sweep_attack": 64, "totem_of_undying": 65, "underwater": 66, "splash": 67, "witch": 68, "bubble_pop": 69, "dragon_breath": 7, "current_down": 70, "bubble_column_up": 71, "nautilus": 72, "dolphin": 73, "campfire_cosy_smoke": 74, "campfire_signal_smoke": 75, "dripping_honey": 76, "falling_honey": 77, "landing_honey": 78, "falling_nectar": 79, "dripping_lava": 8, "falling_spore_blossom": 80, "ash": 81, "crimson_spore": 82, "warped_spore": 83, "spore_blossom_air": 84, "dripping_obsidian_tear": 85, "falling_obsidian_tear": 86, "landing_obsidian_tear": 87, "reverse_portal": 88, "white_ash": 89, "falling_lava": 9, "small_flame": 90, "snowflake": 91, "dripping_dripstone_lava": 92, "falling_dripstone_lava": 93, "dripping_dripstone_water": 94, "falling_dripstone_water": 95, "glow_squid_ink": 96, "glow": 97, "wax_on": 98, "wax_off": 99}
+var ParticleDataPositionTypeReverseMap = map[string]proto_base.VarInt{"block": 0, "entity": 1}
 
 func (ret Particle) Encode(w io.Writer) (err error) {
-	var vParticleType queser.VarInt
-	vParticleType, err = queser.ErroringIndex(ParticleTypeReverseMap, ret.Type)
+	var vParticleType proto_base.VarInt
+	vParticleType, err = proto_base.ErroringIndex(ParticleTypeReverseMap, ret.Type)
 	if err != nil {
 		return
 	}
@@ -1561,9 +1561,9 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 	}
 	switch ret.Type {
 	case "block":
-		ParticleData, ok := ret.Data.(queser.VarInt)
+		ParticleData, ok := ret.Data.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Encode(w)
@@ -1571,9 +1571,9 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "block_crumble":
-		ParticleData, ok := ret.Data.(queser.VarInt)
+		ParticleData, ok := ret.Data.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Encode(w)
@@ -1581,9 +1581,9 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "block_marker":
-		ParticleData, ok := ret.Data.(queser.VarInt)
+		ParticleData, ok := ret.Data.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Encode(w)
@@ -1598,7 +1598,7 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			Scale float32
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ParticleData.Red)
@@ -1628,7 +1628,7 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			ToBlue    float32
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ParticleData.FromRed)
@@ -1660,9 +1660,9 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "dust_pillar":
-		ParticleData, ok := ret.Data.(queser.VarInt)
+		ParticleData, ok := ret.Data.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Encode(w)
@@ -1672,7 +1672,7 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 	case "entity_effect":
 		ParticleData, ok := ret.Data.(int32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ParticleData)
@@ -1680,9 +1680,9 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "falling_dust":
-		ParticleData, ok := ret.Data.(queser.VarInt)
+		ParticleData, ok := ret.Data.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Encode(w)
@@ -1690,9 +1690,9 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "firefly":
-		ParticleData, ok := ret.Data.(queser.Void)
+		ParticleData, ok := ret.Data.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Encode(w)
@@ -1702,7 +1702,7 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 	case "item":
 		ParticleData, ok := ret.Data.(Slot)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Encode(w)
@@ -1712,7 +1712,7 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 	case "sculk_charge":
 		ParticleData, ok := ret.Data.(float32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ParticleData)
@@ -1720,9 +1720,9 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "shriek":
-		ParticleData, ok := ret.Data.(queser.VarInt)
+		ParticleData, ok := ret.Data.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Encode(w)
@@ -1732,7 +1732,7 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 	case "tinted_leaves":
 		ParticleData, ok := ret.Data.(int32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ParticleData)
@@ -1745,7 +1745,7 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			Color  uint8
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ParticleData.Target.Encode(w)
@@ -1760,14 +1760,14 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 		ParticleData, ok := ret.Data.(struct {
 			PositionType string
 			Position     any
-			Ticks        queser.VarInt
+			Ticks        proto_base.VarInt
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		var vParticleDataPositionType queser.VarInt
-		vParticleDataPositionType, err = queser.ErroringIndex(ParticleDataPositionTypeReverseMap, ParticleData.PositionType)
+		var vParticleDataPositionType proto_base.VarInt
+		vParticleDataPositionType, err = proto_base.ErroringIndex(ParticleDataPositionTypeReverseMap, ParticleData.PositionType)
 		if err != nil {
 			return
 		}
@@ -1779,7 +1779,7 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 		case "block":
 			ParticleDataPosition, ok := ParticleData.Position.(Position)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = ParticleDataPosition.Encode(w)
@@ -1788,11 +1788,11 @@ func (ret Particle) Encode(w io.Writer) (err error) {
 			}
 		case "entity":
 			ParticleDataPosition, ok := ParticleData.Position.(struct {
-				EntityId        queser.VarInt
+				EntityId        proto_base.VarInt
 				EntityEyeHeight float32
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = ParticleDataPosition.EntityId.Encode(w)
@@ -1816,26 +1816,26 @@ type ServerLinkType struct {
 	Val string
 }
 
-var ServerLinkTypeMap = map[queser.VarInt]string{0: "bug_report", 1: "community_guidelines", 2: "support", 3: "status", 4: "feedback", 5: "community", 6: "website", 7: "forums", 8: "news", 9: "announcements"}
+var ServerLinkTypeMap = map[proto_base.VarInt]string{0: "bug_report", 1: "community_guidelines", 2: "support", 3: "status", 4: "feedback", 5: "community", 6: "website", 7: "forums", 8: "news", 9: "announcements"}
 
 func (_ ServerLinkType) Decode(r io.Reader) (ret ServerLinkType, err error) {
-	var ServerLinkTypeKey queser.VarInt
+	var ServerLinkTypeKey proto_base.VarInt
 	ServerLinkTypeKey, err = ServerLinkTypeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Val, err = queser.ErroringIndex(ServerLinkTypeMap, ServerLinkTypeKey)
+	ret.Val, err = proto_base.ErroringIndex(ServerLinkTypeMap, ServerLinkTypeKey)
 	if err != nil {
 		return
 	}
 	return
 }
 
-var ServerLinkTypeReverseMap = map[string]queser.VarInt{"bug_report": 0, "community_guidelines": 1, "support": 2, "status": 3, "feedback": 4, "community": 5, "website": 6, "forums": 7, "news": 8, "announcements": 9}
+var ServerLinkTypeReverseMap = map[string]proto_base.VarInt{"bug_report": 0, "community_guidelines": 1, "support": 2, "status": 3, "feedback": 4, "community": 5, "website": 6, "forums": 7, "news": 8, "announcements": 9}
 
 func (ret ServerLinkType) Encode(w io.Writer) (err error) {
-	var vServerLinkType queser.VarInt
-	vServerLinkType, err = queser.ErroringIndex(ServerLinkTypeReverseMap, ret.Val)
+	var vServerLinkType proto_base.VarInt
+	vServerLinkType, err = proto_base.ErroringIndex(ServerLinkTypeReverseMap, ret.Val)
 	if err != nil {
 		return
 	}
@@ -1847,16 +1847,16 @@ func (ret ServerLinkType) Encode(w io.Writer) (err error) {
 }
 
 type Slot struct {
-	ItemCount queser.VarInt
+	ItemCount proto_base.VarInt
 	Anon      any
 }
 
 func (_ Slot) Decode(r io.Reader) (ret Slot, err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 func (ret Slot) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
@@ -1866,11 +1866,11 @@ type SlotComponent struct {
 }
 
 func (_ SlotComponent) Decode(r io.Reader) (ret SlotComponent, err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 func (ret SlotComponent) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
@@ -1878,26 +1878,26 @@ type SlotComponentType struct {
 	Val string
 }
 
-var SlotComponentTypeMap = map[queser.VarInt]string{0: "custom_data", 1: "max_stack_size", 10: "enchantments", 11: "can_place_on", 12: "can_break", 13: "attribute_modifiers", 14: "custom_model_data", 15: "tooltip_display", 16: "repair_cost", 17: "creative_slot_lock", 18: "enchantment_glint_override", 19: "intangible_projectile", 2: "max_damage", 20: "food", 21: "consumable", 22: "use_remainder", 23: "use_cooldown", 24: "damage_resistant", 25: "tool", 26: "weapon", 27: "enchantable", 28: "equippable", 29: "repairable", 3: "damage", 30: "glider", 31: "tooltip_style", 32: "death_protection", 33: "blocks_attacks", 34: "stored_enchantments", 35: "dyed_color", 36: "map_color", 37: "map_id", 38: "map_decorations", 39: "map_post_processing", 4: "unbreakable", 40: "potion_duration_scale", 41: "charged_projectiles", 42: "bundle_contents", 43: "potion_contents", 44: "suspicious_stew_effects", 45: "writable_book_content", 46: "written_book_content", 47: "trim", 48: "debug_stick_state", 49: "entity_data", 5: "custom_name", 50: "bucket_entity_data", 51: "block_entity_data", 52: "instrument", 53: "provides_trim_material", 54: "ominous_bottle_amplifier", 55: "jukebox_playable", 56: "provides_banner_patterns", 57: "recipes", 58: "lodestone_tracker", 59: "firework_explosion", 6: "item_name", 60: "fireworks", 61: "profile", 62: "note_block_sound", 63: "banner_patterns", 64: "base_color", 65: "pot_decorations", 66: "container", 67: "block_state", 68: "bees", 69: "lock", 7: "item_model", 70: "container_loot", 71: "break_sound", 72: "villager/variant", 73: "wolf/variant", 74: "wolf/sound_variant", 75: "wolf/collar", 76: "fox/variant", 77: "salmon/size", 78: "parrot/variant", 79: "tropical_fish/pattern", 8: "lore", 80: "tropical_fish/base_color", 81: "tropical_fish/pattern_color", 82: "mooshroom/variant", 83: "rabbit/variant", 84: "pig/variant", 85: "cow/variant", 86: "chicken/variant", 87: "frog/variant", 88: "horse/variant", 89: "painting/variant", 9: "rarity", 90: "llama/variant", 91: "axolotl/variant", 92: "cat/variant", 93: "cat/collar", 94: "sheep/color", 95: "shulker/color"}
+var SlotComponentTypeMap = map[proto_base.VarInt]string{0: "custom_data", 1: "max_stack_size", 10: "enchantments", 11: "can_place_on", 12: "can_break", 13: "attribute_modifiers", 14: "custom_model_data", 15: "tooltip_display", 16: "repair_cost", 17: "creative_slot_lock", 18: "enchantment_glint_override", 19: "intangible_projectile", 2: "max_damage", 20: "food", 21: "consumable", 22: "use_remainder", 23: "use_cooldown", 24: "damage_resistant", 25: "tool", 26: "weapon", 27: "enchantable", 28: "equippable", 29: "repairable", 3: "damage", 30: "glider", 31: "tooltip_style", 32: "death_protection", 33: "blocks_attacks", 34: "stored_enchantments", 35: "dyed_color", 36: "map_color", 37: "map_id", 38: "map_decorations", 39: "map_post_processing", 4: "unbreakable", 40: "potion_duration_scale", 41: "charged_projectiles", 42: "bundle_contents", 43: "potion_contents", 44: "suspicious_stew_effects", 45: "writable_book_content", 46: "written_book_content", 47: "trim", 48: "debug_stick_state", 49: "entity_data", 5: "custom_name", 50: "bucket_entity_data", 51: "block_entity_data", 52: "instrument", 53: "provides_trim_material", 54: "ominous_bottle_amplifier", 55: "jukebox_playable", 56: "provides_banner_patterns", 57: "recipes", 58: "lodestone_tracker", 59: "firework_explosion", 6: "item_name", 60: "fireworks", 61: "profile", 62: "note_block_sound", 63: "banner_patterns", 64: "base_color", 65: "pot_decorations", 66: "container", 67: "block_state", 68: "bees", 69: "lock", 7: "item_model", 70: "container_loot", 71: "break_sound", 72: "villager/variant", 73: "wolf/variant", 74: "wolf/sound_variant", 75: "wolf/collar", 76: "fox/variant", 77: "salmon/size", 78: "parrot/variant", 79: "tropical_fish/pattern", 8: "lore", 80: "tropical_fish/base_color", 81: "tropical_fish/pattern_color", 82: "mooshroom/variant", 83: "rabbit/variant", 84: "pig/variant", 85: "cow/variant", 86: "chicken/variant", 87: "frog/variant", 88: "horse/variant", 89: "painting/variant", 9: "rarity", 90: "llama/variant", 91: "axolotl/variant", 92: "cat/variant", 93: "cat/collar", 94: "sheep/color", 95: "shulker/color"}
 
 func (_ SlotComponentType) Decode(r io.Reader) (ret SlotComponentType, err error) {
-	var SlotComponentTypeKey queser.VarInt
+	var SlotComponentTypeKey proto_base.VarInt
 	SlotComponentTypeKey, err = SlotComponentTypeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Val, err = queser.ErroringIndex(SlotComponentTypeMap, SlotComponentTypeKey)
+	ret.Val, err = proto_base.ErroringIndex(SlotComponentTypeMap, SlotComponentTypeKey)
 	if err != nil {
 		return
 	}
 	return
 }
 
-var SlotComponentTypeReverseMap = map[string]queser.VarInt{"custom_data": 0, "max_stack_size": 1, "enchantments": 10, "can_place_on": 11, "can_break": 12, "attribute_modifiers": 13, "custom_model_data": 14, "tooltip_display": 15, "repair_cost": 16, "creative_slot_lock": 17, "enchantment_glint_override": 18, "intangible_projectile": 19, "max_damage": 2, "food": 20, "consumable": 21, "use_remainder": 22, "use_cooldown": 23, "damage_resistant": 24, "tool": 25, "weapon": 26, "enchantable": 27, "equippable": 28, "repairable": 29, "damage": 3, "glider": 30, "tooltip_style": 31, "death_protection": 32, "blocks_attacks": 33, "stored_enchantments": 34, "dyed_color": 35, "map_color": 36, "map_id": 37, "map_decorations": 38, "map_post_processing": 39, "unbreakable": 4, "potion_duration_scale": 40, "charged_projectiles": 41, "bundle_contents": 42, "potion_contents": 43, "suspicious_stew_effects": 44, "writable_book_content": 45, "written_book_content": 46, "trim": 47, "debug_stick_state": 48, "entity_data": 49, "custom_name": 5, "bucket_entity_data": 50, "block_entity_data": 51, "instrument": 52, "provides_trim_material": 53, "ominous_bottle_amplifier": 54, "jukebox_playable": 55, "provides_banner_patterns": 56, "recipes": 57, "lodestone_tracker": 58, "firework_explosion": 59, "item_name": 6, "fireworks": 60, "profile": 61, "note_block_sound": 62, "banner_patterns": 63, "base_color": 64, "pot_decorations": 65, "container": 66, "block_state": 67, "bees": 68, "lock": 69, "item_model": 7, "container_loot": 70, "break_sound": 71, "villager/variant": 72, "wolf/variant": 73, "wolf/sound_variant": 74, "wolf/collar": 75, "fox/variant": 76, "salmon/size": 77, "parrot/variant": 78, "tropical_fish/pattern": 79, "lore": 8, "tropical_fish/base_color": 80, "tropical_fish/pattern_color": 81, "mooshroom/variant": 82, "rabbit/variant": 83, "pig/variant": 84, "cow/variant": 85, "chicken/variant": 86, "frog/variant": 87, "horse/variant": 88, "painting/variant": 89, "rarity": 9, "llama/variant": 90, "axolotl/variant": 91, "cat/variant": 92, "cat/collar": 93, "sheep/color": 94, "shulker/color": 95}
+var SlotComponentTypeReverseMap = map[string]proto_base.VarInt{"custom_data": 0, "max_stack_size": 1, "enchantments": 10, "can_place_on": 11, "can_break": 12, "attribute_modifiers": 13, "custom_model_data": 14, "tooltip_display": 15, "repair_cost": 16, "creative_slot_lock": 17, "enchantment_glint_override": 18, "intangible_projectile": 19, "max_damage": 2, "food": 20, "consumable": 21, "use_remainder": 22, "use_cooldown": 23, "damage_resistant": 24, "tool": 25, "weapon": 26, "enchantable": 27, "equippable": 28, "repairable": 29, "damage": 3, "glider": 30, "tooltip_style": 31, "death_protection": 32, "blocks_attacks": 33, "stored_enchantments": 34, "dyed_color": 35, "map_color": 36, "map_id": 37, "map_decorations": 38, "map_post_processing": 39, "unbreakable": 4, "potion_duration_scale": 40, "charged_projectiles": 41, "bundle_contents": 42, "potion_contents": 43, "suspicious_stew_effects": 44, "writable_book_content": 45, "written_book_content": 46, "trim": 47, "debug_stick_state": 48, "entity_data": 49, "custom_name": 5, "bucket_entity_data": 50, "block_entity_data": 51, "instrument": 52, "provides_trim_material": 53, "ominous_bottle_amplifier": 54, "jukebox_playable": 55, "provides_banner_patterns": 56, "recipes": 57, "lodestone_tracker": 58, "firework_explosion": 59, "item_name": 6, "fireworks": 60, "profile": 61, "note_block_sound": 62, "banner_patterns": 63, "base_color": 64, "pot_decorations": 65, "container": 66, "block_state": 67, "bees": 68, "lock": 69, "item_model": 7, "container_loot": 70, "break_sound": 71, "villager/variant": 72, "wolf/variant": 73, "wolf/sound_variant": 74, "wolf/collar": 75, "fox/variant": 76, "salmon/size": 77, "parrot/variant": 78, "tropical_fish/pattern": 79, "lore": 8, "tropical_fish/base_color": 80, "tropical_fish/pattern_color": 81, "mooshroom/variant": 82, "rabbit/variant": 83, "pig/variant": 84, "cow/variant": 85, "chicken/variant": 86, "frog/variant": 87, "horse/variant": 88, "painting/variant": 89, "rarity": 9, "llama/variant": 90, "axolotl/variant": 91, "cat/variant": 92, "cat/collar": 93, "sheep/color": 94, "shulker/color": 95}
 
 func (ret SlotComponentType) Encode(w io.Writer) (err error) {
-	var vSlotComponentType queser.VarInt
-	vSlotComponentType, err = queser.ErroringIndex(SlotComponentTypeReverseMap, ret.Val)
+	var vSlotComponentType proto_base.VarInt
+	vSlotComponentType, err = proto_base.ErroringIndex(SlotComponentTypeReverseMap, ret.Val)
 	if err != nil {
 		return
 	}
@@ -1909,16 +1909,16 @@ func (ret SlotComponentType) Encode(w io.Writer) (err error) {
 }
 
 type UntrustedSlot struct {
-	ItemCount queser.VarInt
+	ItemCount proto_base.VarInt
 	Anon      any
 }
 
 func (_ UntrustedSlot) Decode(r io.Reader) (ret UntrustedSlot, err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 func (ret UntrustedSlot) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
@@ -1984,7 +1984,7 @@ func (_ ChatSession) Decode(r io.Reader) (ret ChatSession, err error) {
 		if err != nil {
 			return
 		}
-		var lChatSessionPublicKeyKeyBytes queser.VarInt
+		var lChatSessionPublicKeyKeyBytes proto_base.VarInt
 		lChatSessionPublicKeyKeyBytes, err = lChatSessionPublicKeyKeyBytes.Decode(r)
 		if err != nil {
 			return
@@ -1993,7 +1993,7 @@ func (_ ChatSession) Decode(r io.Reader) (ret ChatSession, err error) {
 		if err != nil {
 			return
 		}
-		var lChatSessionPublicKeyKeySignature queser.VarInt
+		var lChatSessionPublicKeyKeySignature proto_base.VarInt
 		lChatSessionPublicKeyKeySignature, err = lChatSessionPublicKeyKeySignature.Decode(r)
 		if err != nil {
 			return
@@ -2020,7 +2020,7 @@ func (ret ChatSession) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = queser.VarInt(len((*ret.Val).PublicKey.KeyBytes)).Encode(w)
+		err = proto_base.VarInt(len((*ret.Val).PublicKey.KeyBytes)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -2028,7 +2028,7 @@ func (ret ChatSession) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = queser.VarInt(len((*ret.Val).PublicKey.KeySignature)).Encode(w)
+		err = proto_base.VarInt(len((*ret.Val).PublicKey.KeySignature)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -2043,7 +2043,7 @@ func (ret ChatSession) Encode(w io.Writer) (err error) {
 type ChunkBlockEntity struct {
 	Anon    uint8
 	Y       int16
-	Type    queser.VarInt
+	Type    proto_base.VarInt
 	NbtData nbt.Anon
 }
 
@@ -2088,27 +2088,27 @@ func (ret ChunkBlockEntity) Encode(w io.Writer) (err error) {
 
 type CommandNode struct {
 	Flags         uint8
-	Children      []queser.VarInt
+	Children      []proto_base.VarInt
 	RedirectNode  any
 	ExtraNodeData any
 }
 
-var CommandNodeExtraNodeDataParserMap = map[queser.VarInt]string{0: "brigadier:bool", 1: "brigadier:float", 10: "minecraft:vec3", 11: "minecraft:vec2", 12: "minecraft:block_state", 13: "minecraft:block_predicate", 14: "minecraft:item_stack", 15: "minecraft:item_predicate", 16: "minecraft:color", 17: "minecraft:hex_color", 18: "minecraft:component", 19: "minecraft:style", 2: "brigadier:double", 20: "minecraft:message", 21: "minecraft:nbt", 22: "minecraft:nbt_tag", 23: "minecraft:nbt_path", 24: "minecraft:objective", 25: "minecraft:objective_criteria", 26: "minecraft:operation", 27: "minecraft:particle", 28: "minecraft:angle", 29: "minecraft:rotation", 3: "brigadier:integer", 30: "minecraft:scoreboard_slot", 31: "minecraft:score_holder", 32: "minecraft:swizzle", 33: "minecraft:team", 34: "minecraft:item_slot", 35: "minecraft:item_slots", 36: "minecraft:resource_location", 37: "minecraft:function", 38: "minecraft:entity_anchor", 39: "minecraft:int_range", 4: "brigadier:long", 40: "minecraft:float_range", 41: "minecraft:dimension", 42: "minecraft:gamemode", 43: "minecraft:time", 44: "minecraft:resource_or_tag", 45: "minecraft:resource_or_tag_key", 46: "minecraft:resource", 47: "minecraft:resource_key", 48: "minecraft:resource_selector", 49: "minecraft:template_mirror", 5: "brigadier:string", 50: "minecraft:template_rotation", 51: "minecraft:heightmap", 52: "minecraft:loot_table", 53: "minecraft:loot_predicate", 54: "minecraft:loot_modifier", 55: "minecraft:dialog", 56: "minecraft:uuid", 6: "minecraft:entity", 7: "minecraft:game_profile", 8: "minecraft:block_pos", 9: "minecraft:column_pos"}
-var CommandNodeExtraNodeDataPropertiesMap = map[queser.VarInt]string{0: "SINGLE_WORD", 1: "QUOTABLE_PHRASE", 2: "GREEDY_PHRASE"}
+var CommandNodeExtraNodeDataParserMap = map[proto_base.VarInt]string{0: "brigadier:bool", 1: "brigadier:float", 10: "minecraft:vec3", 11: "minecraft:vec2", 12: "minecraft:block_state", 13: "minecraft:block_predicate", 14: "minecraft:item_stack", 15: "minecraft:item_predicate", 16: "minecraft:color", 17: "minecraft:hex_color", 18: "minecraft:component", 19: "minecraft:style", 2: "brigadier:double", 20: "minecraft:message", 21: "minecraft:nbt", 22: "minecraft:nbt_tag", 23: "minecraft:nbt_path", 24: "minecraft:objective", 25: "minecraft:objective_criteria", 26: "minecraft:operation", 27: "minecraft:particle", 28: "minecraft:angle", 29: "minecraft:rotation", 3: "brigadier:integer", 30: "minecraft:scoreboard_slot", 31: "minecraft:score_holder", 32: "minecraft:swizzle", 33: "minecraft:team", 34: "minecraft:item_slot", 35: "minecraft:item_slots", 36: "minecraft:resource_location", 37: "minecraft:function", 38: "minecraft:entity_anchor", 39: "minecraft:int_range", 4: "brigadier:long", 40: "minecraft:float_range", 41: "minecraft:dimension", 42: "minecraft:gamemode", 43: "minecraft:time", 44: "minecraft:resource_or_tag", 45: "minecraft:resource_or_tag_key", 46: "minecraft:resource", 47: "minecraft:resource_key", 48: "minecraft:resource_selector", 49: "minecraft:template_mirror", 5: "brigadier:string", 50: "minecraft:template_rotation", 51: "minecraft:heightmap", 52: "minecraft:loot_table", 53: "minecraft:loot_predicate", 54: "minecraft:loot_modifier", 55: "minecraft:dialog", 56: "minecraft:uuid", 6: "minecraft:entity", 7: "minecraft:game_profile", 8: "minecraft:block_pos", 9: "minecraft:column_pos"}
+var CommandNodeExtraNodeDataPropertiesMap = map[proto_base.VarInt]string{0: "SINGLE_WORD", 1: "QUOTABLE_PHRASE", 2: "GREEDY_PHRASE"}
 
 func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Flags)
 	if err != nil {
 		return
 	}
-	var lCommandNodeChildren queser.VarInt
+	var lCommandNodeChildren proto_base.VarInt
 	lCommandNodeChildren, err = lCommandNodeChildren.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Children = []queser.VarInt{}
+	ret.Children = []proto_base.VarInt{}
 	for range lCommandNodeChildren {
-		var CommandNodeChildrenElement queser.VarInt
+		var CommandNodeChildrenElement proto_base.VarInt
 		CommandNodeChildrenElement, err = CommandNodeChildrenElement.Decode(r)
 		if err != nil {
 			return
@@ -2117,14 +2117,14 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 	}
 	switch ret.Flags {
 	case 1:
-		var CommandNodeRedirectNodeTmp queser.VarInt
+		var CommandNodeRedirectNodeTmp proto_base.VarInt
 		CommandNodeRedirectNodeTmp, err = CommandNodeRedirectNodeTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.RedirectNode = CommandNodeRedirectNodeTmp
 	default:
-		var CommandNodeRedirectNodeTmp queser.Void
+		var CommandNodeRedirectNodeTmp proto_base.Void
 		CommandNodeRedirectNodeTmp, err = CommandNodeRedirectNodeTmp.Decode(r)
 		if err != nil {
 			return
@@ -2133,7 +2133,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 	}
 	switch ret.Flags {
 	case 0:
-		var CommandNodeExtraNodeDataTmp queser.Void
+		var CommandNodeExtraNodeDataTmp proto_base.Void
 		CommandNodeExtraNodeDataTmp, err = CommandNodeExtraNodeDataTmp.Decode(r)
 		if err != nil {
 			return
@@ -2143,7 +2143,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 		var CommandNodeExtraNodeDataTmp struct {
 			Name string
 		}
-		CommandNodeExtraNodeDataTmp.Name, err = queser.DecodeString(r)
+		CommandNodeExtraNodeDataTmp.Name, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -2155,22 +2155,22 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			Properties     any
 			SuggestionType any
 		}
-		CommandNodeExtraNodeDataTmp.Name, err = queser.DecodeString(r)
+		CommandNodeExtraNodeDataTmp.Name, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		var CommandNodeExtraNodeDataParserKey queser.VarInt
+		var CommandNodeExtraNodeDataParserKey proto_base.VarInt
 		CommandNodeExtraNodeDataParserKey, err = CommandNodeExtraNodeDataParserKey.Decode(r)
 		if err != nil {
 			return
 		}
-		CommandNodeExtraNodeDataTmp.Parser, err = queser.ErroringIndex(CommandNodeExtraNodeDataParserMap, CommandNodeExtraNodeDataParserKey)
+		CommandNodeExtraNodeDataTmp.Parser, err = proto_base.ErroringIndex(CommandNodeExtraNodeDataParserMap, CommandNodeExtraNodeDataParserKey)
 		if err != nil {
 			return
 		}
 		switch CommandNodeExtraNodeDataTmp.Parser {
 		case "brigadier:bool":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
@@ -2195,7 +2195,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 				}
 				CommandNodeExtraNodeDataPropertiesTmp.Min = CommandNodeExtraNodeDataPropertiesMinTmp
 			default:
-				var CommandNodeExtraNodeDataPropertiesMinTmp queser.Void
+				var CommandNodeExtraNodeDataPropertiesMinTmp proto_base.Void
 				CommandNodeExtraNodeDataPropertiesMinTmp, err = CommandNodeExtraNodeDataPropertiesMinTmp.Decode(r)
 				if err != nil {
 					return
@@ -2211,7 +2211,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 				}
 				CommandNodeExtraNodeDataPropertiesTmp.Max = CommandNodeExtraNodeDataPropertiesMaxTmp
 			default:
-				var CommandNodeExtraNodeDataPropertiesMaxTmp queser.Void
+				var CommandNodeExtraNodeDataPropertiesMaxTmp proto_base.Void
 				CommandNodeExtraNodeDataPropertiesMaxTmp, err = CommandNodeExtraNodeDataPropertiesMaxTmp.Decode(r)
 				if err != nil {
 					return
@@ -2238,7 +2238,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 				}
 				CommandNodeExtraNodeDataPropertiesTmp.Min = CommandNodeExtraNodeDataPropertiesMinTmp
 			default:
-				var CommandNodeExtraNodeDataPropertiesMinTmp queser.Void
+				var CommandNodeExtraNodeDataPropertiesMinTmp proto_base.Void
 				CommandNodeExtraNodeDataPropertiesMinTmp, err = CommandNodeExtraNodeDataPropertiesMinTmp.Decode(r)
 				if err != nil {
 					return
@@ -2254,7 +2254,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 				}
 				CommandNodeExtraNodeDataPropertiesTmp.Max = CommandNodeExtraNodeDataPropertiesMaxTmp
 			default:
-				var CommandNodeExtraNodeDataPropertiesMaxTmp queser.Void
+				var CommandNodeExtraNodeDataPropertiesMaxTmp proto_base.Void
 				CommandNodeExtraNodeDataPropertiesMaxTmp, err = CommandNodeExtraNodeDataPropertiesMaxTmp.Decode(r)
 				if err != nil {
 					return
@@ -2281,7 +2281,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 				}
 				CommandNodeExtraNodeDataPropertiesTmp.Min = CommandNodeExtraNodeDataPropertiesMinTmp
 			default:
-				var CommandNodeExtraNodeDataPropertiesMinTmp queser.Void
+				var CommandNodeExtraNodeDataPropertiesMinTmp proto_base.Void
 				CommandNodeExtraNodeDataPropertiesMinTmp, err = CommandNodeExtraNodeDataPropertiesMinTmp.Decode(r)
 				if err != nil {
 					return
@@ -2297,7 +2297,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 				}
 				CommandNodeExtraNodeDataPropertiesTmp.Max = CommandNodeExtraNodeDataPropertiesMaxTmp
 			default:
-				var CommandNodeExtraNodeDataPropertiesMaxTmp queser.Void
+				var CommandNodeExtraNodeDataPropertiesMaxTmp proto_base.Void
 				CommandNodeExtraNodeDataPropertiesMaxTmp, err = CommandNodeExtraNodeDataPropertiesMaxTmp.Decode(r)
 				if err != nil {
 					return
@@ -2324,7 +2324,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 				}
 				CommandNodeExtraNodeDataPropertiesTmp.Min = CommandNodeExtraNodeDataPropertiesMinTmp
 			default:
-				var CommandNodeExtraNodeDataPropertiesMinTmp queser.Void
+				var CommandNodeExtraNodeDataPropertiesMinTmp proto_base.Void
 				CommandNodeExtraNodeDataPropertiesMinTmp, err = CommandNodeExtraNodeDataPropertiesMinTmp.Decode(r)
 				if err != nil {
 					return
@@ -2340,7 +2340,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 				}
 				CommandNodeExtraNodeDataPropertiesTmp.Max = CommandNodeExtraNodeDataPropertiesMaxTmp
 			default:
-				var CommandNodeExtraNodeDataPropertiesMaxTmp queser.Void
+				var CommandNodeExtraNodeDataPropertiesMaxTmp proto_base.Void
 				CommandNodeExtraNodeDataPropertiesMaxTmp, err = CommandNodeExtraNodeDataPropertiesMaxTmp.Decode(r)
 				if err != nil {
 					return
@@ -2350,74 +2350,74 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "brigadier:string":
 			var CommandNodeExtraNodeDataPropertiesTmp string
-			var CommandNodeExtraNodeDataPropertiesKey queser.VarInt
+			var CommandNodeExtraNodeDataPropertiesKey proto_base.VarInt
 			CommandNodeExtraNodeDataPropertiesKey, err = CommandNodeExtraNodeDataPropertiesKey.Decode(r)
 			if err != nil {
 				return
 			}
-			CommandNodeExtraNodeDataPropertiesTmp, err = queser.ErroringIndex(CommandNodeExtraNodeDataPropertiesMap, CommandNodeExtraNodeDataPropertiesKey)
+			CommandNodeExtraNodeDataPropertiesTmp, err = proto_base.ErroringIndex(CommandNodeExtraNodeDataPropertiesMap, CommandNodeExtraNodeDataPropertiesKey)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:angle":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:block_pos":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:block_predicate":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:block_state":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:color":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:column_pos":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:component":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:dialog":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:dimension":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
@@ -2431,126 +2431,126 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:entity_anchor":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:float_range":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:function":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:game_profile":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:gamemode":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:heightmap":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:hex_color":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:int_range":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:item_predicate":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:item_slot":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:item_stack":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:message":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:nbt":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:nbt_path":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:objective":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:objective_criteria":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:operation":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:particle":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
@@ -2560,7 +2560,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			var CommandNodeExtraNodeDataPropertiesTmp struct {
 				Registry string
 			}
-			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = queser.DecodeString(r)
+			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -2569,13 +2569,13 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			var CommandNodeExtraNodeDataPropertiesTmp struct {
 				Registry string
 			}
-			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = queser.DecodeString(r)
+			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:resource_location":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
@@ -2585,7 +2585,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			var CommandNodeExtraNodeDataPropertiesTmp struct {
 				Registry string
 			}
-			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = queser.DecodeString(r)
+			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -2594,7 +2594,7 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			var CommandNodeExtraNodeDataPropertiesTmp struct {
 				Registry string
 			}
-			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = queser.DecodeString(r)
+			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -2603,13 +2603,13 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			var CommandNodeExtraNodeDataPropertiesTmp struct {
 				Registry string
 			}
-			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = queser.DecodeString(r)
+			CommandNodeExtraNodeDataPropertiesTmp.Registry, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:rotation":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
@@ -2623,35 +2623,35 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:scoreboard_slot":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:swizzle":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:team":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:template_mirror":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:template_rotation":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
@@ -2667,21 +2667,21 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:uuid":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:vec2":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.Properties = CommandNodeExtraNodeDataPropertiesTmp
 		case "minecraft:vec3":
-			var CommandNodeExtraNodeDataPropertiesTmp queser.Void
+			var CommandNodeExtraNodeDataPropertiesTmp proto_base.Void
 			CommandNodeExtraNodeDataPropertiesTmp, err = CommandNodeExtraNodeDataPropertiesTmp.Decode(r)
 			if err != nil {
 				return
@@ -2691,13 +2691,13 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 		switch ret.Flags {
 		case 1:
 			var CommandNodeExtraNodeDataSuggestionTypeTmp string
-			CommandNodeExtraNodeDataSuggestionTypeTmp, err = queser.DecodeString(r)
+			CommandNodeExtraNodeDataSuggestionTypeTmp, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
 			CommandNodeExtraNodeDataTmp.SuggestionType = CommandNodeExtraNodeDataSuggestionTypeTmp
 		default:
-			var CommandNodeExtraNodeDataSuggestionTypeTmp queser.Void
+			var CommandNodeExtraNodeDataSuggestionTypeTmp proto_base.Void
 			CommandNodeExtraNodeDataSuggestionTypeTmp, err = CommandNodeExtraNodeDataSuggestionTypeTmp.Decode(r)
 			if err != nil {
 				return
@@ -2709,15 +2709,15 @@ func (_ CommandNode) Decode(r io.Reader) (ret CommandNode, err error) {
 	return
 }
 
-var CommandNodeExtraNodeDataParserReverseMap = map[string]queser.VarInt{"brigadier:bool": 0, "brigadier:float": 1, "minecraft:vec3": 10, "minecraft:vec2": 11, "minecraft:block_state": 12, "minecraft:block_predicate": 13, "minecraft:item_stack": 14, "minecraft:item_predicate": 15, "minecraft:color": 16, "minecraft:hex_color": 17, "minecraft:component": 18, "minecraft:style": 19, "brigadier:double": 2, "minecraft:message": 20, "minecraft:nbt": 21, "minecraft:nbt_tag": 22, "minecraft:nbt_path": 23, "minecraft:objective": 24, "minecraft:objective_criteria": 25, "minecraft:operation": 26, "minecraft:particle": 27, "minecraft:angle": 28, "minecraft:rotation": 29, "brigadier:integer": 3, "minecraft:scoreboard_slot": 30, "minecraft:score_holder": 31, "minecraft:swizzle": 32, "minecraft:team": 33, "minecraft:item_slot": 34, "minecraft:item_slots": 35, "minecraft:resource_location": 36, "minecraft:function": 37, "minecraft:entity_anchor": 38, "minecraft:int_range": 39, "brigadier:long": 4, "minecraft:float_range": 40, "minecraft:dimension": 41, "minecraft:gamemode": 42, "minecraft:time": 43, "minecraft:resource_or_tag": 44, "minecraft:resource_or_tag_key": 45, "minecraft:resource": 46, "minecraft:resource_key": 47, "minecraft:resource_selector": 48, "minecraft:template_mirror": 49, "brigadier:string": 5, "minecraft:template_rotation": 50, "minecraft:heightmap": 51, "minecraft:loot_table": 52, "minecraft:loot_predicate": 53, "minecraft:loot_modifier": 54, "minecraft:dialog": 55, "minecraft:uuid": 56, "minecraft:entity": 6, "minecraft:game_profile": 7, "minecraft:block_pos": 8, "minecraft:column_pos": 9}
-var CommandNodeExtraNodeDataPropertiesReverseMap = map[string]queser.VarInt{"SINGLE_WORD": 0, "QUOTABLE_PHRASE": 1, "GREEDY_PHRASE": 2}
+var CommandNodeExtraNodeDataParserReverseMap = map[string]proto_base.VarInt{"brigadier:bool": 0, "brigadier:float": 1, "minecraft:vec3": 10, "minecraft:vec2": 11, "minecraft:block_state": 12, "minecraft:block_predicate": 13, "minecraft:item_stack": 14, "minecraft:item_predicate": 15, "minecraft:color": 16, "minecraft:hex_color": 17, "minecraft:component": 18, "minecraft:style": 19, "brigadier:double": 2, "minecraft:message": 20, "minecraft:nbt": 21, "minecraft:nbt_tag": 22, "minecraft:nbt_path": 23, "minecraft:objective": 24, "minecraft:objective_criteria": 25, "minecraft:operation": 26, "minecraft:particle": 27, "minecraft:angle": 28, "minecraft:rotation": 29, "brigadier:integer": 3, "minecraft:scoreboard_slot": 30, "minecraft:score_holder": 31, "minecraft:swizzle": 32, "minecraft:team": 33, "minecraft:item_slot": 34, "minecraft:item_slots": 35, "minecraft:resource_location": 36, "minecraft:function": 37, "minecraft:entity_anchor": 38, "minecraft:int_range": 39, "brigadier:long": 4, "minecraft:float_range": 40, "minecraft:dimension": 41, "minecraft:gamemode": 42, "minecraft:time": 43, "minecraft:resource_or_tag": 44, "minecraft:resource_or_tag_key": 45, "minecraft:resource": 46, "minecraft:resource_key": 47, "minecraft:resource_selector": 48, "minecraft:template_mirror": 49, "brigadier:string": 5, "minecraft:template_rotation": 50, "minecraft:heightmap": 51, "minecraft:loot_table": 52, "minecraft:loot_predicate": 53, "minecraft:loot_modifier": 54, "minecraft:dialog": 55, "minecraft:uuid": 56, "minecraft:entity": 6, "minecraft:game_profile": 7, "minecraft:block_pos": 8, "minecraft:column_pos": 9}
+var CommandNodeExtraNodeDataPropertiesReverseMap = map[string]proto_base.VarInt{"SINGLE_WORD": 0, "QUOTABLE_PHRASE": 1, "GREEDY_PHRASE": 2}
 
 func (ret CommandNode) Encode(w io.Writer) (err error) {
 	err = binary.Write(w, binary.BigEndian, ret.Flags)
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Children)).Encode(w)
+	err = proto_base.VarInt(len(ret.Children)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -2729,9 +2729,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 	}
 	switch ret.Flags {
 	case 1:
-		CommandNodeRedirectNode, ok := ret.RedirectNode.(queser.VarInt)
+		CommandNodeRedirectNode, ok := ret.RedirectNode.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = CommandNodeRedirectNode.Encode(w)
@@ -2739,21 +2739,21 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.RedirectNode.(queser.Void)
+		_, ok := ret.RedirectNode.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.RedirectNode.(queser.Void).Encode(w)
+		err = ret.RedirectNode.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
 	}
 	switch ret.Flags {
 	case 0:
-		CommandNodeExtraNodeData, ok := ret.ExtraNodeData.(queser.Void)
+		CommandNodeExtraNodeData, ok := ret.ExtraNodeData.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = CommandNodeExtraNodeData.Encode(w)
@@ -2765,10 +2765,10 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			Name string
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, CommandNodeExtraNodeData.Name)
+		err = proto_base.EncodeString(w, CommandNodeExtraNodeData.Name)
 		if err != nil {
 			return
 		}
@@ -2780,15 +2780,15 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			SuggestionType any
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, CommandNodeExtraNodeData.Name)
+		err = proto_base.EncodeString(w, CommandNodeExtraNodeData.Name)
 		if err != nil {
 			return
 		}
-		var vCommandNodeExtraNodeDataParser queser.VarInt
-		vCommandNodeExtraNodeDataParser, err = queser.ErroringIndex(CommandNodeExtraNodeDataParserReverseMap, CommandNodeExtraNodeData.Parser)
+		var vCommandNodeExtraNodeDataParser proto_base.VarInt
+		vCommandNodeExtraNodeDataParser, err = proto_base.ErroringIndex(CommandNodeExtraNodeDataParserReverseMap, CommandNodeExtraNodeData.Parser)
 		if err != nil {
 			return
 		}
@@ -2798,9 +2798,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 		}
 		switch CommandNodeExtraNodeData.Parser {
 		case "brigadier:bool":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -2814,7 +2814,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Max   any
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataProperties.Flags)
@@ -2825,7 +2825,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			case 1:
 				CommandNodeExtraNodeDataPropertiesMin, ok := CommandNodeExtraNodeDataProperties.Min.(float64)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
 				err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataPropertiesMin)
@@ -2833,12 +2833,12 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 					return
 				}
 			default:
-				_, ok := CommandNodeExtraNodeDataProperties.Min.(queser.Void)
+				_, ok := CommandNodeExtraNodeDataProperties.Min.(proto_base.Void)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
-				err = CommandNodeExtraNodeDataProperties.Min.(queser.Void).Encode(w)
+				err = CommandNodeExtraNodeDataProperties.Min.(proto_base.Void).Encode(w)
 				if err != nil {
 					return
 				}
@@ -2847,7 +2847,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			case 1:
 				CommandNodeExtraNodeDataPropertiesMax, ok := CommandNodeExtraNodeDataProperties.Max.(float64)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
 				err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataPropertiesMax)
@@ -2855,12 +2855,12 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 					return
 				}
 			default:
-				_, ok := CommandNodeExtraNodeDataProperties.Max.(queser.Void)
+				_, ok := CommandNodeExtraNodeDataProperties.Max.(proto_base.Void)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
-				err = CommandNodeExtraNodeDataProperties.Max.(queser.Void).Encode(w)
+				err = CommandNodeExtraNodeDataProperties.Max.(proto_base.Void).Encode(w)
 				if err != nil {
 					return
 				}
@@ -2872,7 +2872,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Max   any
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataProperties.Flags)
@@ -2883,7 +2883,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			case 1:
 				CommandNodeExtraNodeDataPropertiesMin, ok := CommandNodeExtraNodeDataProperties.Min.(float32)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
 				err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataPropertiesMin)
@@ -2891,12 +2891,12 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 					return
 				}
 			default:
-				_, ok := CommandNodeExtraNodeDataProperties.Min.(queser.Void)
+				_, ok := CommandNodeExtraNodeDataProperties.Min.(proto_base.Void)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
-				err = CommandNodeExtraNodeDataProperties.Min.(queser.Void).Encode(w)
+				err = CommandNodeExtraNodeDataProperties.Min.(proto_base.Void).Encode(w)
 				if err != nil {
 					return
 				}
@@ -2905,7 +2905,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			case 1:
 				CommandNodeExtraNodeDataPropertiesMax, ok := CommandNodeExtraNodeDataProperties.Max.(float32)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
 				err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataPropertiesMax)
@@ -2913,12 +2913,12 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 					return
 				}
 			default:
-				_, ok := CommandNodeExtraNodeDataProperties.Max.(queser.Void)
+				_, ok := CommandNodeExtraNodeDataProperties.Max.(proto_base.Void)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
-				err = CommandNodeExtraNodeDataProperties.Max.(queser.Void).Encode(w)
+				err = CommandNodeExtraNodeDataProperties.Max.(proto_base.Void).Encode(w)
 				if err != nil {
 					return
 				}
@@ -2930,7 +2930,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Max   any
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataProperties.Flags)
@@ -2941,7 +2941,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			case 1:
 				CommandNodeExtraNodeDataPropertiesMin, ok := CommandNodeExtraNodeDataProperties.Min.(int32)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
 				err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataPropertiesMin)
@@ -2949,12 +2949,12 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 					return
 				}
 			default:
-				_, ok := CommandNodeExtraNodeDataProperties.Min.(queser.Void)
+				_, ok := CommandNodeExtraNodeDataProperties.Min.(proto_base.Void)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
-				err = CommandNodeExtraNodeDataProperties.Min.(queser.Void).Encode(w)
+				err = CommandNodeExtraNodeDataProperties.Min.(proto_base.Void).Encode(w)
 				if err != nil {
 					return
 				}
@@ -2963,7 +2963,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			case 1:
 				CommandNodeExtraNodeDataPropertiesMax, ok := CommandNodeExtraNodeDataProperties.Max.(int32)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
 				err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataPropertiesMax)
@@ -2971,12 +2971,12 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 					return
 				}
 			default:
-				_, ok := CommandNodeExtraNodeDataProperties.Max.(queser.Void)
+				_, ok := CommandNodeExtraNodeDataProperties.Max.(proto_base.Void)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
-				err = CommandNodeExtraNodeDataProperties.Max.(queser.Void).Encode(w)
+				err = CommandNodeExtraNodeDataProperties.Max.(proto_base.Void).Encode(w)
 				if err != nil {
 					return
 				}
@@ -2988,7 +2988,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Max   any
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataProperties.Flags)
@@ -2999,7 +2999,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			case 1:
 				CommandNodeExtraNodeDataPropertiesMin, ok := CommandNodeExtraNodeDataProperties.Min.(int64)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
 				err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataPropertiesMin)
@@ -3007,12 +3007,12 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 					return
 				}
 			default:
-				_, ok := CommandNodeExtraNodeDataProperties.Min.(queser.Void)
+				_, ok := CommandNodeExtraNodeDataProperties.Min.(proto_base.Void)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
-				err = CommandNodeExtraNodeDataProperties.Min.(queser.Void).Encode(w)
+				err = CommandNodeExtraNodeDataProperties.Min.(proto_base.Void).Encode(w)
 				if err != nil {
 					return
 				}
@@ -3021,7 +3021,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 			case 1:
 				CommandNodeExtraNodeDataPropertiesMax, ok := CommandNodeExtraNodeDataProperties.Max.(int64)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
 				err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataPropertiesMax)
@@ -3029,12 +3029,12 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 					return
 				}
 			default:
-				_, ok := CommandNodeExtraNodeDataProperties.Max.(queser.Void)
+				_, ok := CommandNodeExtraNodeDataProperties.Max.(proto_base.Void)
 				if !ok {
-					err = queser.BadTypeError
+					err = proto_base.BadTypeError
 					return
 				}
-				err = CommandNodeExtraNodeDataProperties.Max.(queser.Void).Encode(w)
+				err = CommandNodeExtraNodeDataProperties.Max.(proto_base.Void).Encode(w)
 				if err != nil {
 					return
 				}
@@ -3042,11 +3042,11 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 		case "brigadier:string":
 			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(string)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			var vCommandNodeExtraNodeDataProperties queser.VarInt
-			vCommandNodeExtraNodeDataProperties, err = queser.ErroringIndex(CommandNodeExtraNodeDataPropertiesReverseMap, CommandNodeExtraNodeDataProperties)
+			var vCommandNodeExtraNodeDataProperties proto_base.VarInt
+			vCommandNodeExtraNodeDataProperties, err = proto_base.ErroringIndex(CommandNodeExtraNodeDataPropertiesReverseMap, CommandNodeExtraNodeDataProperties)
 			if err != nil {
 				return
 			}
@@ -3055,9 +3055,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:angle":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3065,9 +3065,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:block_pos":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3075,9 +3075,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:block_predicate":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3085,9 +3085,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:block_state":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3095,9 +3095,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:color":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3105,9 +3105,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:column_pos":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3115,9 +3115,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:component":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3125,9 +3125,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:dialog":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3135,9 +3135,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:dimension":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3147,7 +3147,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 		case "minecraft:entity":
 			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(uint8)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataProperties)
@@ -3155,9 +3155,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:entity_anchor":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3165,9 +3165,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:float_range":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3175,9 +3175,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:function":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3185,9 +3185,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:game_profile":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3195,9 +3195,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:gamemode":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3205,9 +3205,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:heightmap":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3215,9 +3215,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:hex_color":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3225,9 +3225,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:int_range":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3235,9 +3235,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:item_predicate":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3245,9 +3245,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:item_slot":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3255,9 +3255,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:item_stack":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3265,9 +3265,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:message":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3275,9 +3275,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:nbt":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3285,9 +3285,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:nbt_path":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3295,9 +3295,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:objective":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3305,9 +3305,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:objective_criteria":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3315,9 +3315,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:operation":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3325,9 +3325,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:particle":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3339,10 +3339,10 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Registry string
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = queser.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
+			err = proto_base.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
 			if err != nil {
 				return
 			}
@@ -3351,17 +3351,17 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Registry string
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = queser.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
+			err = proto_base.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
 			if err != nil {
 				return
 			}
 		case "minecraft:resource_location":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3373,10 +3373,10 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Registry string
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = queser.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
+			err = proto_base.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
 			if err != nil {
 				return
 			}
@@ -3385,10 +3385,10 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Registry string
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = queser.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
+			err = proto_base.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
 			if err != nil {
 				return
 			}
@@ -3397,17 +3397,17 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Registry string
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = queser.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
+			err = proto_base.EncodeString(w, CommandNodeExtraNodeDataProperties.Registry)
 			if err != nil {
 				return
 			}
 		case "minecraft:rotation":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3417,7 +3417,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 		case "minecraft:score_holder":
 			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(uint8)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataProperties)
@@ -3425,9 +3425,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:scoreboard_slot":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3435,9 +3435,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:swizzle":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3445,9 +3445,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:team":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3455,9 +3455,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:template_mirror":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3465,9 +3465,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:template_rotation":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3479,7 +3479,7 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				Min int32
 			})
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, CommandNodeExtraNodeDataProperties.Min)
@@ -3487,9 +3487,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:uuid":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3497,9 +3497,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:vec2":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3507,9 +3507,9 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 				return
 			}
 		case "minecraft:vec3":
-			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(queser.Void)
+			CommandNodeExtraNodeDataProperties, ok := CommandNodeExtraNodeData.Properties.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = CommandNodeExtraNodeDataProperties.Encode(w)
@@ -3521,20 +3521,20 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 		case 1:
 			CommandNodeExtraNodeDataSuggestionType, ok := CommandNodeExtraNodeData.SuggestionType.(string)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = queser.EncodeString(w, CommandNodeExtraNodeDataSuggestionType)
+			err = proto_base.EncodeString(w, CommandNodeExtraNodeDataSuggestionType)
 			if err != nil {
 				return
 			}
 		default:
-			_, ok := CommandNodeExtraNodeData.SuggestionType.(queser.Void)
+			_, ok := CommandNodeExtraNodeData.SuggestionType.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = CommandNodeExtraNodeData.SuggestionType.(queser.Void).Encode(w)
+			err = CommandNodeExtraNodeData.SuggestionType.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
@@ -3544,15 +3544,15 @@ func (ret CommandNode) Encode(w io.Writer) (err error) {
 }
 
 type EntityMetadata struct {
-	Val queser.ToDo
+	Val proto_base.ToDo
 }
 
 func (_ EntityMetadata) Decode(r io.Reader) (ret EntityMetadata, err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 func (ret EntityMetadata) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
@@ -3562,17 +3562,17 @@ type EntityMetadataEntry struct {
 	Value any
 }
 
-var EntityMetadataEntryTypeMap = map[queser.VarInt]string{0: "byte", 1: "int", 10: "block_pos", 11: "optional_block_pos", 12: "direction", 13: "optional_uuid", 14: "block_state", 15: "optional_block_state", 16: "compound_tag", 17: "particle", 18: "particles", 19: "villager_data", 2: "long", 20: "optional_unsigned_int", 21: "pose", 22: "cat_variant", 23: "cow_variant", 24: "wolf_variant", 25: "wolf_sound_variant", 26: "frog_variant", 27: "pig_variant", 28: "chicken_variant", 29: "optional_global_pos", 3: "float", 30: "painting_variant", 31: "sniffer_state", 32: "armadillo_state", 33: "vector3", 34: "quaternion", 4: "string", 5: "component", 6: "optional_component", 7: "item_stack", 8: "boolean", 9: "rotations"}
+var EntityMetadataEntryTypeMap = map[proto_base.VarInt]string{0: "byte", 1: "int", 10: "block_pos", 11: "optional_block_pos", 12: "direction", 13: "optional_uuid", 14: "block_state", 15: "optional_block_state", 16: "compound_tag", 17: "particle", 18: "particles", 19: "villager_data", 2: "long", 20: "optional_unsigned_int", 21: "pose", 22: "cat_variant", 23: "cow_variant", 24: "wolf_variant", 25: "wolf_sound_variant", 26: "frog_variant", 27: "pig_variant", 28: "chicken_variant", 29: "optional_global_pos", 3: "float", 30: "painting_variant", 31: "sniffer_state", 32: "armadillo_state", 33: "vector3", 34: "quaternion", 4: "string", 5: "component", 6: "optional_component", 7: "item_stack", 8: "boolean", 9: "rotations"}
 
 func (_ EntityMetadataEntry) Decode(r io.Reader) (ret EntityMetadataEntry, err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
-var EntityMetadataEntryTypeReverseMap = map[string]queser.VarInt{"byte": 0, "int": 1, "block_pos": 10, "optional_block_pos": 11, "direction": 12, "optional_uuid": 13, "block_state": 14, "optional_block_state": 15, "compound_tag": 16, "particle": 17, "particles": 18, "villager_data": 19, "long": 2, "optional_unsigned_int": 20, "pose": 21, "cat_variant": 22, "cow_variant": 23, "wolf_variant": 24, "wolf_sound_variant": 25, "frog_variant": 26, "pig_variant": 27, "chicken_variant": 28, "optional_global_pos": 29, "float": 3, "painting_variant": 30, "sniffer_state": 31, "armadillo_state": 32, "vector3": 33, "quaternion": 34, "string": 4, "component": 5, "optional_component": 6, "item_stack": 7, "boolean": 8, "rotations": 9}
+var EntityMetadataEntryTypeReverseMap = map[string]proto_base.VarInt{"byte": 0, "int": 1, "block_pos": 10, "optional_block_pos": 11, "direction": 12, "optional_uuid": 13, "block_state": 14, "optional_block_state": 15, "compound_tag": 16, "particle": 17, "particles": 18, "villager_data": 19, "long": 2, "optional_unsigned_int": 20, "pose": 21, "cat_variant": 22, "cow_variant": 23, "wolf_variant": 24, "wolf_sound_variant": 25, "frog_variant": 26, "pig_variant": 27, "chicken_variant": 28, "optional_global_pos": 29, "float": 3, "painting_variant": 30, "sniffer_state": 31, "armadillo_state": 32, "vector3": 33, "quaternion": 34, "string": 4, "component": 5, "optional_component": 6, "item_stack": 7, "boolean": 8, "rotations": 9}
 
 func (ret EntityMetadataEntry) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
@@ -3586,11 +3586,11 @@ type GameProfile struct {
 }
 
 func (_ GameProfile) Decode(r io.Reader) (ret GameProfile, err error) {
-	ret.Name, err = queser.DecodeString(r)
+	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	var lGameProfileProperties queser.VarInt
+	var lGameProfileProperties proto_base.VarInt
 	lGameProfileProperties, err = lGameProfileProperties.Decode(r)
 	if err != nil {
 		return
@@ -3606,11 +3606,11 @@ func (_ GameProfile) Decode(r io.Reader) (ret GameProfile, err error) {
 			Value     string
 			Signature *string
 		}
-		GameProfilePropertiesElement.Name, err = queser.DecodeString(r)
+		GameProfilePropertiesElement.Name, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		GameProfilePropertiesElement.Value, err = queser.DecodeString(r)
+		GameProfilePropertiesElement.Value, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -3621,7 +3621,7 @@ func (_ GameProfile) Decode(r io.Reader) (ret GameProfile, err error) {
 		}
 		if GameProfilePropertiesElementSignaturePresent {
 			var GameProfilePropertiesElementSignaturePresentValue string
-			GameProfilePropertiesElementSignaturePresentValue, err = queser.DecodeString(r)
+			GameProfilePropertiesElementSignaturePresentValue, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -3632,20 +3632,20 @@ func (_ GameProfile) Decode(r io.Reader) (ret GameProfile, err error) {
 	return
 }
 func (ret GameProfile) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Name)
+	err = proto_base.EncodeString(w, ret.Name)
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Properties)).Encode(w)
+	err = proto_base.VarInt(len(ret.Properties)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iGameProfileProperties := range len(ret.Properties) {
-		err = queser.EncodeString(w, ret.Properties[iGameProfileProperties].Name)
+		err = proto_base.EncodeString(w, ret.Properties[iGameProfileProperties].Name)
 		if err != nil {
 			return
 		}
-		err = queser.EncodeString(w, ret.Properties[iGameProfileProperties].Value)
+		err = proto_base.EncodeString(w, ret.Properties[iGameProfileProperties].Value)
 		if err != nil {
 			return
 		}
@@ -3654,7 +3654,7 @@ func (ret GameProfile) Encode(w io.Writer) (err error) {
 			return
 		}
 		if ret.Properties[iGameProfileProperties].Signature != nil {
-			err = queser.EncodeString(w, *ret.Properties[iGameProfileProperties].Signature)
+			err = proto_base.EncodeString(w, *ret.Properties[iGameProfileProperties].Signature)
 			if err != nil {
 				return
 			}
@@ -3668,7 +3668,7 @@ type Ingredient struct {
 }
 
 func (_ Ingredient) Decode(r io.Reader) (ret Ingredient, err error) {
-	var lIngredient queser.VarInt
+	var lIngredient proto_base.VarInt
 	lIngredient, err = lIngredient.Decode(r)
 	if err != nil {
 		return
@@ -3685,7 +3685,7 @@ func (_ Ingredient) Decode(r io.Reader) (ret Ingredient, err error) {
 	return
 }
 func (ret Ingredient) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Val)).Encode(w)
+	err = proto_base.VarInt(len(ret.Val)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -3699,7 +3699,7 @@ func (ret Ingredient) Encode(w io.Writer) (err error) {
 }
 
 type Optvarint struct {
-	Val queser.VarInt
+	Val proto_base.VarInt
 }
 
 func (_ Optvarint) Decode(r io.Reader) (ret Optvarint, err error) {
@@ -3758,11 +3758,11 @@ func (_ PacketCommonAddResourcePack) Decode(r io.Reader) (ret PacketCommonAddRes
 	if err != nil {
 		return
 	}
-	ret.Url, err = queser.DecodeString(r)
+	ret.Url, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.Hash, err = queser.DecodeString(r)
+	ret.Hash, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -3790,11 +3790,11 @@ func (ret PacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Url)
+	err = proto_base.EncodeString(w, ret.Url)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Hash)
+	err = proto_base.EncodeString(w, ret.Hash)
 	if err != nil {
 		return
 	}
@@ -3830,14 +3830,14 @@ type PacketCommonCookieRequest struct {
 }
 
 func (_ PacketCommonCookieRequest) Decode(r io.Reader) (ret PacketCommonCookieRequest, err error) {
-	ret.Cookie, err = queser.DecodeString(r)
+	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
 	return
 }
 func (ret PacketCommonCookieRequest) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Cookie)
+	err = proto_base.EncodeString(w, ret.Cookie)
 	if err != nil {
 		return
 	}
@@ -3850,7 +3850,7 @@ type PacketCommonCookieResponse struct {
 }
 
 func (_ PacketCommonCookieResponse) Decode(r io.Reader) (ret PacketCommonCookieResponse, err error) {
-	ret.Key, err = queser.DecodeString(r)
+	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -3870,7 +3870,7 @@ func (_ PacketCommonCookieResponse) Decode(r io.Reader) (ret PacketCommonCookieR
 	return
 }
 func (ret PacketCommonCookieResponse) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Key)
+	err = proto_base.EncodeString(w, ret.Key)
 	if err != nil {
 		return
 	}
@@ -3893,7 +3893,7 @@ type PacketCommonCustomClickAction struct {
 }
 
 func (_ PacketCommonCustomClickAction) Decode(r io.Reader) (ret PacketCommonCustomClickAction, err error) {
-	ret.Id, err = queser.DecodeString(r)
+	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -3913,7 +3913,7 @@ func (_ PacketCommonCustomClickAction) Decode(r io.Reader) (ret PacketCommonCust
 	return
 }
 func (ret PacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Id)
+	err = proto_base.EncodeString(w, ret.Id)
 	if err != nil {
 		return
 	}
@@ -3938,7 +3938,7 @@ type PacketCommonCustomReportDetails struct {
 }
 
 func (_ PacketCommonCustomReportDetails) Decode(r io.Reader) (ret PacketCommonCustomReportDetails, err error) {
-	var lPacketCommonCustomReportDetailsDetails queser.VarInt
+	var lPacketCommonCustomReportDetailsDetails proto_base.VarInt
 	lPacketCommonCustomReportDetailsDetails, err = lPacketCommonCustomReportDetailsDetails.Decode(r)
 	if err != nil {
 		return
@@ -3952,11 +3952,11 @@ func (_ PacketCommonCustomReportDetails) Decode(r io.Reader) (ret PacketCommonCu
 			Key   string
 			Value string
 		}
-		PacketCommonCustomReportDetailsDetailsElement.Key, err = queser.DecodeString(r)
+		PacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		PacketCommonCustomReportDetailsDetailsElement.Value, err = queser.DecodeString(r)
+		PacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -3965,16 +3965,16 @@ func (_ PacketCommonCustomReportDetails) Decode(r io.Reader) (ret PacketCommonCu
 	return
 }
 func (ret PacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Details)).Encode(w)
+	err = proto_base.VarInt(len(ret.Details)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
-		err = queser.EncodeString(w, ret.Details[iPacketCommonCustomReportDetailsDetails].Key)
+		err = proto_base.EncodeString(w, ret.Details[iPacketCommonCustomReportDetailsDetails].Key)
 		if err != nil {
 			return
 		}
-		err = queser.EncodeString(w, ret.Details[iPacketCommonCustomReportDetailsDetails].Value)
+		err = proto_base.EncodeString(w, ret.Details[iPacketCommonCustomReportDetailsDetails].Value)
 		if err != nil {
 			return
 		}
@@ -4025,7 +4025,7 @@ type PacketCommonSelectKnownPacks struct {
 }
 
 func (_ PacketCommonSelectKnownPacks) Decode(r io.Reader) (ret PacketCommonSelectKnownPacks, err error) {
-	var lPacketCommonSelectKnownPacksPacks queser.VarInt
+	var lPacketCommonSelectKnownPacksPacks proto_base.VarInt
 	lPacketCommonSelectKnownPacksPacks, err = lPacketCommonSelectKnownPacksPacks.Decode(r)
 	if err != nil {
 		return
@@ -4041,15 +4041,15 @@ func (_ PacketCommonSelectKnownPacks) Decode(r io.Reader) (ret PacketCommonSelec
 			Id        string
 			Version   string
 		}
-		PacketCommonSelectKnownPacksPacksElement.Namespace, err = queser.DecodeString(r)
+		PacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		PacketCommonSelectKnownPacksPacksElement.Id, err = queser.DecodeString(r)
+		PacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		PacketCommonSelectKnownPacksPacksElement.Version, err = queser.DecodeString(r)
+		PacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -4058,20 +4058,20 @@ func (_ PacketCommonSelectKnownPacks) Decode(r io.Reader) (ret PacketCommonSelec
 	return
 }
 func (ret PacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Packs)).Encode(w)
+	err = proto_base.VarInt(len(ret.Packs)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
-		err = queser.EncodeString(w, ret.Packs[iPacketCommonSelectKnownPacksPacks].Namespace)
+		err = proto_base.EncodeString(w, ret.Packs[iPacketCommonSelectKnownPacksPacks].Namespace)
 		if err != nil {
 			return
 		}
-		err = queser.EncodeString(w, ret.Packs[iPacketCommonSelectKnownPacksPacks].Id)
+		err = proto_base.EncodeString(w, ret.Packs[iPacketCommonSelectKnownPacksPacks].Id)
 		if err != nil {
 			return
 		}
-		err = queser.EncodeString(w, ret.Packs[iPacketCommonSelectKnownPacksPacks].Version)
+		err = proto_base.EncodeString(w, ret.Packs[iPacketCommonSelectKnownPacksPacks].Version)
 		if err != nil {
 			return
 		}
@@ -4089,7 +4089,7 @@ type PacketCommonServerLinks struct {
 }
 
 func (_ PacketCommonServerLinks) Decode(r io.Reader) (ret PacketCommonServerLinks, err error) {
-	var lPacketCommonServerLinksLinks queser.VarInt
+	var lPacketCommonServerLinksLinks proto_base.VarInt
 	lPacketCommonServerLinksLinks, err = lPacketCommonServerLinksLinks.Decode(r)
 	if err != nil {
 		return
@@ -4129,7 +4129,7 @@ func (_ PacketCommonServerLinks) Decode(r io.Reader) (ret PacketCommonServerLink
 			}
 			PacketCommonServerLinksLinksElement.UnknownType = PacketCommonServerLinksLinksElementUnknownTypeTmp
 		}
-		PacketCommonServerLinksLinksElement.Link, err = queser.DecodeString(r)
+		PacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -4138,7 +4138,7 @@ func (_ PacketCommonServerLinks) Decode(r io.Reader) (ret PacketCommonServerLink
 	return
 }
 func (ret PacketCommonServerLinks) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Links)).Encode(w)
+	err = proto_base.VarInt(len(ret.Links)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -4151,7 +4151,7 @@ func (ret PacketCommonServerLinks) Encode(w io.Writer) (err error) {
 		case true:
 			PacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PacketCommonServerLinksLinksInnerKnownType.Encode(w)
@@ -4163,7 +4163,7 @@ func (ret PacketCommonServerLinks) Encode(w io.Writer) (err error) {
 		case false:
 			PacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PacketCommonServerLinksLinksInnerUnknownType.Encode(w)
@@ -4171,7 +4171,7 @@ func (ret PacketCommonServerLinks) Encode(w io.Writer) (err error) {
 				return
 			}
 		}
-		err = queser.EncodeString(w, ret.Links[iPacketCommonServerLinksLinks].Link)
+		err = proto_base.EncodeString(w, ret.Links[iPacketCommonServerLinksLinks].Link)
 		if err != nil {
 			return
 		}
@@ -4182,19 +4182,19 @@ func (ret PacketCommonServerLinks) Encode(w io.Writer) (err error) {
 type PacketCommonSettings struct {
 	Locale              string
 	ViewDistance        int8
-	ChatFlags           queser.VarInt
+	ChatFlags           proto_base.VarInt
 	ChatColors          bool
 	SkinParts           uint8
-	MainHand            queser.VarInt
+	MainHand            proto_base.VarInt
 	EnableTextFiltering bool
 	EnableServerListing bool
 	ParticleStatus      string
 }
 
-var PacketCommonSettingsParticleStatusMap = map[queser.VarInt]string{0: "all", 1: "decreased", 2: "minimal"}
+var PacketCommonSettingsParticleStatusMap = map[proto_base.VarInt]string{0: "all", 1: "decreased", 2: "minimal"}
 
 func (_ PacketCommonSettings) Decode(r io.Reader) (ret PacketCommonSettings, err error) {
-	ret.Locale, err = queser.DecodeString(r)
+	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -4226,22 +4226,22 @@ func (_ PacketCommonSettings) Decode(r io.Reader) (ret PacketCommonSettings, err
 	if err != nil {
 		return
 	}
-	var PacketCommonSettingsParticleStatusKey queser.VarInt
+	var PacketCommonSettingsParticleStatusKey proto_base.VarInt
 	PacketCommonSettingsParticleStatusKey, err = PacketCommonSettingsParticleStatusKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.ParticleStatus, err = queser.ErroringIndex(PacketCommonSettingsParticleStatusMap, PacketCommonSettingsParticleStatusKey)
+	ret.ParticleStatus, err = proto_base.ErroringIndex(PacketCommonSettingsParticleStatusMap, PacketCommonSettingsParticleStatusKey)
 	if err != nil {
 		return
 	}
 	return
 }
 
-var PacketCommonSettingsParticleStatusReverseMap = map[string]queser.VarInt{"all": 0, "decreased": 1, "minimal": 2}
+var PacketCommonSettingsParticleStatusReverseMap = map[string]proto_base.VarInt{"all": 0, "decreased": 1, "minimal": 2}
 
 func (ret PacketCommonSettings) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Locale)
+	err = proto_base.EncodeString(w, ret.Locale)
 	if err != nil {
 		return
 	}
@@ -4273,8 +4273,8 @@ func (ret PacketCommonSettings) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	var vPacketCommonSettingsParticleStatus queser.VarInt
-	vPacketCommonSettingsParticleStatus, err = queser.ErroringIndex(PacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
+	var vPacketCommonSettingsParticleStatus proto_base.VarInt
+	vPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(PacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
 	if err != nil {
 		return
 	}
@@ -4291,7 +4291,7 @@ type PacketCommonStoreCookie struct {
 }
 
 func (_ PacketCommonStoreCookie) Decode(r io.Reader) (ret PacketCommonStoreCookie, err error) {
-	ret.Key, err = queser.DecodeString(r)
+	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -4302,7 +4302,7 @@ func (_ PacketCommonStoreCookie) Decode(r io.Reader) (ret PacketCommonStoreCooki
 	return
 }
 func (ret PacketCommonStoreCookie) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Key)
+	err = proto_base.EncodeString(w, ret.Key)
 	if err != nil {
 		return
 	}
@@ -4315,11 +4315,11 @@ func (ret PacketCommonStoreCookie) Encode(w io.Writer) (err error) {
 
 type PacketCommonTransfer struct {
 	Host string
-	Port queser.VarInt
+	Port proto_base.VarInt
 }
 
 func (_ PacketCommonTransfer) Decode(r io.Reader) (ret PacketCommonTransfer, err error) {
-	ret.Host, err = queser.DecodeString(r)
+	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -4330,7 +4330,7 @@ func (_ PacketCommonTransfer) Decode(r io.Reader) (ret PacketCommonTransfer, err
 	return
 }
 func (ret PacketCommonTransfer) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Host)
+	err = proto_base.EncodeString(w, ret.Host)
 	if err != nil {
 		return
 	}
@@ -4362,24 +4362,24 @@ func (ret Position) Encode(w io.Writer) (err error) {
 
 type PreviousMessages struct {
 	Val []struct {
-		Id        queser.VarInt
+		Id        proto_base.VarInt
 		Signature any
 	}
 }
 
 func (_ PreviousMessages) Decode(r io.Reader) (ret PreviousMessages, err error) {
-	var lPreviousMessages queser.VarInt
+	var lPreviousMessages proto_base.VarInt
 	lPreviousMessages, err = lPreviousMessages.Decode(r)
 	if err != nil {
 		return
 	}
 	ret.Val = []struct {
-		Id        queser.VarInt
+		Id        proto_base.VarInt
 		Signature any
 	}{}
 	for range lPreviousMessages {
 		var PreviousMessagesElement struct {
-			Id        queser.VarInt
+			Id        proto_base.VarInt
 			Signature any
 		}
 		PreviousMessagesElement.Id, err = PreviousMessagesElement.Id.Decode(r)
@@ -4395,7 +4395,7 @@ func (_ PreviousMessages) Decode(r io.Reader) (ret PreviousMessages, err error) 
 			}
 			PreviousMessagesElement.Signature = PreviousMessagesElementSignatureTmp
 		default:
-			var PreviousMessagesElementSignatureTmp queser.Void
+			var PreviousMessagesElementSignatureTmp proto_base.Void
 			PreviousMessagesElementSignatureTmp, err = PreviousMessagesElementSignatureTmp.Decode(r)
 			if err != nil {
 				return
@@ -4407,7 +4407,7 @@ func (_ PreviousMessages) Decode(r io.Reader) (ret PreviousMessages, err error) 
 	return
 }
 func (ret PreviousMessages) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Val)).Encode(w)
+	err = proto_base.VarInt(len(ret.Val)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -4420,7 +4420,7 @@ func (ret PreviousMessages) Encode(w io.Writer) (err error) {
 		case 0:
 			PreviousMessagesInnerSignature, ok := ret.Val[iPreviousMessages].Signature.([256]byte)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			arr := PreviousMessagesInnerSignature
@@ -4429,12 +4429,12 @@ func (ret PreviousMessages) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			_, ok := ret.Val[iPreviousMessages].Signature.(queser.Void)
+			_, ok := ret.Val[iPreviousMessages].Signature.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Val[iPreviousMessages].Signature.(queser.Void).Encode(w)
+			err = ret.Val[iPreviousMessages].Signature.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
@@ -4447,26 +4447,26 @@ type SoundSource struct {
 	Val string
 }
 
-var SoundSourceMap = map[queser.VarInt]string{0: "master", 1: "music", 10: "ui", 2: "record", 3: "weather", 4: "block", 5: "hostile", 6: "neutral", 7: "player", 8: "ambient", 9: "voice"}
+var SoundSourceMap = map[proto_base.VarInt]string{0: "master", 1: "music", 10: "ui", 2: "record", 3: "weather", 4: "block", 5: "hostile", 6: "neutral", 7: "player", 8: "ambient", 9: "voice"}
 
 func (_ SoundSource) Decode(r io.Reader) (ret SoundSource, err error) {
-	var SoundSourceKey queser.VarInt
+	var SoundSourceKey proto_base.VarInt
 	SoundSourceKey, err = SoundSourceKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Val, err = queser.ErroringIndex(SoundSourceMap, SoundSourceKey)
+	ret.Val, err = proto_base.ErroringIndex(SoundSourceMap, SoundSourceKey)
 	if err != nil {
 		return
 	}
 	return
 }
 
-var SoundSourceReverseMap = map[string]queser.VarInt{"master": 0, "music": 1, "ui": 10, "record": 2, "weather": 3, "block": 4, "hostile": 5, "neutral": 6, "player": 7, "ambient": 8, "voice": 9}
+var SoundSourceReverseMap = map[string]proto_base.VarInt{"master": 0, "music": 1, "ui": 10, "record": 2, "weather": 3, "block": 4, "hostile": 5, "neutral": 6, "player": 7, "ambient": 8, "voice": 9}
 
 func (ret SoundSource) Encode(w io.Writer) (err error) {
-	var vSoundSource queser.VarInt
-	vSoundSource, err = queser.ErroringIndex(SoundSourceReverseMap, ret.Val)
+	var vSoundSource proto_base.VarInt
+	vSoundSource, err = proto_base.ErroringIndex(SoundSourceReverseMap, ret.Val)
 	if err != nil {
 		return
 	}
@@ -4480,37 +4480,37 @@ func (ret SoundSource) Encode(w io.Writer) (err error) {
 type Tags struct {
 	Val []struct {
 		TagName string
-		Entries []queser.VarInt
+		Entries []proto_base.VarInt
 	}
 }
 
 func (_ Tags) Decode(r io.Reader) (ret Tags, err error) {
-	var lTags queser.VarInt
+	var lTags proto_base.VarInt
 	lTags, err = lTags.Decode(r)
 	if err != nil {
 		return
 	}
 	ret.Val = []struct {
 		TagName string
-		Entries []queser.VarInt
+		Entries []proto_base.VarInt
 	}{}
 	for range lTags {
 		var TagsElement struct {
 			TagName string
-			Entries []queser.VarInt
+			Entries []proto_base.VarInt
 		}
-		TagsElement.TagName, err = queser.DecodeString(r)
+		TagsElement.TagName, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		var lTagsElementEntries queser.VarInt
+		var lTagsElementEntries proto_base.VarInt
 		lTagsElementEntries, err = lTagsElementEntries.Decode(r)
 		if err != nil {
 			return
 		}
-		TagsElement.Entries = []queser.VarInt{}
+		TagsElement.Entries = []proto_base.VarInt{}
 		for range lTagsElementEntries {
-			var TagsElementEntriesElement queser.VarInt
+			var TagsElementEntriesElement proto_base.VarInt
 			TagsElementEntriesElement, err = TagsElementEntriesElement.Decode(r)
 			if err != nil {
 				return
@@ -4522,16 +4522,16 @@ func (_ Tags) Decode(r io.Reader) (ret Tags, err error) {
 	return
 }
 func (ret Tags) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Val)).Encode(w)
+	err = proto_base.VarInt(len(ret.Val)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iTags := range len(ret.Val) {
-		err = queser.EncodeString(w, ret.Val[iTags].TagName)
+		err = proto_base.EncodeString(w, ret.Val[iTags].TagName)
 		if err != nil {
 			return
 		}
-		err = queser.VarInt(len(ret.Val[iTags].Entries)).Encode(w)
+		err = proto_base.VarInt(len(ret.Val[iTags].Entries)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -4648,9 +4648,9 @@ func (ret Vec3f64) Encode(w io.Writer) (err error) {
 }
 
 type Vec3i struct {
-	X queser.VarInt
-	Y queser.VarInt
-	Z queser.VarInt
+	X proto_base.VarInt
+	Y proto_base.VarInt
+	Z proto_base.VarInt
 }
 
 func (_ Vec3i) Decode(r io.Reader) (ret Vec3i, err error) {
@@ -4735,15 +4735,15 @@ type HandshakingToServerPacket struct {
 	Params any
 }
 
-var HandshakingToServerPacketNameMap = map[queser.VarInt]string{0x00: "set_protocol", 0xfe: "legacy_server_list_ping"}
+var HandshakingToServerPacketNameMap = map[proto_base.VarInt]string{0x00: "set_protocol", 0xfe: "legacy_server_list_ping"}
 
 func (_ HandshakingToServerPacket) Decode(r io.Reader) (ret HandshakingToServerPacket, err error) {
-	var HandshakingToServerPacketNameKey queser.VarInt
+	var HandshakingToServerPacketNameKey proto_base.VarInt
 	HandshakingToServerPacketNameKey, err = HandshakingToServerPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(HandshakingToServerPacketNameMap, HandshakingToServerPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(HandshakingToServerPacketNameMap, HandshakingToServerPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -4766,11 +4766,11 @@ func (_ HandshakingToServerPacket) Decode(r io.Reader) (ret HandshakingToServerP
 	return
 }
 
-var HandshakingToServerPacketNameReverseMap = map[string]queser.VarInt{"set_protocol": 0x00, "legacy_server_list_ping": 0xfe}
+var HandshakingToServerPacketNameReverseMap = map[string]proto_base.VarInt{"set_protocol": 0x00, "legacy_server_list_ping": 0xfe}
 
 func (ret HandshakingToServerPacket) Encode(w io.Writer) (err error) {
-	var vHandshakingToServerPacketName queser.VarInt
-	vHandshakingToServerPacketName, err = queser.ErroringIndex(HandshakingToServerPacketNameReverseMap, ret.Name)
+	var vHandshakingToServerPacketName proto_base.VarInt
+	vHandshakingToServerPacketName, err = proto_base.ErroringIndex(HandshakingToServerPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -4782,7 +4782,7 @@ func (ret HandshakingToServerPacket) Encode(w io.Writer) (err error) {
 	case "legacy_server_list_ping":
 		HandshakingToServerPacketParams, ok := ret.Params.(HandshakingToServerPacketLegacyServerListPing)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = HandshakingToServerPacketParams.Encode(w)
@@ -4792,7 +4792,7 @@ func (ret HandshakingToServerPacket) Encode(w io.Writer) (err error) {
 	case "set_protocol":
 		HandshakingToServerPacketParams, ok := ret.Params.(HandshakingToServerPacketSetProtocol)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = HandshakingToServerPacketParams.Encode(w)
@@ -4823,10 +4823,10 @@ func (ret HandshakingToServerPacketLegacyServerListPing) Encode(w io.Writer) (er
 }
 
 type HandshakingToServerPacketSetProtocol struct {
-	ProtocolVersion queser.VarInt
+	ProtocolVersion proto_base.VarInt
 	ServerHost      string
 	ServerPort      uint16
-	NextState       queser.VarInt
+	NextState       proto_base.VarInt
 }
 
 func (_ HandshakingToServerPacketSetProtocol) Decode(r io.Reader) (ret HandshakingToServerPacketSetProtocol, err error) {
@@ -4834,7 +4834,7 @@ func (_ HandshakingToServerPacketSetProtocol) Decode(r io.Reader) (ret Handshaki
 	if err != nil {
 		return
 	}
-	ret.ServerHost, err = queser.DecodeString(r)
+	ret.ServerHost, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -4853,7 +4853,7 @@ func (ret HandshakingToServerPacketSetProtocol) Encode(w io.Writer) (err error) 
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.ServerHost)
+	err = proto_base.EncodeString(w, ret.ServerHost)
 	if err != nil {
 		return
 	}
@@ -4873,26 +4873,26 @@ type HandshakingToClientPacket struct {
 	Params any
 }
 
-var HandshakingToClientPacketNameMap = map[queser.VarInt]string{}
+var HandshakingToClientPacketNameMap = map[proto_base.VarInt]string{}
 
 func (_ HandshakingToClientPacket) Decode(r io.Reader) (ret HandshakingToClientPacket, err error) {
-	var HandshakingToClientPacketNameKey queser.VarInt
+	var HandshakingToClientPacketNameKey proto_base.VarInt
 	HandshakingToClientPacketNameKey, err = HandshakingToClientPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(HandshakingToClientPacketNameMap, HandshakingToClientPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(HandshakingToClientPacketNameMap, HandshakingToClientPacketNameKey)
 	if err != nil {
 		return
 	}
 	return
 }
 
-var HandshakingToClientPacketNameReverseMap = map[string]queser.VarInt{}
+var HandshakingToClientPacketNameReverseMap = map[string]proto_base.VarInt{}
 
 func (ret HandshakingToClientPacket) Encode(w io.Writer) (err error) {
-	var vHandshakingToClientPacketName queser.VarInt
-	vHandshakingToClientPacketName, err = queser.ErroringIndex(HandshakingToClientPacketNameReverseMap, ret.Name)
+	var vHandshakingToClientPacketName proto_base.VarInt
+	vHandshakingToClientPacketName, err = proto_base.ErroringIndex(HandshakingToClientPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -4908,15 +4908,15 @@ type StatusToServerPacket struct {
 	Params any
 }
 
-var StatusToServerPacketNameMap = map[queser.VarInt]string{0x00: "ping_start", 0x01: "ping"}
+var StatusToServerPacketNameMap = map[proto_base.VarInt]string{0x00: "ping_start", 0x01: "ping"}
 
 func (_ StatusToServerPacket) Decode(r io.Reader) (ret StatusToServerPacket, err error) {
-	var StatusToServerPacketNameKey queser.VarInt
+	var StatusToServerPacketNameKey proto_base.VarInt
 	StatusToServerPacketNameKey, err = StatusToServerPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(StatusToServerPacketNameMap, StatusToServerPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(StatusToServerPacketNameMap, StatusToServerPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -4939,11 +4939,11 @@ func (_ StatusToServerPacket) Decode(r io.Reader) (ret StatusToServerPacket, err
 	return
 }
 
-var StatusToServerPacketNameReverseMap = map[string]queser.VarInt{"ping_start": 0x00, "ping": 0x01}
+var StatusToServerPacketNameReverseMap = map[string]proto_base.VarInt{"ping_start": 0x00, "ping": 0x01}
 
 func (ret StatusToServerPacket) Encode(w io.Writer) (err error) {
-	var vStatusToServerPacketName queser.VarInt
-	vStatusToServerPacketName, err = queser.ErroringIndex(StatusToServerPacketNameReverseMap, ret.Name)
+	var vStatusToServerPacketName proto_base.VarInt
+	vStatusToServerPacketName, err = proto_base.ErroringIndex(StatusToServerPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -4955,7 +4955,7 @@ func (ret StatusToServerPacket) Encode(w io.Writer) (err error) {
 	case "ping":
 		StatusToServerPacketParams, ok := ret.Params.(StatusToServerPacketPing)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = StatusToServerPacketParams.Encode(w)
@@ -4965,7 +4965,7 @@ func (ret StatusToServerPacket) Encode(w io.Writer) (err error) {
 	case "ping_start":
 		StatusToServerPacketParams, ok := ret.Params.(StatusToServerPacketPingStart)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = StatusToServerPacketParams.Encode(w)
@@ -5010,15 +5010,15 @@ type StatusToClientPacket struct {
 	Params any
 }
 
-var StatusToClientPacketNameMap = map[queser.VarInt]string{0x00: "server_info", 0x01: "ping"}
+var StatusToClientPacketNameMap = map[proto_base.VarInt]string{0x00: "server_info", 0x01: "ping"}
 
 func (_ StatusToClientPacket) Decode(r io.Reader) (ret StatusToClientPacket, err error) {
-	var StatusToClientPacketNameKey queser.VarInt
+	var StatusToClientPacketNameKey proto_base.VarInt
 	StatusToClientPacketNameKey, err = StatusToClientPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(StatusToClientPacketNameMap, StatusToClientPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(StatusToClientPacketNameMap, StatusToClientPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -5041,11 +5041,11 @@ func (_ StatusToClientPacket) Decode(r io.Reader) (ret StatusToClientPacket, err
 	return
 }
 
-var StatusToClientPacketNameReverseMap = map[string]queser.VarInt{"server_info": 0x00, "ping": 0x01}
+var StatusToClientPacketNameReverseMap = map[string]proto_base.VarInt{"server_info": 0x00, "ping": 0x01}
 
 func (ret StatusToClientPacket) Encode(w io.Writer) (err error) {
-	var vStatusToClientPacketName queser.VarInt
-	vStatusToClientPacketName, err = queser.ErroringIndex(StatusToClientPacketNameReverseMap, ret.Name)
+	var vStatusToClientPacketName proto_base.VarInt
+	vStatusToClientPacketName, err = proto_base.ErroringIndex(StatusToClientPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -5057,7 +5057,7 @@ func (ret StatusToClientPacket) Encode(w io.Writer) (err error) {
 	case "ping":
 		StatusToClientPacketParams, ok := ret.Params.(StatusToClientPacketPing)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = StatusToClientPacketParams.Encode(w)
@@ -5067,7 +5067,7 @@ func (ret StatusToClientPacket) Encode(w io.Writer) (err error) {
 	case "server_info":
 		StatusToClientPacketParams, ok := ret.Params.(StatusToClientPacketServerInfo)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = StatusToClientPacketParams.Encode(w)
@@ -5102,14 +5102,14 @@ type StatusToClientPacketServerInfo struct {
 }
 
 func (_ StatusToClientPacketServerInfo) Decode(r io.Reader) (ret StatusToClientPacketServerInfo, err error) {
-	ret.Response, err = queser.DecodeString(r)
+	ret.Response, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
 	return
 }
 func (ret StatusToClientPacketServerInfo) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Response)
+	err = proto_base.EncodeString(w, ret.Response)
 	if err != nil {
 		return
 	}
@@ -5121,15 +5121,15 @@ type LoginToServerPacket struct {
 	Params any
 }
 
-var LoginToServerPacketNameMap = map[queser.VarInt]string{0x00: "login_start", 0x01: "encryption_begin", 0x02: "login_plugin_response", 0x03: "login_acknowledged", 0x04: "cookie_response"}
+var LoginToServerPacketNameMap = map[proto_base.VarInt]string{0x00: "login_start", 0x01: "encryption_begin", 0x02: "login_plugin_response", 0x03: "login_acknowledged", 0x04: "cookie_response"}
 
 func (_ LoginToServerPacket) Decode(r io.Reader) (ret LoginToServerPacket, err error) {
-	var LoginToServerPacketNameKey queser.VarInt
+	var LoginToServerPacketNameKey proto_base.VarInt
 	LoginToServerPacketNameKey, err = LoginToServerPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(LoginToServerPacketNameMap, LoginToServerPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(LoginToServerPacketNameMap, LoginToServerPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -5173,11 +5173,11 @@ func (_ LoginToServerPacket) Decode(r io.Reader) (ret LoginToServerPacket, err e
 	return
 }
 
-var LoginToServerPacketNameReverseMap = map[string]queser.VarInt{"login_start": 0x00, "encryption_begin": 0x01, "login_plugin_response": 0x02, "login_acknowledged": 0x03, "cookie_response": 0x04}
+var LoginToServerPacketNameReverseMap = map[string]proto_base.VarInt{"login_start": 0x00, "encryption_begin": 0x01, "login_plugin_response": 0x02, "login_acknowledged": 0x03, "cookie_response": 0x04}
 
 func (ret LoginToServerPacket) Encode(w io.Writer) (err error) {
-	var vLoginToServerPacketName queser.VarInt
-	vLoginToServerPacketName, err = queser.ErroringIndex(LoginToServerPacketNameReverseMap, ret.Name)
+	var vLoginToServerPacketName proto_base.VarInt
+	vLoginToServerPacketName, err = proto_base.ErroringIndex(LoginToServerPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -5189,7 +5189,7 @@ func (ret LoginToServerPacket) Encode(w io.Writer) (err error) {
 	case "cookie_response":
 		LoginToServerPacketParams, ok := ret.Params.(PacketCommonCookieResponse)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToServerPacketParams.Encode(w)
@@ -5199,7 +5199,7 @@ func (ret LoginToServerPacket) Encode(w io.Writer) (err error) {
 	case "encryption_begin":
 		LoginToServerPacketParams, ok := ret.Params.(LoginToServerPacketEncryptionBegin)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToServerPacketParams.Encode(w)
@@ -5209,7 +5209,7 @@ func (ret LoginToServerPacket) Encode(w io.Writer) (err error) {
 	case "login_acknowledged":
 		LoginToServerPacketParams, ok := ret.Params.(LoginToServerPacketLoginAcknowledged)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToServerPacketParams.Encode(w)
@@ -5219,7 +5219,7 @@ func (ret LoginToServerPacket) Encode(w io.Writer) (err error) {
 	case "login_plugin_response":
 		LoginToServerPacketParams, ok := ret.Params.(LoginToServerPacketLoginPluginResponse)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToServerPacketParams.Encode(w)
@@ -5229,7 +5229,7 @@ func (ret LoginToServerPacket) Encode(w io.Writer) (err error) {
 	case "login_start":
 		LoginToServerPacketParams, ok := ret.Params.(LoginToServerPacketLoginStart)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToServerPacketParams.Encode(w)
@@ -5246,7 +5246,7 @@ type LoginToServerPacketEncryptionBegin struct {
 }
 
 func (_ LoginToServerPacketEncryptionBegin) Decode(r io.Reader) (ret LoginToServerPacketEncryptionBegin, err error) {
-	var lLoginToServerPacketEncryptionBeginSharedSecret queser.VarInt
+	var lLoginToServerPacketEncryptionBeginSharedSecret proto_base.VarInt
 	lLoginToServerPacketEncryptionBeginSharedSecret, err = lLoginToServerPacketEncryptionBeginSharedSecret.Decode(r)
 	if err != nil {
 		return
@@ -5255,7 +5255,7 @@ func (_ LoginToServerPacketEncryptionBegin) Decode(r io.Reader) (ret LoginToServ
 	if err != nil {
 		return
 	}
-	var lLoginToServerPacketEncryptionBeginVerifyToken queser.VarInt
+	var lLoginToServerPacketEncryptionBeginVerifyToken proto_base.VarInt
 	lLoginToServerPacketEncryptionBeginVerifyToken, err = lLoginToServerPacketEncryptionBeginVerifyToken.Decode(r)
 	if err != nil {
 		return
@@ -5267,7 +5267,7 @@ func (_ LoginToServerPacketEncryptionBegin) Decode(r io.Reader) (ret LoginToServ
 	return
 }
 func (ret LoginToServerPacketEncryptionBegin) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.SharedSecret)).Encode(w)
+	err = proto_base.VarInt(len(ret.SharedSecret)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -5275,7 +5275,7 @@ func (ret LoginToServerPacketEncryptionBegin) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.VerifyToken)).Encode(w)
+	err = proto_base.VarInt(len(ret.VerifyToken)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -5297,8 +5297,8 @@ func (ret LoginToServerPacketLoginAcknowledged) Encode(w io.Writer) (err error) 
 }
 
 type LoginToServerPacketLoginPluginResponse struct {
-	MessageId queser.VarInt
-	Data      *queser.RestBuffer
+	MessageId proto_base.VarInt
+	Data      *proto_base.RestBuffer
 }
 
 func (_ LoginToServerPacketLoginPluginResponse) Decode(r io.Reader) (ret LoginToServerPacketLoginPluginResponse, err error) {
@@ -5312,7 +5312,7 @@ func (_ LoginToServerPacketLoginPluginResponse) Decode(r io.Reader) (ret LoginTo
 		return
 	}
 	if LoginToServerPacketLoginPluginResponseDataPresent {
-		var LoginToServerPacketLoginPluginResponseDataPresentValue queser.RestBuffer
+		var LoginToServerPacketLoginPluginResponseDataPresentValue proto_base.RestBuffer
 		LoginToServerPacketLoginPluginResponseDataPresentValue, err = LoginToServerPacketLoginPluginResponseDataPresentValue.Decode(r)
 		if err != nil {
 			return
@@ -5345,7 +5345,7 @@ type LoginToServerPacketLoginStart struct {
 }
 
 func (_ LoginToServerPacketLoginStart) Decode(r io.Reader) (ret LoginToServerPacketLoginStart, err error) {
-	ret.Username, err = queser.DecodeString(r)
+	ret.Username, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -5356,7 +5356,7 @@ func (_ LoginToServerPacketLoginStart) Decode(r io.Reader) (ret LoginToServerPac
 	return
 }
 func (ret LoginToServerPacketLoginStart) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Username)
+	err = proto_base.EncodeString(w, ret.Username)
 	if err != nil {
 		return
 	}
@@ -5372,15 +5372,15 @@ type LoginToClientPacket struct {
 	Params any
 }
 
-var LoginToClientPacketNameMap = map[queser.VarInt]string{0x00: "disconnect", 0x01: "encryption_begin", 0x02: "success", 0x03: "compress", 0x04: "login_plugin_request", 0x05: "cookie_request"}
+var LoginToClientPacketNameMap = map[proto_base.VarInt]string{0x00: "disconnect", 0x01: "encryption_begin", 0x02: "success", 0x03: "compress", 0x04: "login_plugin_request", 0x05: "cookie_request"}
 
 func (_ LoginToClientPacket) Decode(r io.Reader) (ret LoginToClientPacket, err error) {
-	var LoginToClientPacketNameKey queser.VarInt
+	var LoginToClientPacketNameKey proto_base.VarInt
 	LoginToClientPacketNameKey, err = LoginToClientPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(LoginToClientPacketNameMap, LoginToClientPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(LoginToClientPacketNameMap, LoginToClientPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -5431,11 +5431,11 @@ func (_ LoginToClientPacket) Decode(r io.Reader) (ret LoginToClientPacket, err e
 	return
 }
 
-var LoginToClientPacketNameReverseMap = map[string]queser.VarInt{"disconnect": 0x00, "encryption_begin": 0x01, "success": 0x02, "compress": 0x03, "login_plugin_request": 0x04, "cookie_request": 0x05}
+var LoginToClientPacketNameReverseMap = map[string]proto_base.VarInt{"disconnect": 0x00, "encryption_begin": 0x01, "success": 0x02, "compress": 0x03, "login_plugin_request": 0x04, "cookie_request": 0x05}
 
 func (ret LoginToClientPacket) Encode(w io.Writer) (err error) {
-	var vLoginToClientPacketName queser.VarInt
-	vLoginToClientPacketName, err = queser.ErroringIndex(LoginToClientPacketNameReverseMap, ret.Name)
+	var vLoginToClientPacketName proto_base.VarInt
+	vLoginToClientPacketName, err = proto_base.ErroringIndex(LoginToClientPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -5447,7 +5447,7 @@ func (ret LoginToClientPacket) Encode(w io.Writer) (err error) {
 	case "compress":
 		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketCompress)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToClientPacketParams.Encode(w)
@@ -5457,7 +5457,7 @@ func (ret LoginToClientPacket) Encode(w io.Writer) (err error) {
 	case "cookie_request":
 		LoginToClientPacketParams, ok := ret.Params.(PacketCommonCookieRequest)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToClientPacketParams.Encode(w)
@@ -5467,7 +5467,7 @@ func (ret LoginToClientPacket) Encode(w io.Writer) (err error) {
 	case "disconnect":
 		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketDisconnect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToClientPacketParams.Encode(w)
@@ -5477,7 +5477,7 @@ func (ret LoginToClientPacket) Encode(w io.Writer) (err error) {
 	case "encryption_begin":
 		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketEncryptionBegin)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToClientPacketParams.Encode(w)
@@ -5487,7 +5487,7 @@ func (ret LoginToClientPacket) Encode(w io.Writer) (err error) {
 	case "login_plugin_request":
 		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketLoginPluginRequest)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToClientPacketParams.Encode(w)
@@ -5497,7 +5497,7 @@ func (ret LoginToClientPacket) Encode(w io.Writer) (err error) {
 	case "success":
 		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketSuccess)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = LoginToClientPacketParams.Encode(w)
@@ -5509,7 +5509,7 @@ func (ret LoginToClientPacket) Encode(w io.Writer) (err error) {
 }
 
 type LoginToClientPacketCompress struct {
-	Threshold queser.VarInt
+	Threshold proto_base.VarInt
 }
 
 func (_ LoginToClientPacketCompress) Decode(r io.Reader) (ret LoginToClientPacketCompress, err error) {
@@ -5532,14 +5532,14 @@ type LoginToClientPacketDisconnect struct {
 }
 
 func (_ LoginToClientPacketDisconnect) Decode(r io.Reader) (ret LoginToClientPacketDisconnect, err error) {
-	ret.Reason, err = queser.DecodeString(r)
+	ret.Reason, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
 	return
 }
 func (ret LoginToClientPacketDisconnect) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Reason)
+	err = proto_base.EncodeString(w, ret.Reason)
 	if err != nil {
 		return
 	}
@@ -5554,11 +5554,11 @@ type LoginToClientPacketEncryptionBegin struct {
 }
 
 func (_ LoginToClientPacketEncryptionBegin) Decode(r io.Reader) (ret LoginToClientPacketEncryptionBegin, err error) {
-	ret.ServerId, err = queser.DecodeString(r)
+	ret.ServerId, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	var lLoginToClientPacketEncryptionBeginPublicKey queser.VarInt
+	var lLoginToClientPacketEncryptionBeginPublicKey proto_base.VarInt
 	lLoginToClientPacketEncryptionBeginPublicKey, err = lLoginToClientPacketEncryptionBeginPublicKey.Decode(r)
 	if err != nil {
 		return
@@ -5567,7 +5567,7 @@ func (_ LoginToClientPacketEncryptionBegin) Decode(r io.Reader) (ret LoginToClie
 	if err != nil {
 		return
 	}
-	var lLoginToClientPacketEncryptionBeginVerifyToken queser.VarInt
+	var lLoginToClientPacketEncryptionBeginVerifyToken proto_base.VarInt
 	lLoginToClientPacketEncryptionBeginVerifyToken, err = lLoginToClientPacketEncryptionBeginVerifyToken.Decode(r)
 	if err != nil {
 		return
@@ -5583,11 +5583,11 @@ func (_ LoginToClientPacketEncryptionBegin) Decode(r io.Reader) (ret LoginToClie
 	return
 }
 func (ret LoginToClientPacketEncryptionBegin) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.ServerId)
+	err = proto_base.EncodeString(w, ret.ServerId)
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.PublicKey)).Encode(w)
+	err = proto_base.VarInt(len(ret.PublicKey)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -5595,7 +5595,7 @@ func (ret LoginToClientPacketEncryptionBegin) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.VerifyToken)).Encode(w)
+	err = proto_base.VarInt(len(ret.VerifyToken)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -5611,9 +5611,9 @@ func (ret LoginToClientPacketEncryptionBegin) Encode(w io.Writer) (err error) {
 }
 
 type LoginToClientPacketLoginPluginRequest struct {
-	MessageId queser.VarInt
+	MessageId proto_base.VarInt
 	Channel   string
-	Data      queser.RestBuffer
+	Data      proto_base.RestBuffer
 }
 
 func (_ LoginToClientPacketLoginPluginRequest) Decode(r io.Reader) (ret LoginToClientPacketLoginPluginRequest, err error) {
@@ -5621,7 +5621,7 @@ func (_ LoginToClientPacketLoginPluginRequest) Decode(r io.Reader) (ret LoginToC
 	if err != nil {
 		return
 	}
-	ret.Channel, err = queser.DecodeString(r)
+	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -5636,7 +5636,7 @@ func (ret LoginToClientPacketLoginPluginRequest) Encode(w io.Writer) (err error)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Channel)
+	err = proto_base.EncodeString(w, ret.Channel)
 	if err != nil {
 		return
 	}
@@ -5662,11 +5662,11 @@ func (_ LoginToClientPacketSuccess) Decode(r io.Reader) (ret LoginToClientPacket
 	if err != nil {
 		return
 	}
-	ret.Username, err = queser.DecodeString(r)
+	ret.Username, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	var lLoginToClientPacketSuccessProperties queser.VarInt
+	var lLoginToClientPacketSuccessProperties proto_base.VarInt
 	lLoginToClientPacketSuccessProperties, err = lLoginToClientPacketSuccessProperties.Decode(r)
 	if err != nil {
 		return
@@ -5682,11 +5682,11 @@ func (_ LoginToClientPacketSuccess) Decode(r io.Reader) (ret LoginToClientPacket
 			Value     string
 			Signature *string
 		}
-		LoginToClientPacketSuccessPropertiesElement.Name, err = queser.DecodeString(r)
+		LoginToClientPacketSuccessPropertiesElement.Name, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		LoginToClientPacketSuccessPropertiesElement.Value, err = queser.DecodeString(r)
+		LoginToClientPacketSuccessPropertiesElement.Value, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -5697,7 +5697,7 @@ func (_ LoginToClientPacketSuccess) Decode(r io.Reader) (ret LoginToClientPacket
 		}
 		if LoginToClientPacketSuccessPropertiesElementSignaturePresent {
 			var LoginToClientPacketSuccessPropertiesElementSignaturePresentValue string
-			LoginToClientPacketSuccessPropertiesElementSignaturePresentValue, err = queser.DecodeString(r)
+			LoginToClientPacketSuccessPropertiesElementSignaturePresentValue, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -5712,20 +5712,20 @@ func (ret LoginToClientPacketSuccess) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Username)
+	err = proto_base.EncodeString(w, ret.Username)
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Properties)).Encode(w)
+	err = proto_base.VarInt(len(ret.Properties)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iLoginToClientPacketSuccessProperties := range len(ret.Properties) {
-		err = queser.EncodeString(w, ret.Properties[iLoginToClientPacketSuccessProperties].Name)
+		err = proto_base.EncodeString(w, ret.Properties[iLoginToClientPacketSuccessProperties].Name)
 		if err != nil {
 			return
 		}
-		err = queser.EncodeString(w, ret.Properties[iLoginToClientPacketSuccessProperties].Value)
+		err = proto_base.EncodeString(w, ret.Properties[iLoginToClientPacketSuccessProperties].Value)
 		if err != nil {
 			return
 		}
@@ -5734,7 +5734,7 @@ func (ret LoginToClientPacketSuccess) Encode(w io.Writer) (err error) {
 			return
 		}
 		if ret.Properties[iLoginToClientPacketSuccessProperties].Signature != nil {
-			err = queser.EncodeString(w, *ret.Properties[iLoginToClientPacketSuccessProperties].Signature)
+			err = proto_base.EncodeString(w, *ret.Properties[iLoginToClientPacketSuccessProperties].Signature)
 			if err != nil {
 				return
 			}
@@ -5748,15 +5748,15 @@ type ConfigurationToServerPacket struct {
 	Params any
 }
 
-var ConfigurationToServerPacketNameMap = map[queser.VarInt]string{0x00: "settings", 0x01: "cookie_response", 0x02: "custom_payload", 0x03: "finish_configuration", 0x04: "keep_alive", 0x05: "pong", 0x06: "resource_pack_receive", 0x07: "select_known_packs", 0x08: "custom_click_action"}
+var ConfigurationToServerPacketNameMap = map[proto_base.VarInt]string{0x00: "settings", 0x01: "cookie_response", 0x02: "custom_payload", 0x03: "finish_configuration", 0x04: "keep_alive", 0x05: "pong", 0x06: "resource_pack_receive", 0x07: "select_known_packs", 0x08: "custom_click_action"}
 
 func (_ ConfigurationToServerPacket) Decode(r io.Reader) (ret ConfigurationToServerPacket, err error) {
-	var ConfigurationToServerPacketNameKey queser.VarInt
+	var ConfigurationToServerPacketNameKey proto_base.VarInt
 	ConfigurationToServerPacketNameKey, err = ConfigurationToServerPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(ConfigurationToServerPacketNameMap, ConfigurationToServerPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(ConfigurationToServerPacketNameMap, ConfigurationToServerPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -5828,11 +5828,11 @@ func (_ ConfigurationToServerPacket) Decode(r io.Reader) (ret ConfigurationToSer
 	return
 }
 
-var ConfigurationToServerPacketNameReverseMap = map[string]queser.VarInt{"settings": 0x00, "cookie_response": 0x01, "custom_payload": 0x02, "finish_configuration": 0x03, "keep_alive": 0x04, "pong": 0x05, "resource_pack_receive": 0x06, "select_known_packs": 0x07, "custom_click_action": 0x08}
+var ConfigurationToServerPacketNameReverseMap = map[string]proto_base.VarInt{"settings": 0x00, "cookie_response": 0x01, "custom_payload": 0x02, "finish_configuration": 0x03, "keep_alive": 0x04, "pong": 0x05, "resource_pack_receive": 0x06, "select_known_packs": 0x07, "custom_click_action": 0x08}
 
 func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
-	var vConfigurationToServerPacketName queser.VarInt
-	vConfigurationToServerPacketName, err = queser.ErroringIndex(ConfigurationToServerPacketNameReverseMap, ret.Name)
+	var vConfigurationToServerPacketName proto_base.VarInt
+	vConfigurationToServerPacketName, err = proto_base.ErroringIndex(ConfigurationToServerPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -5844,7 +5844,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "cookie_response":
 		ConfigurationToServerPacketParams, ok := ret.Params.(PacketCommonCookieResponse)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5854,7 +5854,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "custom_click_action":
 		ConfigurationToServerPacketParams, ok := ret.Params.(PacketCommonCustomClickAction)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5864,7 +5864,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "custom_payload":
 		ConfigurationToServerPacketParams, ok := ret.Params.(ConfigurationToServerPacketCustomPayload)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5874,7 +5874,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "finish_configuration":
 		ConfigurationToServerPacketParams, ok := ret.Params.(ConfigurationToServerPacketFinishConfiguration)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5884,7 +5884,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "keep_alive":
 		ConfigurationToServerPacketParams, ok := ret.Params.(ConfigurationToServerPacketKeepAlive)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5894,7 +5894,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "pong":
 		ConfigurationToServerPacketParams, ok := ret.Params.(ConfigurationToServerPacketPong)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5904,7 +5904,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "resource_pack_receive":
 		ConfigurationToServerPacketParams, ok := ret.Params.(ConfigurationToServerPacketResourcePackReceive)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5914,7 +5914,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "select_known_packs":
 		ConfigurationToServerPacketParams, ok := ret.Params.(PacketCommonSelectKnownPacks)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5924,7 +5924,7 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 	case "settings":
 		ConfigurationToServerPacketParams, ok := ret.Params.(PacketCommonSettings)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToServerPacketParams.Encode(w)
@@ -5937,11 +5937,11 @@ func (ret ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 
 type ConfigurationToServerPacketCustomPayload struct {
 	Channel string
-	Data    queser.RestBuffer
+	Data    proto_base.RestBuffer
 }
 
 func (_ ConfigurationToServerPacketCustomPayload) Decode(r io.Reader) (ret ConfigurationToServerPacketCustomPayload, err error) {
-	ret.Channel, err = queser.DecodeString(r)
+	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -5952,7 +5952,7 @@ func (_ ConfigurationToServerPacketCustomPayload) Decode(r io.Reader) (ret Confi
 	return
 }
 func (ret ConfigurationToServerPacketCustomPayload) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Channel)
+	err = proto_base.EncodeString(w, ret.Channel)
 	if err != nil {
 		return
 	}
@@ -6013,7 +6013,7 @@ func (ret ConfigurationToServerPacketPong) Encode(w io.Writer) (err error) {
 
 type ConfigurationToServerPacketResourcePackReceive struct {
 	Uuid   uuid.UUID
-	Result queser.VarInt
+	Result proto_base.VarInt
 }
 
 func (_ ConfigurationToServerPacketResourcePackReceive) Decode(r io.Reader) (ret ConfigurationToServerPacketResourcePackReceive, err error) {
@@ -6044,15 +6044,15 @@ type ConfigurationToClientPacket struct {
 	Params any
 }
 
-var ConfigurationToClientPacketNameMap = map[queser.VarInt]string{0x00: "cookie_request", 0x01: "custom_payload", 0x02: "disconnect", 0x03: "finish_configuration", 0x04: "keep_alive", 0x05: "ping", 0x06: "reset_chat", 0x07: "registry_data", 0x08: "remove_resource_pack", 0x09: "add_resource_pack", 0x0a: "store_cookie", 0x0b: "transfer", 0x0c: "feature_flags", 0x0d: "tags", 0x0e: "select_known_packs", 0x0f: "custom_report_details", 0x10: "server_links", 0x11: "clear_dialog", 0x12: "show_dialog"}
+var ConfigurationToClientPacketNameMap = map[proto_base.VarInt]string{0x00: "cookie_request", 0x01: "custom_payload", 0x02: "disconnect", 0x03: "finish_configuration", 0x04: "keep_alive", 0x05: "ping", 0x06: "reset_chat", 0x07: "registry_data", 0x08: "remove_resource_pack", 0x09: "add_resource_pack", 0x0a: "store_cookie", 0x0b: "transfer", 0x0c: "feature_flags", 0x0d: "tags", 0x0e: "select_known_packs", 0x0f: "custom_report_details", 0x10: "server_links", 0x11: "clear_dialog", 0x12: "show_dialog"}
 
 func (_ ConfigurationToClientPacket) Decode(r io.Reader) (ret ConfigurationToClientPacket, err error) {
-	var ConfigurationToClientPacketNameKey queser.VarInt
+	var ConfigurationToClientPacketNameKey proto_base.VarInt
 	ConfigurationToClientPacketNameKey, err = ConfigurationToClientPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(ConfigurationToClientPacketNameMap, ConfigurationToClientPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(ConfigurationToClientPacketNameMap, ConfigurationToClientPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -6194,11 +6194,11 @@ func (_ ConfigurationToClientPacket) Decode(r io.Reader) (ret ConfigurationToCli
 	return
 }
 
-var ConfigurationToClientPacketNameReverseMap = map[string]queser.VarInt{"cookie_request": 0x00, "custom_payload": 0x01, "disconnect": 0x02, "finish_configuration": 0x03, "keep_alive": 0x04, "ping": 0x05, "reset_chat": 0x06, "registry_data": 0x07, "remove_resource_pack": 0x08, "add_resource_pack": 0x09, "store_cookie": 0x0a, "transfer": 0x0b, "feature_flags": 0x0c, "tags": 0x0d, "select_known_packs": 0x0e, "custom_report_details": 0x0f, "server_links": 0x10, "clear_dialog": 0x11, "show_dialog": 0x12}
+var ConfigurationToClientPacketNameReverseMap = map[string]proto_base.VarInt{"cookie_request": 0x00, "custom_payload": 0x01, "disconnect": 0x02, "finish_configuration": 0x03, "keep_alive": 0x04, "ping": 0x05, "reset_chat": 0x06, "registry_data": 0x07, "remove_resource_pack": 0x08, "add_resource_pack": 0x09, "store_cookie": 0x0a, "transfer": 0x0b, "feature_flags": 0x0c, "tags": 0x0d, "select_known_packs": 0x0e, "custom_report_details": 0x0f, "server_links": 0x10, "clear_dialog": 0x11, "show_dialog": 0x12}
 
 func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
-	var vConfigurationToClientPacketName queser.VarInt
-	vConfigurationToClientPacketName, err = queser.ErroringIndex(ConfigurationToClientPacketNameReverseMap, ret.Name)
+	var vConfigurationToClientPacketName proto_base.VarInt
+	vConfigurationToClientPacketName, err = proto_base.ErroringIndex(ConfigurationToClientPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -6210,7 +6210,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "add_resource_pack":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonAddResourcePack)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6220,7 +6220,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "clear_dialog":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonClearDialog)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6230,7 +6230,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "cookie_request":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonCookieRequest)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6240,7 +6240,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "custom_payload":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketCustomPayload)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6250,7 +6250,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "custom_report_details":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonCustomReportDetails)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6260,7 +6260,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "disconnect":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketDisconnect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6270,7 +6270,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "feature_flags":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketFeatureFlags)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6280,7 +6280,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "finish_configuration":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketFinishConfiguration)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6290,7 +6290,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "keep_alive":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketKeepAlive)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6300,7 +6300,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "ping":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketPing)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6310,7 +6310,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "registry_data":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketRegistryData)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6320,7 +6320,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "remove_resource_pack":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonRemoveResourcePack)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6330,7 +6330,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "reset_chat":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketResetChat)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6340,7 +6340,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "select_known_packs":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonSelectKnownPacks)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6350,7 +6350,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "server_links":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonServerLinks)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6360,7 +6360,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "show_dialog":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketShowDialog)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6370,7 +6370,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "store_cookie":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonStoreCookie)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6380,7 +6380,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "tags":
 		ConfigurationToClientPacketParams, ok := ret.Params.(ConfigurationToClientPacketTags)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6390,7 +6390,7 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 	case "transfer":
 		ConfigurationToClientPacketParams, ok := ret.Params.(PacketCommonTransfer)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = ConfigurationToClientPacketParams.Encode(w)
@@ -6403,11 +6403,11 @@ func (ret ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 
 type ConfigurationToClientPacketCustomPayload struct {
 	Channel string
-	Data    queser.RestBuffer
+	Data    proto_base.RestBuffer
 }
 
 func (_ ConfigurationToClientPacketCustomPayload) Decode(r io.Reader) (ret ConfigurationToClientPacketCustomPayload, err error) {
-	ret.Channel, err = queser.DecodeString(r)
+	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -6418,7 +6418,7 @@ func (_ ConfigurationToClientPacketCustomPayload) Decode(r io.Reader) (ret Confi
 	return
 }
 func (ret ConfigurationToClientPacketCustomPayload) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Channel)
+	err = proto_base.EncodeString(w, ret.Channel)
 	if err != nil {
 		return
 	}
@@ -6453,7 +6453,7 @@ type ConfigurationToClientPacketFeatureFlags struct {
 }
 
 func (_ ConfigurationToClientPacketFeatureFlags) Decode(r io.Reader) (ret ConfigurationToClientPacketFeatureFlags, err error) {
-	var lConfigurationToClientPacketFeatureFlagsFeatures queser.VarInt
+	var lConfigurationToClientPacketFeatureFlagsFeatures proto_base.VarInt
 	lConfigurationToClientPacketFeatureFlagsFeatures, err = lConfigurationToClientPacketFeatureFlagsFeatures.Decode(r)
 	if err != nil {
 		return
@@ -6461,7 +6461,7 @@ func (_ ConfigurationToClientPacketFeatureFlags) Decode(r io.Reader) (ret Config
 	ret.Features = []string{}
 	for range lConfigurationToClientPacketFeatureFlagsFeatures {
 		var ConfigurationToClientPacketFeatureFlagsFeaturesElement string
-		ConfigurationToClientPacketFeatureFlagsFeaturesElement, err = queser.DecodeString(r)
+		ConfigurationToClientPacketFeatureFlagsFeaturesElement, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -6470,12 +6470,12 @@ func (_ ConfigurationToClientPacketFeatureFlags) Decode(r io.Reader) (ret Config
 	return
 }
 func (ret ConfigurationToClientPacketFeatureFlags) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Features)).Encode(w)
+	err = proto_base.VarInt(len(ret.Features)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iConfigurationToClientPacketFeatureFlagsFeatures := range len(ret.Features) {
-		err = queser.EncodeString(w, ret.Features[iConfigurationToClientPacketFeatureFlagsFeatures])
+		err = proto_base.EncodeString(w, ret.Features[iConfigurationToClientPacketFeatureFlagsFeatures])
 		if err != nil {
 			return
 		}
@@ -6540,11 +6540,11 @@ type ConfigurationToClientPacketRegistryData struct {
 }
 
 func (_ ConfigurationToClientPacketRegistryData) Decode(r io.Reader) (ret ConfigurationToClientPacketRegistryData, err error) {
-	ret.Id, err = queser.DecodeString(r)
+	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	var lConfigurationToClientPacketRegistryDataEntries queser.VarInt
+	var lConfigurationToClientPacketRegistryDataEntries proto_base.VarInt
 	lConfigurationToClientPacketRegistryDataEntries, err = lConfigurationToClientPacketRegistryDataEntries.Decode(r)
 	if err != nil {
 		return
@@ -6558,7 +6558,7 @@ func (_ ConfigurationToClientPacketRegistryData) Decode(r io.Reader) (ret Config
 			Key   string
 			Value *nbt.Anon
 		}
-		ConfigurationToClientPacketRegistryDataEntriesElement.Key, err = queser.DecodeString(r)
+		ConfigurationToClientPacketRegistryDataEntriesElement.Key, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -6580,16 +6580,16 @@ func (_ ConfigurationToClientPacketRegistryData) Decode(r io.Reader) (ret Config
 	return
 }
 func (ret ConfigurationToClientPacketRegistryData) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Id)
+	err = proto_base.EncodeString(w, ret.Id)
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Entries)).Encode(w)
+	err = proto_base.VarInt(len(ret.Entries)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iConfigurationToClientPacketRegistryDataEntries := range len(ret.Entries) {
-		err = queser.EncodeString(w, ret.Entries[iConfigurationToClientPacketRegistryDataEntries].Key)
+		err = proto_base.EncodeString(w, ret.Entries[iConfigurationToClientPacketRegistryDataEntries].Key)
 		if err != nil {
 			return
 		}
@@ -6644,7 +6644,7 @@ type ConfigurationToClientPacketTags struct {
 }
 
 func (_ ConfigurationToClientPacketTags) Decode(r io.Reader) (ret ConfigurationToClientPacketTags, err error) {
-	var lConfigurationToClientPacketTagsTags queser.VarInt
+	var lConfigurationToClientPacketTagsTags proto_base.VarInt
 	lConfigurationToClientPacketTagsTags, err = lConfigurationToClientPacketTagsTags.Decode(r)
 	if err != nil {
 		return
@@ -6658,7 +6658,7 @@ func (_ ConfigurationToClientPacketTags) Decode(r io.Reader) (ret ConfigurationT
 			TagType string
 			Tags    Tags
 		}
-		ConfigurationToClientPacketTagsTagsElement.TagType, err = queser.DecodeString(r)
+		ConfigurationToClientPacketTagsTagsElement.TagType, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -6671,12 +6671,12 @@ func (_ ConfigurationToClientPacketTags) Decode(r io.Reader) (ret ConfigurationT
 	return
 }
 func (ret ConfigurationToClientPacketTags) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Tags)).Encode(w)
+	err = proto_base.VarInt(len(ret.Tags)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iConfigurationToClientPacketTagsTags := range len(ret.Tags) {
-		err = queser.EncodeString(w, ret.Tags[iConfigurationToClientPacketTagsTags].TagType)
+		err = proto_base.EncodeString(w, ret.Tags[iConfigurationToClientPacketTagsTags].TagType)
 		if err != nil {
 			return
 		}
@@ -6712,15 +6712,15 @@ type PlayToServerPacket struct {
 	Params any
 }
 
-var PlayToServerPacketNameMap = map[queser.VarInt]string{0x00: "teleport_confirm", 0x01: "query_block_nbt", 0x02: "select_bundle_item", 0x03: "set_difficulty", 0x04: "change_gamemode", 0x05: "message_acknowledgement", 0x06: "chat_command", 0x07: "chat_command_signed", 0x08: "chat_message", 0x09: "chat_session_update", 0x0a: "chunk_batch_received", 0x0b: "client_command", 0x0c: "tick_end", 0x0d: "settings", 0x0e: "tab_complete", 0x0f: "configuration_acknowledged", 0x10: "enchant_item", 0x11: "window_click", 0x12: "close_window", 0x13: "set_slot_state", 0x14: "cookie_response", 0x15: "custom_payload", 0x16: "debug_sample_subscription", 0x17: "edit_book", 0x18: "query_entity_nbt", 0x19: "use_entity", 0x1a: "generate_structure", 0x1b: "keep_alive", 0x1c: "lock_difficulty", 0x1d: "position", 0x1e: "position_look", 0x1f: "look", 0x20: "flying", 0x21: "vehicle_move", 0x22: "steer_boat", 0x23: "pick_item_from_block", 0x24: "pick_item_from_entity", 0x25: "ping_request", 0x26: "craft_recipe_request", 0x27: "abilities", 0x28: "block_dig", 0x29: "entity_action", 0x2a: "player_input", 0x2b: "player_loaded", 0x2c: "pong", 0x2d: "recipe_book", 0x2e: "displayed_recipe", 0x2f: "name_item", 0x30: "resource_pack_receive", 0x31: "advancement_tab", 0x32: "select_trade", 0x33: "set_beacon_effect", 0x34: "held_item_slot", 0x35: "update_command_block", 0x36: "update_command_block_minecart", 0x37: "set_creative_slot", 0x38: "update_jigsaw_block", 0x39: "update_structure_block", 0x3a: "set_test_block", 0x3b: "update_sign", 0x3c: "arm_animation", 0x3d: "spectate", 0x3e: "test_instance_block_action", 0x3f: "block_place", 0x40: "use_item", 0x41: "custom_click_action"}
+var PlayToServerPacketNameMap = map[proto_base.VarInt]string{0x00: "teleport_confirm", 0x01: "query_block_nbt", 0x02: "select_bundle_item", 0x03: "set_difficulty", 0x04: "change_gamemode", 0x05: "message_acknowledgement", 0x06: "chat_command", 0x07: "chat_command_signed", 0x08: "chat_message", 0x09: "chat_session_update", 0x0a: "chunk_batch_received", 0x0b: "client_command", 0x0c: "tick_end", 0x0d: "settings", 0x0e: "tab_complete", 0x0f: "configuration_acknowledged", 0x10: "enchant_item", 0x11: "window_click", 0x12: "close_window", 0x13: "set_slot_state", 0x14: "cookie_response", 0x15: "custom_payload", 0x16: "debug_sample_subscription", 0x17: "edit_book", 0x18: "query_entity_nbt", 0x19: "use_entity", 0x1a: "generate_structure", 0x1b: "keep_alive", 0x1c: "lock_difficulty", 0x1d: "position", 0x1e: "position_look", 0x1f: "look", 0x20: "flying", 0x21: "vehicle_move", 0x22: "steer_boat", 0x23: "pick_item_from_block", 0x24: "pick_item_from_entity", 0x25: "ping_request", 0x26: "craft_recipe_request", 0x27: "abilities", 0x28: "block_dig", 0x29: "entity_action", 0x2a: "player_input", 0x2b: "player_loaded", 0x2c: "pong", 0x2d: "recipe_book", 0x2e: "displayed_recipe", 0x2f: "name_item", 0x30: "resource_pack_receive", 0x31: "advancement_tab", 0x32: "select_trade", 0x33: "set_beacon_effect", 0x34: "held_item_slot", 0x35: "update_command_block", 0x36: "update_command_block_minecart", 0x37: "set_creative_slot", 0x38: "update_jigsaw_block", 0x39: "update_structure_block", 0x3a: "set_test_block", 0x3b: "update_sign", 0x3c: "arm_animation", 0x3d: "spectate", 0x3e: "test_instance_block_action", 0x3f: "block_place", 0x40: "use_item", 0x41: "custom_click_action"}
 
 func (_ PlayToServerPacket) Decode(r io.Reader) (ret PlayToServerPacket, err error) {
-	var PlayToServerPacketNameKey queser.VarInt
+	var PlayToServerPacketNameKey proto_base.VarInt
 	PlayToServerPacketNameKey, err = PlayToServerPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(PlayToServerPacketNameMap, PlayToServerPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(PlayToServerPacketNameMap, PlayToServerPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -7191,11 +7191,11 @@ func (_ PlayToServerPacket) Decode(r io.Reader) (ret PlayToServerPacket, err err
 	return
 }
 
-var PlayToServerPacketNameReverseMap = map[string]queser.VarInt{"teleport_confirm": 0x00, "query_block_nbt": 0x01, "select_bundle_item": 0x02, "set_difficulty": 0x03, "change_gamemode": 0x04, "message_acknowledgement": 0x05, "chat_command": 0x06, "chat_command_signed": 0x07, "chat_message": 0x08, "chat_session_update": 0x09, "chunk_batch_received": 0x0a, "client_command": 0x0b, "tick_end": 0x0c, "settings": 0x0d, "tab_complete": 0x0e, "configuration_acknowledged": 0x0f, "enchant_item": 0x10, "window_click": 0x11, "close_window": 0x12, "set_slot_state": 0x13, "cookie_response": 0x14, "custom_payload": 0x15, "debug_sample_subscription": 0x16, "edit_book": 0x17, "query_entity_nbt": 0x18, "use_entity": 0x19, "generate_structure": 0x1a, "keep_alive": 0x1b, "lock_difficulty": 0x1c, "position": 0x1d, "position_look": 0x1e, "look": 0x1f, "flying": 0x20, "vehicle_move": 0x21, "steer_boat": 0x22, "pick_item_from_block": 0x23, "pick_item_from_entity": 0x24, "ping_request": 0x25, "craft_recipe_request": 0x26, "abilities": 0x27, "block_dig": 0x28, "entity_action": 0x29, "player_input": 0x2a, "player_loaded": 0x2b, "pong": 0x2c, "recipe_book": 0x2d, "displayed_recipe": 0x2e, "name_item": 0x2f, "resource_pack_receive": 0x30, "advancement_tab": 0x31, "select_trade": 0x32, "set_beacon_effect": 0x33, "held_item_slot": 0x34, "update_command_block": 0x35, "update_command_block_minecart": 0x36, "set_creative_slot": 0x37, "update_jigsaw_block": 0x38, "update_structure_block": 0x39, "set_test_block": 0x3a, "update_sign": 0x3b, "arm_animation": 0x3c, "spectate": 0x3d, "test_instance_block_action": 0x3e, "block_place": 0x3f, "use_item": 0x40, "custom_click_action": 0x41}
+var PlayToServerPacketNameReverseMap = map[string]proto_base.VarInt{"teleport_confirm": 0x00, "query_block_nbt": 0x01, "select_bundle_item": 0x02, "set_difficulty": 0x03, "change_gamemode": 0x04, "message_acknowledgement": 0x05, "chat_command": 0x06, "chat_command_signed": 0x07, "chat_message": 0x08, "chat_session_update": 0x09, "chunk_batch_received": 0x0a, "client_command": 0x0b, "tick_end": 0x0c, "settings": 0x0d, "tab_complete": 0x0e, "configuration_acknowledged": 0x0f, "enchant_item": 0x10, "window_click": 0x11, "close_window": 0x12, "set_slot_state": 0x13, "cookie_response": 0x14, "custom_payload": 0x15, "debug_sample_subscription": 0x16, "edit_book": 0x17, "query_entity_nbt": 0x18, "use_entity": 0x19, "generate_structure": 0x1a, "keep_alive": 0x1b, "lock_difficulty": 0x1c, "position": 0x1d, "position_look": 0x1e, "look": 0x1f, "flying": 0x20, "vehicle_move": 0x21, "steer_boat": 0x22, "pick_item_from_block": 0x23, "pick_item_from_entity": 0x24, "ping_request": 0x25, "craft_recipe_request": 0x26, "abilities": 0x27, "block_dig": 0x28, "entity_action": 0x29, "player_input": 0x2a, "player_loaded": 0x2b, "pong": 0x2c, "recipe_book": 0x2d, "displayed_recipe": 0x2e, "name_item": 0x2f, "resource_pack_receive": 0x30, "advancement_tab": 0x31, "select_trade": 0x32, "set_beacon_effect": 0x33, "held_item_slot": 0x34, "update_command_block": 0x35, "update_command_block_minecart": 0x36, "set_creative_slot": 0x37, "update_jigsaw_block": 0x38, "update_structure_block": 0x39, "set_test_block": 0x3a, "update_sign": 0x3b, "arm_animation": 0x3c, "spectate": 0x3d, "test_instance_block_action": 0x3e, "block_place": 0x3f, "use_item": 0x40, "custom_click_action": 0x41}
 
 func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
-	var vPlayToServerPacketName queser.VarInt
-	vPlayToServerPacketName, err = queser.ErroringIndex(PlayToServerPacketNameReverseMap, ret.Name)
+	var vPlayToServerPacketName proto_base.VarInt
+	vPlayToServerPacketName, err = proto_base.ErroringIndex(PlayToServerPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -7207,7 +7207,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "abilities":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketAbilities)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7217,7 +7217,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "advancement_tab":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketAdvancementTab)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7227,7 +7227,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "arm_animation":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketArmAnimation)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7237,7 +7237,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "block_dig":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketBlockDig)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7247,7 +7247,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "block_place":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketBlockPlace)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7257,7 +7257,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "change_gamemode":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketChangeGamemode)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7267,7 +7267,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "chat_command":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketChatCommand)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7277,7 +7277,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "chat_command_signed":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketChatCommandSigned)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7287,7 +7287,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "chat_message":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketChatMessage)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7297,7 +7297,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "chat_session_update":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketChatSessionUpdate)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7307,7 +7307,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "chunk_batch_received":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketChunkBatchReceived)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7317,7 +7317,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "client_command":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketClientCommand)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7327,7 +7327,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "close_window":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketCloseWindow)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7337,7 +7337,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "configuration_acknowledged":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketConfigurationAcknowledged)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7347,7 +7347,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "cookie_response":
 		PlayToServerPacketParams, ok := ret.Params.(PacketCommonCookieResponse)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7357,7 +7357,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "craft_recipe_request":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketCraftRecipeRequest)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7367,7 +7367,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "custom_click_action":
 		PlayToServerPacketParams, ok := ret.Params.(PacketCommonCustomClickAction)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7377,7 +7377,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "custom_payload":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketCustomPayload)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7387,7 +7387,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "debug_sample_subscription":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketDebugSampleSubscription)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7397,7 +7397,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "displayed_recipe":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketDisplayedRecipe)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7407,7 +7407,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "edit_book":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketEditBook)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7417,7 +7417,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "enchant_item":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketEnchantItem)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7427,7 +7427,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "entity_action":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketEntityAction)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7437,7 +7437,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "flying":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketFlying)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7447,7 +7447,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "generate_structure":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketGenerateStructure)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7457,7 +7457,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "held_item_slot":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketHeldItemSlot)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7467,7 +7467,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "keep_alive":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketKeepAlive)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7477,7 +7477,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "lock_difficulty":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketLockDifficulty)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7487,7 +7487,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "look":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketLook)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7497,7 +7497,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "message_acknowledgement":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketMessageAcknowledgement)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7507,7 +7507,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "name_item":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketNameItem)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7517,7 +7517,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "pick_item_from_block":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketPickItemFromBlock)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7527,7 +7527,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "pick_item_from_entity":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketPickItemFromEntity)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7537,7 +7537,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "ping_request":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketPingRequest)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7547,7 +7547,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "player_input":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketPlayerInput)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7557,7 +7557,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "player_loaded":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketPlayerLoaded)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7567,7 +7567,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "pong":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketPong)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7577,7 +7577,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "position":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketPosition)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7587,7 +7587,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "position_look":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketPositionLook)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7597,7 +7597,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "query_block_nbt":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketQueryBlockNbt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7607,7 +7607,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "query_entity_nbt":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketQueryEntityNbt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7617,7 +7617,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "recipe_book":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketRecipeBook)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7627,7 +7627,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "resource_pack_receive":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketResourcePackReceive)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7637,7 +7637,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "select_bundle_item":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSelectBundleItem)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7647,7 +7647,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "select_trade":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSelectTrade)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7657,7 +7657,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "set_beacon_effect":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSetBeaconEffect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7667,7 +7667,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "set_creative_slot":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSetCreativeSlot)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7677,7 +7677,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "set_difficulty":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSetDifficulty)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7687,7 +7687,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "set_slot_state":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSetSlotState)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7697,7 +7697,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "set_test_block":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSetTestBlock)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7707,7 +7707,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "settings":
 		PlayToServerPacketParams, ok := ret.Params.(PacketCommonSettings)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7717,7 +7717,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "spectate":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSpectate)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7727,7 +7727,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "steer_boat":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketSteerBoat)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7737,7 +7737,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "tab_complete":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketTabComplete)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7747,7 +7747,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "teleport_confirm":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketTeleportConfirm)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7757,7 +7757,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "test_instance_block_action":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketTestInstanceBlockAction)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7767,7 +7767,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "tick_end":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketTickEnd)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7777,7 +7777,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "update_command_block":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketUpdateCommandBlock)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7787,7 +7787,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "update_command_block_minecart":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketUpdateCommandBlockMinecart)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7797,7 +7797,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "update_jigsaw_block":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketUpdateJigsawBlock)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7807,7 +7807,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "update_sign":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketUpdateSign)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7817,7 +7817,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "update_structure_block":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketUpdateStructureBlock)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7827,7 +7827,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "use_entity":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketUseEntity)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7837,7 +7837,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "use_item":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketUseItem)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7847,7 +7847,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "vehicle_move":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketVehicleMove)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7857,7 +7857,7 @@ func (ret PlayToServerPacket) Encode(w io.Writer) (err error) {
 	case "window_click":
 		PlayToServerPacketParams, ok := ret.Params.(PlayToServerPacketWindowClick)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketParams.Encode(w)
@@ -7888,7 +7888,7 @@ func (ret PlayToServerPacketAbilities) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketAdvancementTab struct {
-	Action queser.VarInt
+	Action proto_base.VarInt
 	TabId  any
 }
 
@@ -7900,13 +7900,13 @@ func (_ PlayToServerPacketAdvancementTab) Decode(r io.Reader) (ret PlayToServerP
 	switch ret.Action {
 	case 0:
 		var PlayToServerPacketAdvancementTabTabIdTmp string
-		PlayToServerPacketAdvancementTabTabIdTmp, err = queser.DecodeString(r)
+		PlayToServerPacketAdvancementTabTabIdTmp, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
 		ret.TabId = PlayToServerPacketAdvancementTabTabIdTmp
 	case 1:
-		var PlayToServerPacketAdvancementTabTabIdTmp queser.Void
+		var PlayToServerPacketAdvancementTabTabIdTmp proto_base.Void
 		PlayToServerPacketAdvancementTabTabIdTmp, err = PlayToServerPacketAdvancementTabTabIdTmp.Decode(r)
 		if err != nil {
 			return
@@ -7924,17 +7924,17 @@ func (ret PlayToServerPacketAdvancementTab) Encode(w io.Writer) (err error) {
 	case 0:
 		PlayToServerPacketAdvancementTabTabId, ok := ret.TabId.(string)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, PlayToServerPacketAdvancementTabTabId)
+		err = proto_base.EncodeString(w, PlayToServerPacketAdvancementTabTabId)
 		if err != nil {
 			return
 		}
 	case 1:
-		PlayToServerPacketAdvancementTabTabId, ok := ret.TabId.(queser.Void)
+		PlayToServerPacketAdvancementTabTabId, ok := ret.TabId.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketAdvancementTabTabId.Encode(w)
@@ -7946,7 +7946,7 @@ func (ret PlayToServerPacketAdvancementTab) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketArmAnimation struct {
-	Hand queser.VarInt
+	Hand proto_base.VarInt
 }
 
 func (_ PlayToServerPacketArmAnimation) Decode(r io.Reader) (ret PlayToServerPacketArmAnimation, err error) {
@@ -7965,10 +7965,10 @@ func (ret PlayToServerPacketArmAnimation) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketBlockDig struct {
-	Status   queser.VarInt
+	Status   proto_base.VarInt
 	Location Position
 	Face     int8
-	Sequence queser.VarInt
+	Sequence proto_base.VarInt
 }
 
 func (_ PlayToServerPacketBlockDig) Decode(r io.Reader) (ret PlayToServerPacketBlockDig, err error) {
@@ -8011,15 +8011,15 @@ func (ret PlayToServerPacketBlockDig) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketBlockPlace struct {
-	Hand           queser.VarInt
+	Hand           proto_base.VarInt
 	Location       Position
-	Direction      queser.VarInt
+	Direction      proto_base.VarInt
 	CursorX        float32
 	CursorY        float32
 	CursorZ        float32
 	InsideBlock    bool
 	WorldBorderHit bool
-	Sequence       queser.VarInt
+	Sequence       proto_base.VarInt
 }
 
 func (_ PlayToServerPacketBlockPlace) Decode(r io.Reader) (ret PlayToServerPacketBlockPlace, err error) {
@@ -8105,26 +8105,26 @@ type PlayToServerPacketChangeGamemode struct {
 	Mode string
 }
 
-var PlayToServerPacketChangeGamemodeModeMap = map[queser.VarInt]string{0: "survival", 1: "creative", 2: "adventure", 3: "spectator"}
+var PlayToServerPacketChangeGamemodeModeMap = map[proto_base.VarInt]string{0: "survival", 1: "creative", 2: "adventure", 3: "spectator"}
 
 func (_ PlayToServerPacketChangeGamemode) Decode(r io.Reader) (ret PlayToServerPacketChangeGamemode, err error) {
-	var PlayToServerPacketChangeGamemodeModeKey queser.VarInt
+	var PlayToServerPacketChangeGamemodeModeKey proto_base.VarInt
 	PlayToServerPacketChangeGamemodeModeKey, err = PlayToServerPacketChangeGamemodeModeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Mode, err = queser.ErroringIndex(PlayToServerPacketChangeGamemodeModeMap, PlayToServerPacketChangeGamemodeModeKey)
+	ret.Mode, err = proto_base.ErroringIndex(PlayToServerPacketChangeGamemodeModeMap, PlayToServerPacketChangeGamemodeModeKey)
 	if err != nil {
 		return
 	}
 	return
 }
 
-var PlayToServerPacketChangeGamemodeModeReverseMap = map[string]queser.VarInt{"survival": 0, "creative": 1, "adventure": 2, "spectator": 3}
+var PlayToServerPacketChangeGamemodeModeReverseMap = map[string]proto_base.VarInt{"survival": 0, "creative": 1, "adventure": 2, "spectator": 3}
 
 func (ret PlayToServerPacketChangeGamemode) Encode(w io.Writer) (err error) {
-	var vPlayToServerPacketChangeGamemodeMode queser.VarInt
-	vPlayToServerPacketChangeGamemodeMode, err = queser.ErroringIndex(PlayToServerPacketChangeGamemodeModeReverseMap, ret.Mode)
+	var vPlayToServerPacketChangeGamemodeMode proto_base.VarInt
+	vPlayToServerPacketChangeGamemodeMode, err = proto_base.ErroringIndex(PlayToServerPacketChangeGamemodeModeReverseMap, ret.Mode)
 	if err != nil {
 		return
 	}
@@ -8140,14 +8140,14 @@ type PlayToServerPacketChatCommand struct {
 }
 
 func (_ PlayToServerPacketChatCommand) Decode(r io.Reader) (ret PlayToServerPacketChatCommand, err error) {
-	ret.Command, err = queser.DecodeString(r)
+	ret.Command, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
 	return
 }
 func (ret PlayToServerPacketChatCommand) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Command)
+	err = proto_base.EncodeString(w, ret.Command)
 	if err != nil {
 		return
 	}
@@ -8162,13 +8162,13 @@ type PlayToServerPacketChatCommandSigned struct {
 		ArgumentName string
 		Signature    [256]byte
 	}
-	MessageCount queser.VarInt
+	MessageCount proto_base.VarInt
 	Acknowledged [3]byte
 	Checksum     int8
 }
 
 func (_ PlayToServerPacketChatCommandSigned) Decode(r io.Reader) (ret PlayToServerPacketChatCommandSigned, err error) {
-	ret.Command, err = queser.DecodeString(r)
+	ret.Command, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -8180,7 +8180,7 @@ func (_ PlayToServerPacketChatCommandSigned) Decode(r io.Reader) (ret PlayToServ
 	if err != nil {
 		return
 	}
-	var lPlayToServerPacketChatCommandSignedArgumentSignatures queser.VarInt
+	var lPlayToServerPacketChatCommandSignedArgumentSignatures proto_base.VarInt
 	lPlayToServerPacketChatCommandSignedArgumentSignatures, err = lPlayToServerPacketChatCommandSignedArgumentSignatures.Decode(r)
 	if err != nil {
 		return
@@ -8194,7 +8194,7 @@ func (_ PlayToServerPacketChatCommandSigned) Decode(r io.Reader) (ret PlayToServ
 			ArgumentName string
 			Signature    [256]byte
 		}
-		PlayToServerPacketChatCommandSignedArgumentSignaturesElement.ArgumentName, err = queser.DecodeString(r)
+		PlayToServerPacketChatCommandSignedArgumentSignaturesElement.ArgumentName, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -8219,7 +8219,7 @@ func (_ PlayToServerPacketChatCommandSigned) Decode(r io.Reader) (ret PlayToServ
 	return
 }
 func (ret PlayToServerPacketChatCommandSigned) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Command)
+	err = proto_base.EncodeString(w, ret.Command)
 	if err != nil {
 		return
 	}
@@ -8231,12 +8231,12 @@ func (ret PlayToServerPacketChatCommandSigned) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.ArgumentSignatures)).Encode(w)
+	err = proto_base.VarInt(len(ret.ArgumentSignatures)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToServerPacketChatCommandSignedArgumentSignatures := range len(ret.ArgumentSignatures) {
-		err = queser.EncodeString(w, ret.ArgumentSignatures[iPlayToServerPacketChatCommandSignedArgumentSignatures].ArgumentName)
+		err = proto_base.EncodeString(w, ret.ArgumentSignatures[iPlayToServerPacketChatCommandSignedArgumentSignatures].ArgumentName)
 		if err != nil {
 			return
 		}
@@ -8267,13 +8267,13 @@ type PlayToServerPacketChatMessage struct {
 	Timestamp    int64
 	Salt         int64
 	Signature    *[256]byte
-	Offset       queser.VarInt
+	Offset       proto_base.VarInt
 	Acknowledged [3]byte
 	Checksum     uint8
 }
 
 func (_ PlayToServerPacketChatMessage) Decode(r io.Reader) (ret PlayToServerPacketChatMessage, err error) {
-	ret.Message, err = queser.DecodeString(r)
+	ret.Message, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -8313,7 +8313,7 @@ func (_ PlayToServerPacketChatMessage) Decode(r io.Reader) (ret PlayToServerPack
 	return
 }
 func (ret PlayToServerPacketChatMessage) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Message)
+	err = proto_base.EncodeString(w, ret.Message)
 	if err != nil {
 		return
 	}
@@ -8418,7 +8418,7 @@ func (ret PlayToServerPacketChunkBatchReceived) Encode(w io.Writer) (err error) 
 }
 
 type PlayToServerPacketClientCommand struct {
-	ActionId queser.VarInt
+	ActionId proto_base.VarInt
 }
 
 func (_ PlayToServerPacketClientCommand) Decode(r io.Reader) (ret PlayToServerPacketClientCommand, err error) {
@@ -8467,7 +8467,7 @@ func (ret PlayToServerPacketConfigurationAcknowledged) Encode(w io.Writer) (err 
 
 type PlayToServerPacketCraftRecipeRequest struct {
 	WindowId ContainerID
-	RecipeId queser.VarInt
+	RecipeId proto_base.VarInt
 	MakeAll  bool
 }
 
@@ -8504,11 +8504,11 @@ func (ret PlayToServerPacketCraftRecipeRequest) Encode(w io.Writer) (err error) 
 
 type PlayToServerPacketCustomPayload struct {
 	Channel string
-	Data    queser.RestBuffer
+	Data    proto_base.RestBuffer
 }
 
 func (_ PlayToServerPacketCustomPayload) Decode(r io.Reader) (ret PlayToServerPacketCustomPayload, err error) {
-	ret.Channel, err = queser.DecodeString(r)
+	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -8519,7 +8519,7 @@ func (_ PlayToServerPacketCustomPayload) Decode(r io.Reader) (ret PlayToServerPa
 	return
 }
 func (ret PlayToServerPacketCustomPayload) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Channel)
+	err = proto_base.EncodeString(w, ret.Channel)
 	if err != nil {
 		return
 	}
@@ -8531,7 +8531,7 @@ func (ret PlayToServerPacketCustomPayload) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketDebugSampleSubscription struct {
-	Type queser.VarInt
+	Type proto_base.VarInt
 }
 
 func (_ PlayToServerPacketDebugSampleSubscription) Decode(r io.Reader) (ret PlayToServerPacketDebugSampleSubscription, err error) {
@@ -8550,7 +8550,7 @@ func (ret PlayToServerPacketDebugSampleSubscription) Encode(w io.Writer) (err er
 }
 
 type PlayToServerPacketDisplayedRecipe struct {
-	RecipeId queser.VarInt
+	RecipeId proto_base.VarInt
 }
 
 func (_ PlayToServerPacketDisplayedRecipe) Decode(r io.Reader) (ret PlayToServerPacketDisplayedRecipe, err error) {
@@ -8569,7 +8569,7 @@ func (ret PlayToServerPacketDisplayedRecipe) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketEditBook struct {
-	Hand  queser.VarInt
+	Hand  proto_base.VarInt
 	Pages []string
 	Title *string
 }
@@ -8579,7 +8579,7 @@ func (_ PlayToServerPacketEditBook) Decode(r io.Reader) (ret PlayToServerPacketE
 	if err != nil {
 		return
 	}
-	var lPlayToServerPacketEditBookPages queser.VarInt
+	var lPlayToServerPacketEditBookPages proto_base.VarInt
 	lPlayToServerPacketEditBookPages, err = lPlayToServerPacketEditBookPages.Decode(r)
 	if err != nil {
 		return
@@ -8587,7 +8587,7 @@ func (_ PlayToServerPacketEditBook) Decode(r io.Reader) (ret PlayToServerPacketE
 	ret.Pages = []string{}
 	for range lPlayToServerPacketEditBookPages {
 		var PlayToServerPacketEditBookPagesElement string
-		PlayToServerPacketEditBookPagesElement, err = queser.DecodeString(r)
+		PlayToServerPacketEditBookPagesElement, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -8600,7 +8600,7 @@ func (_ PlayToServerPacketEditBook) Decode(r io.Reader) (ret PlayToServerPacketE
 	}
 	if PlayToServerPacketEditBookTitlePresent {
 		var PlayToServerPacketEditBookTitlePresentValue string
-		PlayToServerPacketEditBookTitlePresentValue, err = queser.DecodeString(r)
+		PlayToServerPacketEditBookTitlePresentValue, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -8613,12 +8613,12 @@ func (ret PlayToServerPacketEditBook) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Pages)).Encode(w)
+	err = proto_base.VarInt(len(ret.Pages)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToServerPacketEditBookPages := range len(ret.Pages) {
-		err = queser.EncodeString(w, ret.Pages[iPlayToServerPacketEditBookPages])
+		err = proto_base.EncodeString(w, ret.Pages[iPlayToServerPacketEditBookPages])
 		if err != nil {
 			return
 		}
@@ -8628,7 +8628,7 @@ func (ret PlayToServerPacketEditBook) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.Title != nil {
-		err = queser.EncodeString(w, *ret.Title)
+		err = proto_base.EncodeString(w, *ret.Title)
 		if err != nil {
 			return
 		}
@@ -8665,24 +8665,24 @@ func (ret PlayToServerPacketEnchantItem) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketEntityAction struct {
-	EntityId  queser.VarInt
+	EntityId  proto_base.VarInt
 	ActionId  string
-	JumpBoost queser.VarInt
+	JumpBoost proto_base.VarInt
 }
 
-var PlayToServerPacketEntityActionActionIdMap = map[queser.VarInt]string{0: "leave_bed", 1: "start_sprinting", 2: "stop_sprinting", 3: "start_horse_jump", 4: "stop_horse_jump", 5: "open_vehicle_inventory", 6: "start_elytra_flying"}
+var PlayToServerPacketEntityActionActionIdMap = map[proto_base.VarInt]string{0: "leave_bed", 1: "start_sprinting", 2: "stop_sprinting", 3: "start_horse_jump", 4: "stop_horse_jump", 5: "open_vehicle_inventory", 6: "start_elytra_flying"}
 
 func (_ PlayToServerPacketEntityAction) Decode(r io.Reader) (ret PlayToServerPacketEntityAction, err error) {
 	ret.EntityId, err = ret.EntityId.Decode(r)
 	if err != nil {
 		return
 	}
-	var PlayToServerPacketEntityActionActionIdKey queser.VarInt
+	var PlayToServerPacketEntityActionActionIdKey proto_base.VarInt
 	PlayToServerPacketEntityActionActionIdKey, err = PlayToServerPacketEntityActionActionIdKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.ActionId, err = queser.ErroringIndex(PlayToServerPacketEntityActionActionIdMap, PlayToServerPacketEntityActionActionIdKey)
+	ret.ActionId, err = proto_base.ErroringIndex(PlayToServerPacketEntityActionActionIdMap, PlayToServerPacketEntityActionActionIdKey)
 	if err != nil {
 		return
 	}
@@ -8693,15 +8693,15 @@ func (_ PlayToServerPacketEntityAction) Decode(r io.Reader) (ret PlayToServerPac
 	return
 }
 
-var PlayToServerPacketEntityActionActionIdReverseMap = map[string]queser.VarInt{"leave_bed": 0, "start_sprinting": 1, "stop_sprinting": 2, "start_horse_jump": 3, "stop_horse_jump": 4, "open_vehicle_inventory": 5, "start_elytra_flying": 6}
+var PlayToServerPacketEntityActionActionIdReverseMap = map[string]proto_base.VarInt{"leave_bed": 0, "start_sprinting": 1, "stop_sprinting": 2, "start_horse_jump": 3, "stop_horse_jump": 4, "open_vehicle_inventory": 5, "start_elytra_flying": 6}
 
 func (ret PlayToServerPacketEntityAction) Encode(w io.Writer) (err error) {
 	err = ret.EntityId.Encode(w)
 	if err != nil {
 		return
 	}
-	var vPlayToServerPacketEntityActionActionId queser.VarInt
-	vPlayToServerPacketEntityActionActionId, err = queser.ErroringIndex(PlayToServerPacketEntityActionActionIdReverseMap, ret.ActionId)
+	var vPlayToServerPacketEntityActionActionId proto_base.VarInt
+	vPlayToServerPacketEntityActionActionId, err = proto_base.ErroringIndex(PlayToServerPacketEntityActionActionIdReverseMap, ret.ActionId)
 	if err != nil {
 		return
 	}
@@ -8737,7 +8737,7 @@ func (ret PlayToServerPacketFlying) Encode(w io.Writer) (err error) {
 
 type PlayToServerPacketGenerateStructure struct {
 	Location    Position
-	Levels      queser.VarInt
+	Levels      proto_base.VarInt
 	KeepJigsaws bool
 }
 
@@ -8867,7 +8867,7 @@ func (ret PlayToServerPacketLook) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketMessageAcknowledgement struct {
-	Count queser.VarInt
+	Count proto_base.VarInt
 }
 
 func (_ PlayToServerPacketMessageAcknowledgement) Decode(r io.Reader) (ret PlayToServerPacketMessageAcknowledgement, err error) {
@@ -8890,14 +8890,14 @@ type PlayToServerPacketNameItem struct {
 }
 
 func (_ PlayToServerPacketNameItem) Decode(r io.Reader) (ret PlayToServerPacketNameItem, err error) {
-	ret.Name, err = queser.DecodeString(r)
+	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
 	return
 }
 func (ret PlayToServerPacketNameItem) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Name)
+	err = proto_base.EncodeString(w, ret.Name)
 	if err != nil {
 		return
 	}
@@ -8933,7 +8933,7 @@ func (ret PlayToServerPacketPickItemFromBlock) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketPickItemFromEntity struct {
-	EntityId    queser.VarInt
+	EntityId    proto_base.VarInt
 	IncludeData bool
 }
 
@@ -9138,7 +9138,7 @@ func (ret PlayToServerPacketPositionLook) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketQueryBlockNbt struct {
-	TransactionId queser.VarInt
+	TransactionId proto_base.VarInt
 	Location      Position
 }
 
@@ -9166,8 +9166,8 @@ func (ret PlayToServerPacketQueryBlockNbt) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketQueryEntityNbt struct {
-	TransactionId queser.VarInt
-	EntityId      queser.VarInt
+	TransactionId proto_base.VarInt
+	EntityId      proto_base.VarInt
 }
 
 func (_ PlayToServerPacketQueryEntityNbt) Decode(r io.Reader) (ret PlayToServerPacketQueryEntityNbt, err error) {
@@ -9194,7 +9194,7 @@ func (ret PlayToServerPacketQueryEntityNbt) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketRecipeBook struct {
-	BookId       queser.VarInt
+	BookId       proto_base.VarInt
 	BookOpen     bool
 	FilterActive bool
 }
@@ -9232,7 +9232,7 @@ func (ret PlayToServerPacketRecipeBook) Encode(w io.Writer) (err error) {
 
 type PlayToServerPacketResourcePackReceive struct {
 	Uuid   uuid.UUID
-	Result queser.VarInt
+	Result proto_base.VarInt
 }
 
 func (_ PlayToServerPacketResourcePackReceive) Decode(r io.Reader) (ret PlayToServerPacketResourcePackReceive, err error) {
@@ -9259,8 +9259,8 @@ func (ret PlayToServerPacketResourcePackReceive) Encode(w io.Writer) (err error)
 }
 
 type PlayToServerPacketSelectBundleItem struct {
-	SlotId            queser.VarInt
-	SelectedItemIndex queser.VarInt
+	SlotId            proto_base.VarInt
+	SelectedItemIndex proto_base.VarInt
 }
 
 func (_ PlayToServerPacketSelectBundleItem) Decode(r io.Reader) (ret PlayToServerPacketSelectBundleItem, err error) {
@@ -9287,7 +9287,7 @@ func (ret PlayToServerPacketSelectBundleItem) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketSelectTrade struct {
-	Slot queser.VarInt
+	Slot proto_base.VarInt
 }
 
 func (_ PlayToServerPacketSelectTrade) Decode(r io.Reader) (ret PlayToServerPacketSelectTrade, err error) {
@@ -9306,8 +9306,8 @@ func (ret PlayToServerPacketSelectTrade) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketSetBeaconEffect struct {
-	PrimaryEffect   *queser.VarInt
-	SecondaryEffect *queser.VarInt
+	PrimaryEffect   *proto_base.VarInt
+	SecondaryEffect *proto_base.VarInt
 }
 
 func (_ PlayToServerPacketSetBeaconEffect) Decode(r io.Reader) (ret PlayToServerPacketSetBeaconEffect, err error) {
@@ -9317,7 +9317,7 @@ func (_ PlayToServerPacketSetBeaconEffect) Decode(r io.Reader) (ret PlayToServer
 		return
 	}
 	if PlayToServerPacketSetBeaconEffectPrimaryEffectPresent {
-		var PlayToServerPacketSetBeaconEffectPrimaryEffectPresentValue queser.VarInt
+		var PlayToServerPacketSetBeaconEffectPrimaryEffectPresentValue proto_base.VarInt
 		PlayToServerPacketSetBeaconEffectPrimaryEffectPresentValue, err = PlayToServerPacketSetBeaconEffectPrimaryEffectPresentValue.Decode(r)
 		if err != nil {
 			return
@@ -9330,7 +9330,7 @@ func (_ PlayToServerPacketSetBeaconEffect) Decode(r io.Reader) (ret PlayToServer
 		return
 	}
 	if PlayToServerPacketSetBeaconEffectSecondaryEffectPresent {
-		var PlayToServerPacketSetBeaconEffectSecondaryEffectPresentValue queser.VarInt
+		var PlayToServerPacketSetBeaconEffectSecondaryEffectPresentValue proto_base.VarInt
 		PlayToServerPacketSetBeaconEffectSecondaryEffectPresentValue, err = PlayToServerPacketSetBeaconEffectSecondaryEffectPresentValue.Decode(r)
 		if err != nil {
 			return
@@ -9395,26 +9395,26 @@ type PlayToServerPacketSetDifficulty struct {
 	NewDifficulty string
 }
 
-var PlayToServerPacketSetDifficultyNewDifficultyMap = map[queser.VarInt]string{0: "peaceful", 1: "easy", 2: "normal", 3: "hard"}
+var PlayToServerPacketSetDifficultyNewDifficultyMap = map[proto_base.VarInt]string{0: "peaceful", 1: "easy", 2: "normal", 3: "hard"}
 
 func (_ PlayToServerPacketSetDifficulty) Decode(r io.Reader) (ret PlayToServerPacketSetDifficulty, err error) {
-	var PlayToServerPacketSetDifficultyNewDifficultyKey queser.VarInt
+	var PlayToServerPacketSetDifficultyNewDifficultyKey proto_base.VarInt
 	PlayToServerPacketSetDifficultyNewDifficultyKey, err = PlayToServerPacketSetDifficultyNewDifficultyKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.NewDifficulty, err = queser.ErroringIndex(PlayToServerPacketSetDifficultyNewDifficultyMap, PlayToServerPacketSetDifficultyNewDifficultyKey)
+	ret.NewDifficulty, err = proto_base.ErroringIndex(PlayToServerPacketSetDifficultyNewDifficultyMap, PlayToServerPacketSetDifficultyNewDifficultyKey)
 	if err != nil {
 		return
 	}
 	return
 }
 
-var PlayToServerPacketSetDifficultyNewDifficultyReverseMap = map[string]queser.VarInt{"peaceful": 0, "easy": 1, "normal": 2, "hard": 3}
+var PlayToServerPacketSetDifficultyNewDifficultyReverseMap = map[string]proto_base.VarInt{"peaceful": 0, "easy": 1, "normal": 2, "hard": 3}
 
 func (ret PlayToServerPacketSetDifficulty) Encode(w io.Writer) (err error) {
-	var vPlayToServerPacketSetDifficultyNewDifficulty queser.VarInt
-	vPlayToServerPacketSetDifficultyNewDifficulty, err = queser.ErroringIndex(PlayToServerPacketSetDifficultyNewDifficultyReverseMap, ret.NewDifficulty)
+	var vPlayToServerPacketSetDifficultyNewDifficulty proto_base.VarInt
+	vPlayToServerPacketSetDifficultyNewDifficulty, err = proto_base.ErroringIndex(PlayToServerPacketSetDifficultyNewDifficultyReverseMap, ret.NewDifficulty)
 	if err != nil {
 		return
 	}
@@ -9426,7 +9426,7 @@ func (ret PlayToServerPacketSetDifficulty) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketSetSlotState struct {
-	SlotId   queser.VarInt
+	SlotId   proto_base.VarInt
 	WindowId ContainerID
 	State    bool
 }
@@ -9464,7 +9464,7 @@ func (ret PlayToServerPacketSetSlotState) Encode(w io.Writer) (err error) {
 
 type PlayToServerPacketSetTestBlock struct {
 	Position Position
-	Mode     queser.VarInt
+	Mode     proto_base.VarInt
 	Message  string
 }
 
@@ -9477,7 +9477,7 @@ func (_ PlayToServerPacketSetTestBlock) Decode(r io.Reader) (ret PlayToServerPac
 	if err != nil {
 		return
 	}
-	ret.Message, err = queser.DecodeString(r)
+	ret.Message, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -9492,7 +9492,7 @@ func (ret PlayToServerPacketSetTestBlock) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Message)
+	err = proto_base.EncodeString(w, ret.Message)
 	if err != nil {
 		return
 	}
@@ -9547,7 +9547,7 @@ func (ret PlayToServerPacketSteerBoat) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketTabComplete struct {
-	TransactionId queser.VarInt
+	TransactionId proto_base.VarInt
 	Text          string
 }
 
@@ -9556,7 +9556,7 @@ func (_ PlayToServerPacketTabComplete) Decode(r io.Reader) (ret PlayToServerPack
 	if err != nil {
 		return
 	}
-	ret.Text, err = queser.DecodeString(r)
+	ret.Text, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -9567,7 +9567,7 @@ func (ret PlayToServerPacketTabComplete) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Text)
+	err = proto_base.EncodeString(w, ret.Text)
 	if err != nil {
 		return
 	}
@@ -9575,7 +9575,7 @@ func (ret PlayToServerPacketTabComplete) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketTeleportConfirm struct {
-	TeleportId queser.VarInt
+	TeleportId proto_base.VarInt
 }
 
 func (_ PlayToServerPacketTeleportConfirm) Decode(r io.Reader) (ret PlayToServerPacketTeleportConfirm, err error) {
@@ -9595,13 +9595,13 @@ func (ret PlayToServerPacketTeleportConfirm) Encode(w io.Writer) (err error) {
 
 type PlayToServerPacketTestInstanceBlockAction struct {
 	Pos    Position
-	Action queser.VarInt
+	Action proto_base.VarInt
 	Data   struct {
 		Test           *string
 		Size           Vec3i
-		Rotation       queser.VarInt
+		Rotation       proto_base.VarInt
 		IgnoreEntities bool
-		Status         queser.VarInt
+		Status         proto_base.VarInt
 		ErrorMessage   *nbt.Anon
 	}
 }
@@ -9622,7 +9622,7 @@ func (_ PlayToServerPacketTestInstanceBlockAction) Decode(r io.Reader) (ret Play
 	}
 	if PlayToServerPacketTestInstanceBlockActionDataTestPresent {
 		var PlayToServerPacketTestInstanceBlockActionDataTestPresentValue string
-		PlayToServerPacketTestInstanceBlockActionDataTestPresentValue, err = queser.DecodeString(r)
+		PlayToServerPacketTestInstanceBlockActionDataTestPresentValue, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -9673,7 +9673,7 @@ func (ret PlayToServerPacketTestInstanceBlockAction) Encode(w io.Writer) (err er
 		return
 	}
 	if ret.Data.Test != nil {
-		err = queser.EncodeString(w, *ret.Data.Test)
+		err = proto_base.EncodeString(w, *ret.Data.Test)
 		if err != nil {
 			return
 		}
@@ -9720,7 +9720,7 @@ func (ret PlayToServerPacketTickEnd) Encode(w io.Writer) (err error) {
 type PlayToServerPacketUpdateCommandBlock struct {
 	Location Position
 	Command  string
-	Mode     queser.VarInt
+	Mode     proto_base.VarInt
 	Flags    uint8
 }
 
@@ -9729,7 +9729,7 @@ func (_ PlayToServerPacketUpdateCommandBlock) Decode(r io.Reader) (ret PlayToSer
 	if err != nil {
 		return
 	}
-	ret.Command, err = queser.DecodeString(r)
+	ret.Command, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -9748,7 +9748,7 @@ func (ret PlayToServerPacketUpdateCommandBlock) Encode(w io.Writer) (err error) 
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Command)
+	err = proto_base.EncodeString(w, ret.Command)
 	if err != nil {
 		return
 	}
@@ -9764,7 +9764,7 @@ func (ret PlayToServerPacketUpdateCommandBlock) Encode(w io.Writer) (err error) 
 }
 
 type PlayToServerPacketUpdateCommandBlockMinecart struct {
-	EntityId    queser.VarInt
+	EntityId    proto_base.VarInt
 	Command     string
 	TrackOutput bool
 }
@@ -9774,7 +9774,7 @@ func (_ PlayToServerPacketUpdateCommandBlockMinecart) Decode(r io.Reader) (ret P
 	if err != nil {
 		return
 	}
-	ret.Command, err = queser.DecodeString(r)
+	ret.Command, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -9789,7 +9789,7 @@ func (ret PlayToServerPacketUpdateCommandBlockMinecart) Encode(w io.Writer) (err
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Command)
+	err = proto_base.EncodeString(w, ret.Command)
 	if err != nil {
 		return
 	}
@@ -9807,8 +9807,8 @@ type PlayToServerPacketUpdateJigsawBlock struct {
 	Pool              string
 	FinalState        string
 	JointType         string
-	SelectionPriority queser.VarInt
-	PlacementPriority queser.VarInt
+	SelectionPriority proto_base.VarInt
+	PlacementPriority proto_base.VarInt
 }
 
 func (_ PlayToServerPacketUpdateJigsawBlock) Decode(r io.Reader) (ret PlayToServerPacketUpdateJigsawBlock, err error) {
@@ -9816,23 +9816,23 @@ func (_ PlayToServerPacketUpdateJigsawBlock) Decode(r io.Reader) (ret PlayToServ
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.DecodeString(r)
+	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.Target, err = queser.DecodeString(r)
+	ret.Target, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.Pool, err = queser.DecodeString(r)
+	ret.Pool, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.FinalState, err = queser.DecodeString(r)
+	ret.FinalState, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.JointType, err = queser.DecodeString(r)
+	ret.JointType, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -9851,23 +9851,23 @@ func (ret PlayToServerPacketUpdateJigsawBlock) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Name)
+	err = proto_base.EncodeString(w, ret.Name)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Target)
+	err = proto_base.EncodeString(w, ret.Target)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Pool)
+	err = proto_base.EncodeString(w, ret.Pool)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.FinalState)
+	err = proto_base.EncodeString(w, ret.FinalState)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.JointType)
+	err = proto_base.EncodeString(w, ret.JointType)
 	if err != nil {
 		return
 	}
@@ -9900,19 +9900,19 @@ func (_ PlayToServerPacketUpdateSign) Decode(r io.Reader) (ret PlayToServerPacke
 	if err != nil {
 		return
 	}
-	ret.Text1, err = queser.DecodeString(r)
+	ret.Text1, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.Text2, err = queser.DecodeString(r)
+	ret.Text2, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.Text3, err = queser.DecodeString(r)
+	ret.Text3, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	ret.Text4, err = queser.DecodeString(r)
+	ret.Text4, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -9927,19 +9927,19 @@ func (ret PlayToServerPacketUpdateSign) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Text1)
+	err = proto_base.EncodeString(w, ret.Text1)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Text2)
+	err = proto_base.EncodeString(w, ret.Text2)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Text3)
+	err = proto_base.EncodeString(w, ret.Text3)
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Text4)
+	err = proto_base.EncodeString(w, ret.Text4)
 	if err != nil {
 		return
 	}
@@ -9948,8 +9948,8 @@ func (ret PlayToServerPacketUpdateSign) Encode(w io.Writer) (err error) {
 
 type PlayToServerPacketUpdateStructureBlock struct {
 	Location  Position
-	Action    queser.VarInt
-	Mode      queser.VarInt
+	Action    proto_base.VarInt
+	Mode      proto_base.VarInt
 	Name      string
 	OffsetX   int8
 	OffsetY   int8
@@ -9957,11 +9957,11 @@ type PlayToServerPacketUpdateStructureBlock struct {
 	SizeX     int8
 	SizeY     int8
 	SizeZ     int8
-	Mirror    queser.VarInt
-	Rotation  queser.VarInt
+	Mirror    proto_base.VarInt
+	Rotation  proto_base.VarInt
 	Metadata  string
 	Integrity float32
-	Seed      queser.VarInt
+	Seed      proto_base.VarInt
 	Flags     string
 }
 
@@ -9980,7 +9980,7 @@ func (_ PlayToServerPacketUpdateStructureBlock) Decode(r io.Reader) (ret PlayToS
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.DecodeString(r)
+	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -10016,7 +10016,7 @@ func (_ PlayToServerPacketUpdateStructureBlock) Decode(r io.Reader) (ret PlayToS
 	if err != nil {
 		return
 	}
-	ret.Metadata, err = queser.DecodeString(r)
+	ret.Metadata, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -10033,7 +10033,7 @@ func (_ PlayToServerPacketUpdateStructureBlock) Decode(r io.Reader) (ret PlayToS
 	if err != nil {
 		return
 	}
-	ret.Flags, err = queser.ErroringIndex(PlayToServerPacketUpdateStructureBlockFlagsMap, PlayToServerPacketUpdateStructureBlockFlagsKey)
+	ret.Flags, err = proto_base.ErroringIndex(PlayToServerPacketUpdateStructureBlockFlagsMap, PlayToServerPacketUpdateStructureBlockFlagsKey)
 	if err != nil {
 		return
 	}
@@ -10055,7 +10055,7 @@ func (ret PlayToServerPacketUpdateStructureBlock) Encode(w io.Writer) (err error
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Name)
+	err = proto_base.EncodeString(w, ret.Name)
 	if err != nil {
 		return
 	}
@@ -10091,7 +10091,7 @@ func (ret PlayToServerPacketUpdateStructureBlock) Encode(w io.Writer) (err error
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Metadata)
+	err = proto_base.EncodeString(w, ret.Metadata)
 	if err != nil {
 		return
 	}
@@ -10104,7 +10104,7 @@ func (ret PlayToServerPacketUpdateStructureBlock) Encode(w io.Writer) (err error
 		return
 	}
 	var vPlayToServerPacketUpdateStructureBlockFlags uint8
-	vPlayToServerPacketUpdateStructureBlockFlags, err = queser.ErroringIndex(PlayToServerPacketUpdateStructureBlockFlagsReverseMap, ret.Flags)
+	vPlayToServerPacketUpdateStructureBlockFlags, err = proto_base.ErroringIndex(PlayToServerPacketUpdateStructureBlockFlagsReverseMap, ret.Flags)
 	if err != nil {
 		return
 	}
@@ -10116,8 +10116,8 @@ func (ret PlayToServerPacketUpdateStructureBlock) Encode(w io.Writer) (err error
 }
 
 type PlayToServerPacketUseEntity struct {
-	Target   queser.VarInt
-	Mouse    queser.VarInt
+	Target   proto_base.VarInt
+	Mouse    proto_base.VarInt
 	X        any
 	Y        any
 	Z        any
@@ -10143,7 +10143,7 @@ func (_ PlayToServerPacketUseEntity) Decode(r io.Reader) (ret PlayToServerPacket
 		}
 		ret.X = PlayToServerPacketUseEntityXTmp
 	default:
-		var PlayToServerPacketUseEntityXTmp queser.Void
+		var PlayToServerPacketUseEntityXTmp proto_base.Void
 		PlayToServerPacketUseEntityXTmp, err = PlayToServerPacketUseEntityXTmp.Decode(r)
 		if err != nil {
 			return
@@ -10159,7 +10159,7 @@ func (_ PlayToServerPacketUseEntity) Decode(r io.Reader) (ret PlayToServerPacket
 		}
 		ret.Y = PlayToServerPacketUseEntityYTmp
 	default:
-		var PlayToServerPacketUseEntityYTmp queser.Void
+		var PlayToServerPacketUseEntityYTmp proto_base.Void
 		PlayToServerPacketUseEntityYTmp, err = PlayToServerPacketUseEntityYTmp.Decode(r)
 		if err != nil {
 			return
@@ -10175,7 +10175,7 @@ func (_ PlayToServerPacketUseEntity) Decode(r io.Reader) (ret PlayToServerPacket
 		}
 		ret.Z = PlayToServerPacketUseEntityZTmp
 	default:
-		var PlayToServerPacketUseEntityZTmp queser.Void
+		var PlayToServerPacketUseEntityZTmp proto_base.Void
 		PlayToServerPacketUseEntityZTmp, err = PlayToServerPacketUseEntityZTmp.Decode(r)
 		if err != nil {
 			return
@@ -10184,21 +10184,21 @@ func (_ PlayToServerPacketUseEntity) Decode(r io.Reader) (ret PlayToServerPacket
 	}
 	switch ret.Mouse {
 	case 0:
-		var PlayToServerPacketUseEntityHandTmp queser.VarInt
+		var PlayToServerPacketUseEntityHandTmp proto_base.VarInt
 		PlayToServerPacketUseEntityHandTmp, err = PlayToServerPacketUseEntityHandTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Hand = PlayToServerPacketUseEntityHandTmp
 	case 2:
-		var PlayToServerPacketUseEntityHandTmp queser.VarInt
+		var PlayToServerPacketUseEntityHandTmp proto_base.VarInt
 		PlayToServerPacketUseEntityHandTmp, err = PlayToServerPacketUseEntityHandTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Hand = PlayToServerPacketUseEntityHandTmp
 	default:
-		var PlayToServerPacketUseEntityHandTmp queser.Void
+		var PlayToServerPacketUseEntityHandTmp proto_base.Void
 		PlayToServerPacketUseEntityHandTmp, err = PlayToServerPacketUseEntityHandTmp.Decode(r)
 		if err != nil {
 			return
@@ -10224,7 +10224,7 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 	case 2:
 		PlayToServerPacketUseEntityX, ok := ret.X.(float32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToServerPacketUseEntityX)
@@ -10232,12 +10232,12 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.X.(queser.Void)
+		_, ok := ret.X.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.X.(queser.Void).Encode(w)
+		err = ret.X.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -10246,7 +10246,7 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 	case 2:
 		PlayToServerPacketUseEntityY, ok := ret.Y.(float32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToServerPacketUseEntityY)
@@ -10254,12 +10254,12 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Y.(queser.Void)
+		_, ok := ret.Y.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Y.(queser.Void).Encode(w)
+		err = ret.Y.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -10268,7 +10268,7 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 	case 2:
 		PlayToServerPacketUseEntityZ, ok := ret.Z.(float32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToServerPacketUseEntityZ)
@@ -10276,21 +10276,21 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Z.(queser.Void)
+		_, ok := ret.Z.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Z.(queser.Void).Encode(w)
+		err = ret.Z.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
 	}
 	switch ret.Mouse {
 	case 0:
-		PlayToServerPacketUseEntityHand, ok := ret.Hand.(queser.VarInt)
+		PlayToServerPacketUseEntityHand, ok := ret.Hand.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketUseEntityHand.Encode(w)
@@ -10298,9 +10298,9 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 			return
 		}
 	case 2:
-		PlayToServerPacketUseEntityHand, ok := ret.Hand.(queser.VarInt)
+		PlayToServerPacketUseEntityHand, ok := ret.Hand.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToServerPacketUseEntityHand.Encode(w)
@@ -10308,12 +10308,12 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Hand.(queser.Void)
+		_, ok := ret.Hand.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Hand.(queser.Void).Encode(w)
+		err = ret.Hand.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -10326,8 +10326,8 @@ func (ret PlayToServerPacketUseEntity) Encode(w io.Writer) (err error) {
 }
 
 type PlayToServerPacketUseItem struct {
-	Hand     queser.VarInt
-	Sequence queser.VarInt
+	Hand     proto_base.VarInt
+	Sequence proto_base.VarInt
 	Rotation Vec2f
 }
 
@@ -10428,10 +10428,10 @@ func (ret PlayToServerPacketVehicleMove) Encode(w io.Writer) (err error) {
 
 type PlayToServerPacketWindowClick struct {
 	WindowId     ContainerID
-	StateId      queser.VarInt
+	StateId      proto_base.VarInt
 	Slot         int16
 	MouseButton  int8
-	Mode         queser.VarInt
+	Mode         proto_base.VarInt
 	ChangedSlots []struct {
 		Location int16
 		Item     *HashedSlot
@@ -10460,7 +10460,7 @@ func (_ PlayToServerPacketWindowClick) Decode(r io.Reader) (ret PlayToServerPack
 	if err != nil {
 		return
 	}
-	var lPlayToServerPacketWindowClickChangedSlots queser.VarInt
+	var lPlayToServerPacketWindowClickChangedSlots proto_base.VarInt
 	lPlayToServerPacketWindowClickChangedSlots, err = lPlayToServerPacketWindowClickChangedSlots.Decode(r)
 	if err != nil {
 		return
@@ -10529,7 +10529,7 @@ func (ret PlayToServerPacketWindowClick) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.ChangedSlots)).Encode(w)
+	err = proto_base.VarInt(len(ret.ChangedSlots)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -10569,11 +10569,11 @@ type PlayToClientChatType struct {
 }
 
 func (_ PlayToClientChatType) Decode(r io.Reader) (ret PlayToClientChatType, err error) {
-	ret.TranslationKey, err = queser.DecodeString(r)
+	ret.TranslationKey, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
-	var lPlayToClientChatTypeParameters queser.VarInt
+	var lPlayToClientChatTypeParameters proto_base.VarInt
 	lPlayToClientChatTypeParameters, err = lPlayToClientChatTypeParameters.Decode(r)
 	if err != nil {
 		return
@@ -10594,11 +10594,11 @@ func (_ PlayToClientChatType) Decode(r io.Reader) (ret PlayToClientChatType, err
 	return
 }
 func (ret PlayToClientChatType) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.TranslationKey)
+	err = proto_base.EncodeString(w, ret.TranslationKey)
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Parameters)).Encode(w)
+	err = proto_base.VarInt(len(ret.Parameters)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -10619,26 +10619,26 @@ type PlayToClientChatTypeParameterType struct {
 	Val string
 }
 
-var PlayToClientChatTypeParameterTypeMap = map[queser.VarInt]string{0: "content", 1: "sender", 2: "target"}
+var PlayToClientChatTypeParameterTypeMap = map[proto_base.VarInt]string{0: "content", 1: "sender", 2: "target"}
 
 func (_ PlayToClientChatTypeParameterType) Decode(r io.Reader) (ret PlayToClientChatTypeParameterType, err error) {
-	var PlayToClientChatTypeParameterTypeKey queser.VarInt
+	var PlayToClientChatTypeParameterTypeKey proto_base.VarInt
 	PlayToClientChatTypeParameterTypeKey, err = PlayToClientChatTypeParameterTypeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Val, err = queser.ErroringIndex(PlayToClientChatTypeParameterTypeMap, PlayToClientChatTypeParameterTypeKey)
+	ret.Val, err = proto_base.ErroringIndex(PlayToClientChatTypeParameterTypeMap, PlayToClientChatTypeParameterTypeKey)
 	if err != nil {
 		return
 	}
 	return
 }
 
-var PlayToClientChatTypeParameterTypeReverseMap = map[string]queser.VarInt{"content": 0, "sender": 1, "target": 2}
+var PlayToClientChatTypeParameterTypeReverseMap = map[string]proto_base.VarInt{"content": 0, "sender": 1, "target": 2}
 
 func (ret PlayToClientChatTypeParameterType) Encode(w io.Writer) (err error) {
-	var vPlayToClientChatTypeParameterType queser.VarInt
-	vPlayToClientChatTypeParameterType, err = queser.ErroringIndex(PlayToClientChatTypeParameterTypeReverseMap, ret.Val)
+	var vPlayToClientChatTypeParameterType proto_base.VarInt
+	vPlayToClientChatTypeParameterType, err = proto_base.ErroringIndex(PlayToClientChatTypeParameterTypeReverseMap, ret.Val)
 	if err != nil {
 		return
 	}
@@ -10682,7 +10682,7 @@ type PlayToClientChatTypesHolder struct {
 }
 
 func (_ PlayToClientChatTypesHolder) Decode(r io.Reader) (ret PlayToClientChatTypesHolder, err error) {
-	var PlayToClientChatTypesHolderId queser.VarInt
+	var PlayToClientChatTypesHolderId proto_base.VarInt
 	PlayToClientChatTypesHolderId, err = PlayToClientChatTypesHolderId.Decode(r)
 	if err != nil {
 		return
@@ -10701,7 +10701,7 @@ func (_ PlayToClientChatTypesHolder) Decode(r io.Reader) (ret PlayToClientChatTy
 }
 func (ret PlayToClientChatTypesHolder) Encode(w io.Writer) (err error) {
 	switch PlayToClientChatTypesHolderKnownType := ret.Val.(type) {
-	case queser.VarInt:
+	case proto_base.VarInt:
 		err = PlayToClientChatTypesHolderKnownType.Encode(w)
 		if err != nil {
 			return
@@ -10712,7 +10712,7 @@ func (ret PlayToClientChatTypesHolder) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		err = queser.BadTypeError
+		err = proto_base.BadTypeError
 	}
 	return
 }
@@ -10769,23 +10769,23 @@ type PlayToClientRecipeDisplay struct {
 	Data any
 }
 
-var PlayToClientRecipeDisplayTypeMap = map[queser.VarInt]string{0: "crafting_shapeless", 1: "crafting_shaped", 2: "furnace", 3: "stonecutter", 4: "smithing"}
+var PlayToClientRecipeDisplayTypeMap = map[proto_base.VarInt]string{0: "crafting_shapeless", 1: "crafting_shaped", 2: "furnace", 3: "stonecutter", 4: "smithing"}
 
 func (_ PlayToClientRecipeDisplay) Decode(r io.Reader) (ret PlayToClientRecipeDisplay, err error) {
-	var PlayToClientRecipeDisplayTypeKey queser.VarInt
+	var PlayToClientRecipeDisplayTypeKey proto_base.VarInt
 	PlayToClientRecipeDisplayTypeKey, err = PlayToClientRecipeDisplayTypeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Type, err = queser.ErroringIndex(PlayToClientRecipeDisplayTypeMap, PlayToClientRecipeDisplayTypeKey)
+	ret.Type, err = proto_base.ErroringIndex(PlayToClientRecipeDisplayTypeMap, PlayToClientRecipeDisplayTypeKey)
 	if err != nil {
 		return
 	}
 	switch ret.Type {
 	case "crafting_shaped":
 		var PlayToClientRecipeDisplayDataTmp struct {
-			Width           queser.VarInt
-			Height          queser.VarInt
+			Width           proto_base.VarInt
+			Height          proto_base.VarInt
 			Ingredients     []PlayToClientSlotDisplay
 			Result          PlayToClientSlotDisplay
 			CraftingStation PlayToClientSlotDisplay
@@ -10798,7 +10798,7 @@ func (_ PlayToClientRecipeDisplay) Decode(r io.Reader) (ret PlayToClientRecipeDi
 		if err != nil {
 			return
 		}
-		var lPlayToClientRecipeDisplayDataIngredients queser.VarInt
+		var lPlayToClientRecipeDisplayDataIngredients proto_base.VarInt
 		lPlayToClientRecipeDisplayDataIngredients, err = lPlayToClientRecipeDisplayDataIngredients.Decode(r)
 		if err != nil {
 			return
@@ -10827,7 +10827,7 @@ func (_ PlayToClientRecipeDisplay) Decode(r io.Reader) (ret PlayToClientRecipeDi
 			Result          PlayToClientSlotDisplay
 			CraftingStation PlayToClientSlotDisplay
 		}
-		var lPlayToClientRecipeDisplayDataIngredients queser.VarInt
+		var lPlayToClientRecipeDisplayDataIngredients proto_base.VarInt
 		lPlayToClientRecipeDisplayDataIngredients, err = lPlayToClientRecipeDisplayDataIngredients.Decode(r)
 		if err != nil {
 			return
@@ -10856,7 +10856,7 @@ func (_ PlayToClientRecipeDisplay) Decode(r io.Reader) (ret PlayToClientRecipeDi
 			Fuel            PlayToClientSlotDisplay
 			Result          PlayToClientSlotDisplay
 			CraftingStation PlayToClientSlotDisplay
-			Duration        queser.VarInt
+			Duration        proto_base.VarInt
 			Experience      float32
 		}
 		PlayToClientRecipeDisplayDataTmp.Ingredient, err = PlayToClientRecipeDisplayDataTmp.Ingredient.Decode(r)
@@ -10936,11 +10936,11 @@ func (_ PlayToClientRecipeDisplay) Decode(r io.Reader) (ret PlayToClientRecipeDi
 	return
 }
 
-var PlayToClientRecipeDisplayTypeReverseMap = map[string]queser.VarInt{"crafting_shapeless": 0, "crafting_shaped": 1, "furnace": 2, "stonecutter": 3, "smithing": 4}
+var PlayToClientRecipeDisplayTypeReverseMap = map[string]proto_base.VarInt{"crafting_shapeless": 0, "crafting_shaped": 1, "furnace": 2, "stonecutter": 3, "smithing": 4}
 
 func (ret PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
-	var vPlayToClientRecipeDisplayType queser.VarInt
-	vPlayToClientRecipeDisplayType, err = queser.ErroringIndex(PlayToClientRecipeDisplayTypeReverseMap, ret.Type)
+	var vPlayToClientRecipeDisplayType proto_base.VarInt
+	vPlayToClientRecipeDisplayType, err = proto_base.ErroringIndex(PlayToClientRecipeDisplayTypeReverseMap, ret.Type)
 	if err != nil {
 		return
 	}
@@ -10951,14 +10951,14 @@ func (ret PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 	switch ret.Type {
 	case "crafting_shaped":
 		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
-			Width           queser.VarInt
-			Height          queser.VarInt
+			Width           proto_base.VarInt
+			Height          proto_base.VarInt
 			Ingredients     []PlayToClientSlotDisplay
 			Result          PlayToClientSlotDisplay
 			CraftingStation PlayToClientSlotDisplay
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientRecipeDisplayData.Width.Encode(w)
@@ -10969,7 +10969,7 @@ func (ret PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = queser.VarInt(len(PlayToClientRecipeDisplayData.Ingredients)).Encode(w)
+		err = proto_base.VarInt(len(PlayToClientRecipeDisplayData.Ingredients)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -10994,10 +10994,10 @@ func (ret PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			CraftingStation PlayToClientSlotDisplay
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.VarInt(len(PlayToClientRecipeDisplayData.Ingredients)).Encode(w)
+		err = proto_base.VarInt(len(PlayToClientRecipeDisplayData.Ingredients)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -11021,11 +11021,11 @@ func (ret PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			Fuel            PlayToClientSlotDisplay
 			Result          PlayToClientSlotDisplay
 			CraftingStation PlayToClientSlotDisplay
-			Duration        queser.VarInt
+			Duration        proto_base.VarInt
 			Experience      float32
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientRecipeDisplayData.Ingredient.Encode(w)
@@ -11061,7 +11061,7 @@ func (ret PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			CraftingStation PlayToClientSlotDisplay
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientRecipeDisplayData.Template.Encode(w)
@@ -11091,7 +11091,7 @@ func (ret PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			CraftingStation PlayToClientSlotDisplay
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientRecipeDisplayData.Ingredient.Encode(w)
@@ -11115,21 +11115,21 @@ type PlayToClientSlotDisplay struct {
 	Data any
 }
 
-var PlayToClientSlotDisplayTypeMap = map[queser.VarInt]string{0: "empty", 1: "any_fuel", 2: "item", 3: "item_stack", 4: "tag", 5: "smithing_trim", 6: "with_remainder", 7: "composite"}
+var PlayToClientSlotDisplayTypeMap = map[proto_base.VarInt]string{0: "empty", 1: "any_fuel", 2: "item", 3: "item_stack", 4: "tag", 5: "smithing_trim", 6: "with_remainder", 7: "composite"}
 
 func (_ PlayToClientSlotDisplay) Decode(r io.Reader) (ret PlayToClientSlotDisplay, err error) {
-	var PlayToClientSlotDisplayTypeKey queser.VarInt
+	var PlayToClientSlotDisplayTypeKey proto_base.VarInt
 	PlayToClientSlotDisplayTypeKey, err = PlayToClientSlotDisplayTypeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Type, err = queser.ErroringIndex(PlayToClientSlotDisplayTypeMap, PlayToClientSlotDisplayTypeKey)
+	ret.Type, err = proto_base.ErroringIndex(PlayToClientSlotDisplayTypeMap, PlayToClientSlotDisplayTypeKey)
 	if err != nil {
 		return
 	}
 	switch ret.Type {
 	case "any_fuel":
-		var PlayToClientSlotDisplayDataTmp queser.Void
+		var PlayToClientSlotDisplayDataTmp proto_base.Void
 		PlayToClientSlotDisplayDataTmp, err = PlayToClientSlotDisplayDataTmp.Decode(r)
 		if err != nil {
 			return
@@ -11137,7 +11137,7 @@ func (_ PlayToClientSlotDisplay) Decode(r io.Reader) (ret PlayToClientSlotDispla
 		ret.Data = PlayToClientSlotDisplayDataTmp
 	case "composite":
 		var PlayToClientSlotDisplayDataTmp []PlayToClientSlotDisplay
-		var lPlayToClientSlotDisplayData queser.VarInt
+		var lPlayToClientSlotDisplayData proto_base.VarInt
 		lPlayToClientSlotDisplayData, err = lPlayToClientSlotDisplayData.Decode(r)
 		if err != nil {
 			return
@@ -11153,14 +11153,14 @@ func (_ PlayToClientSlotDisplay) Decode(r io.Reader) (ret PlayToClientSlotDispla
 		}
 		ret.Data = PlayToClientSlotDisplayDataTmp
 	case "empty":
-		var PlayToClientSlotDisplayDataTmp queser.Void
+		var PlayToClientSlotDisplayDataTmp proto_base.Void
 		PlayToClientSlotDisplayDataTmp, err = PlayToClientSlotDisplayDataTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Data = PlayToClientSlotDisplayDataTmp
 	case "item":
-		var PlayToClientSlotDisplayDataTmp queser.VarInt
+		var PlayToClientSlotDisplayDataTmp proto_base.VarInt
 		PlayToClientSlotDisplayDataTmp, err = PlayToClientSlotDisplayDataTmp.Decode(r)
 		if err != nil {
 			return
@@ -11187,7 +11187,7 @@ func (_ PlayToClientSlotDisplay) Decode(r io.Reader) (ret PlayToClientSlotDispla
 		if err != nil {
 			return
 		}
-		var PlayToClientSlotDisplayDataPatternId queser.VarInt
+		var PlayToClientSlotDisplayDataPatternId proto_base.VarInt
 		PlayToClientSlotDisplayDataPatternId, err = PlayToClientSlotDisplayDataPatternId.Decode(r)
 		if err != nil {
 			return
@@ -11205,7 +11205,7 @@ func (_ PlayToClientSlotDisplay) Decode(r io.Reader) (ret PlayToClientSlotDispla
 		ret.Data = PlayToClientSlotDisplayDataTmp
 	case "tag":
 		var PlayToClientSlotDisplayDataTmp string
-		PlayToClientSlotDisplayDataTmp, err = queser.DecodeString(r)
+		PlayToClientSlotDisplayDataTmp, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -11228,11 +11228,11 @@ func (_ PlayToClientSlotDisplay) Decode(r io.Reader) (ret PlayToClientSlotDispla
 	return
 }
 
-var PlayToClientSlotDisplayTypeReverseMap = map[string]queser.VarInt{"empty": 0, "any_fuel": 1, "item": 2, "item_stack": 3, "tag": 4, "smithing_trim": 5, "with_remainder": 6, "composite": 7}
+var PlayToClientSlotDisplayTypeReverseMap = map[string]proto_base.VarInt{"empty": 0, "any_fuel": 1, "item": 2, "item_stack": 3, "tag": 4, "smithing_trim": 5, "with_remainder": 6, "composite": 7}
 
 func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
-	var vPlayToClientSlotDisplayType queser.VarInt
-	vPlayToClientSlotDisplayType, err = queser.ErroringIndex(PlayToClientSlotDisplayTypeReverseMap, ret.Type)
+	var vPlayToClientSlotDisplayType proto_base.VarInt
+	vPlayToClientSlotDisplayType, err = proto_base.ErroringIndex(PlayToClientSlotDisplayTypeReverseMap, ret.Type)
 	if err != nil {
 		return
 	}
@@ -11242,9 +11242,9 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 	}
 	switch ret.Type {
 	case "any_fuel":
-		PlayToClientSlotDisplayData, ok := ret.Data.(queser.Void)
+		PlayToClientSlotDisplayData, ok := ret.Data.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientSlotDisplayData.Encode(w)
@@ -11254,10 +11254,10 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 	case "composite":
 		PlayToClientSlotDisplayData, ok := ret.Data.([]PlayToClientSlotDisplay)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.VarInt(len(PlayToClientSlotDisplayData)).Encode(w)
+		err = proto_base.VarInt(len(PlayToClientSlotDisplayData)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -11268,9 +11268,9 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			}
 		}
 	case "empty":
-		PlayToClientSlotDisplayData, ok := ret.Data.(queser.Void)
+		PlayToClientSlotDisplayData, ok := ret.Data.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientSlotDisplayData.Encode(w)
@@ -11278,9 +11278,9 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "item":
-		PlayToClientSlotDisplayData, ok := ret.Data.(queser.VarInt)
+		PlayToClientSlotDisplayData, ok := ret.Data.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientSlotDisplayData.Encode(w)
@@ -11290,7 +11290,7 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 	case "item_stack":
 		PlayToClientSlotDisplayData, ok := ret.Data.(Slot)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientSlotDisplayData.Encode(w)
@@ -11304,7 +11304,7 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			Pattern  any
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientSlotDisplayData.Base.Encode(w)
@@ -11316,7 +11316,7 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			return
 		}
 		switch PlayToClientSlotDisplayDataPatternKnownType := PlayToClientSlotDisplayData.Pattern.(type) {
-		case queser.VarInt:
+		case proto_base.VarInt:
 			err = PlayToClientSlotDisplayDataPatternKnownType.Encode(w)
 			if err != nil {
 				return
@@ -11327,15 +11327,15 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 		}
 	case "tag":
 		PlayToClientSlotDisplayData, ok := ret.Data.(string)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, PlayToClientSlotDisplayData)
+		err = proto_base.EncodeString(w, PlayToClientSlotDisplayData)
 		if err != nil {
 			return
 		}
@@ -11345,7 +11345,7 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			Remainder PlayToClientSlotDisplay
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientSlotDisplayData.Input.Encode(w)
@@ -11361,7 +11361,7 @@ func (ret PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientSpawnInfo struct {
-	Dimension        queser.VarInt
+	Dimension        proto_base.VarInt
 	Name             string
 	HashedSeed       int64
 	Gamemode         string
@@ -11372,8 +11372,8 @@ type PlayToClientSpawnInfo struct {
 		DimensionName string
 		Location      Position
 	}
-	PortalCooldown queser.VarInt
-	SeaLevel       queser.VarInt
+	PortalCooldown proto_base.VarInt
+	SeaLevel       proto_base.VarInt
 }
 
 var PlayToClientSpawnInfoGamemodeMap = map[int8]string{0: "survival", 1: "creative", 2: "adventure", 3: "spectator"}
@@ -11383,7 +11383,7 @@ func (_ PlayToClientSpawnInfo) Decode(r io.Reader) (ret PlayToClientSpawnInfo, e
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.DecodeString(r)
+	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -11396,7 +11396,7 @@ func (_ PlayToClientSpawnInfo) Decode(r io.Reader) (ret PlayToClientSpawnInfo, e
 	if err != nil {
 		return
 	}
-	ret.Gamemode, err = queser.ErroringIndex(PlayToClientSpawnInfoGamemodeMap, PlayToClientSpawnInfoGamemodeKey)
+	ret.Gamemode, err = proto_base.ErroringIndex(PlayToClientSpawnInfoGamemodeMap, PlayToClientSpawnInfoGamemodeKey)
 	if err != nil {
 		return
 	}
@@ -11422,7 +11422,7 @@ func (_ PlayToClientSpawnInfo) Decode(r io.Reader) (ret PlayToClientSpawnInfo, e
 			DimensionName string
 			Location      Position
 		}
-		PlayToClientSpawnInfoDeathPresentValue.DimensionName, err = queser.DecodeString(r)
+		PlayToClientSpawnInfoDeathPresentValue.DimensionName, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -11450,7 +11450,7 @@ func (ret PlayToClientSpawnInfo) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Name)
+	err = proto_base.EncodeString(w, ret.Name)
 	if err != nil {
 		return
 	}
@@ -11459,7 +11459,7 @@ func (ret PlayToClientSpawnInfo) Encode(w io.Writer) (err error) {
 		return
 	}
 	var vPlayToClientSpawnInfoGamemode int8
-	vPlayToClientSpawnInfoGamemode, err = queser.ErroringIndex(PlayToClientSpawnInfoGamemodeReverseMap, ret.Gamemode)
+	vPlayToClientSpawnInfoGamemode, err = proto_base.ErroringIndex(PlayToClientSpawnInfoGamemodeReverseMap, ret.Gamemode)
 	if err != nil {
 		return
 	}
@@ -11484,7 +11484,7 @@ func (ret PlayToClientSpawnInfo) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.Death != nil {
-		err = queser.EncodeString(w, (*ret.Death).DimensionName)
+		err = proto_base.EncodeString(w, (*ret.Death).DimensionName)
 		if err != nil {
 			return
 		}
@@ -11509,15 +11509,15 @@ type PlayToClientPacket struct {
 	Params any
 }
 
-var PlayToClientPacketNameMap = map[queser.VarInt]string{0x00: "bundle_delimiter", 0x01: "spawn_entity", 0x02: "animation", 0x03: "statistics", 0x04: "acknowledge_player_digging", 0x05: "block_break_animation", 0x06: "tile_entity_data", 0x07: "block_action", 0x08: "block_change", 0x09: "boss_bar", 0x0a: "difficulty", 0x0b: "chunk_batch_finished", 0x0c: "chunk_batch_start", 0x0d: "chunk_biomes", 0x0e: "clear_titles", 0x0f: "tab_complete", 0x10: "declare_commands", 0x11: "close_window", 0x12: "window_items", 0x13: "craft_progress_bar", 0x14: "set_slot", 0x15: "cookie_request", 0x16: "set_cooldown", 0x17: "chat_suggestions", 0x18: "custom_payload", 0x19: "damage_event", 0x1a: "debug_sample", 0x1b: "hide_message", 0x1c: "kick_disconnect", 0x1d: "profileless_chat", 0x1e: "entity_status", 0x1f: "sync_entity_position", 0x20: "explosion", 0x21: "unload_chunk", 0x22: "game_state_change", 0x23: "open_horse_window", 0x24: "hurt_animation", 0x25: "initialize_world_border", 0x26: "keep_alive", 0x27: "map_chunk", 0x28: "world_event", 0x29: "world_particles", 0x2a: "update_light", 0x2b: "login", 0x2c: "map", 0x2d: "trade_list", 0x2e: "rel_entity_move", 0x2f: "entity_move_look", 0x30: "move_minecart", 0x31: "entity_look", 0x32: "vehicle_move", 0x33: "open_book", 0x34: "open_window", 0x35: "open_sign_entity", 0x36: "ping", 0x37: "ping_response", 0x38: "craft_recipe_response", 0x39: "abilities", 0x3a: "player_chat", 0x3b: "end_combat_event", 0x3c: "enter_combat_event", 0x3d: "death_combat_event", 0x3e: "player_remove", 0x3f: "player_info", 0x40: "face_player", 0x41: "position", 0x42: "player_rotation", 0x43: "recipe_book_add", 0x44: "recipe_book_remove", 0x45: "recipe_book_settings", 0x46: "entity_destroy", 0x47: "remove_entity_effect", 0x48: "reset_score", 0x49: "remove_resource_pack", 0x4a: "add_resource_pack", 0x4b: "respawn", 0x4c: "entity_head_rotation", 0x4d: "multi_block_change", 0x4e: "select_advancement_tab", 0x4f: "server_data", 0x50: "action_bar", 0x51: "world_border_center", 0x52: "world_border_lerp_size", 0x53: "world_border_size", 0x54: "world_border_warning_delay", 0x55: "world_border_warning_reach", 0x56: "camera", 0x57: "update_view_position", 0x58: "update_view_distance", 0x59: "set_cursor_item", 0x5a: "spawn_position", 0x5b: "scoreboard_display_objective", 0x5c: "entity_metadata", 0x5d: "attach_entity", 0x5e: "entity_velocity", 0x5f: "entity_equipment", 0x60: "experience", 0x61: "update_health", 0x62: "held_item_slot", 0x63: "scoreboard_objective", 0x64: "set_passengers", 0x65: "set_player_inventory", 0x66: "teams", 0x67: "scoreboard_score", 0x68: "simulation_distance", 0x69: "set_title_subtitle", 0x6a: "update_time", 0x6b: "set_title_text", 0x6c: "set_title_time", 0x6d: "entity_sound_effect", 0x6e: "sound_effect", 0x6f: "start_configuration", 0x70: "stop_sound", 0x71: "store_cookie", 0x72: "system_chat", 0x73: "playerlist_header", 0x74: "nbt_query_response", 0x75: "collect", 0x76: "entity_teleport", 0x77: "test_instance_block_status", 0x78: "set_ticking_state", 0x79: "step_tick", 0x7a: "transfer", 0x7b: "advancements", 0x7c: "entity_update_attributes", 0x7d: "entity_effect", 0x7e: "declare_recipes", 0x7f: "tags", 0x80: "set_projectile_power", 0x81: "custom_report_details", 0x82: "server_links", 0x83: "tracked_waypoint", 0x84: "clear_dialog", 0x85: "show_dialog"}
+var PlayToClientPacketNameMap = map[proto_base.VarInt]string{0x00: "bundle_delimiter", 0x01: "spawn_entity", 0x02: "animation", 0x03: "statistics", 0x04: "acknowledge_player_digging", 0x05: "block_break_animation", 0x06: "tile_entity_data", 0x07: "block_action", 0x08: "block_change", 0x09: "boss_bar", 0x0a: "difficulty", 0x0b: "chunk_batch_finished", 0x0c: "chunk_batch_start", 0x0d: "chunk_biomes", 0x0e: "clear_titles", 0x0f: "tab_complete", 0x10: "declare_commands", 0x11: "close_window", 0x12: "window_items", 0x13: "craft_progress_bar", 0x14: "set_slot", 0x15: "cookie_request", 0x16: "set_cooldown", 0x17: "chat_suggestions", 0x18: "custom_payload", 0x19: "damage_event", 0x1a: "debug_sample", 0x1b: "hide_message", 0x1c: "kick_disconnect", 0x1d: "profileless_chat", 0x1e: "entity_status", 0x1f: "sync_entity_position", 0x20: "explosion", 0x21: "unload_chunk", 0x22: "game_state_change", 0x23: "open_horse_window", 0x24: "hurt_animation", 0x25: "initialize_world_border", 0x26: "keep_alive", 0x27: "map_chunk", 0x28: "world_event", 0x29: "world_particles", 0x2a: "update_light", 0x2b: "login", 0x2c: "map", 0x2d: "trade_list", 0x2e: "rel_entity_move", 0x2f: "entity_move_look", 0x30: "move_minecart", 0x31: "entity_look", 0x32: "vehicle_move", 0x33: "open_book", 0x34: "open_window", 0x35: "open_sign_entity", 0x36: "ping", 0x37: "ping_response", 0x38: "craft_recipe_response", 0x39: "abilities", 0x3a: "player_chat", 0x3b: "end_combat_event", 0x3c: "enter_combat_event", 0x3d: "death_combat_event", 0x3e: "player_remove", 0x3f: "player_info", 0x40: "face_player", 0x41: "position", 0x42: "player_rotation", 0x43: "recipe_book_add", 0x44: "recipe_book_remove", 0x45: "recipe_book_settings", 0x46: "entity_destroy", 0x47: "remove_entity_effect", 0x48: "reset_score", 0x49: "remove_resource_pack", 0x4a: "add_resource_pack", 0x4b: "respawn", 0x4c: "entity_head_rotation", 0x4d: "multi_block_change", 0x4e: "select_advancement_tab", 0x4f: "server_data", 0x50: "action_bar", 0x51: "world_border_center", 0x52: "world_border_lerp_size", 0x53: "world_border_size", 0x54: "world_border_warning_delay", 0x55: "world_border_warning_reach", 0x56: "camera", 0x57: "update_view_position", 0x58: "update_view_distance", 0x59: "set_cursor_item", 0x5a: "spawn_position", 0x5b: "scoreboard_display_objective", 0x5c: "entity_metadata", 0x5d: "attach_entity", 0x5e: "entity_velocity", 0x5f: "entity_equipment", 0x60: "experience", 0x61: "update_health", 0x62: "held_item_slot", 0x63: "scoreboard_objective", 0x64: "set_passengers", 0x65: "set_player_inventory", 0x66: "teams", 0x67: "scoreboard_score", 0x68: "simulation_distance", 0x69: "set_title_subtitle", 0x6a: "update_time", 0x6b: "set_title_text", 0x6c: "set_title_time", 0x6d: "entity_sound_effect", 0x6e: "sound_effect", 0x6f: "start_configuration", 0x70: "stop_sound", 0x71: "store_cookie", 0x72: "system_chat", 0x73: "playerlist_header", 0x74: "nbt_query_response", 0x75: "collect", 0x76: "entity_teleport", 0x77: "test_instance_block_status", 0x78: "set_ticking_state", 0x79: "step_tick", 0x7a: "transfer", 0x7b: "advancements", 0x7c: "entity_update_attributes", 0x7d: "entity_effect", 0x7e: "declare_recipes", 0x7f: "tags", 0x80: "set_projectile_power", 0x81: "custom_report_details", 0x82: "server_links", 0x83: "tracked_waypoint", 0x84: "clear_dialog", 0x85: "show_dialog"}
 
 func (_ PlayToClientPacket) Decode(r io.Reader) (ret PlayToClientPacket, err error) {
-	var PlayToClientPacketNameKey queser.VarInt
+	var PlayToClientPacketNameKey proto_base.VarInt
 	PlayToClientPacketNameKey, err = PlayToClientPacketNameKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.ErroringIndex(PlayToClientPacketNameMap, PlayToClientPacketNameKey)
+	ret.Name, err = proto_base.ErroringIndex(PlayToClientPacketNameMap, PlayToClientPacketNameKey)
 	if err != nil {
 		return
 	}
@@ -11600,7 +11600,7 @@ func (_ PlayToClientPacket) Decode(r io.Reader) (ret PlayToClientPacket, err err
 		}
 		ret.Params = PlayToClientPacketParamsTmp
 	case "bundle_delimiter":
-		var PlayToClientPacketParamsTmp queser.Void
+		var PlayToClientPacketParamsTmp proto_base.Void
 		PlayToClientPacketParamsTmp, err = PlayToClientPacketParamsTmp.Decode(r)
 		if err != nil {
 			return
@@ -12464,11 +12464,11 @@ func (_ PlayToClientPacket) Decode(r io.Reader) (ret PlayToClientPacket, err err
 	return
 }
 
-var PlayToClientPacketNameReverseMap = map[string]queser.VarInt{"bundle_delimiter": 0x00, "spawn_entity": 0x01, "animation": 0x02, "statistics": 0x03, "acknowledge_player_digging": 0x04, "block_break_animation": 0x05, "tile_entity_data": 0x06, "block_action": 0x07, "block_change": 0x08, "boss_bar": 0x09, "difficulty": 0x0a, "chunk_batch_finished": 0x0b, "chunk_batch_start": 0x0c, "chunk_biomes": 0x0d, "clear_titles": 0x0e, "tab_complete": 0x0f, "declare_commands": 0x10, "close_window": 0x11, "window_items": 0x12, "craft_progress_bar": 0x13, "set_slot": 0x14, "cookie_request": 0x15, "set_cooldown": 0x16, "chat_suggestions": 0x17, "custom_payload": 0x18, "damage_event": 0x19, "debug_sample": 0x1a, "hide_message": 0x1b, "kick_disconnect": 0x1c, "profileless_chat": 0x1d, "entity_status": 0x1e, "sync_entity_position": 0x1f, "explosion": 0x20, "unload_chunk": 0x21, "game_state_change": 0x22, "open_horse_window": 0x23, "hurt_animation": 0x24, "initialize_world_border": 0x25, "keep_alive": 0x26, "map_chunk": 0x27, "world_event": 0x28, "world_particles": 0x29, "update_light": 0x2a, "login": 0x2b, "map": 0x2c, "trade_list": 0x2d, "rel_entity_move": 0x2e, "entity_move_look": 0x2f, "move_minecart": 0x30, "entity_look": 0x31, "vehicle_move": 0x32, "open_book": 0x33, "open_window": 0x34, "open_sign_entity": 0x35, "ping": 0x36, "ping_response": 0x37, "craft_recipe_response": 0x38, "abilities": 0x39, "player_chat": 0x3a, "end_combat_event": 0x3b, "enter_combat_event": 0x3c, "death_combat_event": 0x3d, "player_remove": 0x3e, "player_info": 0x3f, "face_player": 0x40, "position": 0x41, "player_rotation": 0x42, "recipe_book_add": 0x43, "recipe_book_remove": 0x44, "recipe_book_settings": 0x45, "entity_destroy": 0x46, "remove_entity_effect": 0x47, "reset_score": 0x48, "remove_resource_pack": 0x49, "add_resource_pack": 0x4a, "respawn": 0x4b, "entity_head_rotation": 0x4c, "multi_block_change": 0x4d, "select_advancement_tab": 0x4e, "server_data": 0x4f, "action_bar": 0x50, "world_border_center": 0x51, "world_border_lerp_size": 0x52, "world_border_size": 0x53, "world_border_warning_delay": 0x54, "world_border_warning_reach": 0x55, "camera": 0x56, "update_view_position": 0x57, "update_view_distance": 0x58, "set_cursor_item": 0x59, "spawn_position": 0x5a, "scoreboard_display_objective": 0x5b, "entity_metadata": 0x5c, "attach_entity": 0x5d, "entity_velocity": 0x5e, "entity_equipment": 0x5f, "experience": 0x60, "update_health": 0x61, "held_item_slot": 0x62, "scoreboard_objective": 0x63, "set_passengers": 0x64, "set_player_inventory": 0x65, "teams": 0x66, "scoreboard_score": 0x67, "simulation_distance": 0x68, "set_title_subtitle": 0x69, "update_time": 0x6a, "set_title_text": 0x6b, "set_title_time": 0x6c, "entity_sound_effect": 0x6d, "sound_effect": 0x6e, "start_configuration": 0x6f, "stop_sound": 0x70, "store_cookie": 0x71, "system_chat": 0x72, "playerlist_header": 0x73, "nbt_query_response": 0x74, "collect": 0x75, "entity_teleport": 0x76, "test_instance_block_status": 0x77, "set_ticking_state": 0x78, "step_tick": 0x79, "transfer": 0x7a, "advancements": 0x7b, "entity_update_attributes": 0x7c, "entity_effect": 0x7d, "declare_recipes": 0x7e, "tags": 0x7f, "set_projectile_power": 0x80, "custom_report_details": 0x81, "server_links": 0x82, "tracked_waypoint": 0x83, "clear_dialog": 0x84, "show_dialog": 0x85}
+var PlayToClientPacketNameReverseMap = map[string]proto_base.VarInt{"bundle_delimiter": 0x00, "spawn_entity": 0x01, "animation": 0x02, "statistics": 0x03, "acknowledge_player_digging": 0x04, "block_break_animation": 0x05, "tile_entity_data": 0x06, "block_action": 0x07, "block_change": 0x08, "boss_bar": 0x09, "difficulty": 0x0a, "chunk_batch_finished": 0x0b, "chunk_batch_start": 0x0c, "chunk_biomes": 0x0d, "clear_titles": 0x0e, "tab_complete": 0x0f, "declare_commands": 0x10, "close_window": 0x11, "window_items": 0x12, "craft_progress_bar": 0x13, "set_slot": 0x14, "cookie_request": 0x15, "set_cooldown": 0x16, "chat_suggestions": 0x17, "custom_payload": 0x18, "damage_event": 0x19, "debug_sample": 0x1a, "hide_message": 0x1b, "kick_disconnect": 0x1c, "profileless_chat": 0x1d, "entity_status": 0x1e, "sync_entity_position": 0x1f, "explosion": 0x20, "unload_chunk": 0x21, "game_state_change": 0x22, "open_horse_window": 0x23, "hurt_animation": 0x24, "initialize_world_border": 0x25, "keep_alive": 0x26, "map_chunk": 0x27, "world_event": 0x28, "world_particles": 0x29, "update_light": 0x2a, "login": 0x2b, "map": 0x2c, "trade_list": 0x2d, "rel_entity_move": 0x2e, "entity_move_look": 0x2f, "move_minecart": 0x30, "entity_look": 0x31, "vehicle_move": 0x32, "open_book": 0x33, "open_window": 0x34, "open_sign_entity": 0x35, "ping": 0x36, "ping_response": 0x37, "craft_recipe_response": 0x38, "abilities": 0x39, "player_chat": 0x3a, "end_combat_event": 0x3b, "enter_combat_event": 0x3c, "death_combat_event": 0x3d, "player_remove": 0x3e, "player_info": 0x3f, "face_player": 0x40, "position": 0x41, "player_rotation": 0x42, "recipe_book_add": 0x43, "recipe_book_remove": 0x44, "recipe_book_settings": 0x45, "entity_destroy": 0x46, "remove_entity_effect": 0x47, "reset_score": 0x48, "remove_resource_pack": 0x49, "add_resource_pack": 0x4a, "respawn": 0x4b, "entity_head_rotation": 0x4c, "multi_block_change": 0x4d, "select_advancement_tab": 0x4e, "server_data": 0x4f, "action_bar": 0x50, "world_border_center": 0x51, "world_border_lerp_size": 0x52, "world_border_size": 0x53, "world_border_warning_delay": 0x54, "world_border_warning_reach": 0x55, "camera": 0x56, "update_view_position": 0x57, "update_view_distance": 0x58, "set_cursor_item": 0x59, "spawn_position": 0x5a, "scoreboard_display_objective": 0x5b, "entity_metadata": 0x5c, "attach_entity": 0x5d, "entity_velocity": 0x5e, "entity_equipment": 0x5f, "experience": 0x60, "update_health": 0x61, "held_item_slot": 0x62, "scoreboard_objective": 0x63, "set_passengers": 0x64, "set_player_inventory": 0x65, "teams": 0x66, "scoreboard_score": 0x67, "simulation_distance": 0x68, "set_title_subtitle": 0x69, "update_time": 0x6a, "set_title_text": 0x6b, "set_title_time": 0x6c, "entity_sound_effect": 0x6d, "sound_effect": 0x6e, "start_configuration": 0x6f, "stop_sound": 0x70, "store_cookie": 0x71, "system_chat": 0x72, "playerlist_header": 0x73, "nbt_query_response": 0x74, "collect": 0x75, "entity_teleport": 0x76, "test_instance_block_status": 0x77, "set_ticking_state": 0x78, "step_tick": 0x79, "transfer": 0x7a, "advancements": 0x7b, "entity_update_attributes": 0x7c, "entity_effect": 0x7d, "declare_recipes": 0x7e, "tags": 0x7f, "set_projectile_power": 0x80, "custom_report_details": 0x81, "server_links": 0x82, "tracked_waypoint": 0x83, "clear_dialog": 0x84, "show_dialog": 0x85}
 
 func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
-	var vPlayToClientPacketName queser.VarInt
-	vPlayToClientPacketName, err = queser.ErroringIndex(PlayToClientPacketNameReverseMap, ret.Name)
+	var vPlayToClientPacketName proto_base.VarInt
+	vPlayToClientPacketName, err = proto_base.ErroringIndex(PlayToClientPacketNameReverseMap, ret.Name)
 	if err != nil {
 		return
 	}
@@ -12480,7 +12480,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "abilities":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAbilities)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12490,7 +12490,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "acknowledge_player_digging":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAcknowledgePlayerDigging)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12500,7 +12500,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "action_bar":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketActionBar)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12510,7 +12510,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "add_resource_pack":
 		PlayToClientPacketParams, ok := ret.Params.(PacketCommonAddResourcePack)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12520,7 +12520,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "advancements":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAdvancements)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12530,7 +12530,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "animation":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAnimation)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12540,7 +12540,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "attach_entity":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAttachEntity)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12550,7 +12550,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "block_action":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockAction)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12560,7 +12560,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "block_break_animation":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockBreakAnimation)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12570,7 +12570,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "block_change":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockChange)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12580,7 +12580,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "boss_bar":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBossBar)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12588,9 +12588,9 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 			return
 		}
 	case "bundle_delimiter":
-		PlayToClientPacketParams, ok := ret.Params.(queser.Void)
+		PlayToClientPacketParams, ok := ret.Params.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12600,7 +12600,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "camera":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCamera)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12610,7 +12610,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "chat_suggestions":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChatSuggestions)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12620,7 +12620,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "chunk_batch_finished":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBatchFinished)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12630,7 +12630,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "chunk_batch_start":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBatchStart)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12640,7 +12640,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "chunk_biomes":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBiomes)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12650,7 +12650,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "clear_dialog":
 		PlayToClientPacketParams, ok := ret.Params.(PacketCommonClearDialog)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12660,7 +12660,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "clear_titles":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketClearTitles)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12670,7 +12670,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "close_window":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCloseWindow)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12680,7 +12680,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "collect":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCollect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12690,7 +12690,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "cookie_request":
 		PlayToClientPacketParams, ok := ret.Params.(PacketCommonCookieRequest)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12700,7 +12700,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "craft_progress_bar":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCraftProgressBar)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12710,7 +12710,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "craft_recipe_response":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCraftRecipeResponse)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12720,7 +12720,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "custom_payload":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCustomPayload)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12730,7 +12730,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "custom_report_details":
 		PlayToClientPacketParams, ok := ret.Params.(PacketCommonCustomReportDetails)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12740,7 +12740,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "damage_event":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDamageEvent)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12750,7 +12750,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "death_combat_event":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeathCombatEvent)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12760,7 +12760,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "debug_sample":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugSample)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12770,7 +12770,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "declare_commands":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeclareCommands)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12780,7 +12780,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "declare_recipes":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeclareRecipes)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12790,7 +12790,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "difficulty":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDifficulty)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12800,7 +12800,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "end_combat_event":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEndCombatEvent)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12810,7 +12810,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "enter_combat_event":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEnterCombatEvent)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12820,7 +12820,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_destroy":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityDestroy)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12830,7 +12830,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_effect":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityEffect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12840,7 +12840,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_equipment":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityEquipment)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12850,7 +12850,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_head_rotation":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityHeadRotation)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12860,7 +12860,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_look":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityLook)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12870,7 +12870,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_metadata":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityMetadata)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12880,7 +12880,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_move_look":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityMoveLook)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12890,7 +12890,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_sound_effect":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntitySoundEffect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12900,7 +12900,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_status":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityStatus)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12910,7 +12910,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_teleport":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityTeleport)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12920,7 +12920,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_update_attributes":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityUpdateAttributes)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12930,7 +12930,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "entity_velocity":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityVelocity)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12940,7 +12940,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "experience":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketExperience)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12950,7 +12950,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "explosion":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketExplosion)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12960,7 +12960,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "face_player":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketFacePlayer)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12970,7 +12970,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "game_state_change":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketGameStateChange)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12980,7 +12980,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "held_item_slot":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHeldItemSlot)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -12990,7 +12990,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "hide_message":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHideMessage)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13000,7 +13000,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "hurt_animation":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHurtAnimation)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13010,7 +13010,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "initialize_world_border":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketInitializeWorldBorder)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13020,7 +13020,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "keep_alive":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketKeepAlive)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13030,7 +13030,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "kick_disconnect":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketKickDisconnect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13040,7 +13040,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "login":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketLogin)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13050,7 +13050,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "map":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMap)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13060,7 +13060,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "map_chunk":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMapChunk)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13070,7 +13070,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "move_minecart":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMoveMinecart)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13080,7 +13080,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "multi_block_change":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMultiBlockChange)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13090,7 +13090,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "nbt_query_response":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketNbtQueryResponse)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13100,7 +13100,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "open_book":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenBook)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13110,7 +13110,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "open_horse_window":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenHorseWindow)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13120,7 +13120,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "open_sign_entity":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenSignEntity)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13130,7 +13130,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "open_window":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenWindow)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13140,7 +13140,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "ping":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPing)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13150,7 +13150,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "ping_response":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPingResponse)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13160,7 +13160,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "player_chat":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerChat)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13170,7 +13170,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "player_info":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerInfo)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13180,7 +13180,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "player_remove":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerRemove)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13190,7 +13190,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "player_rotation":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerRotation)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13200,7 +13200,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "playerlist_header":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerlistHeader)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13210,7 +13210,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "position":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPosition)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13220,7 +13220,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "profileless_chat":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketProfilelessChat)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13230,7 +13230,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "recipe_book_add":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookAdd)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13240,7 +13240,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "recipe_book_remove":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookRemove)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13250,7 +13250,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "recipe_book_settings":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookSettings)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13260,7 +13260,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "rel_entity_move":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRelEntityMove)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13270,7 +13270,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "remove_entity_effect":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRemoveEntityEffect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13280,7 +13280,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "remove_resource_pack":
 		PlayToClientPacketParams, ok := ret.Params.(PacketCommonRemoveResourcePack)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13290,7 +13290,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "reset_score":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketResetScore)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13300,7 +13300,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "respawn":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRespawn)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13310,7 +13310,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "scoreboard_display_objective":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardDisplayObjective)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13320,7 +13320,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "scoreboard_objective":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardObjective)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13330,7 +13330,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "scoreboard_score":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardScore)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13340,7 +13340,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "select_advancement_tab":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSelectAdvancementTab)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13350,7 +13350,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "server_data":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketServerData)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13360,7 +13360,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "server_links":
 		PlayToClientPacketParams, ok := ret.Params.(PacketCommonServerLinks)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13370,7 +13370,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_cooldown":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetCooldown)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13380,7 +13380,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_cursor_item":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetCursorItem)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13390,7 +13390,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_passengers":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetPassengers)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13400,7 +13400,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_player_inventory":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetPlayerInventory)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13410,7 +13410,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_projectile_power":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetProjectilePower)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13420,7 +13420,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_slot":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetSlot)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13430,7 +13430,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_ticking_state":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTickingState)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13440,7 +13440,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_title_subtitle":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleSubtitle)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13450,7 +13450,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_title_text":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleText)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13460,7 +13460,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "set_title_time":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleTime)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13470,7 +13470,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "show_dialog":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketShowDialog)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13480,7 +13480,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "simulation_distance":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSimulationDistance)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13490,7 +13490,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "sound_effect":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSoundEffect)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13500,7 +13500,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "spawn_entity":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSpawnEntity)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13510,7 +13510,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "spawn_position":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSpawnPosition)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13520,7 +13520,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "start_configuration":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStartConfiguration)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13530,7 +13530,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "statistics":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStatistics)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13540,7 +13540,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "step_tick":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStepTick)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13550,7 +13550,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "stop_sound":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStopSound)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13560,7 +13560,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "store_cookie":
 		PlayToClientPacketParams, ok := ret.Params.(PacketCommonStoreCookie)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13570,7 +13570,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "sync_entity_position":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSyncEntityPosition)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13580,7 +13580,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "system_chat":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSystemChat)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13590,7 +13590,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "tab_complete":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTabComplete)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13600,7 +13600,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "tags":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTags)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13610,7 +13610,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "teams":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTeams)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13620,7 +13620,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "test_instance_block_status":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTestInstanceBlockStatus)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13630,7 +13630,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "tile_entity_data":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTileEntityData)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13640,7 +13640,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "tracked_waypoint":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTrackedWaypoint)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13650,7 +13650,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "trade_list":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTradeList)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13660,7 +13660,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "transfer":
 		PlayToClientPacketParams, ok := ret.Params.(PacketCommonTransfer)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13670,7 +13670,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "unload_chunk":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUnloadChunk)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13680,7 +13680,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "update_health":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateHealth)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13690,7 +13690,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "update_light":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateLight)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13700,7 +13700,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "update_time":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateTime)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13710,7 +13710,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "update_view_distance":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateViewDistance)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13720,7 +13720,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "update_view_position":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateViewPosition)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13730,7 +13730,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "vehicle_move":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketVehicleMove)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13740,7 +13740,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "window_items":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWindowItems)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13750,7 +13750,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "world_border_center":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderCenter)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13760,7 +13760,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "world_border_lerp_size":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderLerpSize)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13770,7 +13770,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "world_border_size":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderSize)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13780,7 +13780,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "world_border_warning_delay":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderWarningDelay)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13790,7 +13790,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "world_border_warning_reach":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderWarningReach)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13800,7 +13800,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "world_event":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldEvent)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13810,7 +13810,7 @@ func (ret PlayToClientPacket) Encode(w io.Writer) (err error) {
 	case "world_particles":
 		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldParticles)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketParams.Encode(w)
@@ -13859,7 +13859,7 @@ func (ret PlayToClientPacketAbilities) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketAcknowledgePlayerDigging struct {
-	SequenceId queser.VarInt
+	SequenceId proto_base.VarInt
 }
 
 func (_ PlayToClientPacketAcknowledgePlayerDigging) Decode(r io.Reader) (ret PlayToClientPacketAcknowledgePlayerDigging, err error) {
@@ -13897,20 +13897,20 @@ func (ret PlayToClientPacketActionBar) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketAdvancements struct {
-	Val queser.ToDo
+	Val proto_base.ToDo
 }
 
 func (_ PlayToClientPacketAdvancements) Decode(r io.Reader) (ret PlayToClientPacketAdvancements, err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 func (ret PlayToClientPacketAdvancements) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
 type PlayToClientPacketAnimation struct {
-	EntityId  queser.VarInt
+	EntityId  proto_base.VarInt
 	Animation uint8
 }
 
@@ -13969,7 +13969,7 @@ type PlayToClientPacketBlockAction struct {
 	Location Position
 	Byte1    uint8
 	Byte2    uint8
-	BlockId  queser.VarInt
+	BlockId  proto_base.VarInt
 }
 
 func (_ PlayToClientPacketBlockAction) Decode(r io.Reader) (ret PlayToClientPacketBlockAction, err error) {
@@ -14012,7 +14012,7 @@ func (ret PlayToClientPacketBlockAction) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketBlockBreakAnimation struct {
-	EntityId     queser.VarInt
+	EntityId     proto_base.VarInt
 	Location     Position
 	DestroyStage int8
 }
@@ -14050,7 +14050,7 @@ func (ret PlayToClientPacketBlockBreakAnimation) Encode(w io.Writer) (err error)
 
 type PlayToClientPacketBlockChange struct {
 	Location Position
-	Type     queser.VarInt
+	Type     proto_base.VarInt
 }
 
 func (_ PlayToClientPacketBlockChange) Decode(r io.Reader) (ret PlayToClientPacketBlockChange, err error) {
@@ -14078,7 +14078,7 @@ func (ret PlayToClientPacketBlockChange) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketBossBar struct {
 	EntityUUID uuid.UUID
-	Action     queser.VarInt
+	Action     proto_base.VarInt
 	Title      any
 	Health     any
 	Color      any
@@ -14111,7 +14111,7 @@ func (_ PlayToClientPacketBossBar) Decode(r io.Reader) (ret PlayToClientPacketBo
 		}
 		ret.Title = PlayToClientPacketBossBarTitleTmp
 	default:
-		var PlayToClientPacketBossBarTitleTmp queser.Void
+		var PlayToClientPacketBossBarTitleTmp proto_base.Void
 		PlayToClientPacketBossBarTitleTmp, err = PlayToClientPacketBossBarTitleTmp.Decode(r)
 		if err != nil {
 			return
@@ -14134,7 +14134,7 @@ func (_ PlayToClientPacketBossBar) Decode(r io.Reader) (ret PlayToClientPacketBo
 		}
 		ret.Health = PlayToClientPacketBossBarHealthTmp
 	default:
-		var PlayToClientPacketBossBarHealthTmp queser.Void
+		var PlayToClientPacketBossBarHealthTmp proto_base.Void
 		PlayToClientPacketBossBarHealthTmp, err = PlayToClientPacketBossBarHealthTmp.Decode(r)
 		if err != nil {
 			return
@@ -14143,21 +14143,21 @@ func (_ PlayToClientPacketBossBar) Decode(r io.Reader) (ret PlayToClientPacketBo
 	}
 	switch ret.Action {
 	case 0:
-		var PlayToClientPacketBossBarColorTmp queser.VarInt
+		var PlayToClientPacketBossBarColorTmp proto_base.VarInt
 		PlayToClientPacketBossBarColorTmp, err = PlayToClientPacketBossBarColorTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Color = PlayToClientPacketBossBarColorTmp
 	case 4:
-		var PlayToClientPacketBossBarColorTmp queser.VarInt
+		var PlayToClientPacketBossBarColorTmp proto_base.VarInt
 		PlayToClientPacketBossBarColorTmp, err = PlayToClientPacketBossBarColorTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Color = PlayToClientPacketBossBarColorTmp
 	default:
-		var PlayToClientPacketBossBarColorTmp queser.Void
+		var PlayToClientPacketBossBarColorTmp proto_base.Void
 		PlayToClientPacketBossBarColorTmp, err = PlayToClientPacketBossBarColorTmp.Decode(r)
 		if err != nil {
 			return
@@ -14166,21 +14166,21 @@ func (_ PlayToClientPacketBossBar) Decode(r io.Reader) (ret PlayToClientPacketBo
 	}
 	switch ret.Action {
 	case 0:
-		var PlayToClientPacketBossBarDividersTmp queser.VarInt
+		var PlayToClientPacketBossBarDividersTmp proto_base.VarInt
 		PlayToClientPacketBossBarDividersTmp, err = PlayToClientPacketBossBarDividersTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Dividers = PlayToClientPacketBossBarDividersTmp
 	case 4:
-		var PlayToClientPacketBossBarDividersTmp queser.VarInt
+		var PlayToClientPacketBossBarDividersTmp proto_base.VarInt
 		PlayToClientPacketBossBarDividersTmp, err = PlayToClientPacketBossBarDividersTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Dividers = PlayToClientPacketBossBarDividersTmp
 	default:
-		var PlayToClientPacketBossBarDividersTmp queser.Void
+		var PlayToClientPacketBossBarDividersTmp proto_base.Void
 		PlayToClientPacketBossBarDividersTmp, err = PlayToClientPacketBossBarDividersTmp.Decode(r)
 		if err != nil {
 			return
@@ -14203,7 +14203,7 @@ func (_ PlayToClientPacketBossBar) Decode(r io.Reader) (ret PlayToClientPacketBo
 		}
 		ret.Flags = PlayToClientPacketBossBarFlagsTmp
 	default:
-		var PlayToClientPacketBossBarFlagsTmp queser.Void
+		var PlayToClientPacketBossBarFlagsTmp proto_base.Void
 		PlayToClientPacketBossBarFlagsTmp, err = PlayToClientPacketBossBarFlagsTmp.Decode(r)
 		if err != nil {
 			return
@@ -14225,7 +14225,7 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 	case 0:
 		PlayToClientPacketBossBarTitle, ok := ret.Title.(nbt.Anon)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketBossBarTitle.Encode(w)
@@ -14235,7 +14235,7 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 	case 3:
 		PlayToClientPacketBossBarTitle, ok := ret.Title.(nbt.Anon)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketBossBarTitle.Encode(w)
@@ -14243,12 +14243,12 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Title.(queser.Void)
+		_, ok := ret.Title.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Title.(queser.Void).Encode(w)
+		err = ret.Title.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -14257,7 +14257,7 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 	case 0:
 		PlayToClientPacketBossBarHealth, ok := ret.Health.(float32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarHealth)
@@ -14267,7 +14267,7 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 	case 2:
 		PlayToClientPacketBossBarHealth, ok := ret.Health.(float32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarHealth)
@@ -14275,21 +14275,21 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Health.(queser.Void)
+		_, ok := ret.Health.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Health.(queser.Void).Encode(w)
+		err = ret.Health.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
 	}
 	switch ret.Action {
 	case 0:
-		PlayToClientPacketBossBarColor, ok := ret.Color.(queser.VarInt)
+		PlayToClientPacketBossBarColor, ok := ret.Color.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketBossBarColor.Encode(w)
@@ -14297,9 +14297,9 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			return
 		}
 	case 4:
-		PlayToClientPacketBossBarColor, ok := ret.Color.(queser.VarInt)
+		PlayToClientPacketBossBarColor, ok := ret.Color.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketBossBarColor.Encode(w)
@@ -14307,21 +14307,21 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Color.(queser.Void)
+		_, ok := ret.Color.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Color.(queser.Void).Encode(w)
+		err = ret.Color.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
 	}
 	switch ret.Action {
 	case 0:
-		PlayToClientPacketBossBarDividers, ok := ret.Dividers.(queser.VarInt)
+		PlayToClientPacketBossBarDividers, ok := ret.Dividers.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketBossBarDividers.Encode(w)
@@ -14329,9 +14329,9 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			return
 		}
 	case 4:
-		PlayToClientPacketBossBarDividers, ok := ret.Dividers.(queser.VarInt)
+		PlayToClientPacketBossBarDividers, ok := ret.Dividers.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketBossBarDividers.Encode(w)
@@ -14339,12 +14339,12 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Dividers.(queser.Void)
+		_, ok := ret.Dividers.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Dividers.(queser.Void).Encode(w)
+		err = ret.Dividers.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -14353,7 +14353,7 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 	case 0:
 		PlayToClientPacketBossBarFlags, ok := ret.Flags.(uint8)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarFlags)
@@ -14363,7 +14363,7 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 	case 5:
 		PlayToClientPacketBossBarFlags, ok := ret.Flags.(uint8)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarFlags)
@@ -14371,12 +14371,12 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Flags.(queser.Void)
+		_, ok := ret.Flags.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Flags.(queser.Void).Encode(w)
+		err = ret.Flags.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -14385,7 +14385,7 @@ func (ret PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketCamera struct {
-	CameraId queser.VarInt
+	CameraId proto_base.VarInt
 }
 
 func (_ PlayToClientPacketCamera) Decode(r io.Reader) (ret PlayToClientPacketCamera, err error) {
@@ -14404,7 +14404,7 @@ func (ret PlayToClientPacketCamera) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketChatSuggestions struct {
-	Action  queser.VarInt
+	Action  proto_base.VarInt
 	Entries []string
 }
 
@@ -14413,7 +14413,7 @@ func (_ PlayToClientPacketChatSuggestions) Decode(r io.Reader) (ret PlayToClient
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketChatSuggestionsEntries queser.VarInt
+	var lPlayToClientPacketChatSuggestionsEntries proto_base.VarInt
 	lPlayToClientPacketChatSuggestionsEntries, err = lPlayToClientPacketChatSuggestionsEntries.Decode(r)
 	if err != nil {
 		return
@@ -14421,7 +14421,7 @@ func (_ PlayToClientPacketChatSuggestions) Decode(r io.Reader) (ret PlayToClient
 	ret.Entries = []string{}
 	for range lPlayToClientPacketChatSuggestionsEntries {
 		var PlayToClientPacketChatSuggestionsEntriesElement string
-		PlayToClientPacketChatSuggestionsEntriesElement, err = queser.DecodeString(r)
+		PlayToClientPacketChatSuggestionsEntriesElement, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -14434,12 +14434,12 @@ func (ret PlayToClientPacketChatSuggestions) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Entries)).Encode(w)
+	err = proto_base.VarInt(len(ret.Entries)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketChatSuggestionsEntries := range len(ret.Entries) {
-		err = queser.EncodeString(w, ret.Entries[iPlayToClientPacketChatSuggestionsEntries])
+		err = proto_base.EncodeString(w, ret.Entries[iPlayToClientPacketChatSuggestionsEntries])
 		if err != nil {
 			return
 		}
@@ -14448,7 +14448,7 @@ func (ret PlayToClientPacketChatSuggestions) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketChunkBatchFinished struct {
-	BatchSize queser.VarInt
+	BatchSize proto_base.VarInt
 }
 
 func (_ PlayToClientPacketChunkBatchFinished) Decode(r io.Reader) (ret PlayToClientPacketChunkBatchFinished, err error) {
@@ -14484,7 +14484,7 @@ type PlayToClientPacketChunkBiomes struct {
 }
 
 func (_ PlayToClientPacketChunkBiomes) Decode(r io.Reader) (ret PlayToClientPacketChunkBiomes, err error) {
-	var lPlayToClientPacketChunkBiomesBiomes queser.VarInt
+	var lPlayToClientPacketChunkBiomesBiomes proto_base.VarInt
 	lPlayToClientPacketChunkBiomesBiomes, err = lPlayToClientPacketChunkBiomesBiomes.Decode(r)
 	if err != nil {
 		return
@@ -14511,7 +14511,7 @@ func (_ PlayToClientPacketChunkBiomes) Decode(r io.Reader) (ret PlayToClientPack
 	return
 }
 func (ret PlayToClientPacketChunkBiomes) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Biomes)).Encode(w)
+	err = proto_base.VarInt(len(ret.Biomes)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -14567,9 +14567,9 @@ func (ret PlayToClientPacketCloseWindow) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketCollect struct {
-	CollectedEntityId queser.VarInt
-	CollectorEntityId queser.VarInt
-	PickupItemCount   queser.VarInt
+	CollectedEntityId proto_base.VarInt
+	CollectorEntityId proto_base.VarInt
+	PickupItemCount   proto_base.VarInt
 }
 
 func (_ PlayToClientPacketCollect) Decode(r io.Reader) (ret PlayToClientPacketCollect, err error) {
@@ -14670,11 +14670,11 @@ func (ret PlayToClientPacketCraftRecipeResponse) Encode(w io.Writer) (err error)
 
 type PlayToClientPacketCustomPayload struct {
 	Channel string
-	Data    queser.RestBuffer
+	Data    proto_base.RestBuffer
 }
 
 func (_ PlayToClientPacketCustomPayload) Decode(r io.Reader) (ret PlayToClientPacketCustomPayload, err error) {
-	ret.Channel, err = queser.DecodeString(r)
+	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -14685,7 +14685,7 @@ func (_ PlayToClientPacketCustomPayload) Decode(r io.Reader) (ret PlayToClientPa
 	return
 }
 func (ret PlayToClientPacketCustomPayload) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Channel)
+	err = proto_base.EncodeString(w, ret.Channel)
 	if err != nil {
 		return
 	}
@@ -14697,10 +14697,10 @@ func (ret PlayToClientPacketCustomPayload) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketDamageEvent struct {
-	EntityId       queser.VarInt
-	SourceTypeId   queser.VarInt
-	SourceCauseId  queser.VarInt
-	SourceDirectId queser.VarInt
+	EntityId       proto_base.VarInt
+	SourceTypeId   proto_base.VarInt
+	SourceCauseId  proto_base.VarInt
+	SourceDirectId proto_base.VarInt
 	SourcePosition *Vec3f64
 }
 
@@ -14767,7 +14767,7 @@ func (ret PlayToClientPacketDamageEvent) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketDeathCombatEvent struct {
-	PlayerId queser.VarInt
+	PlayerId proto_base.VarInt
 	Message  nbt.Anon
 }
 
@@ -14796,11 +14796,11 @@ func (ret PlayToClientPacketDeathCombatEvent) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketDebugSample struct {
 	Sample []int64
-	Type   queser.VarInt
+	Type   proto_base.VarInt
 }
 
 func (_ PlayToClientPacketDebugSample) Decode(r io.Reader) (ret PlayToClientPacketDebugSample, err error) {
-	var lPlayToClientPacketDebugSampleSample queser.VarInt
+	var lPlayToClientPacketDebugSampleSample proto_base.VarInt
 	lPlayToClientPacketDebugSampleSample, err = lPlayToClientPacketDebugSampleSample.Decode(r)
 	if err != nil {
 		return
@@ -14821,7 +14821,7 @@ func (_ PlayToClientPacketDebugSample) Decode(r io.Reader) (ret PlayToClientPack
 	return
 }
 func (ret PlayToClientPacketDebugSample) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Sample)).Encode(w)
+	err = proto_base.VarInt(len(ret.Sample)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -14840,11 +14840,11 @@ func (ret PlayToClientPacketDebugSample) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketDeclareCommands struct {
 	Nodes     []CommandNode
-	RootIndex queser.VarInt
+	RootIndex proto_base.VarInt
 }
 
 func (_ PlayToClientPacketDeclareCommands) Decode(r io.Reader) (ret PlayToClientPacketDeclareCommands, err error) {
-	var lPlayToClientPacketDeclareCommandsNodes queser.VarInt
+	var lPlayToClientPacketDeclareCommandsNodes proto_base.VarInt
 	lPlayToClientPacketDeclareCommandsNodes, err = lPlayToClientPacketDeclareCommandsNodes.Decode(r)
 	if err != nil {
 		return
@@ -14865,7 +14865,7 @@ func (_ PlayToClientPacketDeclareCommands) Decode(r io.Reader) (ret PlayToClient
 	return
 }
 func (ret PlayToClientPacketDeclareCommands) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Nodes)).Encode(w)
+	err = proto_base.VarInt(len(ret.Nodes)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -14885,7 +14885,7 @@ func (ret PlayToClientPacketDeclareCommands) Encode(w io.Writer) (err error) {
 type PlayToClientPacketDeclareRecipes struct {
 	Recipes []struct {
 		Name  string
-		Items []queser.VarInt
+		Items []proto_base.VarInt
 	}
 	StoneCutterRecipes []struct {
 		Input       IDSet
@@ -14894,32 +14894,32 @@ type PlayToClientPacketDeclareRecipes struct {
 }
 
 func (_ PlayToClientPacketDeclareRecipes) Decode(r io.Reader) (ret PlayToClientPacketDeclareRecipes, err error) {
-	var lPlayToClientPacketDeclareRecipesRecipes queser.VarInt
+	var lPlayToClientPacketDeclareRecipesRecipes proto_base.VarInt
 	lPlayToClientPacketDeclareRecipesRecipes, err = lPlayToClientPacketDeclareRecipesRecipes.Decode(r)
 	if err != nil {
 		return
 	}
 	ret.Recipes = []struct {
 		Name  string
-		Items []queser.VarInt
+		Items []proto_base.VarInt
 	}{}
 	for range lPlayToClientPacketDeclareRecipesRecipes {
 		var PlayToClientPacketDeclareRecipesRecipesElement struct {
 			Name  string
-			Items []queser.VarInt
+			Items []proto_base.VarInt
 		}
-		PlayToClientPacketDeclareRecipesRecipesElement.Name, err = queser.DecodeString(r)
+		PlayToClientPacketDeclareRecipesRecipesElement.Name, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
-		var lPlayToClientPacketDeclareRecipesRecipesElementItems queser.VarInt
+		var lPlayToClientPacketDeclareRecipesRecipesElementItems proto_base.VarInt
 		lPlayToClientPacketDeclareRecipesRecipesElementItems, err = lPlayToClientPacketDeclareRecipesRecipesElementItems.Decode(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketDeclareRecipesRecipesElement.Items = []queser.VarInt{}
+		PlayToClientPacketDeclareRecipesRecipesElement.Items = []proto_base.VarInt{}
 		for range lPlayToClientPacketDeclareRecipesRecipesElementItems {
-			var PlayToClientPacketDeclareRecipesRecipesElementItemsElement queser.VarInt
+			var PlayToClientPacketDeclareRecipesRecipesElementItemsElement proto_base.VarInt
 			PlayToClientPacketDeclareRecipesRecipesElementItemsElement, err = PlayToClientPacketDeclareRecipesRecipesElementItemsElement.Decode(r)
 			if err != nil {
 				return
@@ -14928,7 +14928,7 @@ func (_ PlayToClientPacketDeclareRecipes) Decode(r io.Reader) (ret PlayToClientP
 		}
 		ret.Recipes = append(ret.Recipes, PlayToClientPacketDeclareRecipesRecipesElement)
 	}
-	var lPlayToClientPacketDeclareRecipesStoneCutterRecipes queser.VarInt
+	var lPlayToClientPacketDeclareRecipesStoneCutterRecipes proto_base.VarInt
 	lPlayToClientPacketDeclareRecipesStoneCutterRecipes, err = lPlayToClientPacketDeclareRecipesStoneCutterRecipes.Decode(r)
 	if err != nil {
 		return
@@ -14955,16 +14955,16 @@ func (_ PlayToClientPacketDeclareRecipes) Decode(r io.Reader) (ret PlayToClientP
 	return
 }
 func (ret PlayToClientPacketDeclareRecipes) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Recipes)).Encode(w)
+	err = proto_base.VarInt(len(ret.Recipes)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketDeclareRecipesRecipes := range len(ret.Recipes) {
-		err = queser.EncodeString(w, ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Name)
+		err = proto_base.EncodeString(w, ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Name)
 		if err != nil {
 			return
 		}
-		err = queser.VarInt(len(ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Items)).Encode(w)
+		err = proto_base.VarInt(len(ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Items)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -14975,7 +14975,7 @@ func (ret PlayToClientPacketDeclareRecipes) Encode(w io.Writer) (err error) {
 			}
 		}
 	}
-	err = queser.VarInt(len(ret.StoneCutterRecipes)).Encode(w)
+	err = proto_base.VarInt(len(ret.StoneCutterRecipes)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -14997,15 +14997,15 @@ type PlayToClientPacketDifficulty struct {
 	DifficultyLocked bool
 }
 
-var PlayToClientPacketDifficultyDifficultyMap = map[queser.VarInt]string{0: "peaceful", 1: "easy", 2: "normal", 3: "hard"}
+var PlayToClientPacketDifficultyDifficultyMap = map[proto_base.VarInt]string{0: "peaceful", 1: "easy", 2: "normal", 3: "hard"}
 
 func (_ PlayToClientPacketDifficulty) Decode(r io.Reader) (ret PlayToClientPacketDifficulty, err error) {
-	var PlayToClientPacketDifficultyDifficultyKey queser.VarInt
+	var PlayToClientPacketDifficultyDifficultyKey proto_base.VarInt
 	PlayToClientPacketDifficultyDifficultyKey, err = PlayToClientPacketDifficultyDifficultyKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Difficulty, err = queser.ErroringIndex(PlayToClientPacketDifficultyDifficultyMap, PlayToClientPacketDifficultyDifficultyKey)
+	ret.Difficulty, err = proto_base.ErroringIndex(PlayToClientPacketDifficultyDifficultyMap, PlayToClientPacketDifficultyDifficultyKey)
 	if err != nil {
 		return
 	}
@@ -15016,11 +15016,11 @@ func (_ PlayToClientPacketDifficulty) Decode(r io.Reader) (ret PlayToClientPacke
 	return
 }
 
-var PlayToClientPacketDifficultyDifficultyReverseMap = map[string]queser.VarInt{"peaceful": 0, "easy": 1, "normal": 2, "hard": 3}
+var PlayToClientPacketDifficultyDifficultyReverseMap = map[string]proto_base.VarInt{"peaceful": 0, "easy": 1, "normal": 2, "hard": 3}
 
 func (ret PlayToClientPacketDifficulty) Encode(w io.Writer) (err error) {
-	var vPlayToClientPacketDifficultyDifficulty queser.VarInt
-	vPlayToClientPacketDifficultyDifficulty, err = queser.ErroringIndex(PlayToClientPacketDifficultyDifficultyReverseMap, ret.Difficulty)
+	var vPlayToClientPacketDifficultyDifficulty proto_base.VarInt
+	vPlayToClientPacketDifficultyDifficulty, err = proto_base.ErroringIndex(PlayToClientPacketDifficultyDifficultyReverseMap, ret.Difficulty)
 	if err != nil {
 		return
 	}
@@ -15036,7 +15036,7 @@ func (ret PlayToClientPacketDifficulty) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketEndCombatEvent struct {
-	Duration queser.VarInt
+	Duration proto_base.VarInt
 }
 
 func (_ PlayToClientPacketEndCombatEvent) Decode(r io.Reader) (ret PlayToClientPacketEndCombatEvent, err error) {
@@ -15065,18 +15065,18 @@ func (ret PlayToClientPacketEnterCombatEvent) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketEntityDestroy struct {
-	EntityIds []queser.VarInt
+	EntityIds []proto_base.VarInt
 }
 
 func (_ PlayToClientPacketEntityDestroy) Decode(r io.Reader) (ret PlayToClientPacketEntityDestroy, err error) {
-	var lPlayToClientPacketEntityDestroyEntityIds queser.VarInt
+	var lPlayToClientPacketEntityDestroyEntityIds proto_base.VarInt
 	lPlayToClientPacketEntityDestroyEntityIds, err = lPlayToClientPacketEntityDestroyEntityIds.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.EntityIds = []queser.VarInt{}
+	ret.EntityIds = []proto_base.VarInt{}
 	for range lPlayToClientPacketEntityDestroyEntityIds {
-		var PlayToClientPacketEntityDestroyEntityIdsElement queser.VarInt
+		var PlayToClientPacketEntityDestroyEntityIdsElement proto_base.VarInt
 		PlayToClientPacketEntityDestroyEntityIdsElement, err = PlayToClientPacketEntityDestroyEntityIdsElement.Decode(r)
 		if err != nil {
 			return
@@ -15086,7 +15086,7 @@ func (_ PlayToClientPacketEntityDestroy) Decode(r io.Reader) (ret PlayToClientPa
 	return
 }
 func (ret PlayToClientPacketEntityDestroy) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.EntityIds)).Encode(w)
+	err = proto_base.VarInt(len(ret.EntityIds)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -15100,10 +15100,10 @@ func (ret PlayToClientPacketEntityDestroy) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketEntityEffect struct {
-	EntityId  queser.VarInt
-	EffectId  queser.VarInt
-	Amplifier queser.VarInt
-	Duration  queser.VarInt
+	EntityId  proto_base.VarInt
+	EffectId  proto_base.VarInt
+	Amplifier proto_base.VarInt
+	Duration  proto_base.VarInt
 	Flags     uint8
 }
 
@@ -15155,20 +15155,20 @@ func (ret PlayToClientPacketEntityEffect) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketEntityEquipment struct {
-	Val queser.ToDo
+	Val proto_base.ToDo
 }
 
 func (_ PlayToClientPacketEntityEquipment) Decode(r io.Reader) (ret PlayToClientPacketEntityEquipment, err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 func (ret PlayToClientPacketEntityEquipment) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
 type PlayToClientPacketEntityHeadRotation struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	HeadYaw  int8
 }
 
@@ -15196,7 +15196,7 @@ func (ret PlayToClientPacketEntityHeadRotation) Encode(w io.Writer) (err error) 
 }
 
 type PlayToClientPacketEntityLook struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	Yaw      int8
 	Pitch    int8
 	OnGround bool
@@ -15242,7 +15242,7 @@ func (ret PlayToClientPacketEntityLook) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketEntityMetadata struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	Metadata EntityMetadata
 }
 
@@ -15270,7 +15270,7 @@ func (ret PlayToClientPacketEntityMetadata) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketEntityMoveLook struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	DX       int16
 	DY       int16
 	DZ       int16
@@ -15345,7 +15345,7 @@ func (ret PlayToClientPacketEntityMoveLook) Encode(w io.Writer) (err error) {
 type PlayToClientPacketEntitySoundEffect struct {
 	Sound         ItemSoundHolder
 	SoundCategory SoundSource
-	EntityId      queser.VarInt
+	EntityId      proto_base.VarInt
 	Volume        float32
 	Pitch         float32
 	Seed          int64
@@ -15435,7 +15435,7 @@ func (ret PlayToClientPacketEntityStatus) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketEntityTeleport struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	X        float64
 	Y        float64
 	Z        float64
@@ -15508,7 +15508,7 @@ func (ret PlayToClientPacketEntityTeleport) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketEntityUpdateAttributes struct {
-	EntityId   queser.VarInt
+	EntityId   proto_base.VarInt
 	Properties []struct {
 		Key       string
 		Value     float64
@@ -15520,14 +15520,14 @@ type PlayToClientPacketEntityUpdateAttributes struct {
 	}
 }
 
-var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap = map[queser.VarInt]string{0: "generic.armor", 1: "generic.armor_toughness", 10: "player.entity_interaction_range", 11: "generic.fall_damage_multiplier", 12: "generic.flying_speed", 13: "generic.follow_range", 14: "generic.gravity", 15: "generic.jump_strength", 16: "generic.knockback_resistance", 17: "generic.luck", 18: "generic.max_absorption", 19: "generic.max_health", 2: "generic.attack_damage", 20: "generic.movement_speed", 21: "generic.safe_fall_distance", 22: "generic.scale", 23: "zombie.spawn_reinforcements", 24: "generic.step_height", 25: "submerged_mining_speed", 26: "sweeping_damage_ratio", 27: "tempt_range", 28: "water_movement_efficiency", 29: "waypoint_transmit_range", 3: "generic.attack_knockback", 30: "waypoint_receive_range", 4: "generic.attack_speed", 5: "player.block_break_speed", 6: "player.block_interaction_range", 7: "burning_time", 8: "camera_distance", 9: "explosion_knockback_resistance"}
+var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap = map[proto_base.VarInt]string{0: "generic.armor", 1: "generic.armor_toughness", 10: "player.entity_interaction_range", 11: "generic.fall_damage_multiplier", 12: "generic.flying_speed", 13: "generic.follow_range", 14: "generic.gravity", 15: "generic.jump_strength", 16: "generic.knockback_resistance", 17: "generic.luck", 18: "generic.max_absorption", 19: "generic.max_health", 2: "generic.attack_damage", 20: "generic.movement_speed", 21: "generic.safe_fall_distance", 22: "generic.scale", 23: "zombie.spawn_reinforcements", 24: "generic.step_height", 25: "submerged_mining_speed", 26: "sweeping_damage_ratio", 27: "tempt_range", 28: "water_movement_efficiency", 29: "waypoint_transmit_range", 3: "generic.attack_knockback", 30: "waypoint_receive_range", 4: "generic.attack_speed", 5: "player.block_break_speed", 6: "player.block_interaction_range", 7: "burning_time", 8: "camera_distance", 9: "explosion_knockback_resistance"}
 
 func (_ PlayToClientPacketEntityUpdateAttributes) Decode(r io.Reader) (ret PlayToClientPacketEntityUpdateAttributes, err error) {
 	ret.EntityId, err = ret.EntityId.Decode(r)
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketEntityUpdateAttributesProperties queser.VarInt
+	var lPlayToClientPacketEntityUpdateAttributesProperties proto_base.VarInt
 	lPlayToClientPacketEntityUpdateAttributesProperties, err = lPlayToClientPacketEntityUpdateAttributesProperties.Decode(r)
 	if err != nil {
 		return
@@ -15551,12 +15551,12 @@ func (_ PlayToClientPacketEntityUpdateAttributes) Decode(r io.Reader) (ret PlayT
 				Operation int8
 			}
 		}
-		var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey queser.VarInt
+		var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey proto_base.VarInt
 		PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey, err = PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey.Decode(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketEntityUpdateAttributesPropertiesElement.Key, err = queser.ErroringIndex(PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap, PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey)
+		PlayToClientPacketEntityUpdateAttributesPropertiesElement.Key, err = proto_base.ErroringIndex(PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap, PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey)
 		if err != nil {
 			return
 		}
@@ -15564,7 +15564,7 @@ func (_ PlayToClientPacketEntityUpdateAttributes) Decode(r io.Reader) (ret PlayT
 		if err != nil {
 			return
 		}
-		var lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers queser.VarInt
+		var lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers proto_base.VarInt
 		lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers, err = lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers.Decode(r)
 		if err != nil {
 			return
@@ -15580,7 +15580,7 @@ func (_ PlayToClientPacketEntityUpdateAttributes) Decode(r io.Reader) (ret PlayT
 				Amount    float64
 				Operation int8
 			}
-			PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement.Uuid, err = queser.DecodeString(r)
+			PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement.Uuid, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -15599,21 +15599,21 @@ func (_ PlayToClientPacketEntityUpdateAttributes) Decode(r io.Reader) (ret PlayT
 	return
 }
 
-var PlayToClientPacketEntityUpdateAttributesPropertiesKeyReverseMap = map[string]queser.VarInt{"generic.armor": 0, "generic.armor_toughness": 1, "player.entity_interaction_range": 10, "generic.fall_damage_multiplier": 11, "generic.flying_speed": 12, "generic.follow_range": 13, "generic.gravity": 14, "generic.jump_strength": 15, "generic.knockback_resistance": 16, "generic.luck": 17, "generic.max_absorption": 18, "generic.max_health": 19, "generic.attack_damage": 2, "generic.movement_speed": 20, "generic.safe_fall_distance": 21, "generic.scale": 22, "zombie.spawn_reinforcements": 23, "generic.step_height": 24, "submerged_mining_speed": 25, "sweeping_damage_ratio": 26, "tempt_range": 27, "water_movement_efficiency": 28, "waypoint_transmit_range": 29, "generic.attack_knockback": 3, "waypoint_receive_range": 30, "generic.attack_speed": 4, "player.block_break_speed": 5, "player.block_interaction_range": 6, "burning_time": 7, "camera_distance": 8, "explosion_knockback_resistance": 9}
-var PlayToClientPacketEntityUpdateAttributesPropertiesInnerKeyReverseMap = map[string]queser.VarInt{"generic.armor": 0, "generic.armor_toughness": 1, "player.entity_interaction_range": 10, "generic.fall_damage_multiplier": 11, "generic.flying_speed": 12, "generic.follow_range": 13, "generic.gravity": 14, "generic.jump_strength": 15, "generic.knockback_resistance": 16, "generic.luck": 17, "generic.max_absorption": 18, "generic.max_health": 19, "generic.attack_damage": 2, "generic.movement_speed": 20, "generic.safe_fall_distance": 21, "generic.scale": 22, "zombie.spawn_reinforcements": 23, "generic.step_height": 24, "submerged_mining_speed": 25, "sweeping_damage_ratio": 26, "tempt_range": 27, "water_movement_efficiency": 28, "waypoint_transmit_range": 29, "generic.attack_knockback": 3, "waypoint_receive_range": 30, "generic.attack_speed": 4, "player.block_break_speed": 5, "player.block_interaction_range": 6, "burning_time": 7, "camera_distance": 8, "explosion_knockback_resistance": 9}
+var PlayToClientPacketEntityUpdateAttributesPropertiesKeyReverseMap = map[string]proto_base.VarInt{"generic.armor": 0, "generic.armor_toughness": 1, "player.entity_interaction_range": 10, "generic.fall_damage_multiplier": 11, "generic.flying_speed": 12, "generic.follow_range": 13, "generic.gravity": 14, "generic.jump_strength": 15, "generic.knockback_resistance": 16, "generic.luck": 17, "generic.max_absorption": 18, "generic.max_health": 19, "generic.attack_damage": 2, "generic.movement_speed": 20, "generic.safe_fall_distance": 21, "generic.scale": 22, "zombie.spawn_reinforcements": 23, "generic.step_height": 24, "submerged_mining_speed": 25, "sweeping_damage_ratio": 26, "tempt_range": 27, "water_movement_efficiency": 28, "waypoint_transmit_range": 29, "generic.attack_knockback": 3, "waypoint_receive_range": 30, "generic.attack_speed": 4, "player.block_break_speed": 5, "player.block_interaction_range": 6, "burning_time": 7, "camera_distance": 8, "explosion_knockback_resistance": 9}
+var PlayToClientPacketEntityUpdateAttributesPropertiesInnerKeyReverseMap = map[string]proto_base.VarInt{"generic.armor": 0, "generic.armor_toughness": 1, "player.entity_interaction_range": 10, "generic.fall_damage_multiplier": 11, "generic.flying_speed": 12, "generic.follow_range": 13, "generic.gravity": 14, "generic.jump_strength": 15, "generic.knockback_resistance": 16, "generic.luck": 17, "generic.max_absorption": 18, "generic.max_health": 19, "generic.attack_damage": 2, "generic.movement_speed": 20, "generic.safe_fall_distance": 21, "generic.scale": 22, "zombie.spawn_reinforcements": 23, "generic.step_height": 24, "submerged_mining_speed": 25, "sweeping_damage_ratio": 26, "tempt_range": 27, "water_movement_efficiency": 28, "waypoint_transmit_range": 29, "generic.attack_knockback": 3, "waypoint_receive_range": 30, "generic.attack_speed": 4, "player.block_break_speed": 5, "player.block_interaction_range": 6, "burning_time": 7, "camera_distance": 8, "explosion_knockback_resistance": 9}
 
 func (ret PlayToClientPacketEntityUpdateAttributes) Encode(w io.Writer) (err error) {
 	err = ret.EntityId.Encode(w)
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Properties)).Encode(w)
+	err = proto_base.VarInt(len(ret.Properties)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketEntityUpdateAttributesProperties := range len(ret.Properties) {
-		var vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey queser.VarInt
-		vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey, err = queser.ErroringIndex(PlayToClientPacketEntityUpdateAttributesPropertiesInnerKeyReverseMap, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Key)
+		var vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey proto_base.VarInt
+		vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey, err = proto_base.ErroringIndex(PlayToClientPacketEntityUpdateAttributesPropertiesInnerKeyReverseMap, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Key)
 		if err != nil {
 			return
 		}
@@ -15625,12 +15625,12 @@ func (ret PlayToClientPacketEntityUpdateAttributes) Encode(w io.Writer) (err err
 		if err != nil {
 			return
 		}
-		err = queser.VarInt(len(ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers)).Encode(w)
+		err = proto_base.VarInt(len(ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers)).Encode(w)
 		if err != nil {
 			return
 		}
 		for iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers := range len(ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers) {
-			err = queser.EncodeString(w, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers[iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers].Uuid)
+			err = proto_base.EncodeString(w, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers[iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers].Uuid)
 			if err != nil {
 				return
 			}
@@ -15648,7 +15648,7 @@ func (ret PlayToClientPacketEntityUpdateAttributes) Encode(w io.Writer) (err err
 }
 
 type PlayToClientPacketEntityVelocity struct {
-	EntityId  queser.VarInt
+	EntityId  proto_base.VarInt
 	VelocityX int16
 	VelocityY int16
 	VelocityZ int16
@@ -15695,8 +15695,8 @@ func (ret PlayToClientPacketEntityVelocity) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketExperience struct {
 	ExperienceBar   float32
-	Level           queser.VarInt
-	TotalExperience queser.VarInt
+	Level           proto_base.VarInt
+	TotalExperience proto_base.VarInt
 }
 
 func (_ PlayToClientPacketExperience) Decode(r io.Reader) (ret PlayToClientPacketExperience, err error) {
@@ -15810,7 +15810,7 @@ func (ret PlayToClientPacketExplosion) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketFacePlayer struct {
-	FeetEyes       queser.VarInt
+	FeetEyes       proto_base.VarInt
 	X              float64
 	Y              float64
 	Z              float64
@@ -15842,14 +15842,14 @@ func (_ PlayToClientPacketFacePlayer) Decode(r io.Reader) (ret PlayToClientPacke
 	}
 	switch ret.IsEntity {
 	case true:
-		var PlayToClientPacketFacePlayerEntityIdTmp queser.VarInt
+		var PlayToClientPacketFacePlayerEntityIdTmp proto_base.VarInt
 		PlayToClientPacketFacePlayerEntityIdTmp, err = PlayToClientPacketFacePlayerEntityIdTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.EntityId = PlayToClientPacketFacePlayerEntityIdTmp
 	default:
-		var PlayToClientPacketFacePlayerEntityIdTmp queser.Void
+		var PlayToClientPacketFacePlayerEntityIdTmp proto_base.Void
 		PlayToClientPacketFacePlayerEntityIdTmp, err = PlayToClientPacketFacePlayerEntityIdTmp.Decode(r)
 		if err != nil {
 			return
@@ -15858,14 +15858,14 @@ func (_ PlayToClientPacketFacePlayer) Decode(r io.Reader) (ret PlayToClientPacke
 	}
 	switch ret.IsEntity {
 	case true:
-		var PlayToClientPacketFacePlayerEntityFeetEyesTmp queser.VarInt
+		var PlayToClientPacketFacePlayerEntityFeetEyesTmp proto_base.VarInt
 		PlayToClientPacketFacePlayerEntityFeetEyesTmp, err = PlayToClientPacketFacePlayerEntityFeetEyesTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.EntityFeetEyes = PlayToClientPacketFacePlayerEntityFeetEyesTmp
 	default:
-		var PlayToClientPacketFacePlayerEntityFeetEyesTmp queser.Void
+		var PlayToClientPacketFacePlayerEntityFeetEyesTmp proto_base.Void
 		PlayToClientPacketFacePlayerEntityFeetEyesTmp, err = PlayToClientPacketFacePlayerEntityFeetEyesTmp.Decode(r)
 		if err != nil {
 			return
@@ -15897,9 +15897,9 @@ func (ret PlayToClientPacketFacePlayer) Encode(w io.Writer) (err error) {
 	}
 	switch ret.IsEntity {
 	case true:
-		PlayToClientPacketFacePlayerEntityId, ok := ret.EntityId.(queser.VarInt)
+		PlayToClientPacketFacePlayerEntityId, ok := ret.EntityId.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketFacePlayerEntityId.Encode(w)
@@ -15907,21 +15907,21 @@ func (ret PlayToClientPacketFacePlayer) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.EntityId.(queser.Void)
+		_, ok := ret.EntityId.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.EntityId.(queser.Void).Encode(w)
+		err = ret.EntityId.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
 	}
 	switch ret.IsEntity {
 	case true:
-		PlayToClientPacketFacePlayerEntityFeetEyes, ok := ret.EntityFeetEyes.(queser.VarInt)
+		PlayToClientPacketFacePlayerEntityFeetEyes, ok := ret.EntityFeetEyes.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketFacePlayerEntityFeetEyes.Encode(w)
@@ -15929,12 +15929,12 @@ func (ret PlayToClientPacketFacePlayer) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.EntityFeetEyes.(queser.Void)
+		_, ok := ret.EntityFeetEyes.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.EntityFeetEyes.(queser.Void).Encode(w)
+		err = ret.EntityFeetEyes.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -15955,7 +15955,7 @@ func (_ PlayToClientPacketGameStateChange) Decode(r io.Reader) (ret PlayToClient
 	if err != nil {
 		return
 	}
-	ret.Reason, err = queser.ErroringIndex(PlayToClientPacketGameStateChangeReasonMap, PlayToClientPacketGameStateChangeReasonKey)
+	ret.Reason, err = proto_base.ErroringIndex(PlayToClientPacketGameStateChangeReasonMap, PlayToClientPacketGameStateChangeReasonKey)
 	if err != nil {
 		return
 	}
@@ -15970,7 +15970,7 @@ var PlayToClientPacketGameStateChangeReasonReverseMap = map[string]uint8{"no_res
 
 func (ret PlayToClientPacketGameStateChange) Encode(w io.Writer) (err error) {
 	var vPlayToClientPacketGameStateChangeReason uint8
-	vPlayToClientPacketGameStateChangeReason, err = queser.ErroringIndex(PlayToClientPacketGameStateChangeReasonReverseMap, ret.Reason)
+	vPlayToClientPacketGameStateChangeReason, err = proto_base.ErroringIndex(PlayToClientPacketGameStateChangeReasonReverseMap, ret.Reason)
 	if err != nil {
 		return
 	}
@@ -15986,7 +15986,7 @@ func (ret PlayToClientPacketGameStateChange) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketHeldItemSlot struct {
-	Slot queser.VarInt
+	Slot proto_base.VarInt
 }
 
 func (_ PlayToClientPacketHeldItemSlot) Decode(r io.Reader) (ret PlayToClientPacketHeldItemSlot, err error) {
@@ -16005,7 +16005,7 @@ func (ret PlayToClientPacketHeldItemSlot) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketHideMessage struct {
-	Id        queser.VarInt
+	Id        proto_base.VarInt
 	Signature any
 }
 
@@ -16023,7 +16023,7 @@ func (_ PlayToClientPacketHideMessage) Decode(r io.Reader) (ret PlayToClientPack
 		}
 		ret.Signature = PlayToClientPacketHideMessageSignatureTmp
 	default:
-		var PlayToClientPacketHideMessageSignatureTmp queser.Void
+		var PlayToClientPacketHideMessageSignatureTmp proto_base.Void
 		PlayToClientPacketHideMessageSignatureTmp, err = PlayToClientPacketHideMessageSignatureTmp.Decode(r)
 		if err != nil {
 			return
@@ -16041,7 +16041,7 @@ func (ret PlayToClientPacketHideMessage) Encode(w io.Writer) (err error) {
 	case 0:
 		PlayToClientPacketHideMessageSignature, ok := ret.Signature.([256]byte)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		arr := PlayToClientPacketHideMessageSignature
@@ -16050,12 +16050,12 @@ func (ret PlayToClientPacketHideMessage) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Signature.(queser.Void)
+		_, ok := ret.Signature.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Signature.(queser.Void).Encode(w)
+		err = ret.Signature.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -16064,7 +16064,7 @@ func (ret PlayToClientPacketHideMessage) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketHurtAnimation struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	Yaw      float32
 }
 
@@ -16096,10 +16096,10 @@ type PlayToClientPacketInitializeWorldBorder struct {
 	Z                      float64
 	OldDiameter            float64
 	NewDiameter            float64
-	Speed                  queser.VarInt
-	PortalTeleportBoundary queser.VarInt
-	WarningBlocks          queser.VarInt
-	WarningTime            queser.VarInt
+	Speed                  proto_base.VarInt
+	PortalTeleportBoundary proto_base.VarInt
+	WarningBlocks          proto_base.VarInt
+	WarningTime            proto_base.VarInt
 }
 
 func (_ PlayToClientPacketInitializeWorldBorder) Decode(r io.Reader) (ret PlayToClientPacketInitializeWorldBorder, err error) {
@@ -16215,9 +16215,9 @@ type PlayToClientPacketLogin struct {
 	EntityId            int32
 	IsHardcore          bool
 	WorldNames          []string
-	MaxPlayers          queser.VarInt
-	ViewDistance        queser.VarInt
-	SimulationDistance  queser.VarInt
+	MaxPlayers          proto_base.VarInt
+	ViewDistance        proto_base.VarInt
+	SimulationDistance  proto_base.VarInt
 	ReducedDebugInfo    bool
 	EnableRespawnScreen bool
 	DoLimitedCrafting   bool
@@ -16234,7 +16234,7 @@ func (_ PlayToClientPacketLogin) Decode(r io.Reader) (ret PlayToClientPacketLogi
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketLoginWorldNames queser.VarInt
+	var lPlayToClientPacketLoginWorldNames proto_base.VarInt
 	lPlayToClientPacketLoginWorldNames, err = lPlayToClientPacketLoginWorldNames.Decode(r)
 	if err != nil {
 		return
@@ -16242,7 +16242,7 @@ func (_ PlayToClientPacketLogin) Decode(r io.Reader) (ret PlayToClientPacketLogi
 	ret.WorldNames = []string{}
 	for range lPlayToClientPacketLoginWorldNames {
 		var PlayToClientPacketLoginWorldNamesElement string
-		PlayToClientPacketLoginWorldNamesElement, err = queser.DecodeString(r)
+		PlayToClientPacketLoginWorldNamesElement, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -16291,12 +16291,12 @@ func (ret PlayToClientPacketLogin) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.WorldNames)).Encode(w)
+	err = proto_base.VarInt(len(ret.WorldNames)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketLoginWorldNames := range len(ret.WorldNames) {
-		err = queser.EncodeString(w, ret.WorldNames[iPlayToClientPacketLoginWorldNames])
+		err = proto_base.EncodeString(w, ret.WorldNames[iPlayToClientPacketLoginWorldNames])
 		if err != nil {
 			return
 		}
@@ -16337,11 +16337,11 @@ func (ret PlayToClientPacketLogin) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketMap struct {
-	ItemDamage queser.VarInt
+	ItemDamage proto_base.VarInt
 	Scale      int8
 	Locked     bool
 	Icons      *[]struct {
-		Type        queser.VarInt
+		Type        proto_base.VarInt
 		X           int8
 		Z           int8
 		Direction   uint8
@@ -16374,19 +16374,19 @@ func (_ PlayToClientPacketMap) Decode(r io.Reader) (ret PlayToClientPacketMap, e
 	}
 	if PlayToClientPacketMapIconsPresent {
 		var PlayToClientPacketMapIconsPresentValue []struct {
-			Type        queser.VarInt
+			Type        proto_base.VarInt
 			X           int8
 			Z           int8
 			Direction   uint8
 			DisplayName *nbt.Anon
 		}
-		var lPlayToClientPacketMapIcons queser.VarInt
+		var lPlayToClientPacketMapIcons proto_base.VarInt
 		lPlayToClientPacketMapIcons, err = lPlayToClientPacketMapIcons.Decode(r)
 		if err != nil {
 			return
 		}
 		PlayToClientPacketMapIconsPresentValue = []struct {
-			Type        queser.VarInt
+			Type        proto_base.VarInt
 			X           int8
 			Z           int8
 			Direction   uint8
@@ -16394,7 +16394,7 @@ func (_ PlayToClientPacketMap) Decode(r io.Reader) (ret PlayToClientPacketMap, e
 		}{}
 		for range lPlayToClientPacketMapIcons {
 			var PlayToClientPacketMapIconsElement struct {
-				Type        queser.VarInt
+				Type        proto_base.VarInt
 				X           int8
 				Z           int8
 				Direction   uint8
@@ -16439,7 +16439,7 @@ func (_ PlayToClientPacketMap) Decode(r io.Reader) (ret PlayToClientPacketMap, e
 	}
 	switch ret.Columns {
 	case 0:
-		var PlayToClientPacketMapRowsTmp queser.Void
+		var PlayToClientPacketMapRowsTmp proto_base.Void
 		PlayToClientPacketMapRowsTmp, err = PlayToClientPacketMapRowsTmp.Decode(r)
 		if err != nil {
 			return
@@ -16455,7 +16455,7 @@ func (_ PlayToClientPacketMap) Decode(r io.Reader) (ret PlayToClientPacketMap, e
 	}
 	switch ret.Columns {
 	case 0:
-		var PlayToClientPacketMapXTmp queser.Void
+		var PlayToClientPacketMapXTmp proto_base.Void
 		PlayToClientPacketMapXTmp, err = PlayToClientPacketMapXTmp.Decode(r)
 		if err != nil {
 			return
@@ -16471,7 +16471,7 @@ func (_ PlayToClientPacketMap) Decode(r io.Reader) (ret PlayToClientPacketMap, e
 	}
 	switch ret.Columns {
 	case 0:
-		var PlayToClientPacketMapYTmp queser.Void
+		var PlayToClientPacketMapYTmp proto_base.Void
 		PlayToClientPacketMapYTmp, err = PlayToClientPacketMapYTmp.Decode(r)
 		if err != nil {
 			return
@@ -16487,7 +16487,7 @@ func (_ PlayToClientPacketMap) Decode(r io.Reader) (ret PlayToClientPacketMap, e
 	}
 	switch ret.Columns {
 	case 0:
-		var PlayToClientPacketMapDataTmp queser.Void
+		var PlayToClientPacketMapDataTmp proto_base.Void
 		PlayToClientPacketMapDataTmp, err = PlayToClientPacketMapDataTmp.Decode(r)
 		if err != nil {
 			return
@@ -16495,7 +16495,7 @@ func (_ PlayToClientPacketMap) Decode(r io.Reader) (ret PlayToClientPacketMap, e
 		ret.Data = PlayToClientPacketMapDataTmp
 	default:
 		var PlayToClientPacketMapDataTmp []byte
-		var lPlayToClientPacketMapData queser.VarInt
+		var lPlayToClientPacketMapData proto_base.VarInt
 		lPlayToClientPacketMapData, err = lPlayToClientPacketMapData.Decode(r)
 		if err != nil {
 			return
@@ -16526,7 +16526,7 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.Icons != nil {
-		err = queser.VarInt(len(*ret.Icons)).Encode(w)
+		err = proto_base.VarInt(len(*ret.Icons)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -16565,9 +16565,9 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 	}
 	switch ret.Columns {
 	case 0:
-		PlayToClientPacketMapRows, ok := ret.Rows.(queser.Void)
+		PlayToClientPacketMapRows, ok := ret.Rows.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketMapRows.Encode(w)
@@ -16577,7 +16577,7 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 	default:
 		_, ok := ret.Rows.(uint8)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ret.Rows.(uint8))
@@ -16587,9 +16587,9 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 	}
 	switch ret.Columns {
 	case 0:
-		PlayToClientPacketMapX, ok := ret.X.(queser.Void)
+		PlayToClientPacketMapX, ok := ret.X.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketMapX.Encode(w)
@@ -16599,7 +16599,7 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 	default:
 		_, ok := ret.X.(uint8)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ret.X.(uint8))
@@ -16609,9 +16609,9 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 	}
 	switch ret.Columns {
 	case 0:
-		PlayToClientPacketMapY, ok := ret.Y.(queser.Void)
+		PlayToClientPacketMapY, ok := ret.Y.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketMapY.Encode(w)
@@ -16621,7 +16621,7 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 	default:
 		_, ok := ret.Y.(uint8)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, ret.Y.(uint8))
@@ -16631,9 +16631,9 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 	}
 	switch ret.Columns {
 	case 0:
-		PlayToClientPacketMapData, ok := ret.Data.(queser.Void)
+		PlayToClientPacketMapData, ok := ret.Data.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketMapData.Encode(w)
@@ -16643,10 +16643,10 @@ func (ret PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 	default:
 		_, ok := ret.Data.([]byte)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.VarInt(len(ret.Data.([]byte))).Encode(w)
+		err = proto_base.VarInt(len(ret.Data.([]byte))).Encode(w)
 		if err != nil {
 			return
 		}
@@ -16675,7 +16675,7 @@ type PlayToClientPacketMapChunk struct {
 	BlockLight          [][]uint8
 }
 
-var PlayToClientPacketMapChunkHeightmapsElementTypeMap = map[queser.VarInt]string{0: "world_surface_wg", 1: "world_surface", 2: "ocean_floor_wg", 3: "ocean_floor", 4: "motion_blocking", 5: "motion_blocking_no_leaves"}
+var PlayToClientPacketMapChunkHeightmapsElementTypeMap = map[proto_base.VarInt]string{0: "world_surface_wg", 1: "world_surface", 2: "ocean_floor_wg", 3: "ocean_floor", 4: "motion_blocking", 5: "motion_blocking_no_leaves"}
 
 func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketMapChunk, err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
@@ -16686,7 +16686,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketMapChunkHeightmaps queser.VarInt
+	var lPlayToClientPacketMapChunkHeightmaps proto_base.VarInt
 	lPlayToClientPacketMapChunkHeightmaps, err = lPlayToClientPacketMapChunkHeightmaps.Decode(r)
 	if err != nil {
 		return
@@ -16700,16 +16700,16 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 			Type string
 			Data []int64
 		}
-		var PlayToClientPacketMapChunkHeightmapsElementTypeKey queser.VarInt
+		var PlayToClientPacketMapChunkHeightmapsElementTypeKey proto_base.VarInt
 		PlayToClientPacketMapChunkHeightmapsElementTypeKey, err = PlayToClientPacketMapChunkHeightmapsElementTypeKey.Decode(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketMapChunkHeightmapsElement.Type, err = queser.ErroringIndex(PlayToClientPacketMapChunkHeightmapsElementTypeMap, PlayToClientPacketMapChunkHeightmapsElementTypeKey)
+		PlayToClientPacketMapChunkHeightmapsElement.Type, err = proto_base.ErroringIndex(PlayToClientPacketMapChunkHeightmapsElementTypeMap, PlayToClientPacketMapChunkHeightmapsElementTypeKey)
 		if err != nil {
 			return
 		}
-		var lPlayToClientPacketMapChunkHeightmapsElementData queser.VarInt
+		var lPlayToClientPacketMapChunkHeightmapsElementData proto_base.VarInt
 		lPlayToClientPacketMapChunkHeightmapsElementData, err = lPlayToClientPacketMapChunkHeightmapsElementData.Decode(r)
 		if err != nil {
 			return
@@ -16729,7 +16729,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketMapChunkBlockEntities queser.VarInt
+	var lPlayToClientPacketMapChunkBlockEntities proto_base.VarInt
 	lPlayToClientPacketMapChunkBlockEntities, err = lPlayToClientPacketMapChunkBlockEntities.Decode(r)
 	if err != nil {
 		return
@@ -16743,7 +16743,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 		}
 		ret.BlockEntities = append(ret.BlockEntities, PlayToClientPacketMapChunkBlockEntitiesElement)
 	}
-	var lPlayToClientPacketMapChunkSkyLightMask queser.VarInt
+	var lPlayToClientPacketMapChunkSkyLightMask proto_base.VarInt
 	lPlayToClientPacketMapChunkSkyLightMask, err = lPlayToClientPacketMapChunkSkyLightMask.Decode(r)
 	if err != nil {
 		return
@@ -16757,7 +16757,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 		}
 		ret.SkyLightMask = append(ret.SkyLightMask, PlayToClientPacketMapChunkSkyLightMaskElement)
 	}
-	var lPlayToClientPacketMapChunkBlockLightMask queser.VarInt
+	var lPlayToClientPacketMapChunkBlockLightMask proto_base.VarInt
 	lPlayToClientPacketMapChunkBlockLightMask, err = lPlayToClientPacketMapChunkBlockLightMask.Decode(r)
 	if err != nil {
 		return
@@ -16771,7 +16771,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 		}
 		ret.BlockLightMask = append(ret.BlockLightMask, PlayToClientPacketMapChunkBlockLightMaskElement)
 	}
-	var lPlayToClientPacketMapChunkEmptySkyLightMask queser.VarInt
+	var lPlayToClientPacketMapChunkEmptySkyLightMask proto_base.VarInt
 	lPlayToClientPacketMapChunkEmptySkyLightMask, err = lPlayToClientPacketMapChunkEmptySkyLightMask.Decode(r)
 	if err != nil {
 		return
@@ -16785,7 +16785,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 		}
 		ret.EmptySkyLightMask = append(ret.EmptySkyLightMask, PlayToClientPacketMapChunkEmptySkyLightMaskElement)
 	}
-	var lPlayToClientPacketMapChunkEmptyBlockLightMask queser.VarInt
+	var lPlayToClientPacketMapChunkEmptyBlockLightMask proto_base.VarInt
 	lPlayToClientPacketMapChunkEmptyBlockLightMask, err = lPlayToClientPacketMapChunkEmptyBlockLightMask.Decode(r)
 	if err != nil {
 		return
@@ -16799,7 +16799,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 		}
 		ret.EmptyBlockLightMask = append(ret.EmptyBlockLightMask, PlayToClientPacketMapChunkEmptyBlockLightMaskElement)
 	}
-	var lPlayToClientPacketMapChunkSkyLight queser.VarInt
+	var lPlayToClientPacketMapChunkSkyLight proto_base.VarInt
 	lPlayToClientPacketMapChunkSkyLight, err = lPlayToClientPacketMapChunkSkyLight.Decode(r)
 	if err != nil {
 		return
@@ -16807,7 +16807,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 	ret.SkyLight = [][]uint8{}
 	for range lPlayToClientPacketMapChunkSkyLight {
 		var PlayToClientPacketMapChunkSkyLightElement []uint8
-		var lPlayToClientPacketMapChunkSkyLightElement queser.VarInt
+		var lPlayToClientPacketMapChunkSkyLightElement proto_base.VarInt
 		lPlayToClientPacketMapChunkSkyLightElement, err = lPlayToClientPacketMapChunkSkyLightElement.Decode(r)
 		if err != nil {
 			return
@@ -16823,7 +16823,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 		}
 		ret.SkyLight = append(ret.SkyLight, PlayToClientPacketMapChunkSkyLightElement)
 	}
-	var lPlayToClientPacketMapChunkBlockLight queser.VarInt
+	var lPlayToClientPacketMapChunkBlockLight proto_base.VarInt
 	lPlayToClientPacketMapChunkBlockLight, err = lPlayToClientPacketMapChunkBlockLight.Decode(r)
 	if err != nil {
 		return
@@ -16831,7 +16831,7 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 	ret.BlockLight = [][]uint8{}
 	for range lPlayToClientPacketMapChunkBlockLight {
 		var PlayToClientPacketMapChunkBlockLightElement []uint8
-		var lPlayToClientPacketMapChunkBlockLightElement queser.VarInt
+		var lPlayToClientPacketMapChunkBlockLightElement proto_base.VarInt
 		lPlayToClientPacketMapChunkBlockLightElement, err = lPlayToClientPacketMapChunkBlockLightElement.Decode(r)
 		if err != nil {
 			return
@@ -16850,8 +16850,8 @@ func (_ PlayToClientPacketMapChunk) Decode(r io.Reader) (ret PlayToClientPacketM
 	return
 }
 
-var PlayToClientPacketMapChunkHeightmapsTypeReverseMap = map[string]queser.VarInt{"world_surface_wg": 0, "world_surface": 1, "ocean_floor_wg": 2, "ocean_floor": 3, "motion_blocking": 4, "motion_blocking_no_leaves": 5}
-var PlayToClientPacketMapChunkHeightmapsInnerTypeReverseMap = map[string]queser.VarInt{"world_surface_wg": 0, "world_surface": 1, "ocean_floor_wg": 2, "ocean_floor": 3, "motion_blocking": 4, "motion_blocking_no_leaves": 5}
+var PlayToClientPacketMapChunkHeightmapsTypeReverseMap = map[string]proto_base.VarInt{"world_surface_wg": 0, "world_surface": 1, "ocean_floor_wg": 2, "ocean_floor": 3, "motion_blocking": 4, "motion_blocking_no_leaves": 5}
+var PlayToClientPacketMapChunkHeightmapsInnerTypeReverseMap = map[string]proto_base.VarInt{"world_surface_wg": 0, "world_surface": 1, "ocean_floor_wg": 2, "ocean_floor": 3, "motion_blocking": 4, "motion_blocking_no_leaves": 5}
 
 func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 	err = binary.Write(w, binary.BigEndian, ret.X)
@@ -16862,13 +16862,13 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Heightmaps)).Encode(w)
+	err = proto_base.VarInt(len(ret.Heightmaps)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketMapChunkHeightmaps := range len(ret.Heightmaps) {
-		var vPlayToClientPacketMapChunkHeightmapsInnerType queser.VarInt
-		vPlayToClientPacketMapChunkHeightmapsInnerType, err = queser.ErroringIndex(PlayToClientPacketMapChunkHeightmapsInnerTypeReverseMap, ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Type)
+		var vPlayToClientPacketMapChunkHeightmapsInnerType proto_base.VarInt
+		vPlayToClientPacketMapChunkHeightmapsInnerType, err = proto_base.ErroringIndex(PlayToClientPacketMapChunkHeightmapsInnerTypeReverseMap, ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Type)
 		if err != nil {
 			return
 		}
@@ -16876,7 +16876,7 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = queser.VarInt(len(ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Data)).Encode(w)
+		err = proto_base.VarInt(len(ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Data)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -16891,7 +16891,7 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.BlockEntities)).Encode(w)
+	err = proto_base.VarInt(len(ret.BlockEntities)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -16901,7 +16901,7 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.SkyLightMask)).Encode(w)
+	err = proto_base.VarInt(len(ret.SkyLightMask)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -16911,7 +16911,7 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.BlockLightMask)).Encode(w)
+	err = proto_base.VarInt(len(ret.BlockLightMask)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -16921,7 +16921,7 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.EmptySkyLightMask)).Encode(w)
+	err = proto_base.VarInt(len(ret.EmptySkyLightMask)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -16931,7 +16931,7 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.EmptyBlockLightMask)).Encode(w)
+	err = proto_base.VarInt(len(ret.EmptyBlockLightMask)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -16941,12 +16941,12 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.SkyLight)).Encode(w)
+	err = proto_base.VarInt(len(ret.SkyLight)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketMapChunkSkyLight := range len(ret.SkyLight) {
-		err = queser.VarInt(len(ret.SkyLight[iPlayToClientPacketMapChunkSkyLight])).Encode(w)
+		err = proto_base.VarInt(len(ret.SkyLight[iPlayToClientPacketMapChunkSkyLight])).Encode(w)
 		if err != nil {
 			return
 		}
@@ -16957,12 +16957,12 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 			}
 		}
 	}
-	err = queser.VarInt(len(ret.BlockLight)).Encode(w)
+	err = proto_base.VarInt(len(ret.BlockLight)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketMapChunkBlockLight := range len(ret.BlockLight) {
-		err = queser.VarInt(len(ret.BlockLight[iPlayToClientPacketMapChunkBlockLight])).Encode(w)
+		err = proto_base.VarInt(len(ret.BlockLight[iPlayToClientPacketMapChunkBlockLight])).Encode(w)
 		if err != nil {
 			return
 		}
@@ -16977,7 +16977,7 @@ func (ret PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketMoveMinecart struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	Steps    []struct {
 		Position Vec3f
 		Movement Vec3f
@@ -16992,7 +16992,7 @@ func (_ PlayToClientPacketMoveMinecart) Decode(r io.Reader) (ret PlayToClientPac
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketMoveMinecartSteps queser.VarInt
+	var lPlayToClientPacketMoveMinecartSteps proto_base.VarInt
 	lPlayToClientPacketMoveMinecartSteps, err = lPlayToClientPacketMoveMinecartSteps.Decode(r)
 	if err != nil {
 		return
@@ -17041,7 +17041,7 @@ func (ret PlayToClientPacketMoveMinecart) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Steps)).Encode(w)
+	err = proto_base.VarInt(len(ret.Steps)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -17072,7 +17072,7 @@ func (ret PlayToClientPacketMoveMinecart) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketMultiBlockChange struct {
 	ChunkCoordinates uint64
-	Records          []queser.VarInt
+	Records          []proto_base.VarInt
 }
 
 func (_ PlayToClientPacketMultiBlockChange) Decode(r io.Reader) (ret PlayToClientPacketMultiBlockChange, err error) {
@@ -17080,14 +17080,14 @@ func (_ PlayToClientPacketMultiBlockChange) Decode(r io.Reader) (ret PlayToClien
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketMultiBlockChangeRecords queser.VarInt
+	var lPlayToClientPacketMultiBlockChangeRecords proto_base.VarInt
 	lPlayToClientPacketMultiBlockChangeRecords, err = lPlayToClientPacketMultiBlockChangeRecords.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Records = []queser.VarInt{}
+	ret.Records = []proto_base.VarInt{}
 	for range lPlayToClientPacketMultiBlockChangeRecords {
-		var PlayToClientPacketMultiBlockChangeRecordsElement queser.VarInt
+		var PlayToClientPacketMultiBlockChangeRecordsElement proto_base.VarInt
 		PlayToClientPacketMultiBlockChangeRecordsElement, err = PlayToClientPacketMultiBlockChangeRecordsElement.Decode(r)
 		if err != nil {
 			return
@@ -17101,7 +17101,7 @@ func (ret PlayToClientPacketMultiBlockChange) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Records)).Encode(w)
+	err = proto_base.VarInt(len(ret.Records)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -17115,7 +17115,7 @@ func (ret PlayToClientPacketMultiBlockChange) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketNbtQueryResponse struct {
-	TransactionId queser.VarInt
+	TransactionId proto_base.VarInt
 	Nbt           nbt.Anon
 }
 
@@ -17143,7 +17143,7 @@ func (ret PlayToClientPacketNbtQueryResponse) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketOpenBook struct {
-	Hand queser.VarInt
+	Hand proto_base.VarInt
 }
 
 func (_ PlayToClientPacketOpenBook) Decode(r io.Reader) (ret PlayToClientPacketOpenBook, err error) {
@@ -17163,7 +17163,7 @@ func (ret PlayToClientPacketOpenBook) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketOpenHorseWindow struct {
 	WindowId ContainerID
-	NbSlots  queser.VarInt
+	NbSlots  proto_base.VarInt
 	EntityId int32
 }
 
@@ -17227,8 +17227,8 @@ func (ret PlayToClientPacketOpenSignEntity) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketOpenWindow struct {
-	WindowId      queser.VarInt
-	InventoryType queser.VarInt
+	WindowId      proto_base.VarInt
+	InventoryType proto_base.VarInt
 	WindowTitle   nbt.Anon
 }
 
@@ -17302,16 +17302,16 @@ func (ret PlayToClientPacketPingResponse) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketPlayerChat struct {
-	GlobalIndex         queser.VarInt
+	GlobalIndex         proto_base.VarInt
 	SenderUuid          uuid.UUID
-	Index               queser.VarInt
+	Index               proto_base.VarInt
 	Signature           *[256]byte
 	PlainMessage        string
 	Timestamp           int64
 	Salt                int64
 	PreviousMessages    PreviousMessages
 	UnsignedChatContent *nbt.Anon
-	FilterType          queser.VarInt
+	FilterType          proto_base.VarInt
 	FilterTypeMask      any
 	Type                PlayToClientChatTypesHolder
 	NetworkName         nbt.Anon
@@ -17344,7 +17344,7 @@ func (_ PlayToClientPacketPlayerChat) Decode(r io.Reader) (ret PlayToClientPacke
 		}
 		ret.Signature = &PlayToClientPacketPlayerChatSignaturePresentValue
 	}
-	ret.PlainMessage, err = queser.DecodeString(r)
+	ret.PlainMessage, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -17380,7 +17380,7 @@ func (_ PlayToClientPacketPlayerChat) Decode(r io.Reader) (ret PlayToClientPacke
 	switch ret.FilterType {
 	case 2:
 		var PlayToClientPacketPlayerChatFilterTypeMaskTmp []int64
-		var lPlayToClientPacketPlayerChatFilterTypeMask queser.VarInt
+		var lPlayToClientPacketPlayerChatFilterTypeMask proto_base.VarInt
 		lPlayToClientPacketPlayerChatFilterTypeMask, err = lPlayToClientPacketPlayerChatFilterTypeMask.Decode(r)
 		if err != nil {
 			return
@@ -17396,7 +17396,7 @@ func (_ PlayToClientPacketPlayerChat) Decode(r io.Reader) (ret PlayToClientPacke
 		}
 		ret.FilterTypeMask = PlayToClientPacketPlayerChatFilterTypeMaskTmp
 	default:
-		var PlayToClientPacketPlayerChatFilterTypeMaskTmp queser.Void
+		var PlayToClientPacketPlayerChatFilterTypeMaskTmp proto_base.Void
 		PlayToClientPacketPlayerChatFilterTypeMaskTmp, err = PlayToClientPacketPlayerChatFilterTypeMaskTmp.Decode(r)
 		if err != nil {
 			return
@@ -17450,7 +17450,7 @@ func (ret PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.EncodeString(w, ret.PlainMessage)
+	err = proto_base.EncodeString(w, ret.PlainMessage)
 	if err != nil {
 		return
 	}
@@ -17484,10 +17484,10 @@ func (ret PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
 	case 2:
 		PlayToClientPacketPlayerChatFilterTypeMask, ok := ret.FilterTypeMask.([]int64)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.VarInt(len(PlayToClientPacketPlayerChatFilterTypeMask)).Encode(w)
+		err = proto_base.VarInt(len(PlayToClientPacketPlayerChatFilterTypeMask)).Encode(w)
 		if err != nil {
 			return
 		}
@@ -17498,12 +17498,12 @@ func (ret PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
 			}
 		}
 	default:
-		_, ok := ret.FilterTypeMask.(queser.Void)
+		_, ok := ret.FilterTypeMask.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.FilterTypeMask.(queser.Void).Encode(w)
+		err = ret.FilterTypeMask.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -17549,7 +17549,7 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketPlayerInfoData queser.VarInt
+	var lPlayToClientPacketPlayerInfoData proto_base.VarInt
 	lPlayToClientPacketPlayerInfoData, err = lPlayToClientPacketPlayerInfoData.Decode(r)
 	if err != nil {
 		return
@@ -17590,7 +17590,7 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 			}
 			PlayToClientPacketPlayerInfoDataElement.Player = PlayToClientPacketPlayerInfoDataElementPlayerTmp
 		default:
-			var PlayToClientPacketPlayerInfoDataElementPlayerTmp queser.Void
+			var PlayToClientPacketPlayerInfoDataElementPlayerTmp proto_base.Void
 			PlayToClientPacketPlayerInfoDataElementPlayerTmp, err = PlayToClientPacketPlayerInfoDataElementPlayerTmp.Decode(r)
 			if err != nil {
 				return
@@ -17606,7 +17606,7 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 			}
 			PlayToClientPacketPlayerInfoDataElement.ChatSession = PlayToClientPacketPlayerInfoDataElementChatSessionTmp
 		default:
-			var PlayToClientPacketPlayerInfoDataElementChatSessionTmp queser.Void
+			var PlayToClientPacketPlayerInfoDataElementChatSessionTmp proto_base.Void
 			PlayToClientPacketPlayerInfoDataElementChatSessionTmp, err = PlayToClientPacketPlayerInfoDataElementChatSessionTmp.Decode(r)
 			if err != nil {
 				return
@@ -17615,14 +17615,14 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 		}
 		switch ret.Action&4 != 0 {
 		case true:
-			var PlayToClientPacketPlayerInfoDataElementGamemodeTmp queser.VarInt
+			var PlayToClientPacketPlayerInfoDataElementGamemodeTmp proto_base.VarInt
 			PlayToClientPacketPlayerInfoDataElementGamemodeTmp, err = PlayToClientPacketPlayerInfoDataElementGamemodeTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			PlayToClientPacketPlayerInfoDataElement.Gamemode = PlayToClientPacketPlayerInfoDataElementGamemodeTmp
 		default:
-			var PlayToClientPacketPlayerInfoDataElementGamemodeTmp queser.Void
+			var PlayToClientPacketPlayerInfoDataElementGamemodeTmp proto_base.Void
 			PlayToClientPacketPlayerInfoDataElementGamemodeTmp, err = PlayToClientPacketPlayerInfoDataElementGamemodeTmp.Decode(r)
 			if err != nil {
 				return
@@ -17631,14 +17631,14 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 		}
 		switch ret.Action&8 != 0 {
 		case true:
-			var PlayToClientPacketPlayerInfoDataElementListedTmp queser.VarInt
+			var PlayToClientPacketPlayerInfoDataElementListedTmp proto_base.VarInt
 			PlayToClientPacketPlayerInfoDataElementListedTmp, err = PlayToClientPacketPlayerInfoDataElementListedTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			PlayToClientPacketPlayerInfoDataElement.Listed = PlayToClientPacketPlayerInfoDataElementListedTmp
 		default:
-			var PlayToClientPacketPlayerInfoDataElementListedTmp queser.Void
+			var PlayToClientPacketPlayerInfoDataElementListedTmp proto_base.Void
 			PlayToClientPacketPlayerInfoDataElementListedTmp, err = PlayToClientPacketPlayerInfoDataElementListedTmp.Decode(r)
 			if err != nil {
 				return
@@ -17647,14 +17647,14 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 		}
 		switch ret.Action&10 != 0 {
 		case true:
-			var PlayToClientPacketPlayerInfoDataElementLatencyTmp queser.VarInt
+			var PlayToClientPacketPlayerInfoDataElementLatencyTmp proto_base.VarInt
 			PlayToClientPacketPlayerInfoDataElementLatencyTmp, err = PlayToClientPacketPlayerInfoDataElementLatencyTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			PlayToClientPacketPlayerInfoDataElement.Latency = PlayToClientPacketPlayerInfoDataElementLatencyTmp
 		default:
-			var PlayToClientPacketPlayerInfoDataElementLatencyTmp queser.Void
+			var PlayToClientPacketPlayerInfoDataElementLatencyTmp proto_base.Void
 			PlayToClientPacketPlayerInfoDataElementLatencyTmp, err = PlayToClientPacketPlayerInfoDataElementLatencyTmp.Decode(r)
 			if err != nil {
 				return
@@ -17679,7 +17679,7 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 			}
 			PlayToClientPacketPlayerInfoDataElement.DisplayName = PlayToClientPacketPlayerInfoDataElementDisplayNameTmp
 		default:
-			var PlayToClientPacketPlayerInfoDataElementDisplayNameTmp queser.Void
+			var PlayToClientPacketPlayerInfoDataElementDisplayNameTmp proto_base.Void
 			PlayToClientPacketPlayerInfoDataElementDisplayNameTmp, err = PlayToClientPacketPlayerInfoDataElementDisplayNameTmp.Decode(r)
 			if err != nil {
 				return
@@ -17688,14 +17688,14 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 		}
 		switch ret.Action&80 != 0 {
 		case true:
-			var PlayToClientPacketPlayerInfoDataElementListPriorityTmp queser.VarInt
+			var PlayToClientPacketPlayerInfoDataElementListPriorityTmp proto_base.VarInt
 			PlayToClientPacketPlayerInfoDataElementListPriorityTmp, err = PlayToClientPacketPlayerInfoDataElementListPriorityTmp.Decode(r)
 			if err != nil {
 				return
 			}
 			PlayToClientPacketPlayerInfoDataElement.ListPriority = PlayToClientPacketPlayerInfoDataElementListPriorityTmp
 		default:
-			var PlayToClientPacketPlayerInfoDataElementListPriorityTmp queser.Void
+			var PlayToClientPacketPlayerInfoDataElementListPriorityTmp proto_base.Void
 			PlayToClientPacketPlayerInfoDataElementListPriorityTmp, err = PlayToClientPacketPlayerInfoDataElementListPriorityTmp.Decode(r)
 			if err != nil {
 				return
@@ -17711,7 +17711,7 @@ func (_ PlayToClientPacketPlayerInfo) Decode(r io.Reader) (ret PlayToClientPacke
 			}
 			PlayToClientPacketPlayerInfoDataElement.ShowHat = PlayToClientPacketPlayerInfoDataElementShowHatTmp
 		default:
-			var PlayToClientPacketPlayerInfoDataElementShowHatTmp queser.Void
+			var PlayToClientPacketPlayerInfoDataElementShowHatTmp proto_base.Void
 			PlayToClientPacketPlayerInfoDataElementShowHatTmp, err = PlayToClientPacketPlayerInfoDataElementShowHatTmp.Decode(r)
 			if err != nil {
 				return
@@ -17727,7 +17727,7 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Data)).Encode(w)
+	err = proto_base.VarInt(len(ret.Data)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -17740,7 +17740,7 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 		case true:
 			PlayToClientPacketPlayerInfoDataInnerPlayer, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Player.(GameProfile)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketPlayerInfoDataInnerPlayer.Encode(w)
@@ -17748,12 +17748,12 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Player.(queser.Void)
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Player.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Data[iPlayToClientPacketPlayerInfoData].Player.(queser.Void).Encode(w)
+			err = ret.Data[iPlayToClientPacketPlayerInfoData].Player.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
@@ -17762,7 +17762,7 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 		case true:
 			PlayToClientPacketPlayerInfoDataInnerChatSession, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(ChatSession)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketPlayerInfoDataInnerChatSession.Encode(w)
@@ -17770,21 +17770,21 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(queser.Void)
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(queser.Void).Encode(w)
+			err = ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
 		}
 		switch ret.Action&4 != 0 {
 		case true:
-			PlayToClientPacketPlayerInfoDataInnerGamemode, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(queser.VarInt)
+			PlayToClientPacketPlayerInfoDataInnerGamemode, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(proto_base.VarInt)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketPlayerInfoDataInnerGamemode.Encode(w)
@@ -17792,21 +17792,21 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(queser.Void)
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(queser.Void).Encode(w)
+			err = ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
 		}
 		switch ret.Action&8 != 0 {
 		case true:
-			PlayToClientPacketPlayerInfoDataInnerListed, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(queser.VarInt)
+			PlayToClientPacketPlayerInfoDataInnerListed, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(proto_base.VarInt)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketPlayerInfoDataInnerListed.Encode(w)
@@ -17814,21 +17814,21 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(queser.Void)
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(queser.Void).Encode(w)
+			err = ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
 		}
 		switch ret.Action&10 != 0 {
 		case true:
-			PlayToClientPacketPlayerInfoDataInnerLatency, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(queser.VarInt)
+			PlayToClientPacketPlayerInfoDataInnerLatency, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(proto_base.VarInt)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketPlayerInfoDataInnerLatency.Encode(w)
@@ -17836,12 +17836,12 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(queser.Void)
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(queser.Void).Encode(w)
+			err = ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
@@ -17850,7 +17850,7 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 		case true:
 			PlayToClientPacketPlayerInfoDataInnerDisplayName, ok := ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(*nbt.Anon)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, PlayToClientPacketPlayerInfoDataInnerDisplayName != nil)
@@ -17864,21 +17864,21 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				}
 			}
 		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(queser.Void)
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(queser.Void).Encode(w)
+			err = ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
 		}
 		switch ret.Action&80 != 0 {
 		case true:
-			PlayToClientPacketPlayerInfoDataInnerListPriority, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(queser.VarInt)
+			PlayToClientPacketPlayerInfoDataInnerListPriority, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(proto_base.VarInt)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketPlayerInfoDataInnerListPriority.Encode(w)
@@ -17886,12 +17886,12 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(queser.Void)
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(queser.Void).Encode(w)
+			err = ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
@@ -17900,7 +17900,7 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 		case true:
 			PlayToClientPacketPlayerInfoDataInnerShowHat, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(bool)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = binary.Write(w, binary.BigEndian, PlayToClientPacketPlayerInfoDataInnerShowHat)
@@ -17908,12 +17908,12 @@ func (ret PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				return
 			}
 		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(queser.Void)
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(queser.Void).Encode(w)
+			err = ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
@@ -17927,7 +17927,7 @@ type PlayToClientPacketPlayerRemove struct {
 }
 
 func (_ PlayToClientPacketPlayerRemove) Decode(r io.Reader) (ret PlayToClientPacketPlayerRemove, err error) {
-	var lPlayToClientPacketPlayerRemovePlayers queser.VarInt
+	var lPlayToClientPacketPlayerRemovePlayers proto_base.VarInt
 	lPlayToClientPacketPlayerRemovePlayers, err = lPlayToClientPacketPlayerRemovePlayers.Decode(r)
 	if err != nil {
 		return
@@ -17944,7 +17944,7 @@ func (_ PlayToClientPacketPlayerRemove) Decode(r io.Reader) (ret PlayToClientPac
 	return
 }
 func (ret PlayToClientPacketPlayerRemove) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Players)).Encode(w)
+	err = proto_base.VarInt(len(ret.Players)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -18014,7 +18014,7 @@ func (ret PlayToClientPacketPlayerlistHeader) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketPosition struct {
-	TeleportId queser.VarInt
+	TeleportId proto_base.VarInt
 	X          float64
 	Y          float64
 	Z          float64
@@ -18177,7 +18177,7 @@ func (ret PlayToClientPacketProfilelessChat) Encode(w io.Writer) (err error) {
 type PlayToClientPacketRecipeBookAdd struct {
 	Entries []struct {
 		Recipe struct {
-			DisplayId            queser.VarInt
+			DisplayId            proto_base.VarInt
 			Display              PlayToClientRecipeDisplay
 			Group                Optvarint
 			Category             string
@@ -18188,17 +18188,17 @@ type PlayToClientPacketRecipeBookAdd struct {
 	Replace bool
 }
 
-var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap = map[queser.VarInt]string{0: "crafting_building_blocks", 1: "crafting_redstone", 10: "stonecutter", 11: "smithing", 12: "campfire", 2: "crafting_equipment", 3: "crafting_misc", 4: "furnace_food", 5: "furnace_blocks", 6: "furnace_misc", 7: "blast_furnace_blocks", 8: "blast_furnace_misc", 9: "smoker_food"}
+var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap = map[proto_base.VarInt]string{0: "crafting_building_blocks", 1: "crafting_redstone", 10: "stonecutter", 11: "smithing", 12: "campfire", 2: "crafting_equipment", 3: "crafting_misc", 4: "furnace_food", 5: "furnace_blocks", 6: "furnace_misc", 7: "blast_furnace_blocks", 8: "blast_furnace_misc", 9: "smoker_food"}
 
 func (_ PlayToClientPacketRecipeBookAdd) Decode(r io.Reader) (ret PlayToClientPacketRecipeBookAdd, err error) {
-	var lPlayToClientPacketRecipeBookAddEntries queser.VarInt
+	var lPlayToClientPacketRecipeBookAddEntries proto_base.VarInt
 	lPlayToClientPacketRecipeBookAddEntries, err = lPlayToClientPacketRecipeBookAddEntries.Decode(r)
 	if err != nil {
 		return
 	}
 	ret.Entries = []struct {
 		Recipe struct {
-			DisplayId            queser.VarInt
+			DisplayId            proto_base.VarInt
 			Display              PlayToClientRecipeDisplay
 			Group                Optvarint
 			Category             string
@@ -18209,7 +18209,7 @@ func (_ PlayToClientPacketRecipeBookAdd) Decode(r io.Reader) (ret PlayToClientPa
 	for range lPlayToClientPacketRecipeBookAddEntries {
 		var PlayToClientPacketRecipeBookAddEntriesElement struct {
 			Recipe struct {
-				DisplayId            queser.VarInt
+				DisplayId            proto_base.VarInt
 				Display              PlayToClientRecipeDisplay
 				Group                Optvarint
 				Category             string
@@ -18229,12 +18229,12 @@ func (_ PlayToClientPacketRecipeBookAdd) Decode(r io.Reader) (ret PlayToClientPa
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey queser.VarInt
+		var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey proto_base.VarInt
 		PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey, err = PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey.Decode(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketRecipeBookAddEntriesElement.Recipe.Category, err = queser.ErroringIndex(PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap, PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey)
+		PlayToClientPacketRecipeBookAddEntriesElement.Recipe.Category, err = proto_base.ErroringIndex(PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap, PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey)
 		if err != nil {
 			return
 		}
@@ -18245,7 +18245,7 @@ func (_ PlayToClientPacketRecipeBookAdd) Decode(r io.Reader) (ret PlayToClientPa
 		}
 		if PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresent {
 			var PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue []IDSet
-			var lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements queser.VarInt
+			var lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements proto_base.VarInt
 			lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements, err = lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements.Decode(r)
 			if err != nil {
 				return
@@ -18274,11 +18274,11 @@ func (_ PlayToClientPacketRecipeBookAdd) Decode(r io.Reader) (ret PlayToClientPa
 	return
 }
 
-var PlayToClientPacketRecipeBookAddEntriesRecipeCategoryReverseMap = map[string]queser.VarInt{"crafting_building_blocks": 0, "crafting_redstone": 1, "stonecutter": 10, "smithing": 11, "campfire": 12, "crafting_equipment": 2, "crafting_misc": 3, "furnace_food": 4, "furnace_blocks": 5, "furnace_misc": 6, "blast_furnace_blocks": 7, "blast_furnace_misc": 8, "smoker_food": 9}
-var PlayToClientPacketRecipeBookAddEntriesInnerRecipeCategoryReverseMap = map[string]queser.VarInt{"crafting_building_blocks": 0, "crafting_redstone": 1, "stonecutter": 10, "smithing": 11, "campfire": 12, "crafting_equipment": 2, "crafting_misc": 3, "furnace_food": 4, "furnace_blocks": 5, "furnace_misc": 6, "blast_furnace_blocks": 7, "blast_furnace_misc": 8, "smoker_food": 9}
+var PlayToClientPacketRecipeBookAddEntriesRecipeCategoryReverseMap = map[string]proto_base.VarInt{"crafting_building_blocks": 0, "crafting_redstone": 1, "stonecutter": 10, "smithing": 11, "campfire": 12, "crafting_equipment": 2, "crafting_misc": 3, "furnace_food": 4, "furnace_blocks": 5, "furnace_misc": 6, "blast_furnace_blocks": 7, "blast_furnace_misc": 8, "smoker_food": 9}
+var PlayToClientPacketRecipeBookAddEntriesInnerRecipeCategoryReverseMap = map[string]proto_base.VarInt{"crafting_building_blocks": 0, "crafting_redstone": 1, "stonecutter": 10, "smithing": 11, "campfire": 12, "crafting_equipment": 2, "crafting_misc": 3, "furnace_food": 4, "furnace_blocks": 5, "furnace_misc": 6, "blast_furnace_blocks": 7, "blast_furnace_misc": 8, "smoker_food": 9}
 
 func (ret PlayToClientPacketRecipeBookAdd) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Entries)).Encode(w)
+	err = proto_base.VarInt(len(ret.Entries)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -18295,8 +18295,8 @@ func (ret PlayToClientPacketRecipeBookAdd) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		var vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory queser.VarInt
-		vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory, err = queser.ErroringIndex(PlayToClientPacketRecipeBookAddEntriesInnerRecipeCategoryReverseMap, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Category)
+		var vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory proto_base.VarInt
+		vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory, err = proto_base.ErroringIndex(PlayToClientPacketRecipeBookAddEntriesInnerRecipeCategoryReverseMap, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Category)
 		if err != nil {
 			return
 		}
@@ -18309,7 +18309,7 @@ func (ret PlayToClientPacketRecipeBookAdd) Encode(w io.Writer) (err error) {
 			return
 		}
 		if ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements != nil {
-			err = queser.VarInt(len(*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements)).Encode(w)
+			err = proto_base.VarInt(len(*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements)).Encode(w)
 			if err != nil {
 				return
 			}
@@ -18333,18 +18333,18 @@ func (ret PlayToClientPacketRecipeBookAdd) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketRecipeBookRemove struct {
-	RecipeIds []queser.VarInt
+	RecipeIds []proto_base.VarInt
 }
 
 func (_ PlayToClientPacketRecipeBookRemove) Decode(r io.Reader) (ret PlayToClientPacketRecipeBookRemove, err error) {
-	var lPlayToClientPacketRecipeBookRemoveRecipeIds queser.VarInt
+	var lPlayToClientPacketRecipeBookRemoveRecipeIds proto_base.VarInt
 	lPlayToClientPacketRecipeBookRemoveRecipeIds, err = lPlayToClientPacketRecipeBookRemoveRecipeIds.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.RecipeIds = []queser.VarInt{}
+	ret.RecipeIds = []proto_base.VarInt{}
 	for range lPlayToClientPacketRecipeBookRemoveRecipeIds {
-		var PlayToClientPacketRecipeBookRemoveRecipeIdsElement queser.VarInt
+		var PlayToClientPacketRecipeBookRemoveRecipeIdsElement proto_base.VarInt
 		PlayToClientPacketRecipeBookRemoveRecipeIdsElement, err = PlayToClientPacketRecipeBookRemoveRecipeIdsElement.Decode(r)
 		if err != nil {
 			return
@@ -18354,7 +18354,7 @@ func (_ PlayToClientPacketRecipeBookRemove) Decode(r io.Reader) (ret PlayToClien
 	return
 }
 func (ret PlayToClientPacketRecipeBookRemove) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.RecipeIds)).Encode(w)
+	err = proto_base.VarInt(len(ret.RecipeIds)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -18414,7 +18414,7 @@ func (ret PlayToClientPacketRecipeBookSettings) Encode(w io.Writer) (err error) 
 }
 
 type PlayToClientPacketRelEntityMove struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	DX       int16
 	DY       int16
 	DZ       int16
@@ -18469,8 +18469,8 @@ func (ret PlayToClientPacketRelEntityMove) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketRemoveEntityEffect struct {
-	EntityId queser.VarInt
-	EffectId queser.VarInt
+	EntityId proto_base.VarInt
+	EffectId proto_base.VarInt
 }
 
 func (_ PlayToClientPacketRemoveEntityEffect) Decode(r io.Reader) (ret PlayToClientPacketRemoveEntityEffect, err error) {
@@ -18502,7 +18502,7 @@ type PlayToClientPacketResetScore struct {
 }
 
 func (_ PlayToClientPacketResetScore) Decode(r io.Reader) (ret PlayToClientPacketResetScore, err error) {
-	ret.EntityName, err = queser.DecodeString(r)
+	ret.EntityName, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -18513,7 +18513,7 @@ func (_ PlayToClientPacketResetScore) Decode(r io.Reader) (ret PlayToClientPacke
 	}
 	if PlayToClientPacketResetScoreObjectiveNamePresent {
 		var PlayToClientPacketResetScoreObjectiveNamePresentValue string
-		PlayToClientPacketResetScoreObjectiveNamePresentValue, err = queser.DecodeString(r)
+		PlayToClientPacketResetScoreObjectiveNamePresentValue, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -18522,7 +18522,7 @@ func (_ PlayToClientPacketResetScore) Decode(r io.Reader) (ret PlayToClientPacke
 	return
 }
 func (ret PlayToClientPacketResetScore) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.EntityName)
+	err = proto_base.EncodeString(w, ret.EntityName)
 	if err != nil {
 		return
 	}
@@ -18531,7 +18531,7 @@ func (ret PlayToClientPacketResetScore) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.ObjectiveName != nil {
-		err = queser.EncodeString(w, *ret.ObjectiveName)
+		err = proto_base.EncodeString(w, *ret.ObjectiveName)
 		if err != nil {
 			return
 		}
@@ -18568,7 +18568,7 @@ func (ret PlayToClientPacketRespawn) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketScoreboardDisplayObjective struct {
-	Position queser.VarInt
+	Position proto_base.VarInt
 	Name     string
 }
 
@@ -18577,7 +18577,7 @@ func (_ PlayToClientPacketScoreboardDisplayObjective) Decode(r io.Reader) (ret P
 	if err != nil {
 		return
 	}
-	ret.Name, err = queser.DecodeString(r)
+	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -18588,7 +18588,7 @@ func (ret PlayToClientPacketScoreboardDisplayObjective) Encode(w io.Writer) (err
 	if err != nil {
 		return
 	}
-	err = queser.EncodeString(w, ret.Name)
+	err = proto_base.EncodeString(w, ret.Name)
 	if err != nil {
 		return
 	}
@@ -18605,7 +18605,7 @@ type PlayToClientPacketScoreboardObjective struct {
 }
 
 func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToClientPacketScoreboardObjective, err error) {
-	ret.Name, err = queser.DecodeString(r)
+	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -18629,7 +18629,7 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 		}
 		ret.DisplayText = PlayToClientPacketScoreboardObjectiveDisplayTextTmp
 	default:
-		var PlayToClientPacketScoreboardObjectiveDisplayTextTmp queser.Void
+		var PlayToClientPacketScoreboardObjectiveDisplayTextTmp proto_base.Void
 		PlayToClientPacketScoreboardObjectiveDisplayTextTmp, err = PlayToClientPacketScoreboardObjectiveDisplayTextTmp.Decode(r)
 		if err != nil {
 			return
@@ -18638,21 +18638,21 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 	}
 	switch ret.Action {
 	case 0:
-		var PlayToClientPacketScoreboardObjectiveTypeTmp queser.VarInt
+		var PlayToClientPacketScoreboardObjectiveTypeTmp proto_base.VarInt
 		PlayToClientPacketScoreboardObjectiveTypeTmp, err = PlayToClientPacketScoreboardObjectiveTypeTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Type = PlayToClientPacketScoreboardObjectiveTypeTmp
 	case 2:
-		var PlayToClientPacketScoreboardObjectiveTypeTmp queser.VarInt
+		var PlayToClientPacketScoreboardObjectiveTypeTmp proto_base.VarInt
 		PlayToClientPacketScoreboardObjectiveTypeTmp, err = PlayToClientPacketScoreboardObjectiveTypeTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Type = PlayToClientPacketScoreboardObjectiveTypeTmp
 	default:
-		var PlayToClientPacketScoreboardObjectiveTypeTmp queser.Void
+		var PlayToClientPacketScoreboardObjectiveTypeTmp proto_base.Void
 		PlayToClientPacketScoreboardObjectiveTypeTmp, err = PlayToClientPacketScoreboardObjectiveTypeTmp.Decode(r)
 		if err != nil {
 			return
@@ -18661,14 +18661,14 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 	}
 	switch ret.Action {
 	case 0:
-		var PlayToClientPacketScoreboardObjectiveNumberFormatTmp *queser.VarInt
+		var PlayToClientPacketScoreboardObjectiveNumberFormatTmp *proto_base.VarInt
 		var PlayToClientPacketScoreboardObjectiveNumberFormatPresent bool
 		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormatPresent)
 		if err != nil {
 			return
 		}
 		if PlayToClientPacketScoreboardObjectiveNumberFormatPresent {
-			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue queser.VarInt
+			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue proto_base.VarInt
 			PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue, err = PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue.Decode(r)
 			if err != nil {
 				return
@@ -18677,14 +18677,14 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 		}
 		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormatTmp
 	case 2:
-		var PlayToClientPacketScoreboardObjectiveNumberFormatTmp *queser.VarInt
+		var PlayToClientPacketScoreboardObjectiveNumberFormatTmp *proto_base.VarInt
 		var PlayToClientPacketScoreboardObjectiveNumberFormatPresent bool
 		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormatPresent)
 		if err != nil {
 			return
 		}
 		if PlayToClientPacketScoreboardObjectiveNumberFormatPresent {
-			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue queser.VarInt
+			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue proto_base.VarInt
 			PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue, err = PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue.Decode(r)
 			if err != nil {
 				return
@@ -18693,7 +18693,7 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 		}
 		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormatTmp
 	default:
-		var PlayToClientPacketScoreboardObjectiveNumberFormatTmp queser.Void
+		var PlayToClientPacketScoreboardObjectiveNumberFormatTmp proto_base.Void
 		PlayToClientPacketScoreboardObjectiveNumberFormatTmp, err = PlayToClientPacketScoreboardObjectiveNumberFormatTmp.Decode(r)
 		if err != nil {
 			return
@@ -18719,7 +18719,7 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 			}
 			PlayToClientPacketScoreboardObjectiveStylingTmp = PlayToClientPacketScoreboardObjectiveStylingTmp
 		default:
-			var PlayToClientPacketScoreboardObjectiveStylingTmp queser.Void
+			var PlayToClientPacketScoreboardObjectiveStylingTmp proto_base.Void
 			PlayToClientPacketScoreboardObjectiveStylingTmp, err = PlayToClientPacketScoreboardObjectiveStylingTmp.Decode(r)
 			if err != nil {
 				return
@@ -18745,7 +18745,7 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 			}
 			PlayToClientPacketScoreboardObjectiveStylingTmp = PlayToClientPacketScoreboardObjectiveStylingTmp
 		default:
-			var PlayToClientPacketScoreboardObjectiveStylingTmp queser.Void
+			var PlayToClientPacketScoreboardObjectiveStylingTmp proto_base.Void
 			PlayToClientPacketScoreboardObjectiveStylingTmp, err = PlayToClientPacketScoreboardObjectiveStylingTmp.Decode(r)
 			if err != nil {
 				return
@@ -18754,7 +18754,7 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 		}
 		ret.Styling = PlayToClientPacketScoreboardObjectiveStylingTmp
 	default:
-		var PlayToClientPacketScoreboardObjectiveStylingTmp queser.Void
+		var PlayToClientPacketScoreboardObjectiveStylingTmp proto_base.Void
 		PlayToClientPacketScoreboardObjectiveStylingTmp, err = PlayToClientPacketScoreboardObjectiveStylingTmp.Decode(r)
 		if err != nil {
 			return
@@ -18764,7 +18764,7 @@ func (_ PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (ret PlayToCl
 	return
 }
 func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Name)
+	err = proto_base.EncodeString(w, ret.Name)
 	if err != nil {
 		return
 	}
@@ -18776,7 +18776,7 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 	case 0:
 		PlayToClientPacketScoreboardObjectiveDisplayText, ok := ret.DisplayText.(nbt.Anon)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketScoreboardObjectiveDisplayText.Encode(w)
@@ -18786,7 +18786,7 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 	case 2:
 		PlayToClientPacketScoreboardObjectiveDisplayText, ok := ret.DisplayText.(nbt.Anon)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketScoreboardObjectiveDisplayText.Encode(w)
@@ -18794,21 +18794,21 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 			return
 		}
 	default:
-		_, ok := ret.DisplayText.(queser.Void)
+		_, ok := ret.DisplayText.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.DisplayText.(queser.Void).Encode(w)
+		err = ret.DisplayText.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
 	}
 	switch ret.Action {
 	case 0:
-		PlayToClientPacketScoreboardObjectiveType, ok := ret.Type.(queser.VarInt)
+		PlayToClientPacketScoreboardObjectiveType, ok := ret.Type.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketScoreboardObjectiveType.Encode(w)
@@ -18816,9 +18816,9 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 			return
 		}
 	case 2:
-		PlayToClientPacketScoreboardObjectiveType, ok := ret.Type.(queser.VarInt)
+		PlayToClientPacketScoreboardObjectiveType, ok := ret.Type.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketScoreboardObjectiveType.Encode(w)
@@ -18826,21 +18826,21 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 			return
 		}
 	default:
-		_, ok := ret.Type.(queser.Void)
+		_, ok := ret.Type.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Type.(queser.Void).Encode(w)
+		err = ret.Type.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
 	}
 	switch ret.Action {
 	case 0:
-		PlayToClientPacketScoreboardObjectiveNumberFormat, ok := ret.NumberFormat.(*queser.VarInt)
+		PlayToClientPacketScoreboardObjectiveNumberFormat, ok := ret.NumberFormat.(*proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToClientPacketScoreboardObjectiveNumberFormat != nil)
@@ -18854,9 +18854,9 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 			}
 		}
 	case 2:
-		PlayToClientPacketScoreboardObjectiveNumberFormat, ok := ret.NumberFormat.(*queser.VarInt)
+		PlayToClientPacketScoreboardObjectiveNumberFormat, ok := ret.NumberFormat.(*proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToClientPacketScoreboardObjectiveNumberFormat != nil)
@@ -18870,12 +18870,12 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 			}
 		}
 	default:
-		_, ok := ret.NumberFormat.(queser.Void)
+		_, ok := ret.NumberFormat.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.NumberFormat.(queser.Void).Encode(w)
+		err = ret.NumberFormat.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -18884,14 +18884,14 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 	case 0:
 		PlayToClientPacketScoreboardObjectiveStyling, ok := ret.Styling.(any)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		switch ret.NumberFormat {
 		case 1:
 			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
@@ -18901,7 +18901,7 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 		case 2:
 			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
@@ -18909,12 +18909,12 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 				return
 			}
 		default:
-			_, ok := PlayToClientPacketScoreboardObjectiveStyling.(queser.Void)
+			_, ok := PlayToClientPacketScoreboardObjectiveStyling.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.(queser.Void).Encode(w)
+			err = PlayToClientPacketScoreboardObjectiveStyling.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
@@ -18922,14 +18922,14 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 	case 2:
 		PlayToClientPacketScoreboardObjectiveStyling, ok := ret.Styling.(any)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		switch ret.NumberFormat {
 		case 1:
 			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
@@ -18939,7 +18939,7 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 		case 2:
 			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
 			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
@@ -18947,23 +18947,23 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 				return
 			}
 		default:
-			_, ok := PlayToClientPacketScoreboardObjectiveStyling.(queser.Void)
+			_, ok := PlayToClientPacketScoreboardObjectiveStyling.(proto_base.Void)
 			if !ok {
-				err = queser.BadTypeError
+				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.(queser.Void).Encode(w)
+			err = PlayToClientPacketScoreboardObjectiveStyling.(proto_base.Void).Encode(w)
 			if err != nil {
 				return
 			}
 		}
 	default:
-		_, ok := ret.Styling.(queser.Void)
+		_, ok := ret.Styling.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Styling.(queser.Void).Encode(w)
+		err = ret.Styling.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -18972,15 +18972,15 @@ func (ret PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error)
 }
 
 type PlayToClientPacketScoreboardScore struct {
-	Val queser.ToDo
+	Val proto_base.ToDo
 }
 
 func (_ PlayToClientPacketScoreboardScore) Decode(r io.Reader) (ret PlayToClientPacketScoreboardScore, err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 func (ret PlayToClientPacketScoreboardScore) Encode(w io.Writer) (err error) {
-	err = queser.ToDoError
+	err = proto_base.ToDoError
 	return
 }
 
@@ -18996,7 +18996,7 @@ func (_ PlayToClientPacketSelectAdvancementTab) Decode(r io.Reader) (ret PlayToC
 	}
 	if PlayToClientPacketSelectAdvancementTabIdPresent {
 		var PlayToClientPacketSelectAdvancementTabIdPresentValue string
-		PlayToClientPacketSelectAdvancementTabIdPresentValue, err = queser.DecodeString(r)
+		PlayToClientPacketSelectAdvancementTabIdPresentValue, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -19010,7 +19010,7 @@ func (ret PlayToClientPacketSelectAdvancementTab) Encode(w io.Writer) (err error
 		return
 	}
 	if ret.Id != nil {
-		err = queser.EncodeString(w, *ret.Id)
+		err = proto_base.EncodeString(w, *ret.Id)
 		if err != nil {
 			return
 		}
@@ -19063,11 +19063,11 @@ func (ret PlayToClientPacketServerData) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketSetCooldown struct {
 	CooldownGroup string
-	CooldownTicks queser.VarInt
+	CooldownTicks proto_base.VarInt
 }
 
 func (_ PlayToClientPacketSetCooldown) Decode(r io.Reader) (ret PlayToClientPacketSetCooldown, err error) {
-	ret.CooldownGroup, err = queser.DecodeString(r)
+	ret.CooldownGroup, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -19078,7 +19078,7 @@ func (_ PlayToClientPacketSetCooldown) Decode(r io.Reader) (ret PlayToClientPack
 	return
 }
 func (ret PlayToClientPacketSetCooldown) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.CooldownGroup)
+	err = proto_base.EncodeString(w, ret.CooldownGroup)
 	if err != nil {
 		return
 	}
@@ -19109,8 +19109,8 @@ func (ret PlayToClientPacketSetCursorItem) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketSetPassengers struct {
-	EntityId   queser.VarInt
-	Passengers []queser.VarInt
+	EntityId   proto_base.VarInt
+	Passengers []proto_base.VarInt
 }
 
 func (_ PlayToClientPacketSetPassengers) Decode(r io.Reader) (ret PlayToClientPacketSetPassengers, err error) {
@@ -19118,14 +19118,14 @@ func (_ PlayToClientPacketSetPassengers) Decode(r io.Reader) (ret PlayToClientPa
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketSetPassengersPassengers queser.VarInt
+	var lPlayToClientPacketSetPassengersPassengers proto_base.VarInt
 	lPlayToClientPacketSetPassengersPassengers, err = lPlayToClientPacketSetPassengersPassengers.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Passengers = []queser.VarInt{}
+	ret.Passengers = []proto_base.VarInt{}
 	for range lPlayToClientPacketSetPassengersPassengers {
-		var PlayToClientPacketSetPassengersPassengersElement queser.VarInt
+		var PlayToClientPacketSetPassengersPassengersElement proto_base.VarInt
 		PlayToClientPacketSetPassengersPassengersElement, err = PlayToClientPacketSetPassengersPassengersElement.Decode(r)
 		if err != nil {
 			return
@@ -19139,7 +19139,7 @@ func (ret PlayToClientPacketSetPassengers) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Passengers)).Encode(w)
+	err = proto_base.VarInt(len(ret.Passengers)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -19153,7 +19153,7 @@ func (ret PlayToClientPacketSetPassengers) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketSetPlayerInventory struct {
-	SlotId   queser.VarInt
+	SlotId   proto_base.VarInt
 	Contents Slot
 }
 
@@ -19181,7 +19181,7 @@ func (ret PlayToClientPacketSetPlayerInventory) Encode(w io.Writer) (err error) 
 }
 
 type PlayToClientPacketSetProjectilePower struct {
-	Id                queser.VarInt
+	Id                proto_base.VarInt
 	AccelerationPower float64
 }
 
@@ -19210,7 +19210,7 @@ func (ret PlayToClientPacketSetProjectilePower) Encode(w io.Writer) (err error) 
 
 type PlayToClientPacketSetSlot struct {
 	WindowId ContainerID
-	StateId  queser.VarInt
+	StateId  proto_base.VarInt
 	Slot     int16
 	Item     Slot
 }
@@ -19362,7 +19362,7 @@ type PlayToClientPacketShowDialog struct {
 }
 
 func (_ PlayToClientPacketShowDialog) Decode(r io.Reader) (ret PlayToClientPacketShowDialog, err error) {
-	var PlayToClientPacketShowDialogDialogId queser.VarInt
+	var PlayToClientPacketShowDialogDialogId proto_base.VarInt
 	PlayToClientPacketShowDialogDialogId, err = PlayToClientPacketShowDialogDialogId.Decode(r)
 	if err != nil {
 		return
@@ -19381,7 +19381,7 @@ func (_ PlayToClientPacketShowDialog) Decode(r io.Reader) (ret PlayToClientPacke
 }
 func (ret PlayToClientPacketShowDialog) Encode(w io.Writer) (err error) {
 	switch PlayToClientPacketShowDialogDialogKnownType := ret.Dialog.(type) {
-	case queser.VarInt:
+	case proto_base.VarInt:
 		err = PlayToClientPacketShowDialogDialogKnownType.Encode(w)
 		if err != nil {
 			return
@@ -19392,13 +19392,13 @@ func (ret PlayToClientPacketShowDialog) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		err = queser.BadTypeError
+		err = proto_base.BadTypeError
 	}
 	return
 }
 
 type PlayToClientPacketSimulationDistance struct {
-	Distance queser.VarInt
+	Distance proto_base.VarInt
 }
 
 func (_ PlayToClientPacketSimulationDistance) Decode(r io.Reader) (ret PlayToClientPacketSimulationDistance, err error) {
@@ -19499,16 +19499,16 @@ func (ret PlayToClientPacketSoundEffect) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketSpawnEntity struct {
-	EntityId   queser.VarInt
+	EntityId   proto_base.VarInt
 	ObjectUUID uuid.UUID
-	Type       queser.VarInt
+	Type       proto_base.VarInt
 	X          float64
 	Y          float64
 	Z          float64
 	Pitch      int8
 	Yaw        int8
 	HeadPitch  int8
-	ObjectData queser.VarInt
+	ObjectData proto_base.VarInt
 	VelocityX  int16
 	VelocityY  int16
 	VelocityZ  int16
@@ -19665,28 +19665,28 @@ func (ret PlayToClientPacketStartConfiguration) Encode(w io.Writer) (err error) 
 
 type PlayToClientPacketStatistics struct {
 	Entries []struct {
-		CategoryId  queser.VarInt
-		StatisticId queser.VarInt
-		Value       queser.VarInt
+		CategoryId  proto_base.VarInt
+		StatisticId proto_base.VarInt
+		Value       proto_base.VarInt
 	}
 }
 
 func (_ PlayToClientPacketStatistics) Decode(r io.Reader) (ret PlayToClientPacketStatistics, err error) {
-	var lPlayToClientPacketStatisticsEntries queser.VarInt
+	var lPlayToClientPacketStatisticsEntries proto_base.VarInt
 	lPlayToClientPacketStatisticsEntries, err = lPlayToClientPacketStatisticsEntries.Decode(r)
 	if err != nil {
 		return
 	}
 	ret.Entries = []struct {
-		CategoryId  queser.VarInt
-		StatisticId queser.VarInt
-		Value       queser.VarInt
+		CategoryId  proto_base.VarInt
+		StatisticId proto_base.VarInt
+		Value       proto_base.VarInt
 	}{}
 	for range lPlayToClientPacketStatisticsEntries {
 		var PlayToClientPacketStatisticsEntriesElement struct {
-			CategoryId  queser.VarInt
-			StatisticId queser.VarInt
-			Value       queser.VarInt
+			CategoryId  proto_base.VarInt
+			StatisticId proto_base.VarInt
+			Value       proto_base.VarInt
 		}
 		PlayToClientPacketStatisticsEntriesElement.CategoryId, err = PlayToClientPacketStatisticsEntriesElement.CategoryId.Decode(r)
 		if err != nil {
@@ -19705,7 +19705,7 @@ func (_ PlayToClientPacketStatistics) Decode(r io.Reader) (ret PlayToClientPacke
 	return
 }
 func (ret PlayToClientPacketStatistics) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Entries)).Encode(w)
+	err = proto_base.VarInt(len(ret.Entries)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -19727,7 +19727,7 @@ func (ret PlayToClientPacketStatistics) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketStepTick struct {
-	TickSteps queser.VarInt
+	TickSteps proto_base.VarInt
 }
 
 func (_ PlayToClientPacketStepTick) Decode(r io.Reader) (ret PlayToClientPacketStepTick, err error) {
@@ -19758,21 +19758,21 @@ func (_ PlayToClientPacketStopSound) Decode(r io.Reader) (ret PlayToClientPacket
 	}
 	switch ret.Flags {
 	case 1:
-		var PlayToClientPacketStopSoundSourceTmp queser.VarInt
+		var PlayToClientPacketStopSoundSourceTmp proto_base.VarInt
 		PlayToClientPacketStopSoundSourceTmp, err = PlayToClientPacketStopSoundSourceTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Source = PlayToClientPacketStopSoundSourceTmp
 	case 3:
-		var PlayToClientPacketStopSoundSourceTmp queser.VarInt
+		var PlayToClientPacketStopSoundSourceTmp proto_base.VarInt
 		PlayToClientPacketStopSoundSourceTmp, err = PlayToClientPacketStopSoundSourceTmp.Decode(r)
 		if err != nil {
 			return
 		}
 		ret.Source = PlayToClientPacketStopSoundSourceTmp
 	default:
-		var PlayToClientPacketStopSoundSourceTmp queser.Void
+		var PlayToClientPacketStopSoundSourceTmp proto_base.Void
 		PlayToClientPacketStopSoundSourceTmp, err = PlayToClientPacketStopSoundSourceTmp.Decode(r)
 		if err != nil {
 			return
@@ -19782,20 +19782,20 @@ func (_ PlayToClientPacketStopSound) Decode(r io.Reader) (ret PlayToClientPacket
 	switch ret.Flags {
 	case 2:
 		var PlayToClientPacketStopSoundSoundTmp string
-		PlayToClientPacketStopSoundSoundTmp, err = queser.DecodeString(r)
+		PlayToClientPacketStopSoundSoundTmp, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
 		ret.Sound = PlayToClientPacketStopSoundSoundTmp
 	case 3:
 		var PlayToClientPacketStopSoundSoundTmp string
-		PlayToClientPacketStopSoundSoundTmp, err = queser.DecodeString(r)
+		PlayToClientPacketStopSoundSoundTmp, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
 		ret.Sound = PlayToClientPacketStopSoundSoundTmp
 	default:
-		var PlayToClientPacketStopSoundSoundTmp queser.Void
+		var PlayToClientPacketStopSoundSoundTmp proto_base.Void
 		PlayToClientPacketStopSoundSoundTmp, err = PlayToClientPacketStopSoundSoundTmp.Decode(r)
 		if err != nil {
 			return
@@ -19811,9 +19811,9 @@ func (ret PlayToClientPacketStopSound) Encode(w io.Writer) (err error) {
 	}
 	switch ret.Flags {
 	case 1:
-		PlayToClientPacketStopSoundSource, ok := ret.Source.(queser.VarInt)
+		PlayToClientPacketStopSoundSource, ok := ret.Source.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketStopSoundSource.Encode(w)
@@ -19821,9 +19821,9 @@ func (ret PlayToClientPacketStopSound) Encode(w io.Writer) (err error) {
 			return
 		}
 	case 3:
-		PlayToClientPacketStopSoundSource, ok := ret.Source.(queser.VarInt)
+		PlayToClientPacketStopSoundSource, ok := ret.Source.(proto_base.VarInt)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketStopSoundSource.Encode(w)
@@ -19831,12 +19831,12 @@ func (ret PlayToClientPacketStopSound) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Source.(queser.Void)
+		_, ok := ret.Source.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Source.(queser.Void).Encode(w)
+		err = ret.Source.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -19845,30 +19845,30 @@ func (ret PlayToClientPacketStopSound) Encode(w io.Writer) (err error) {
 	case 2:
 		PlayToClientPacketStopSoundSound, ok := ret.Sound.(string)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, PlayToClientPacketStopSoundSound)
+		err = proto_base.EncodeString(w, PlayToClientPacketStopSoundSound)
 		if err != nil {
 			return
 		}
 	case 3:
 		PlayToClientPacketStopSoundSound, ok := ret.Sound.(string)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, PlayToClientPacketStopSoundSound)
+		err = proto_base.EncodeString(w, PlayToClientPacketStopSoundSound)
 		if err != nil {
 			return
 		}
 	default:
-		_, ok := ret.Sound.(queser.Void)
+		_, ok := ret.Sound.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Sound.(queser.Void).Encode(w)
+		err = ret.Sound.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -19877,7 +19877,7 @@ func (ret PlayToClientPacketStopSound) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketSyncEntityPosition struct {
-	EntityId queser.VarInt
+	EntityId proto_base.VarInt
 	X        float64
 	Y        float64
 	Z        float64
@@ -20005,9 +20005,9 @@ func (ret PlayToClientPacketSystemChat) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketTabComplete struct {
-	TransactionId queser.VarInt
-	Start         queser.VarInt
-	Length        queser.VarInt
+	TransactionId proto_base.VarInt
+	Start         proto_base.VarInt
+	Length        proto_base.VarInt
 	Matches       []struct {
 		Match   string
 		Tooltip *nbt.Anon
@@ -20027,7 +20027,7 @@ func (_ PlayToClientPacketTabComplete) Decode(r io.Reader) (ret PlayToClientPack
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketTabCompleteMatches queser.VarInt
+	var lPlayToClientPacketTabCompleteMatches proto_base.VarInt
 	lPlayToClientPacketTabCompleteMatches, err = lPlayToClientPacketTabCompleteMatches.Decode(r)
 	if err != nil {
 		return
@@ -20041,7 +20041,7 @@ func (_ PlayToClientPacketTabComplete) Decode(r io.Reader) (ret PlayToClientPack
 			Match   string
 			Tooltip *nbt.Anon
 		}
-		PlayToClientPacketTabCompleteMatchesElement.Match, err = queser.DecodeString(r)
+		PlayToClientPacketTabCompleteMatchesElement.Match, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -20075,12 +20075,12 @@ func (ret PlayToClientPacketTabComplete) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Matches)).Encode(w)
+	err = proto_base.VarInt(len(ret.Matches)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketTabCompleteMatches := range len(ret.Matches) {
-		err = queser.EncodeString(w, ret.Matches[iPlayToClientPacketTabCompleteMatches].Match)
+		err = proto_base.EncodeString(w, ret.Matches[iPlayToClientPacketTabCompleteMatches].Match)
 		if err != nil {
 			return
 		}
@@ -20106,7 +20106,7 @@ type PlayToClientPacketTags struct {
 }
 
 func (_ PlayToClientPacketTags) Decode(r io.Reader) (ret PlayToClientPacketTags, err error) {
-	var lPlayToClientPacketTagsTags queser.VarInt
+	var lPlayToClientPacketTagsTags proto_base.VarInt
 	lPlayToClientPacketTagsTags, err = lPlayToClientPacketTagsTags.Decode(r)
 	if err != nil {
 		return
@@ -20120,7 +20120,7 @@ func (_ PlayToClientPacketTags) Decode(r io.Reader) (ret PlayToClientPacketTags,
 			TagType string
 			Tags    Tags
 		}
-		PlayToClientPacketTagsTagsElement.TagType, err = queser.DecodeString(r)
+		PlayToClientPacketTagsTagsElement.TagType, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -20133,12 +20133,12 @@ func (_ PlayToClientPacketTags) Decode(r io.Reader) (ret PlayToClientPacketTags,
 	return
 }
 func (ret PlayToClientPacketTags) Encode(w io.Writer) (err error) {
-	err = queser.VarInt(len(ret.Tags)).Encode(w)
+	err = proto_base.VarInt(len(ret.Tags)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketTagsTags := range len(ret.Tags) {
-		err = queser.EncodeString(w, ret.Tags[iPlayToClientPacketTagsTags].TagType)
+		err = proto_base.EncodeString(w, ret.Tags[iPlayToClientPacketTagsTags].TagType)
 		if err != nil {
 			return
 		}
@@ -20158,11 +20158,11 @@ type PlayToClientPacketTeams struct {
 }
 
 var PlayToClientPacketTeamsModeMap = map[int8]string{0: "add", 1: "remove", 2: "change", 3: "join", 4: "leave"}
-var PlayToClientPacketTeamsAnonNameTagVisibilityMap = map[queser.VarInt]string{0: "always", 1: "never", 2: "hide_for_other_teams", 3: "hide_for_own_team"}
-var PlayToClientPacketTeamsAnonCollisionRuleMap = map[queser.VarInt]string{0: "always", 1: "never", 2: "push_other_teams", 3: "push_own_team"}
+var PlayToClientPacketTeamsAnonNameTagVisibilityMap = map[proto_base.VarInt]string{0: "always", 1: "never", 2: "hide_for_other_teams", 3: "hide_for_own_team"}
+var PlayToClientPacketTeamsAnonCollisionRuleMap = map[proto_base.VarInt]string{0: "always", 1: "never", 2: "push_other_teams", 3: "push_own_team"}
 
 func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeams, err error) {
-	ret.Team, err = queser.DecodeString(r)
+	ret.Team, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -20171,7 +20171,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 	if err != nil {
 		return
 	}
-	ret.Mode, err = queser.ErroringIndex(PlayToClientPacketTeamsModeMap, PlayToClientPacketTeamsModeKey)
+	ret.Mode, err = proto_base.ErroringIndex(PlayToClientPacketTeamsModeMap, PlayToClientPacketTeamsModeKey)
 	if err != nil {
 		return
 	}
@@ -20182,7 +20182,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 			Flags             uint8
 			NameTagVisibility string
 			CollisionRule     string
-			Formatting        queser.VarInt
+			Formatting        proto_base.VarInt
 			Prefix            nbt.Anon
 			Suffix            nbt.Anon
 		}
@@ -20194,21 +20194,21 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketTeamsAnonNameTagVisibilityKey queser.VarInt
+		var PlayToClientPacketTeamsAnonNameTagVisibilityKey proto_base.VarInt
 		PlayToClientPacketTeamsAnonNameTagVisibilityKey, err = PlayToClientPacketTeamsAnonNameTagVisibilityKey.Decode(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketTeamsAnonTmp.NameTagVisibility, err = queser.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
+		PlayToClientPacketTeamsAnonTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketTeamsAnonCollisionRuleKey queser.VarInt
+		var PlayToClientPacketTeamsAnonCollisionRuleKey proto_base.VarInt
 		PlayToClientPacketTeamsAnonCollisionRuleKey, err = PlayToClientPacketTeamsAnonCollisionRuleKey.Decode(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketTeamsAnonTmp.CollisionRule, err = queser.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
+		PlayToClientPacketTeamsAnonTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
 		if err != nil {
 			return
 		}
@@ -20231,7 +20231,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 			Flags             uint8
 			NameTagVisibility string
 			CollisionRule     string
-			Formatting        queser.VarInt
+			Formatting        proto_base.VarInt
 			Prefix            nbt.Anon
 			Suffix            nbt.Anon
 		}
@@ -20243,21 +20243,21 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketTeamsAnonNameTagVisibilityKey queser.VarInt
+		var PlayToClientPacketTeamsAnonNameTagVisibilityKey proto_base.VarInt
 		PlayToClientPacketTeamsAnonNameTagVisibilityKey, err = PlayToClientPacketTeamsAnonNameTagVisibilityKey.Decode(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketTeamsAnonTmp.NameTagVisibility, err = queser.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
+		PlayToClientPacketTeamsAnonTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketTeamsAnonCollisionRuleKey queser.VarInt
+		var PlayToClientPacketTeamsAnonCollisionRuleKey proto_base.VarInt
 		PlayToClientPacketTeamsAnonCollisionRuleKey, err = PlayToClientPacketTeamsAnonCollisionRuleKey.Decode(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketTeamsAnonTmp.CollisionRule, err = queser.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
+		PlayToClientPacketTeamsAnonTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
 		if err != nil {
 			return
 		}
@@ -20275,7 +20275,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		}
 		ret.Anon = PlayToClientPacketTeamsAnonTmp
 	default:
-		var PlayToClientPacketTeamsAnonTmp queser.Void
+		var PlayToClientPacketTeamsAnonTmp proto_base.Void
 		PlayToClientPacketTeamsAnonTmp, err = PlayToClientPacketTeamsAnonTmp.Decode(r)
 		if err != nil {
 			return
@@ -20285,7 +20285,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 	switch ret.Mode {
 	case "add":
 		var PlayToClientPacketTeamsPlayersTmp []string
-		var lPlayToClientPacketTeamsPlayers queser.VarInt
+		var lPlayToClientPacketTeamsPlayers proto_base.VarInt
 		lPlayToClientPacketTeamsPlayers, err = lPlayToClientPacketTeamsPlayers.Decode(r)
 		if err != nil {
 			return
@@ -20293,7 +20293,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		PlayToClientPacketTeamsPlayersTmp = []string{}
 		for range lPlayToClientPacketTeamsPlayers {
 			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = queser.DecodeString(r)
+			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -20302,7 +20302,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		ret.Players = PlayToClientPacketTeamsPlayersTmp
 	case "join":
 		var PlayToClientPacketTeamsPlayersTmp []string
-		var lPlayToClientPacketTeamsPlayers queser.VarInt
+		var lPlayToClientPacketTeamsPlayers proto_base.VarInt
 		lPlayToClientPacketTeamsPlayers, err = lPlayToClientPacketTeamsPlayers.Decode(r)
 		if err != nil {
 			return
@@ -20310,7 +20310,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		PlayToClientPacketTeamsPlayersTmp = []string{}
 		for range lPlayToClientPacketTeamsPlayers {
 			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = queser.DecodeString(r)
+			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -20319,7 +20319,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		ret.Players = PlayToClientPacketTeamsPlayersTmp
 	case "leave":
 		var PlayToClientPacketTeamsPlayersTmp []string
-		var lPlayToClientPacketTeamsPlayers queser.VarInt
+		var lPlayToClientPacketTeamsPlayers proto_base.VarInt
 		lPlayToClientPacketTeamsPlayers, err = lPlayToClientPacketTeamsPlayers.Decode(r)
 		if err != nil {
 			return
@@ -20327,7 +20327,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		PlayToClientPacketTeamsPlayersTmp = []string{}
 		for range lPlayToClientPacketTeamsPlayers {
 			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = queser.DecodeString(r)
+			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
@@ -20335,7 +20335,7 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 		}
 		ret.Players = PlayToClientPacketTeamsPlayersTmp
 	default:
-		var PlayToClientPacketTeamsPlayersTmp queser.Void
+		var PlayToClientPacketTeamsPlayersTmp proto_base.Void
 		PlayToClientPacketTeamsPlayersTmp, err = PlayToClientPacketTeamsPlayersTmp.Decode(r)
 		if err != nil {
 			return
@@ -20346,16 +20346,16 @@ func (_ PlayToClientPacketTeams) Decode(r io.Reader) (ret PlayToClientPacketTeam
 }
 
 var PlayToClientPacketTeamsModeReverseMap = map[string]int8{"add": 0, "remove": 1, "change": 2, "join": 3, "leave": 4}
-var PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap = map[string]queser.VarInt{"always": 0, "never": 1, "hide_for_other_teams": 2, "hide_for_own_team": 3}
-var PlayToClientPacketTeamsAnonCollisionRuleReverseMap = map[string]queser.VarInt{"always": 0, "never": 1, "push_other_teams": 2, "push_own_team": 3}
+var PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap = map[string]proto_base.VarInt{"always": 0, "never": 1, "hide_for_other_teams": 2, "hide_for_own_team": 3}
+var PlayToClientPacketTeamsAnonCollisionRuleReverseMap = map[string]proto_base.VarInt{"always": 0, "never": 1, "push_other_teams": 2, "push_own_team": 3}
 
 func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
-	err = queser.EncodeString(w, ret.Team)
+	err = proto_base.EncodeString(w, ret.Team)
 	if err != nil {
 		return
 	}
 	var vPlayToClientPacketTeamsMode int8
-	vPlayToClientPacketTeamsMode, err = queser.ErroringIndex(PlayToClientPacketTeamsModeReverseMap, ret.Mode)
+	vPlayToClientPacketTeamsMode, err = proto_base.ErroringIndex(PlayToClientPacketTeamsModeReverseMap, ret.Mode)
 	if err != nil {
 		return
 	}
@@ -20370,12 +20370,12 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 			Flags             uint8
 			NameTagVisibility string
 			CollisionRule     string
-			Formatting        queser.VarInt
+			Formatting        proto_base.VarInt
 			Prefix            nbt.Anon
 			Suffix            nbt.Anon
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketTeamsAnon.Name.Encode(w)
@@ -20386,8 +20386,8 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		var vPlayToClientPacketTeamsAnonNameTagVisibility queser.VarInt
-		vPlayToClientPacketTeamsAnonNameTagVisibility, err = queser.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap, PlayToClientPacketTeamsAnon.NameTagVisibility)
+		var vPlayToClientPacketTeamsAnonNameTagVisibility proto_base.VarInt
+		vPlayToClientPacketTeamsAnonNameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap, PlayToClientPacketTeamsAnon.NameTagVisibility)
 		if err != nil {
 			return
 		}
@@ -20395,8 +20395,8 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		var vPlayToClientPacketTeamsAnonCollisionRule queser.VarInt
-		vPlayToClientPacketTeamsAnonCollisionRule, err = queser.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleReverseMap, PlayToClientPacketTeamsAnon.CollisionRule)
+		var vPlayToClientPacketTeamsAnonCollisionRule proto_base.VarInt
+		vPlayToClientPacketTeamsAnonCollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleReverseMap, PlayToClientPacketTeamsAnon.CollisionRule)
 		if err != nil {
 			return
 		}
@@ -20422,12 +20422,12 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 			Flags             uint8
 			NameTagVisibility string
 			CollisionRule     string
-			Formatting        queser.VarInt
+			Formatting        proto_base.VarInt
 			Prefix            nbt.Anon
 			Suffix            nbt.Anon
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketTeamsAnon.Name.Encode(w)
@@ -20438,8 +20438,8 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		var vPlayToClientPacketTeamsAnonNameTagVisibility queser.VarInt
-		vPlayToClientPacketTeamsAnonNameTagVisibility, err = queser.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap, PlayToClientPacketTeamsAnon.NameTagVisibility)
+		var vPlayToClientPacketTeamsAnonNameTagVisibility proto_base.VarInt
+		vPlayToClientPacketTeamsAnonNameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap, PlayToClientPacketTeamsAnon.NameTagVisibility)
 		if err != nil {
 			return
 		}
@@ -20447,8 +20447,8 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		var vPlayToClientPacketTeamsAnonCollisionRule queser.VarInt
-		vPlayToClientPacketTeamsAnonCollisionRule, err = queser.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleReverseMap, PlayToClientPacketTeamsAnon.CollisionRule)
+		var vPlayToClientPacketTeamsAnonCollisionRule proto_base.VarInt
+		vPlayToClientPacketTeamsAnonCollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleReverseMap, PlayToClientPacketTeamsAnon.CollisionRule)
 		if err != nil {
 			return
 		}
@@ -20469,12 +20469,12 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 			return
 		}
 	default:
-		_, ok := ret.Anon.(queser.Void)
+		_, ok := ret.Anon.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Anon.(queser.Void).Encode(w)
+		err = ret.Anon.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -20483,15 +20483,15 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 	case "add":
 		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.VarInt(len(PlayToClientPacketTeamsPlayers)).Encode(w)
+		err = proto_base.VarInt(len(PlayToClientPacketTeamsPlayers)).Encode(w)
 		if err != nil {
 			return
 		}
 		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
-			err = queser.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
+			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
 			if err != nil {
 				return
 			}
@@ -20499,15 +20499,15 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 	case "join":
 		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.VarInt(len(PlayToClientPacketTeamsPlayers)).Encode(w)
+		err = proto_base.VarInt(len(PlayToClientPacketTeamsPlayers)).Encode(w)
 		if err != nil {
 			return
 		}
 		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
-			err = queser.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
+			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
 			if err != nil {
 				return
 			}
@@ -20515,26 +20515,26 @@ func (ret PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 	case "leave":
 		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.VarInt(len(PlayToClientPacketTeamsPlayers)).Encode(w)
+		err = proto_base.VarInt(len(PlayToClientPacketTeamsPlayers)).Encode(w)
 		if err != nil {
 			return
 		}
 		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
-			err = queser.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
+			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
 			if err != nil {
 				return
 			}
 		}
 	default:
-		_, ok := ret.Players.(queser.Void)
+		_, ok := ret.Players.(proto_base.Void)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = ret.Players.(queser.Void).Encode(w)
+		err = ret.Players.(proto_base.Void).Encode(w)
 		if err != nil {
 			return
 		}
@@ -20587,7 +20587,7 @@ func (ret PlayToClientPacketTestInstanceBlockStatus) Encode(w io.Writer) (err er
 
 type PlayToClientPacketTileEntityData struct {
 	Location Position
-	Action   queser.VarInt
+	Action   proto_base.VarInt
 	NbtData  nbt.Anon
 }
 
@@ -20636,16 +20636,16 @@ type PlayToClientPacketTrackedWaypoint struct {
 	}
 }
 
-var PlayToClientPacketTrackedWaypointOperationMap = map[queser.VarInt]string{0: "track", 1: "untrack", 2: "update"}
-var PlayToClientPacketTrackedWaypointWaypointTypeMap = map[queser.VarInt]string{0: "empty", 1: "vec3i", 2: "chunk", 3: "azimuth"}
+var PlayToClientPacketTrackedWaypointOperationMap = map[proto_base.VarInt]string{0: "track", 1: "untrack", 2: "update"}
+var PlayToClientPacketTrackedWaypointWaypointTypeMap = map[proto_base.VarInt]string{0: "empty", 1: "vec3i", 2: "chunk", 3: "azimuth"}
 
 func (_ PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (ret PlayToClientPacketTrackedWaypoint, err error) {
-	var PlayToClientPacketTrackedWaypointOperationKey queser.VarInt
+	var PlayToClientPacketTrackedWaypointOperationKey proto_base.VarInt
 	PlayToClientPacketTrackedWaypointOperationKey, err = PlayToClientPacketTrackedWaypointOperationKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Operation, err = queser.ErroringIndex(PlayToClientPacketTrackedWaypointOperationMap, PlayToClientPacketTrackedWaypointOperationKey)
+	ret.Operation, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointOperationMap, PlayToClientPacketTrackedWaypointOperationKey)
 	if err != nil {
 		return
 	}
@@ -20658,7 +20658,7 @@ func (_ PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (ret PlayToClient
 		var PlayToClientPacketTrackedWaypointWaypointAnonTmp struct {
 			Id string
 		}
-		PlayToClientPacketTrackedWaypointWaypointAnonTmp.Id, err = queser.DecodeString(r)
+		PlayToClientPacketTrackedWaypointWaypointAnonTmp.Id, err = proto_base.DecodeString(r)
 		if err != nil {
 			return
 		}
@@ -20673,7 +20673,7 @@ func (_ PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (ret PlayToClient
 		}
 		ret.Waypoint.Anon = PlayToClientPacketTrackedWaypointWaypointAnonTmp
 	}
-	ret.Waypoint.Icon.Style, err = queser.DecodeString(r)
+	ret.Waypoint.Icon.Style, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
 	}
@@ -20690,12 +20690,12 @@ func (_ PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (ret PlayToClient
 		}
 		ret.Waypoint.Icon.Color = &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue
 	}
-	var PlayToClientPacketTrackedWaypointWaypointTypeKey queser.VarInt
+	var PlayToClientPacketTrackedWaypointWaypointTypeKey proto_base.VarInt
 	PlayToClientPacketTrackedWaypointWaypointTypeKey, err = PlayToClientPacketTrackedWaypointWaypointTypeKey.Decode(r)
 	if err != nil {
 		return
 	}
-	ret.Waypoint.Type, err = queser.ErroringIndex(PlayToClientPacketTrackedWaypointWaypointTypeMap, PlayToClientPacketTrackedWaypointWaypointTypeKey)
+	ret.Waypoint.Type, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointWaypointTypeMap, PlayToClientPacketTrackedWaypointWaypointTypeKey)
 	if err != nil {
 		return
 	}
@@ -20709,8 +20709,8 @@ func (_ PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (ret PlayToClient
 		ret.Waypoint.Data = PlayToClientPacketTrackedWaypointWaypointDataTmp
 	case "chunk":
 		var PlayToClientPacketTrackedWaypointWaypointDataTmp struct {
-			ChunkX queser.VarInt
-			ChunkZ queser.VarInt
+			ChunkX proto_base.VarInt
+			ChunkZ proto_base.VarInt
 		}
 		PlayToClientPacketTrackedWaypointWaypointDataTmp.ChunkX, err = PlayToClientPacketTrackedWaypointWaypointDataTmp.ChunkX.Decode(r)
 		if err != nil {
@@ -20732,12 +20732,12 @@ func (_ PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (ret PlayToClient
 	return
 }
 
-var PlayToClientPacketTrackedWaypointOperationReverseMap = map[string]queser.VarInt{"track": 0, "untrack": 1, "update": 2}
-var PlayToClientPacketTrackedWaypointWaypointTypeReverseMap = map[string]queser.VarInt{"empty": 0, "vec3i": 1, "chunk": 2, "azimuth": 3}
+var PlayToClientPacketTrackedWaypointOperationReverseMap = map[string]proto_base.VarInt{"track": 0, "untrack": 1, "update": 2}
+var PlayToClientPacketTrackedWaypointWaypointTypeReverseMap = map[string]proto_base.VarInt{"empty": 0, "vec3i": 1, "chunk": 2, "azimuth": 3}
 
 func (ret PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
-	var vPlayToClientPacketTrackedWaypointOperation queser.VarInt
-	vPlayToClientPacketTrackedWaypointOperation, err = queser.ErroringIndex(PlayToClientPacketTrackedWaypointOperationReverseMap, ret.Operation)
+	var vPlayToClientPacketTrackedWaypointOperation proto_base.VarInt
+	vPlayToClientPacketTrackedWaypointOperation, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointOperationReverseMap, ret.Operation)
 	if err != nil {
 		return
 	}
@@ -20755,10 +20755,10 @@ func (ret PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
 			Id string
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
-		err = queser.EncodeString(w, PlayToClientPacketTrackedWaypointWaypointAnon.Id)
+		err = proto_base.EncodeString(w, PlayToClientPacketTrackedWaypointWaypointAnon.Id)
 		if err != nil {
 			return
 		}
@@ -20767,7 +20767,7 @@ func (ret PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
 			Uuid uuid.UUID
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		_, err = w.Write(PlayToClientPacketTrackedWaypointWaypointAnon.Uuid[:])
@@ -20775,7 +20775,7 @@ func (ret PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.EncodeString(w, ret.Waypoint.Icon.Style)
+	err = proto_base.EncodeString(w, ret.Waypoint.Icon.Style)
 	if err != nil {
 		return
 	}
@@ -20789,8 +20789,8 @@ func (ret PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	var vPlayToClientPacketTrackedWaypointWaypointType queser.VarInt
-	vPlayToClientPacketTrackedWaypointWaypointType, err = queser.ErroringIndex(PlayToClientPacketTrackedWaypointWaypointTypeReverseMap, ret.Waypoint.Type)
+	var vPlayToClientPacketTrackedWaypointWaypointType proto_base.VarInt
+	vPlayToClientPacketTrackedWaypointWaypointType, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointWaypointTypeReverseMap, ret.Waypoint.Type)
 	if err != nil {
 		return
 	}
@@ -20802,7 +20802,7 @@ func (ret PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
 	case "azimuth":
 		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(float32)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = binary.Write(w, binary.BigEndian, PlayToClientPacketTrackedWaypointWaypointData)
@@ -20811,11 +20811,11 @@ func (ret PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
 		}
 	case "chunk":
 		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(struct {
-			ChunkX queser.VarInt
-			ChunkZ queser.VarInt
+			ChunkX proto_base.VarInt
+			ChunkZ proto_base.VarInt
 		})
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketTrackedWaypointWaypointData.ChunkX.Encode(w)
@@ -20829,7 +20829,7 @@ func (ret PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
 	case "vec3i":
 		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(Vec3i)
 		if !ok {
-			err = queser.BadTypeError
+			err = proto_base.BadTypeError
 			return
 		}
 		err = PlayToClientPacketTrackedWaypointWaypointData.Encode(w)
@@ -20844,14 +20844,14 @@ type PlayToClientPacketTradeList struct {
 	WindowId ContainerID
 	Trades   []struct {
 		InputItem1 struct {
-			ItemId     queser.VarInt
-			ItemCount  queser.VarInt
+			ItemId     proto_base.VarInt
+			ItemCount  proto_base.VarInt
 			Components ExactComponentMatcher
 		}
 		OutputItem Slot
 		InputItem2 *struct {
-			ItemId     queser.VarInt
-			ItemCount  queser.VarInt
+			ItemId     proto_base.VarInt
+			ItemCount  proto_base.VarInt
 			Components ExactComponentMatcher
 		}
 		TradeDisabled      bool
@@ -20862,8 +20862,8 @@ type PlayToClientPacketTradeList struct {
 		PriceMultiplier    float32
 		Demand             int32
 	}
-	VillagerLevel     queser.VarInt
-	Experience        queser.VarInt
+	VillagerLevel     proto_base.VarInt
+	Experience        proto_base.VarInt
 	IsRegularVillager bool
 	CanRestock        bool
 }
@@ -20873,21 +20873,21 @@ func (_ PlayToClientPacketTradeList) Decode(r io.Reader) (ret PlayToClientPacket
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketTradeListTrades queser.VarInt
+	var lPlayToClientPacketTradeListTrades proto_base.VarInt
 	lPlayToClientPacketTradeListTrades, err = lPlayToClientPacketTradeListTrades.Decode(r)
 	if err != nil {
 		return
 	}
 	ret.Trades = []struct {
 		InputItem1 struct {
-			ItemId     queser.VarInt
-			ItemCount  queser.VarInt
+			ItemId     proto_base.VarInt
+			ItemCount  proto_base.VarInt
 			Components ExactComponentMatcher
 		}
 		OutputItem Slot
 		InputItem2 *struct {
-			ItemId     queser.VarInt
-			ItemCount  queser.VarInt
+			ItemId     proto_base.VarInt
+			ItemCount  proto_base.VarInt
 			Components ExactComponentMatcher
 		}
 		TradeDisabled      bool
@@ -20901,14 +20901,14 @@ func (_ PlayToClientPacketTradeList) Decode(r io.Reader) (ret PlayToClientPacket
 	for range lPlayToClientPacketTradeListTrades {
 		var PlayToClientPacketTradeListTradesElement struct {
 			InputItem1 struct {
-				ItemId     queser.VarInt
-				ItemCount  queser.VarInt
+				ItemId     proto_base.VarInt
+				ItemCount  proto_base.VarInt
 				Components ExactComponentMatcher
 			}
 			OutputItem Slot
 			InputItem2 *struct {
-				ItemId     queser.VarInt
-				ItemCount  queser.VarInt
+				ItemId     proto_base.VarInt
+				ItemCount  proto_base.VarInt
 				Components ExactComponentMatcher
 			}
 			TradeDisabled      bool
@@ -20942,8 +20942,8 @@ func (_ PlayToClientPacketTradeList) Decode(r io.Reader) (ret PlayToClientPacket
 		}
 		if PlayToClientPacketTradeListTradesElementInputItem2Present {
 			var PlayToClientPacketTradeListTradesElementInputItem2PresentValue struct {
-				ItemId     queser.VarInt
-				ItemCount  queser.VarInt
+				ItemId     proto_base.VarInt
+				ItemCount  proto_base.VarInt
 				Components ExactComponentMatcher
 			}
 			PlayToClientPacketTradeListTradesElementInputItem2PresentValue.ItemId, err = PlayToClientPacketTradeListTradesElementInputItem2PresentValue.ItemId.Decode(r)
@@ -21013,7 +21013,7 @@ func (ret PlayToClientPacketTradeList) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Trades)).Encode(w)
+	err = proto_base.VarInt(len(ret.Trades)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -21130,7 +21130,7 @@ func (ret PlayToClientPacketUnloadChunk) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketUpdateHealth struct {
 	Health         float32
-	Food           queser.VarInt
+	Food           proto_base.VarInt
 	FoodSaturation float32
 }
 
@@ -21166,8 +21166,8 @@ func (ret PlayToClientPacketUpdateHealth) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketUpdateLight struct {
-	ChunkX              queser.VarInt
-	ChunkZ              queser.VarInt
+	ChunkX              proto_base.VarInt
+	ChunkZ              proto_base.VarInt
 	SkyLightMask        []int64
 	BlockLightMask      []int64
 	EmptySkyLightMask   []int64
@@ -21185,7 +21185,7 @@ func (_ PlayToClientPacketUpdateLight) Decode(r io.Reader) (ret PlayToClientPack
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketUpdateLightSkyLightMask queser.VarInt
+	var lPlayToClientPacketUpdateLightSkyLightMask proto_base.VarInt
 	lPlayToClientPacketUpdateLightSkyLightMask, err = lPlayToClientPacketUpdateLightSkyLightMask.Decode(r)
 	if err != nil {
 		return
@@ -21199,7 +21199,7 @@ func (_ PlayToClientPacketUpdateLight) Decode(r io.Reader) (ret PlayToClientPack
 		}
 		ret.SkyLightMask = append(ret.SkyLightMask, PlayToClientPacketUpdateLightSkyLightMaskElement)
 	}
-	var lPlayToClientPacketUpdateLightBlockLightMask queser.VarInt
+	var lPlayToClientPacketUpdateLightBlockLightMask proto_base.VarInt
 	lPlayToClientPacketUpdateLightBlockLightMask, err = lPlayToClientPacketUpdateLightBlockLightMask.Decode(r)
 	if err != nil {
 		return
@@ -21213,7 +21213,7 @@ func (_ PlayToClientPacketUpdateLight) Decode(r io.Reader) (ret PlayToClientPack
 		}
 		ret.BlockLightMask = append(ret.BlockLightMask, PlayToClientPacketUpdateLightBlockLightMaskElement)
 	}
-	var lPlayToClientPacketUpdateLightEmptySkyLightMask queser.VarInt
+	var lPlayToClientPacketUpdateLightEmptySkyLightMask proto_base.VarInt
 	lPlayToClientPacketUpdateLightEmptySkyLightMask, err = lPlayToClientPacketUpdateLightEmptySkyLightMask.Decode(r)
 	if err != nil {
 		return
@@ -21227,7 +21227,7 @@ func (_ PlayToClientPacketUpdateLight) Decode(r io.Reader) (ret PlayToClientPack
 		}
 		ret.EmptySkyLightMask = append(ret.EmptySkyLightMask, PlayToClientPacketUpdateLightEmptySkyLightMaskElement)
 	}
-	var lPlayToClientPacketUpdateLightEmptyBlockLightMask queser.VarInt
+	var lPlayToClientPacketUpdateLightEmptyBlockLightMask proto_base.VarInt
 	lPlayToClientPacketUpdateLightEmptyBlockLightMask, err = lPlayToClientPacketUpdateLightEmptyBlockLightMask.Decode(r)
 	if err != nil {
 		return
@@ -21241,7 +21241,7 @@ func (_ PlayToClientPacketUpdateLight) Decode(r io.Reader) (ret PlayToClientPack
 		}
 		ret.EmptyBlockLightMask = append(ret.EmptyBlockLightMask, PlayToClientPacketUpdateLightEmptyBlockLightMaskElement)
 	}
-	var lPlayToClientPacketUpdateLightSkyLight queser.VarInt
+	var lPlayToClientPacketUpdateLightSkyLight proto_base.VarInt
 	lPlayToClientPacketUpdateLightSkyLight, err = lPlayToClientPacketUpdateLightSkyLight.Decode(r)
 	if err != nil {
 		return
@@ -21249,7 +21249,7 @@ func (_ PlayToClientPacketUpdateLight) Decode(r io.Reader) (ret PlayToClientPack
 	ret.SkyLight = [][]uint8{}
 	for range lPlayToClientPacketUpdateLightSkyLight {
 		var PlayToClientPacketUpdateLightSkyLightElement []uint8
-		var lPlayToClientPacketUpdateLightSkyLightElement queser.VarInt
+		var lPlayToClientPacketUpdateLightSkyLightElement proto_base.VarInt
 		lPlayToClientPacketUpdateLightSkyLightElement, err = lPlayToClientPacketUpdateLightSkyLightElement.Decode(r)
 		if err != nil {
 			return
@@ -21265,7 +21265,7 @@ func (_ PlayToClientPacketUpdateLight) Decode(r io.Reader) (ret PlayToClientPack
 		}
 		ret.SkyLight = append(ret.SkyLight, PlayToClientPacketUpdateLightSkyLightElement)
 	}
-	var lPlayToClientPacketUpdateLightBlockLight queser.VarInt
+	var lPlayToClientPacketUpdateLightBlockLight proto_base.VarInt
 	lPlayToClientPacketUpdateLightBlockLight, err = lPlayToClientPacketUpdateLightBlockLight.Decode(r)
 	if err != nil {
 		return
@@ -21273,7 +21273,7 @@ func (_ PlayToClientPacketUpdateLight) Decode(r io.Reader) (ret PlayToClientPack
 	ret.BlockLight = [][]uint8{}
 	for range lPlayToClientPacketUpdateLightBlockLight {
 		var PlayToClientPacketUpdateLightBlockLightElement []uint8
-		var lPlayToClientPacketUpdateLightBlockLightElement queser.VarInt
+		var lPlayToClientPacketUpdateLightBlockLightElement proto_base.VarInt
 		lPlayToClientPacketUpdateLightBlockLightElement, err = lPlayToClientPacketUpdateLightBlockLightElement.Decode(r)
 		if err != nil {
 			return
@@ -21300,7 +21300,7 @@ func (ret PlayToClientPacketUpdateLight) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.SkyLightMask)).Encode(w)
+	err = proto_base.VarInt(len(ret.SkyLightMask)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -21310,7 +21310,7 @@ func (ret PlayToClientPacketUpdateLight) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.BlockLightMask)).Encode(w)
+	err = proto_base.VarInt(len(ret.BlockLightMask)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -21320,7 +21320,7 @@ func (ret PlayToClientPacketUpdateLight) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.EmptySkyLightMask)).Encode(w)
+	err = proto_base.VarInt(len(ret.EmptySkyLightMask)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -21330,7 +21330,7 @@ func (ret PlayToClientPacketUpdateLight) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.EmptyBlockLightMask)).Encode(w)
+	err = proto_base.VarInt(len(ret.EmptyBlockLightMask)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -21340,12 +21340,12 @@ func (ret PlayToClientPacketUpdateLight) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = queser.VarInt(len(ret.SkyLight)).Encode(w)
+	err = proto_base.VarInt(len(ret.SkyLight)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketUpdateLightSkyLight := range len(ret.SkyLight) {
-		err = queser.VarInt(len(ret.SkyLight[iPlayToClientPacketUpdateLightSkyLight])).Encode(w)
+		err = proto_base.VarInt(len(ret.SkyLight[iPlayToClientPacketUpdateLightSkyLight])).Encode(w)
 		if err != nil {
 			return
 		}
@@ -21356,12 +21356,12 @@ func (ret PlayToClientPacketUpdateLight) Encode(w io.Writer) (err error) {
 			}
 		}
 	}
-	err = queser.VarInt(len(ret.BlockLight)).Encode(w)
+	err = proto_base.VarInt(len(ret.BlockLight)).Encode(w)
 	if err != nil {
 		return
 	}
 	for iPlayToClientPacketUpdateLightBlockLight := range len(ret.BlockLight) {
-		err = queser.VarInt(len(ret.BlockLight[iPlayToClientPacketUpdateLightBlockLight])).Encode(w)
+		err = proto_base.VarInt(len(ret.BlockLight[iPlayToClientPacketUpdateLightBlockLight])).Encode(w)
 		if err != nil {
 			return
 		}
@@ -21413,7 +21413,7 @@ func (ret PlayToClientPacketUpdateTime) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketUpdateViewDistance struct {
-	ViewDistance queser.VarInt
+	ViewDistance proto_base.VarInt
 }
 
 func (_ PlayToClientPacketUpdateViewDistance) Decode(r io.Reader) (ret PlayToClientPacketUpdateViewDistance, err error) {
@@ -21432,8 +21432,8 @@ func (ret PlayToClientPacketUpdateViewDistance) Encode(w io.Writer) (err error) 
 }
 
 type PlayToClientPacketUpdateViewPosition struct {
-	ChunkX queser.VarInt
-	ChunkZ queser.VarInt
+	ChunkX proto_base.VarInt
+	ChunkZ proto_base.VarInt
 }
 
 func (_ PlayToClientPacketUpdateViewPosition) Decode(r io.Reader) (ret PlayToClientPacketUpdateViewPosition, err error) {
@@ -21516,7 +21516,7 @@ func (ret PlayToClientPacketVehicleMove) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketWindowItems struct {
 	WindowId    ContainerID
-	StateId     queser.VarInt
+	StateId     proto_base.VarInt
 	Items       []Slot
 	CarriedItem Slot
 }
@@ -21530,7 +21530,7 @@ func (_ PlayToClientPacketWindowItems) Decode(r io.Reader) (ret PlayToClientPack
 	if err != nil {
 		return
 	}
-	var lPlayToClientPacketWindowItemsItems queser.VarInt
+	var lPlayToClientPacketWindowItemsItems proto_base.VarInt
 	lPlayToClientPacketWindowItemsItems, err = lPlayToClientPacketWindowItemsItems.Decode(r)
 	if err != nil {
 		return
@@ -21559,7 +21559,7 @@ func (ret PlayToClientPacketWindowItems) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = queser.VarInt(len(ret.Items)).Encode(w)
+	err = proto_base.VarInt(len(ret.Items)).Encode(w)
 	if err != nil {
 		return
 	}
@@ -21607,7 +21607,7 @@ func (ret PlayToClientPacketWorldBorderCenter) Encode(w io.Writer) (err error) {
 type PlayToClientPacketWorldBorderLerpSize struct {
 	OldDiameter float64
 	NewDiameter float64
-	Speed       queser.VarInt
+	Speed       proto_base.VarInt
 }
 
 func (_ PlayToClientPacketWorldBorderLerpSize) Decode(r io.Reader) (ret PlayToClientPacketWorldBorderLerpSize, err error) {
@@ -21661,7 +21661,7 @@ func (ret PlayToClientPacketWorldBorderSize) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketWorldBorderWarningDelay struct {
-	WarningTime queser.VarInt
+	WarningTime proto_base.VarInt
 }
 
 func (_ PlayToClientPacketWorldBorderWarningDelay) Decode(r io.Reader) (ret PlayToClientPacketWorldBorderWarningDelay, err error) {
@@ -21680,7 +21680,7 @@ func (ret PlayToClientPacketWorldBorderWarningDelay) Encode(w io.Writer) (err er
 }
 
 type PlayToClientPacketWorldBorderWarningReach struct {
-	WarningBlocks queser.VarInt
+	WarningBlocks proto_base.VarInt
 }
 
 func (_ PlayToClientPacketWorldBorderWarningReach) Decode(r io.Reader) (ret PlayToClientPacketWorldBorderWarningReach, err error) {

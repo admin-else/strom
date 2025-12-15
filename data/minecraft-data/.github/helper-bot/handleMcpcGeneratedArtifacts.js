@@ -36,7 +36,7 @@ async function handle (ourPR, genPullNo, version, artifactURL, shouldPull) {
 
   if (ourPR.body) {
     await github.updateIssue(ourPR.number, {
-      body: ourPR.body.replace('<!--minecraft-data-generator-placeholder-->', `- https://github.com/PrismarineJS/minecraft-data-generator/pull/${genPullNo}`)
+      body: ourPR.body.replace('<!--minecraft-data-proto_generator-placeholder-->', `- https://github.com/PrismarineJS/minecraft-data-generator/pull/${genPullNo}`)
     })
   }
 
@@ -92,7 +92,7 @@ async function main (versions, genPullNo, artifactUrl, createPR) {
     console.log('PR', details)
     await handle(details, genPullNo, version, artifactUrl, true)
   } else if (createPR) {
-    const pr = await createInitialPR('pc', '(This issue was created for a minecraft-data-generator PR)', {
+    const pr = await createInitialPR('pc', '(This issue was created for a minecraft-data-proto_generator PR)', {
       version,
       protocolVersion: null
     })

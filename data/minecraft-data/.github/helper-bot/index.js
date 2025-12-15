@@ -166,10 +166,10 @@ async function openIssueAndDispatch (title, versionJson, latestVersionData, late
     protocolVersion: versionJson.protocol_version
   })
   console.log('Created PR', pr)
-  // Ask minecraft-data-generator to handle new update
+  // Ask minecraft-data-proto_generator to handle new update
   const dispatchPayload = {
     owner: 'PrismarineJS',
-    repo: 'minecraft-data-generator',
+    repo: 'minecraft-data-proto_generator',
     workflow: 'handle-mcdata-update.yml',
     branch: 'main',
     inputs: {

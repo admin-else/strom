@@ -191,7 +191,7 @@ func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 			return
 		}
 		s1 := Define(Exprs(Ident(name), Ident("ok")), Exprs(TypeAssert(varToSet, tType)))
-		s2 := If(Not(Ident("ok")), NewBlockEllipsis(Assign121(Ident("err"), Selector("queser", "BadTypeError")), Return()))
+		s2 := If(Not(Ident("ok")), NewBlockEllipsis(Assign121(Ident("err"), Selector("proto_base", "BadTypeError")), Return()))
 		var caseDecodeValueStmts []ast.Stmt
 		caseDecodeValueStmts, err = g.VisitEncoder(Ident(name), fType, name)
 		if err != nil {
@@ -210,7 +210,7 @@ func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 			return
 		}
 		s1 := Define(Exprs(Ident("_"), Ident("ok")), Exprs(TypeAssert(varToSet, tType)))
-		s2 := If(Not(Ident("ok")), NewBlockEllipsis(Assign121(Ident("err"), Selector("queser", "BadTypeError")), Return()))
+		s2 := If(Not(Ident("ok")), NewBlockEllipsis(Assign121(Ident("err"), Selector("proto_base", "BadTypeError")), Return()))
 		defaultStmts := []ast.Stmt{s1, s2}
 		var defaultEncodingStmts []ast.Stmt
 		defaultEncodingStmts, err = g.VisitEncoder(TypeAssert(varToSet, tType), data.Default, name)
@@ -262,7 +262,7 @@ func MapperEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 
 	vName := "v" + name
 	s1 := VarStmt(vName, kType)
-	s2 := Assign(Exprs(Ident(vName), Ident("err")), Exprs(Call(Selector("queser", "ErroringIndex"), Ident(mName), varToSet)))
+	s2 := Assign(Exprs(Ident(vName), Ident("err")), Exprs(Call(Selector("proto_base", "ErroringIndex"), Ident(mName), varToSet)))
 	s3 := IfErrNil()
 	s4, err := g.VisitEncoder(Ident(vName), data.Type, name)
 	if err != nil {
@@ -278,7 +278,7 @@ func MapperEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 
 func StringEncoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.Stmt, err error) {
 	s = Stmts(
-		Assign121(Ident("err"), Call(Selector("queser", "EncodeString"), Ident("w"), varToSet)), IfErrNil())
+		Assign121(Ident("err"), Call(Selector("proto_base", "EncodeString"), Ident("w"), varToSet)), IfErrNil())
 	return
 }
 
@@ -310,7 +310,7 @@ func RegistryEntryHolderEncoder(g *Generator, varToSet ast.Expr, dataRaw any, na
 	statements := Stmts()
 	statements = append(statements, Case(Exprs(baseType), baseEncodeStatements))
 	statements = append(statements, Case(Exprs(otherwiseType), otherwiseEncodeStatements))
-	statements = append(statements, Case(nil, Stmts(Assign121(Ident("err"), Selector("queser", "BadTypeError")))))
+	statements = append(statements, Case(nil, Stmts(Assign121(Ident("err"), Selector("proto_base", "BadTypeError")))))
 
 	s = Stmts(TypeSwitch(Define121(Ident(knownTypeName), TypeAssert(varToSet, Ident("type"))), NewBlock(statements)))
 	return
