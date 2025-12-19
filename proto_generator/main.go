@@ -321,7 +321,7 @@ func generateVersion(v string) (err error) {
 	if err != nil {
 		return
 	}
-	f, err := os.Create("proto_generated/v" + vUnderscore + "/proto.go")
+	f, err := os.Create("proto_generated/v" + vUnderscore + "/proto_base.go")
 	if err != nil {
 		return
 	}

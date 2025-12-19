@@ -12,8 +12,10 @@ import (
 	"strconv"
 
 	"github.com/admin-else/strom/api"
-	"github.com/admin-else/strom/bot"
+	"github.com/admin-else/strom/client"
 	"github.com/admin-else/strom/crypto"
+	"github.com/admin-else/strom/event"
+	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 
 	"github.com/admin-else/strom/data"
@@ -21,8 +23,8 @@ import (
 )
 
 type LoginClient struct {
-	*bot.Conn
-	Account api.Account
+	*proto.Conn
+	Account *api.Account
 
 	GivenAccount v1_21_8.LoginToClientPacketSuccess
 }
@@ -32,11 +34,11 @@ func (s *LoginClient) Default(event any) (err error) {
 	return
 }
 
-func (s *LoginClient) OnCycle(_ bot.OnLoopCycle) (err error) {
+func (s *LoginClient) OnCycle(_ event.OnLoopCycle) (err error) {
 	return
 }
 
-func (s *LoginClient) OnStart(_ bot.OnStart) (err error) {
+func (s *LoginClient) OnStart(_ event.OnStart) (err error) {
 	host, portStr, err := net.SplitHostPort(s.RemoteAddr().String())
 	if err != nil {
 		return
@@ -131,11 +133,26 @@ func (s *LoginClient) OnSuccess(success v1_21_8.LoginToClientPacketSuccess) (err
 		return
 	}
 	s.State = proto_base.Configuration
-	err = bot.HandlerDone
+	err = event.HandlerDone
 	return
 }
 
-func Login(c *bot.Conn, account api.Account) (err error) {
+func Login(c *proto.Conn, account *api.Account) (err error) {
+	err = c.Start(&LoginClient{
+		Conn:    c,
+		Account: account,
+	})
+	if err != nil {
+		err = errors.Join(err, errors.New("failed to login"))
+	}
+	return
+}
+
+func ConnectAndLogin(connectTo string, account *api.Account) (c *proto.Conn, err error) {
+	c, err = client.Connect(connectTo)
+	if err != nil {
+		return
+	}
 	err = c.Start(&LoginClient{
 		Conn:    c,
 		Account: account,

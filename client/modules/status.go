@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/admin-else/strom/bot"
+	"github.com/admin-else/strom/event"
+	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 
 	"github.com/admin-else/strom/data"
@@ -13,7 +14,7 @@ import (
 )
 
 type StatusClient struct {
-	*bot.Conn
+	*proto.Conn
 	Status string
 }
 
@@ -22,7 +23,7 @@ func (s *StatusClient) Default(event any) (err error) {
 	return
 }
 
-func (s *StatusClient) OnStart(_ bot.OnStart) (err error) {
+func (s *StatusClient) OnStart(_ event.OnStart) (err error) {
 	parts := strings.Split(s.RemoteAddr().String(), ":")
 	versionData, err := data.LookUpProtocolVersionByName(s.Version)
 	if err != nil {
@@ -48,6 +49,6 @@ func (s *StatusClient) OnStart(_ bot.OnStart) (err error) {
 
 func (s *StatusClient) OnStatus(p v1_21_8.StatusToClientPacketServerInfo) (err error) {
 	s.Status = p.Response
-	err = bot.HandlerDone
+	err = event.HandlerDone
 	return
 }

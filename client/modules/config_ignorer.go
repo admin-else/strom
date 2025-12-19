@@ -4,13 +4,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/admin-else/strom/bot"
+	"github.com/admin-else/strom/event"
+	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 )
 
 type ConfigIgnorer struct {
-	*bot.Conn
+	*proto.Conn
 }
 
 func (c *ConfigIgnorer) Default(event any) (err error) {
@@ -28,7 +29,7 @@ func (c *ConfigIgnorer) OnFinish(_ v1_21_8.ConfigurationToClientPacketFinishConf
 		return
 	}
 	c.State = proto_base.Play
-	err = bot.HandlerDone
+	err = event.HandlerDone
 	return
 }
 
@@ -42,7 +43,7 @@ func (c *ConfigIgnorer) OnKeepAlive(packet v1_21_8.ConfigurationToClientPacketKe
 	return
 }
 
-func IgnoreConfig(c *bot.Conn) (err error) {
+func IgnoreConfig(c *proto.Conn) (err error) {
 	err = c.Start(&ConfigIgnorer{c})
 	if err != nil {
 		err = errors.Join(err, errors.New("failed to ignore config"))

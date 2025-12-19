@@ -1,9 +1,10 @@
 package proto_generated
 
 import (
+	"io"
+
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
-	"io"
 )
 
 func PacketIdentifierToType(v string, d proto_base.Direction, s proto_base.State, i string) (t any) {

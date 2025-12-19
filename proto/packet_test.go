@@ -1,4 +1,4 @@
-package proto_base_test
+package proto_test
 
 import (
 	"bytes"

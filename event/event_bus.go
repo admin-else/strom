@@ -1,4 +1,4 @@
-package bot
+package event
 
 import (
 	"errors"
@@ -32,7 +32,7 @@ func FindHandlers(inst HandlerInst) (handlers map[reflect.Type]reflect.Value) {
 	return
 }
 
-func FireEvent(inst HandlerInst, event any, handlers map[reflect.Type]reflect.Value) (err error) {
+func Fire(inst HandlerInst, event any, handlers map[reflect.Type]reflect.Value) (err error) {
 	if handler, ok := handlers[reflect.TypeOf(event)]; ok {
 		errV := handler.Call([]reflect.Value{reflect.ValueOf(event)})[0]
 		if !errV.IsNil() {
@@ -40,28 +40,6 @@ func FireEvent(inst HandlerInst, event any, handlers map[reflect.Type]reflect.Va
 		}
 	} else {
 		err = inst.Default(event)
-	}
-	return
-}
-
-func (c *Conn) Start(inst HandlerInst) (err error) {
-	_ = *c // exit early on nil connection
-	handlers := FindHandlers(inst)
-	err = FireEvent(inst, OnStart{}, handlers)
-	for err == nil {
-		var event any
-		event, err = c.Receive()
-		if err != nil {
-			return
-		}
-		err = FireEvent(inst, event, handlers)
-		if err != nil {
-			break
-		}
-		err = FireEvent(inst, OnLoopCycle{}, handlers)
-	}
-	if errors.Is(err, HandlerDone) {
-		err = nil
 	}
 	return
 }

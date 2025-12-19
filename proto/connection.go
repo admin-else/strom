@@ -1,4 +1,4 @@
-package bot
+package proto
 
 import (
 	"bytes"
@@ -7,56 +7,29 @@ import (
 	"io"
 	"net"
 
+	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/proto_generated"
 )
 
 var BadPacketTypeError = errors.New("bad packet type")
 
-// UnCodablePacket represents a packet that could not be decoded due to querser not supporting all packets.
+// UnCodablePacket represents a packet that could not be decoded due to proto_generated not supporting all packets.
 type UnCodablePacket struct {
 	Err     error
 	Partial any
 	Data    []byte
 }
 
-type Actor int
-
-const (
-	Server Actor = iota
-	Client
-)
-
-func (a Actor) SendDirection() proto_base.Direction {
-	switch a {
-	case Server:
-		return proto_base.ToClient
-	case Client:
-		return proto_base.ToServer
-	default:
-		panic("invalid actor")
-	}
-}
-
-func (a Actor) ReceiveDirection() proto_base.Direction {
-	switch a {
-	case Server:
-		return proto_base.ToServer
-	case Client:
-		return proto_base.ToClient
-	default:
-		panic("invalid actor")
-	}
-}
-
 type Conn struct {
 	net.Conn
-	R                    io.Reader
-	W                    io.Writer
-	CompressionThreshold int32
-	State                proto_base.State
-	Actor                Actor
-	Version              string
+	R                                io.Reader
+	W                                io.Writer
+	CompressionThreshold             int32
+	State                            proto_base.State
+	Actor                            proto_base.Actor
+	Version                          string
+	DontDecodePacketsWithoutHandlers bool
 }
 
 func (c *Conn) Send(packet any) (err error) {
@@ -131,6 +104,9 @@ func (c *Conn) Receive() (packet any, err error) {
 		}
 		if packetLen == 0 {
 			packetBytes, err = io.ReadAll(rawPacketBuffer)
+			if err != nil {
+				return
+			}
 		} else {
 			var zReader io.ReadCloser
 			zReader, err = zlib.NewReader(rawPacketBuffer)
@@ -155,29 +131,24 @@ func (c *Conn) Receive() (packet any, err error) {
 	return
 }
 
-func Connect(addr string) (ret *Conn, err error) {
-	ret = &Conn{}
-	ret.Version = "1.21.8"
-	ret.State = proto_base.Handshaking
-	ret.CompressionThreshold = -1
-	ret.Actor = Client
-	ret.Conn, err = net.Dial("tcp", addr)
-	if err != nil {
-		return
+func (c *Conn) Start(inst event.HandlerInst) (err error) {
+	_ = *c // exit early on nil connection
+	handlers := event.FindHandlers(inst)
+	err = event.Fire(inst, event.OnStart{}, handlers)
+	for err == nil {
+		var packet any
+		packet, err = c.Receive()
+		if err != nil {
+			return
+		}
+		err = event.Fire(inst, packet, handlers)
+		if err != nil {
+			break
+		}
+		err = event.Fire(inst, event.OnLoopCycle{}, handlers)
 	}
-	ret.R = ret.Conn
-	ret.W = ret.Conn
-	return
-}
-
-func Servee(c net.Conn) (ret *Conn) {
-	ret = &Conn{}
-	ret.Version = "1.21.8"
-	ret.State = proto_base.Handshaking
-	ret.CompressionThreshold = -1
-	ret.Actor = Server
-	ret.Conn = c
-	ret.R = c
-	ret.W = c
+	if errors.Is(err, event.HandlerDone) {
+		err = nil
+	}
 	return
 }

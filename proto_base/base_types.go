@@ -23,6 +23,35 @@ const (
 	Play
 )
 
+type Actor int
+
+const (
+	Server Actor = iota
+	Client
+)
+
+func (a Actor) SendDirection() Direction {
+	switch a {
+	case Server:
+		return ToClient
+	case Client:
+		return ToServer
+	default:
+		panic("invalid actor")
+	}
+}
+
+func (a Actor) ReceiveDirection() Direction {
+	switch a {
+	case Server:
+		return ToServer
+	case Client:
+		return ToClient
+	default:
+		panic("invalid actor")
+	}
+}
+
 type PacketIdentifier struct {
 	Direction Direction
 	State     State

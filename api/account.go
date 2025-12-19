@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/admin-else/strom/crypto"
 	"github.com/google/uuid"
 )
 
@@ -104,4 +105,11 @@ func (a *Account) JoinServer(serverId string) (err error) {
 		return
 	}
 	return
+}
+
+func NewOfflineAccount(name string) *Account {
+	return &Account{
+		Name: name,
+		Uuid: crypto.FromOfflinePlayer(name),
+	}
 }
