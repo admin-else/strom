@@ -74,7 +74,6 @@ type PacketIdentifier struct {
 }
 
 type (
-	VarInt     int32
 	ToDo       struct{}
 	Void       struct{}
 	RestBuffer []byte
@@ -103,7 +102,7 @@ func (RestBuffer) Decode(r io.Reader) (ret RestBuffer, err error) {
 }
 
 func EncodeString(w io.Writer, s string) (err error) {
-	err = VarInt(len(s)).Encode(w)
+	err = EncodeVarInt(w, int32(len(s)))
 	if err != nil {
 		return
 	}
@@ -112,8 +111,7 @@ func EncodeString(w io.Writer, s string) (err error) {
 }
 
 func DecodeString(r io.Reader) (ret string, err error) {
-	var l VarInt
-	l, err = l.Decode(r)
+	l, err := DecodeVarInt(r)
 	if err != nil {
 		return
 	}
@@ -138,7 +136,7 @@ func (t ToDo) Decode(_ io.Reader) (ret ToDo, err error) {
 	return
 }
 
-func (v VarInt) Encode(w io.Writer) (err error) {
+func EncodeVarInt(w io.Writer, v int32) (err error) {
 	uv := uint32(v)
 	for {
 		b := uint8(uv & 0x7F)
@@ -157,14 +155,14 @@ func (v VarInt) Encode(w io.Writer) (err error) {
 	return nil
 }
 
-func (v VarInt) Decode(r io.Reader) (ret VarInt, err error) {
+func DecodeVarInt(r io.Reader) (ret int32, err error) {
 	for i := range 5 { // 32/7
 		var b uint8 = 0
 		err = binary.Read(r, binary.BigEndian, &b)
 		if err != nil {
 			return
 		}
-		ret |= VarInt(uint32(b&0x7F) << (7 * uint32(i)))
+		ret |= int32(uint32(b&0x7F) << (7 * uint32(i)))
 		if b&0x80 == 0 {
 			return
 		}

@@ -468,7 +468,11 @@ func RegistryEntryHolderDecoder(g *Generator, varToSet ast.Expr, dataRaw any, na
 		return
 	}
 	idName := name + "Id"
-	IdVar := VarStmt(idName, Selector("proto_base", "VarInt"))
+	varIntType, err := g.VisitNameAndData("varint", nil)
+	if err != nil {
+		return
+	}
+	IdVar := VarStmt(idName, varIntType)
 	idDecodeStatements, err := g.VisitDecoder(Ident(idName), "varint", name)
 	if err != nil {
 		return
@@ -498,6 +502,11 @@ func RegistryEntryHolderDecoder(g *Generator, varToSet ast.Expr, dataRaw any, na
 	return
 }
 
+func VarIntDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	s = Stmts(Assign(Exprs(varToSet, Ident("err")), Exprs(Call(Selector("proto_base", "DecodeVarInt"), Ident("r")))), IfErrNil())
+	return
+}
+
 func (g *Generator) RegisterDecoderNatives() {
 	g.DecoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerDecoder,
@@ -511,7 +520,7 @@ func (g *Generator) RegisterDecoderNatives() {
 		"string":    StringDecoder,
 
 		"void":            DefaultDecoder,
-		"varint":          DefaultDecoder,
+		"varint":          VarIntDecoder,
 		"anonymousNbt":    DefaultDecoder,
 		"anonOptionalNbt": DefaultDecoder, // I have no idea what the difference is between these two
 		"UUID":            UUIDDecoder,

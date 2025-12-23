@@ -53,7 +53,7 @@ func (c *Conn) Send(packet any) (err error) {
 	if c.CompressionThreshold > 0 {
 		packetBuffer := bytes.NewBuffer(nil)
 		if int32(len(packetBytes)) >= c.CompressionThreshold {
-			err = proto_base.VarInt(len(packetBytes)).Encode(packetBuffer)
+			err = proto_base.EncodeVarInt(packetBuffer, int32(len(packetBytes)))
 			if err != nil {
 				return
 			}
@@ -62,7 +62,7 @@ func (c *Conn) Send(packet any) (err error) {
 				return
 			}
 		} else {
-			err = proto_base.VarInt(0).Encode(packetBuffer)
+			err = proto_base.EncodeVarInt(packetBuffer, 0)
 			if err != nil {
 				return
 			}
@@ -75,7 +75,7 @@ func (c *Conn) Send(packet any) (err error) {
 	} else {
 		packetBytes = rawPacketBytes
 	}
-	err = proto_base.VarInt(len(packetBytes)).Encode(c.W)
+	err = proto_base.EncodeVarInt(c.W, int32(len(packetBytes)))
 	if err != nil {
 		return
 	}
@@ -84,8 +84,7 @@ func (c *Conn) Send(packet any) (err error) {
 }
 
 func (c *Conn) Receive() (packet any, err error) {
-	var rawPacketLen proto_base.VarInt
-	rawPacketLen, err = rawPacketLen.Decode(c.R)
+	rawPacketLen, err := proto_base.DecodeVarInt(c.R)
 	if err != nil {
 		return
 	}
@@ -96,8 +95,8 @@ func (c *Conn) Receive() (packet any, err error) {
 	rawPacketBuffer := bytes.NewBuffer(rawPacketBytes)
 	var packetBytes []byte
 	if c.CompressionThreshold > 0 {
-		var packetLen proto_base.VarInt
-		packetLen, err = packetLen.Decode(rawPacketBuffer)
+		var packetLen int32
+		packetLen, err = proto_base.DecodeVarInt(rawPacketBuffer)
 		if err != nil {
 			return
 		}

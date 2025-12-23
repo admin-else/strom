@@ -16,19 +16,17 @@ const (
 )
 
 func UnpackArrayPalette(r io.Reader, bitsPerEntry uint8, numberOfEntries int) (data []int32, err error) {
-	var palletLen proto_base.VarInt
-	palletLen, err = palletLen.Decode(r)
+	palletLen, err := proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
 	}
 	var pallet []int32 // remember we can't use make because this is user-controlled data
 	for range palletLen {
-		var entry proto_base.VarInt
-		entry, err = proto_base.VarInt(0).Decode(r)
+		entry, err := proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		pallet = append(pallet, int32(entry))
+		pallet = append(pallet, entry)
 	}
 	data, err = UnpackLongData(r, bitsPerEntry, numberOfEntries)
 	for i, b := range data {
@@ -56,7 +54,7 @@ func UnpackLongData(r io.Reader, bitsPerEntry uint8, numberOfEntries int) (data 
 }
 
 func UnpackSingleValuePalette(r io.Reader, numberOfEntries int) (data []int32, err error) {
-	entry, err := proto_base.VarInt(0).Decode(r)
+	entry, err := proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
 	}

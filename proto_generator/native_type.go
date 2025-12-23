@@ -157,7 +157,7 @@ func (g *Generator) RegisterNatives() {
 	g.Natives = map[string]ExprGeneratorFunc{
 		"container":                VisitContainerType,
 		"buffer":                   VisitBufferType,
-		"varint":                   MakeSelectorVisitor("proto_base", "VarInt"),
+		"varint":                   MakeIdentVisitor("int32"),
 		"array":                    VisitArrayTypeVisitorType,
 		"mapper":                   MakeIdentVisitor("string"),
 		"native":                   VisitDontGenerateType,

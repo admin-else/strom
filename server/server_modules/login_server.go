@@ -36,7 +36,7 @@ type LoginServer struct {
 
 func (l *LoginServer) OnHandshake(packet v1_21_8.HandshakingToServerPacketSetProtocol) (err error) {
 	l.State = proto_base.State(packet.NextState)
-	if packet.NextState != proto_base.VarInt(proto_base.Login) {
+	if packet.NextState != int32(proto_base.Login) {
 		err = UnexpectedNextStateError{proto_base.State(packet.NextState)}
 		return
 	}
@@ -44,7 +44,7 @@ func (l *LoginServer) OnHandshake(packet v1_21_8.HandshakingToServerPacketSetPro
 }
 
 func (l *LoginServer) SetCompressionThreshold(threshold int32) (err error) {
-	err = l.Send(v1_21_8.LoginToClientPacketCompress{Threshold: proto_base.VarInt(threshold)})
+	err = l.Send(v1_21_8.LoginToClientPacketCompress{Threshold: threshold})
 	if err != nil {
 		return
 	}
