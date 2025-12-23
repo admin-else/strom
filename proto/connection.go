@@ -16,9 +16,8 @@ var BadPacketTypeError = errors.New("bad packet type")
 
 // UnCodablePacket represents a packet that could not be decoded due to proto_generated not supporting all packets.
 type UnCodablePacket struct {
-	Err     error
-	Partial any
-	Data    []byte
+	Err  error
+	Data []byte
 }
 
 type Conn struct {
@@ -125,7 +124,7 @@ func (c *Conn) Receive() (packet any, err error) {
 	packetBuff := bytes.NewBuffer(packetBytes)
 	packet, err = proto_generated.DecodePacket(c.Version, c.Actor.ReceiveDirection(), c.State, packetBuff)
 	if err != nil {
-		packet = UnCodablePacket{Err: err, Data: packetBytes, Partial: packet}
+		packet = UnCodablePacket{Err: err, Data: packetBytes}
 		err = nil
 	}
 	return

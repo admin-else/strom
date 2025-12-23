@@ -13,6 +13,21 @@ const (
 	ToClient
 )
 
+func (d Direction) String() string {
+	switch d {
+	case ToServer:
+		return "ToServer"
+	case ToClient:
+		return "ToClient"
+	default:
+		return "Unknown"
+	}
+}
+
+func (d Direction) Opposite() Direction {
+	return d ^ 1
+}
+
 type State int
 
 const (

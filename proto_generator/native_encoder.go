@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"go/ast"
 	"go/token"
 
@@ -66,19 +65,19 @@ func SimpleTypeEncoder(_ *Generator, data ast.Expr, _ any, _ string) (s []ast.St
 func ArrayEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
 	var data struct {
 		CountType any
+		Count     string
 		Type      any
 	}
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
 	}
+	if data.CountType == nil {
+		data.CountType = "varint"
+	}
 	ct, err := g.VisitType(data.CountType)
 	if err != nil {
 		return
-	}
-	_, ok := ct.(*ast.Ident)
-	if !ok {
-		err = errors.New("array count type must be simple type otherwise wtf")
 	}
 	iName := "i" + name
 	s, err = g.VisitEncoder(varToSet, data.Type, name)
@@ -174,7 +173,7 @@ func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	if err != nil {
 		return
 	}
-	compareToExpr, err := ParseCompareTo(g, data.CompareTo)
+	compareToExpr, err := g.ParseCompareTo(data.CompareTo)
 	if err != nil {
 		return
 	}

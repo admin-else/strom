@@ -110,6 +110,7 @@ func OptionDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 func ArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
 	var data struct {
 		CountType any
+		Count     string
 		Type      any
 	}
 	lName := "l" + CamelCase(name)
@@ -117,13 +118,27 @@ func ArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 	if err != nil {
 		return
 	}
-	countType, err := g.VisitType(data.CountType)
-	if err != nil {
-		return
-	}
-	s2, err := g.VisitDecoder(Ident(lName), data.CountType, name)
-	if err != nil {
-		return
+	var s2 []ast.Stmt
+	countType, err := g.VisitNameAndData("varint", nil)
+	if data.CountType != nil {
+		countType, err = g.VisitType(data.CountType)
+		if err != nil {
+			return
+		}
+		s2, err = g.VisitDecoder(Ident(lName), data.CountType, name)
+		if err != nil {
+			return
+		}
+	} else {
+		var n int
+		n, err = strconv.Atoi(data.Count)
+		var e ast.Expr
+		if err == nil {
+			e = NumLit(n)
+		} else {
+			e, err = g.ParseCompareTo(data.Count)
+		}
+		s2 = append(s2, Assign121(Ident(lName), e))
 	}
 
 	normalType, err := g.VisitType(data.Type)
@@ -223,7 +238,7 @@ func SwitchDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	if err != nil {
 		return
 	}
-	compareToExpr, err := ParseCompareTo(g, data.CompareTo)
+	compareToExpr, err := g.ParseCompareTo(data.CompareTo)
 	if err != nil {
 		return
 	}

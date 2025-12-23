@@ -51,8 +51,8 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 	if err != nil {
 		return
 	}
-	var cNet net.Conn
 	for {
+		var cNet net.Conn
 		cNet, err = l.Accept()
 		if err != nil {
 			return

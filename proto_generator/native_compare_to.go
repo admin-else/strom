@@ -9,7 +9,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
-func ParseCompareTo(g *Generator, compareTo string) (e ast.Expr, err error) {
+func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, err error) {
 	parts := strings.Split(compareTo, "/")
 	downPrefixCount := 0
 	for _, part := range parts {

@@ -205,6 +205,7 @@ func (g *Generator) GenerateTypes(prefix string, types Types) error {
 		if slices.Contains(g.Settings.ReplaceWithTodoNames, k) {
 			v = "todo"
 		}
+
 		g.Depth = 0
 		e, err := g.VisitType(v)
 		if errors.Is(err, ToDoError) {
