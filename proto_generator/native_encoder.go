@@ -80,10 +80,13 @@ func ArrayEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 		return
 	}
 	iName := "i" + name
-	s, err = g.VisitEncoder(varToSet, data.Type, name)
-	s1, err := g.VisitEncoder(Call(ct, Call(Ident("len"), varToSet)), data.CountType, name)
-	if err != nil {
-		return
+	//s, err = g.VisitEncoder(varToSet, data.Type, name)
+	var s1 []ast.Stmt
+	if data.Count == "" {
+		s1, err = g.VisitEncoder(Call(ct, Call(Ident("len"), varToSet)), data.CountType, name)
+		if err != nil {
+			return
+		}
 	}
 	s2, err := g.VisitEncoder(Index(varToSet, Ident(iName)), data.Type, name+"Inner")
 	if err != nil {
