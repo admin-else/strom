@@ -254,7 +254,7 @@ func SwitchDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 		if err != nil {
 			return
 		}
-		tName := name + "Tmp"
+		tName := name + CamelCase(fName) + "Tmp"
 		s1 := VarStmt(tName, tType)
 		s3 := Assign121(varToSet, Ident(tName))
 		var caseDecodeValueStmts []ast.Stmt
