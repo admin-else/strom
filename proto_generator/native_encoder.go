@@ -320,6 +320,11 @@ func VarIntEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	return
 }
 
+func VarLongEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	s = Stmts(Assign121(Ident("err"), Call(Selector("proto_base", "EncodeVarLong"), Ident("w"), varToSet)), IfErrNil())
+	return
+}
+
 func (g *Generator) RegisterEncoderNatives() {
 	g.EncoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerEncoder,
@@ -333,6 +338,7 @@ func (g *Generator) RegisterEncoderNatives() {
 
 		"void":            DefaultEncoder,
 		"varint":          VarIntEncoder,
+		"varlong":         VarLongEncoder,
 		"anonymousNbt":    DefaultEncoder,
 		"anonOptionalNbt": DefaultEncoder, // I have no idea what the difference is between these two
 		"UUID":            UUIDEncoder,

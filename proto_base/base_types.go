@@ -144,7 +144,7 @@ func EncodeVarInt(w io.Writer, v int32) (err error) {
 		if uv != 0 {
 			b |= 0x80
 		}
-		err := binary.Write(w, binary.BigEndian, b)
+		err = binary.Write(w, binary.BigEndian, b)
 		if err != nil {
 			return err
 		}
@@ -163,6 +163,41 @@ func DecodeVarInt(r io.Reader) (ret int32, err error) {
 			return
 		}
 		ret |= int32(uint32(b&0x7F) << (7 * uint32(i)))
+		if b&0x80 == 0 {
+			return
+		}
+	}
+	err = errors.New("VarInt too long")
+	return
+}
+
+func EncodeVarLong(w io.Writer, v int64) (err error) {
+	uv := uint64(v)
+	for {
+		b := uint8(uv & 0x7F)
+		uv >>= 7
+		if uv != 0 {
+			b |= 0x80
+		}
+		err = binary.Write(w, binary.BigEndian, b)
+		if err != nil {
+			return err
+		}
+		if uv == 0 {
+			break
+		}
+	}
+	return nil
+}
+
+func DecodeVarLong(r io.Reader) (ret int64, err error) {
+	for i := range 10 { // ceil(64/7)
+		var b uint8
+		err = binary.Read(r, binary.BigEndian, &b)
+		if err != nil {
+			return
+		}
+		ret |= int64(uint64(b&0x7F) << (7 * uint64(i)))
 		if b&0x80 == 0 {
 			return
 		}

@@ -301,7 +301,7 @@ func Generate(version string, w io.Writer) (err error) {
 	g := &Generator{Protocol: protocol}
 
 	// These have annoying edge cases that would require me to implement a whole new compareTo parser
-	g.Settings.ReplaceWithTodoNames = []string{"packet_scoreboard_score", "packet_advancements"}
+	g.Settings.ReplaceWithTodoNames = []string{}
 
 	g.File = NewFile("v" + strings.ReplaceAll(version, ".", "_"))
 	AppendDecl(g.File, Import("encoding/binary", "io", "github.com/admin-else/strom/proto_base", "github.com/admin-else/strom/nbt", "github.com/google/uuid"))

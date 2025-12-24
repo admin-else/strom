@@ -158,6 +158,7 @@ func (g *Generator) RegisterNatives() {
 		"container":                VisitContainerType,
 		"buffer":                   VisitBufferType,
 		"varint":                   MakeIdentVisitor("int32"),
+		"varlong":                  MakeIdentVisitor("int64"),
 		"array":                    VisitArrayTypeVisitorType,
 		"mapper":                   MakeIdentVisitor("string"),
 		"native":                   VisitDontGenerateType,

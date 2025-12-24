@@ -1,3 +1,4 @@
 .devres/
 .idea/
 .failed_packets/
+proto_generated/*

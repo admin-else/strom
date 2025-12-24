@@ -507,6 +507,11 @@ func VarIntDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	return
 }
 
+func VarLongDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	s = Stmts(Assign(Exprs(varToSet, Ident("err")), Exprs(Call(Selector("proto_base", "DecodeVarLong"), Ident("r")))), IfErrNil())
+	return
+}
+
 func (g *Generator) RegisterDecoderNatives() {
 	g.DecoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerDecoder,
@@ -521,6 +526,7 @@ func (g *Generator) RegisterDecoderNatives() {
 
 		"void":            DefaultDecoder,
 		"varint":          VarIntDecoder,
+		"varlong":         VarLongDecoder,
 		"anonymousNbt":    DefaultDecoder,
 		"anonOptionalNbt": DefaultDecoder, // I have no idea what the difference is between these two
 		"UUID":            UUIDDecoder,
