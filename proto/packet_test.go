@@ -25,7 +25,7 @@ func FuzzPlayPackets(f *testing.F) {
 		b1 := bytes.NewBuffer(b)
 		p, err := p.Decode(b1)
 		if err != nil {
-			t.Skipf("failed to decode %q because %v (partial %v)", b, err, p)
+			t.Skipf("failed to decode %q because \"%v\" (partial %v)", b, err, p)
 			return
 		}
 		if b1.Len() != 0 {

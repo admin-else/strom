@@ -545,7 +545,7 @@ func (g *Generator) RegisterDecoderNatives() {
 		"bool": SimpleTypeDecoder,
 
 		"registryEntryHolder":      RegistryEntryHolderDecoder,
-		"registryEntryHolderSet":   RegistryEntryHolderSetDecoder,
+		"registryEntryHolderSet":   ToDoDecoder, // RegistryEntryHolderSetDecoder
 		"entityMetadataLoop":       ToDoDecoder,
 		"topBitSetTerminatedArray": ToDoDecoder,
 		"todo":                     ToDoDecoder,
