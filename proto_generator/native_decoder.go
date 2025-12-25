@@ -477,7 +477,6 @@ func RegistryEntryHolderDecoder(g *Generator, varToSet ast.Expr, dataRaw any, na
 	if err != nil {
 		return
 	}
-	idPath := If(NotEquals(Ident(idName), NumLit(0)), NewBlockEllipsis(Assign121(varToSet, Ident(idName)), Return()))
 
 	otherwiseType, err := g.VisitType(data.Otherwise.Type)
 	if err != nil {
@@ -485,20 +484,20 @@ func RegistryEntryHolderDecoder(g *Generator, varToSet ast.Expr, dataRaw any, na
 	}
 	resName := name + "Result"
 	resNameIdent := Ident(resName)
-	resultVar := VarStmt(resName, otherwiseType)
+	var otherwisePath []ast.Stmt
+	otherwisePath = append(otherwisePath, VarStmt(resName, otherwiseType))
 
 	otherwiseDecodeStatements, err := g.VisitDecoder(resNameIdent, data.Otherwise.Type, name+"Otherwise")
 	if err != nil {
 		return
 	}
-	resultAssign := Assign121(varToSet, resNameIdent)
+	otherwisePath = append(otherwisePath, otherwiseDecodeStatements...)
+	otherwisePath = append(otherwisePath, Assign121(varToSet, resNameIdent))
+	idPath := IfElse(NotEquals(Ident(idName), NumLit(0)), NewBlockEllipsis(Assign121(varToSet, Ident(idName))), NewBlock(otherwisePath))
 
 	s = append(s, IdVar)
 	s = append(s, idDecodeStatements...)
 	s = append(s, idPath)
-	s = append(s, resultVar)
-	s = append(s, otherwiseDecodeStatements...)
-	s = append(s, resultAssign)
 	return
 }
 

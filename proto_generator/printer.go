@@ -196,6 +196,14 @@ func If(cond ast.Expr, body *ast.BlockStmt) *ast.IfStmt {
 	}
 }
 
+func IfElse(cond ast.Expr, body *ast.BlockStmt, els *ast.BlockStmt) *ast.IfStmt {
+	return &ast.IfStmt{
+		Cond: cond,
+		Body: body,
+		Else: els,
+	}
+}
+
 func NotEquals(lhs, rhs ast.Expr) *ast.BinaryExpr {
 	return &ast.BinaryExpr{
 		X:  lhs,
