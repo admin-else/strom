@@ -297,7 +297,12 @@ func RegistryEntryHolderEncoder(g *Generator, varToSet ast.Expr, dataRaw any, na
 		return
 	}
 	knownTypeName := name + "KnownType"
+	encode0statements, err := g.VisitEncoder(NumLit(0), "varint", name+"Zero")
+	if err != nil {
+		return
+	}
 	otherwiseEncodeStatements, err := g.VisitEncoder(Ident(knownTypeName), data.Otherwise.Type, name+"Otherwise")
+	otherwiseEncodeStatements = append(encode0statements, otherwiseEncodeStatements...)
 	if err != nil {
 		return
 	}
