@@ -1,8 +1,9 @@
 package v1_21_8
 
 import (
-	"github.com/admin-else/strom/proto_base"
 	"io"
+
+	"github.com/admin-else/strom/proto_base"
 )
 
 func HandshakingToServerPacketIdentifierToType(s string) (t any) {

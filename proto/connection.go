@@ -129,21 +129,25 @@ func (c *Conn) Receive() (packet any, err error) {
 	return
 }
 
-func (c *Conn) Start(inst event.HandlerInst) (err error) {
+func (c *Conn) StartOne(inst any) (err error) {
+	return c.Start([]any{inst})
+}
+
+func (c *Conn) Start(insts []any) (err error) {
 	_ = *c // exit early on nil connection
-	handlers := event.FindHandlers(inst)
-	err = event.Fire(inst, event.OnStart{}, handlers)
+	handlers := event.FindHandlers(insts)
+	err = event.Fire(event.OnStart{}, handlers)
 	for err == nil {
 		var packet any
 		packet, err = c.Receive()
 		if err != nil {
 			return
 		}
-		err = event.Fire(inst, packet, handlers)
+		err = event.Fire(packet, handlers)
 		if err != nil {
 			break
 		}
-		err = event.Fire(inst, event.OnLoopCycle{}, handlers)
+		err = event.Fire(event.OnLoopCycle{}, handlers)
 	}
 	if errors.Is(err, event.HandlerDone) {
 		err = nil
