@@ -75,29 +75,20 @@ type PacketIdentifier struct {
 
 type (
 	ToDo       struct{}
-	Void       struct{}
 	RestBuffer []byte
 )
-
-func (v Void) Encode(_ io.Writer) (err error) {
-	return
-}
-
-func (v Void) Decode(_ io.Reader) (ret Void, err error) {
-	return
-}
 
 var ToDoError = errors.New("to do")
 var BadTypeError = errors.New("bad type")
 
-func (r RestBuffer) Encode(w io.Writer) (err error) {
-	_, err = w.Write(r)
+func (r *RestBuffer) Encode(w io.Writer) (err error) {
+	_, err = w.Write(*r)
 	return
 }
 
-func (RestBuffer) Decode(r io.Reader) (ret RestBuffer, err error) {
+func (ret *RestBuffer) Decode(r io.Reader) (err error) {
 	b, err := io.ReadAll(r)
-	ret = b
+	*ret = b
 	return
 }
 
@@ -215,7 +206,7 @@ func ErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
 	return
 }
 
-type EncodeDecodeAble[Self any] interface {
+type EncodeDecodeAble interface {
 	Encode(w io.Writer) (err error)
-	Decode(r io.Reader) (ret Self, err error)
+	Decode(r io.Reader) (err error)
 }

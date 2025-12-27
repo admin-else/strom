@@ -34,7 +34,7 @@ type Anon struct {
 	Value any
 }
 
-func (s Anon) Decode(r io.Reader) (ret Anon, err error) {
+func (s *Anon) Decode(r io.Reader) (err error) {
 	id := int8(0)
 	err = binary.Read(r, Order, &id)
 	if err != nil {
@@ -44,11 +44,10 @@ func (s Anon) Decode(r io.Reader) (ret Anon, err error) {
 	if err != nil {
 		return
 	}
-	ret = s
 	return
 }
 
-func (s Anon) Encode(w io.Writer) (err error) {
+func (s *Anon) Encode(w io.Writer) (err error) {
 	id, err := getId(s.Value)
 	if err != nil {
 		return

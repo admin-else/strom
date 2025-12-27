@@ -1,9 +1,8 @@
 package v1_21_8
 
 import (
-	"io"
-
 	"github.com/admin-else/strom/proto_base"
+	"io"
 )
 
 func HandshakingToServerPacketIdentifierToType(s string) (t any) {
@@ -1205,7 +1204,7 @@ func DecodePacket(d proto_base.Direction, s proto_base.State, r io.Reader) (para
 			params = packet.Params
 		case proto_base.Play:
 			var packet PlayToServerPacket
-			packet, err = PlayToServerPacket{}.Decode(r)
+			packet, err = packet.Decode(r)
 			if err != nil {
 				return
 			}

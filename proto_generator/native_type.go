@@ -153,6 +153,11 @@ func MakeSelectorVisitor(x, sel string) func(g *Generator, dataRaw any) (e ast.E
 	}
 }
 
+func VoidType(_ *Generator, _ any) (e ast.Expr, err error) {
+	e = NewStruct()
+	return
+}
+
 func (g *Generator) RegisterNatives() {
 	g.Natives = map[string]ExprGeneratorFunc{
 		"container":                VisitContainerType,
@@ -164,7 +169,7 @@ func (g *Generator) RegisterNatives() {
 		"native":                   VisitDontGenerateType,
 		"anonymousNbt":             MakeSelectorVisitor("nbt", "Anon"),
 		"anonOptionalNbt":          MakeSelectorVisitor("nbt", "Anon"), // I have no idea what the difference is between these two
-		"void":                     MakeSelectorVisitor("proto_base", "Void"),
+		"void":                     VoidType,
 		"bool":                     MakeIdentVisitor("bool"),
 		"u8":                       MakeIdentVisitor("uint8"),
 		"u16":                      MakeIdentVisitor("uint16"),

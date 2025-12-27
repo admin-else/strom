@@ -12,7 +12,7 @@ import (
 func DefaultDecoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.Stmt, err error) {
 	s = Stmts(
 		Assign(
-			Exprs(varToSet, Ident("err")),
+			Exprs(Ident("err")),
 			Exprs(Call(SelectorExprAndStr(varToSet, "Decode"), Ident("r"))),
 		),
 		IfErrNil(),
@@ -511,6 +511,10 @@ func VarLongDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (
 	return
 }
 
+func VoidDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	return
+}
+
 func (g *Generator) RegisterDecoderNatives() {
 	g.DecoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerDecoder,
@@ -523,7 +527,7 @@ func (g *Generator) RegisterDecoderNatives() {
 		"bitfield":  BitFieldDecoder,
 		"string":    StringDecoder,
 
-		"void":            DefaultDecoder,
+		"void":            VoidDecoder,
 		"varint":          VarIntDecoder,
 		"varlong":         VarLongDecoder,
 		"anonymousNbt":    DefaultDecoder,

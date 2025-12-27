@@ -11,6 +11,7 @@ import (
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
+	"github.com/admin-else/strom/proto_generated"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/server"
 	"github.com/admin-else/strom/server/server_modules"
@@ -21,8 +22,8 @@ type ProxyClient struct {
 	Server *Proxy
 }
 
-func (p *ProxyClient) Default(event any) (err error) {
-	err = p.Server.Send(event)
+func (p *ProxyClient) OnDefault(event event.Default) (err error) {
+	err = p.Server.Send(event.Val)
 	return
 }
 
@@ -34,8 +35,8 @@ func (p *ProxyClient) OnStart(_ event.OnStart) (err error) {
 	return
 }
 
-func (p *ProxyClient) OnUncodeable(packet proto.UnCodablePacket) (err error) {
-	err = p.Default(packet)
+func (p *ProxyClient) OnUnCodeAble(packet proto.UnCodablePacket) (err error) {
+	err = p.OnDefault(event.Default{Val: packet})
 	if err != nil {
 		return
 	}
@@ -71,7 +72,7 @@ func (p *Proxy) OnFinishConfiguration(packet v1_21_8.ConfigurationToServerPacket
 	return
 }
 
-func (p *Proxy) OnUncodeable(packet proto.UnCodablePacket) (err error) {
+func (p *Proxy) OnUnCodeAble(packet proto.UnCodablePacket) (err error) {
 	err = p.Default(packet)
 	if err != nil {
 		return
@@ -117,7 +118,7 @@ func SaveUnCodeAbleAsTest(d proto_base.Direction, packet proto.UnCodablePacket) 
 
 var StatusResponse = server_modules.StatusResponse{Description: struct {
 	Text string `json:"text"`
-}{Text: "Uncodeable packet hunter proxy"}, Version: struct {
+}{Text: "Un-code-able packet hunter proxy"}, Version: struct {
 	Name     string `json:"name"`
 	Protocol int    `json:"protocol"`
 }{Name: "STROM", Protocol: 772}}
@@ -143,10 +144,10 @@ func main() {
 		defer pc.Close()
 		defer p.Close()
 		go func() {
-			errChan <- pc.Start(pc)
+			errChan <- pc.StartOne(pc)
 		}()
 		go func() {
-			errChan <- p.Start(p)
+			errChan <- p.StartOne(p)
 		}()
 		err = <-errChan
 		return

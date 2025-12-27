@@ -192,7 +192,11 @@ func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 		if err != nil {
 			return
 		}
-		s1 := Define(Exprs(Ident(name), Ident("ok")), Exprs(TypeAssert(varToSet, tType)))
+		varName := name
+		if fType == "void" {
+			varName = "_"
+		}
+		s1 := Define(Exprs(Ident(varName), Ident("ok")), Exprs(TypeAssert(varToSet, tType)))
 		s2 := If(Not(Ident("ok")), NewBlockEllipsis(Assign121(Ident("err"), Selector("proto_base", "BadTypeError")), Return()))
 		var caseDecodeValueStmts []ast.Stmt
 		caseDecodeValueStmts, err = g.VisitEncoder(Ident(name), fType, name)
@@ -333,6 +337,10 @@ func VarLongEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (
 	return
 }
 
+func VoidEncoder(_ *Generator, _ ast.Expr, _ any, _ string) (s []ast.Stmt, err error) {
+	return
+}
+
 func (g *Generator) RegisterEncoderNatives() {
 	g.EncoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerEncoder,
@@ -344,7 +352,7 @@ func (g *Generator) RegisterEncoderNatives() {
 		"buffer":    BufferEncoder,
 		"bitfield":  BitFieldEncoder,
 
-		"void":            DefaultEncoder,
+		"void":            VoidEncoder,
 		"varint":          VarIntEncoder,
 		"varlong":         VarLongEncoder,
 		"anonymousNbt":    DefaultEncoder,

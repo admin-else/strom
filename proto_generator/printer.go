@@ -269,13 +269,13 @@ func NewFunc(name string, arguments []NameAndType, returns []NameAndType) *ast.F
 	}
 }
 
-func NewFuncWithReceiver(name, receiverName, receiver string, arguments []NameAndType, returns []NameAndType) *ast.FuncDecl {
+func NewFuncWithReceiver(name, receiverName string, receiver ast.Expr, arguments []NameAndType, returns []NameAndType) *ast.FuncDecl {
 	f := NewFunc(name, arguments, returns)
 	f.Recv = &ast.FieldList{
 		List: []*ast.Field{
 			{
 				Names: []*ast.Ident{{Name: receiverName}},
-				Type:  &ast.Ident{Name: receiver},
+				Type:  receiver,
 			},
 		},
 	}
