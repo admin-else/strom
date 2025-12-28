@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"reflect"
 )
 
 type Direction int
@@ -209,4 +210,13 @@ func ErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
 type EncodeDecodeAble interface {
 	Encode(w io.Writer) (err error)
 	Decode(r io.Reader) (err error)
+}
+
+type PacketInfo struct {
+	Type            reflect.Type
+	Name            string
+	Direction       Direction
+	State           State
+	PacketId        int
+	ProtocolVersion int
 }

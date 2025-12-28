@@ -197,7 +197,7 @@ func FixPointerReceivers(e ast.Expr) (td ast.Expr, ret ast.Expr) {
 	return
 }
 
-func (g *Generator) GenerateTypes(prefix string, types Types) error {
+func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 	g.CurrentlyGeneratingTypes = types
 	g.CurrentlyGeneratingTypesPrefix = prefix
 	for _, k := range OrderedKeys(types.Types) {
@@ -207,13 +207,13 @@ func (g *Generator) GenerateTypes(prefix string, types Types) error {
 		}
 
 		g.Depth = 0
-		e, err := g.VisitType(v)
-		if errors.Is(err, ToDoError) {
+		e, err2 := g.VisitType(v)
+		if errors.Is(err2, ToDoError) {
 			e = Selector("proto_base", "ToDo")
-			err = nil
+			err2 = nil
 		}
-		if err != nil {
-			return err
+		if err2 != nil {
+			return err2
 		}
 		if e == nil { // This is for types we implement ourselves
 			continue
@@ -229,11 +229,11 @@ func (g *Generator) GenerateTypes(prefix string, types Types) error {
 		rets := []NameAndType{{"err", Ident("error")}}
 		decodeFunction := NewFuncWithReceiver("Decode", "ret", Pointer(Ident(tName)), args, rets)
 		g.Depth = 0
-		s, err := g.VisitDecoder(retExpr, v, tName)
-		if err != nil {
+		s, err2 := g.VisitDecoder(retExpr, v, tName)
+		if err2 != nil {
 			s = ToDoStmts
-			if !errors.Is(err, ToDoError) {
-				fmt.Println("failed to make decoder for", k, err)
+			if !errors.Is(err2, ToDoError) {
+				fmt.Println("failed to make decoder for", k, err2)
 			}
 		}
 		decodeFunction.Body = NewBlock(append(s, Return()))
@@ -243,18 +243,18 @@ func (g *Generator) GenerateTypes(prefix string, types Types) error {
 		rets = []NameAndType{{"err", Ident("error")}}
 		encodeFunction := NewFuncWithReceiver("Encode", "ret", Pointer(Ident(tName)), args, rets)
 		g.Depth = 0
-		s, err = g.VisitEncoder(retExpr, v, tName)
-		if err != nil {
+		s, err2 = g.VisitEncoder(retExpr, v, tName)
+		if err2 != nil {
 			s = ToDoStmts
-			if !errors.Is(err, ToDoError) {
-				fmt.Println("failed to make encoder for", k, err)
+			if !errors.Is(err2, ToDoError) {
+				fmt.Println("failed to make encoder for", k, err2)
 			}
 		}
 		encodeFunction.Body = NewBlock(append(s, Return()))
 		AppendDecl(g.File, encodeFunction)
 
 	}
-	return nil
+	return
 }
 
 func (g *Generator) GenerateState(prefix string, state State) (err error) {
@@ -331,12 +331,6 @@ func generateVersion(v string) (err error) {
 	if err != nil {
 		return
 	}
-	helperF, err := os.Create("proto_generated/v" + vUnderscore + "/helpers.go")
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	err = GenerateHelpers(v, helperF)
 	return
 }
 
@@ -349,12 +343,6 @@ func GenerateVersions(versions []string) (err error) {
 	if err != nil {
 		return
 	}
-	f, err := os.Create("proto_generated/version_switcher.go")
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	err = GenerateVersionSwitcher(versions, f)
 	for _, version := range versions {
 		fmt.Println("generating", version)
 		err = generateVersion(version)
@@ -362,7 +350,7 @@ func GenerateVersions(versions []string) (err error) {
 			return
 		}
 	}
-	return
+	return GeneratePacketInfoFile(versions)
 }
 
 func main() {

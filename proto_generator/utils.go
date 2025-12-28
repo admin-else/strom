@@ -9,7 +9,8 @@ import (
 
 var boundaries = []rune{' ', '_', '-', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}'}
 
-func CamelCase(s string) (ret string) {
+func CamelCase(s string) string {
+	ret := ""
 	atWordBoundary := true
 	for _, c := range s {
 		if slices.Contains(boundaries, c) {
@@ -22,7 +23,7 @@ func CamelCase(s string) (ret string) {
 		atWordBoundary = false
 		ret += string(c)
 	}
-	return
+	return ret
 }
 
 func OrderedKeys[Map map[K]V, K cmp.Ordered, V any](m Map) []K {
@@ -32,12 +33,20 @@ func OrderedKeys[Map map[K]V, K cmp.Ordered, V any](m Map) []K {
 	return keys
 }
 
-func ReverseMap[M map[K]V, K cmp.Ordered, V cmp.Ordered](m M) (ret map[V]K) {
-	ret = map[V]K{}
+func AssertAndConvertMapValues[T any, M map[K]any, K cmp.Ordered](m M) map[K]T {
+	ret := map[K]T{}
+	for k, v := range m {
+		ret[k] = v.(T)
+	}
+	return ret
+}
+
+func ReverseMap[M map[K]V, K cmp.Ordered, V cmp.Ordered](m M) map[V]K {
+	ret := map[V]K{}
 	for k, v := range m {
 		ret[v] = k
 	}
-	return
+	return ret
 }
 
 func must(err error) {
@@ -46,9 +55,10 @@ func must(err error) {
 	}
 }
 
-func PopFront[T any](s []T) (front T, rest []T, ok bool) {
+func PopFront[T any](s []T) (T, []T, bool) {
 	if len(s) == 0 {
-		return front, s, false
+		var zero T
+		return zero, s, false
 	}
 	return s[0], s[1:], true
 }

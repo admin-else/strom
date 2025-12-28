@@ -8,13 +8,12 @@ import (
 	"io"
 )
 
-func NewStruct() *ast.StructType {
+func NewStruct() (s *ast.StructType) {
 	return &ast.StructType{
 		Fields: &ast.FieldList{
 			List: []*ast.Field{},
 		},
 	}
-
 }
 
 func AddFieldToStruct(s *ast.StructType, fieldName string, t ast.Expr) {
@@ -48,12 +47,24 @@ func Import(path ...string) ast.Decl {
 	}
 }
 
-func Ident(name string) *ast.Ident {
+func Ident(name string) (id *ast.Ident) {
 	return ast.NewIdent(name)
 }
 
 func VarStmt(name string, t ast.Expr) *ast.DeclStmt {
 	return &ast.DeclStmt{Decl: Var(name, t)}
+}
+
+func VarValues(name string, v ...ast.Expr) ast.Decl {
+	return &ast.GenDecl{
+		Tok: token.VAR,
+		Specs: []ast.Spec{
+			&ast.ValueSpec{
+				Names:  []*ast.Ident{Ident(name)},
+				Values: v,
+			},
+		},
+	}
 }
 
 func Var(name string, t ast.Expr) ast.Decl {
@@ -72,7 +83,7 @@ func Var(name string, t ast.Expr) ast.Decl {
 	}
 }
 
-func Slice(elementType ast.Expr) ast.Expr {
+func Slice(elementType ast.Expr) (e ast.Expr) {
 	return &ast.ArrayType{
 		Len: nil, // nil Length means it's a slice, not an array
 		Elt: elementType,
@@ -116,34 +127,34 @@ func TypeDecl(name string, t ast.Expr) ast.Decl {
 	}
 }
 
-func Selector(x, sel string) ast.Expr {
+func Selector(x, sel string) (e ast.Expr) {
 	return &ast.SelectorExpr{
 		X:   Ident(x),
 		Sel: Ident(sel),
 	}
 }
 
-func SelectorExprAndStr(x ast.Expr, sel string) ast.Expr {
+func SelectorExprAndStr(x ast.Expr, sel string) (e ast.Expr) {
 	return &ast.SelectorExpr{
 		X:   x,
 		Sel: Ident(sel),
 	}
 }
 
-func Pointer(elementType ast.Expr) ast.Expr {
+func Pointer(elementType ast.Expr) (e ast.Expr) {
 	return &ast.StarExpr{
 		X: elementType,
 	}
 }
 
-func Call(fn ast.Expr, args ...ast.Expr) *ast.CallExpr {
+func Call(fn ast.Expr, args ...ast.Expr) (e *ast.CallExpr) {
 	return &ast.CallExpr{
 		Fun:  fn,
 		Args: args,
 	}
 }
 
-func Assign121(lhs, rhs ast.Expr) *ast.AssignStmt {
+func Assign121(lhs, rhs ast.Expr) (s *ast.AssignStmt) {
 	return &ast.AssignStmt{
 		Lhs: []ast.Expr{lhs},
 		Tok: token.ASSIGN,
@@ -151,7 +162,7 @@ func Assign121(lhs, rhs ast.Expr) *ast.AssignStmt {
 	}
 }
 
-func Assign(lhs, rhs []ast.Expr) *ast.AssignStmt {
+func Assign(lhs, rhs []ast.Expr) (s *ast.AssignStmt) {
 	return &ast.AssignStmt{
 		Lhs: lhs,
 		Tok: token.ASSIGN,
@@ -159,7 +170,7 @@ func Assign(lhs, rhs []ast.Expr) *ast.AssignStmt {
 	}
 }
 
-func Define(lhs, rhs []ast.Expr) *ast.AssignStmt {
+func Define(lhs, rhs []ast.Expr) (s *ast.AssignStmt) {
 	return &ast.AssignStmt{
 		Lhs: lhs,
 		Tok: token.DEFINE,
@@ -167,7 +178,7 @@ func Define(lhs, rhs []ast.Expr) *ast.AssignStmt {
 	}
 }
 
-func Define121(lhs, rhs ast.Expr) *ast.AssignStmt {
+func Define121(lhs, rhs ast.Expr) (s *ast.AssignStmt) {
 	return &ast.AssignStmt{
 		Lhs: []ast.Expr{lhs},
 		Tok: token.DEFINE,
