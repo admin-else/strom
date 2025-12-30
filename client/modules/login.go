@@ -26,10 +26,10 @@ type LoginClient struct {
 	*proto.Conn
 	Account *api.Account
 
-	GivenAccount v1_21_8.LoginToClientPacketSuccess
+	GivenAccount *v1_21_8.LoginToClientPacketSuccess
 }
 
-func (s *LoginClient) Default(event any) (err error) {
+func (s *LoginClient) Default(event event.Default) (err error) {
 	err = fmt.Errorf("unexpected event: %#v", event)
 	return
 }
@@ -47,12 +47,13 @@ func (s *LoginClient) OnStart(_ event.OnStart) (err error) {
 	if err != nil {
 		return
 	}
+	s.ProtocolVersion = int32(versionData.Version)
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		return
 	}
-	err = s.Send(v1_21_8.HandshakingToServerPacketSetProtocol{
-		ProtocolVersion: int32(versionData.Version),
+	err = s.Send(&v1_21_8.HandshakingToServerPacketSetProtocol{
+		ProtocolVersion: s.ProtocolVersion,
 		ServerHost:      host,
 		ServerPort:      uint16(port),
 		NextState:       int32(proto_base.Login),
@@ -61,11 +62,11 @@ func (s *LoginClient) OnStart(_ event.OnStart) (err error) {
 		return
 	}
 	s.State = proto_base.Login
-	err = s.Send(v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Name, PlayerUUID: s.Account.Uuid})
+	err = s.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Name, PlayerUUID: s.Account.Uuid})
 	return
 }
 
-func (s *LoginClient) OnCompress(compress v1_21_8.LoginToClientPacketCompress) (err error) {
+func (s *LoginClient) OnCompress(compress *v1_21_8.LoginToClientPacketCompress) (err error) {
 	s.CompressionThreshold = int32(compress.Threshold)
 	return
 }
@@ -104,7 +105,7 @@ func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegi
 	if err != nil {
 		return
 	}
-	err = s.Send(v1_21_8.LoginToServerPacketEncryptionBegin{SharedSecret: sharedSecretEnc, VerifyToken: verifyTokenEnc})
+	err = s.Send(&v1_21_8.LoginToServerPacketEncryptionBegin{SharedSecret: sharedSecretEnc, VerifyToken: verifyTokenEnc})
 	if err != nil {
 		return
 	}
@@ -126,9 +127,9 @@ func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegi
 
 }
 
-func (s *LoginClient) OnSuccess(success v1_21_8.LoginToClientPacketSuccess) (err error) {
+func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (err error) {
 	s.GivenAccount = success
-	err = s.Send(v1_21_8.LoginToServerPacketLoginAcknowledged{})
+	err = s.Send(&v1_21_8.LoginToServerPacketLoginAcknowledged{})
 	if err != nil {
 		return
 	}
@@ -138,7 +139,7 @@ func (s *LoginClient) OnSuccess(success v1_21_8.LoginToClientPacketSuccess) (err
 }
 
 func Login(c *proto.Conn, account *api.Account) (err error) {
-	err = c.Start(&LoginClient{
+	err = c.StartOne(&LoginClient{
 		Conn:    c,
 		Account: account,
 	})
@@ -153,7 +154,7 @@ func ConnectAndLogin(connectTo string, account *api.Account) (c *proto.Conn, err
 	if err != nil {
 		return
 	}
-	err = c.Start(&LoginClient{
+	err = c.StartOne(&LoginClient{
 		Conn:    c,
 		Account: account,
 	})

@@ -79,14 +79,13 @@ func CollectPacketInfo(versions []string) (packetInfos []PacketInfo, err error) 
 }
 
 func GeneratePacketInfoFile(versions []string) (err error) {
-	var packetInfos []PacketInfo
-	packetInfos, err = CollectPacketInfo(versions)
+	packetInfos, err := CollectPacketInfo(versions)
 	if err != nil {
 		return
 	}
 
 	f := NewFile("proto_generated")
-	imports := []string{"reflect", "github.com/admin-else/strom/proto_base"}
+	imports := []string{"github.com/admin-else/strom/proto_base"}
 	for _, v := range versions {
 		vUnderscore := strings.ReplaceAll(v, ".", "_")
 		imports = append(imports, "github.com/admin-else/strom/proto_generated/v"+vUnderscore)
@@ -109,8 +108,8 @@ func GeneratePacketInfoFile(versions []string) (err error) {
 		packetId, _ := strconv.ParseInt(p.PacketId, 0, 32)
 		protocolVersion, _ := strconv.Atoi(p.ProtocolVersion)
 
-		packetInfoExprs = append(packetInfoExprs, CompLit(Selector("proto_base", "PacketInfo"), []ast.Expr{
-			KeyValueExpr(Ident("Type"), Call(Selector("reflect", "TypeOf"), CompLit(typeExpr, nil))),
+		packetInfoExprs = append(packetInfoExprs, CompLit(nil, []ast.Expr{
+			KeyValueExpr(Ident("Type"), AddrOf(CompLit(typeExpr, nil))),
 			KeyValueExpr(Ident("Name"), StrLit(p.Name)),
 			KeyValueExpr(Ident("Direction"), Selector("proto_base", p.Direction)),
 			KeyValueExpr(Ident("State"), Selector("proto_base", p.State)),

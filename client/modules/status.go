@@ -33,7 +33,7 @@ func (s *StatusClient) OnStart(_ event.OnStart) (err error) {
 	if err != nil {
 		return
 	}
-	err = s.Send(v1_21_8.HandshakingToServerPacketSetProtocol{
+	err = s.Send(&v1_21_8.HandshakingToServerPacketSetProtocol{
 		ProtocolVersion: int32(versionData.Version),
 		ServerHost:      parts[0],
 		ServerPort:      uint16(port),
@@ -43,7 +43,7 @@ func (s *StatusClient) OnStart(_ event.OnStart) (err error) {
 		return
 	}
 	s.State = proto_base.Status
-	err = s.Send(v1_21_8.StatusToServerPacketPingStart{})
+	err = s.Send(&v1_21_8.StatusToServerPacketPingStart{})
 	return
 }
 

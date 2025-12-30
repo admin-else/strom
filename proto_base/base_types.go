@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"reflect"
 )
 
 type Direction int
@@ -213,10 +212,10 @@ type EncodeDecodeAble interface {
 }
 
 type PacketInfo struct {
-	Type            reflect.Type
+	Type            EncodeDecodeAble
 	Name            string
 	Direction       Direction
 	State           State
-	PacketId        int
-	ProtocolVersion int
+	PacketId        int32
+	ProtocolVersion int32
 }

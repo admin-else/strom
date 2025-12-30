@@ -8541,6 +8541,11 @@
             }
           ]
         ],
+        "packet_bundle_delimiter": [
+          "container",
+          [
+          ]
+        ],
         "packet": [
           "container",
           [
@@ -8696,7 +8701,7 @@
                 {
                   "compareTo": "name",
                   "fields": {
-                    "bundle_delimiter": "void",
+                    "bundle_delimiter": "packet_bundle_delimiter",
                     "spawn_entity": "packet_spawn_entity",
                     "animation": "packet_animation",
                     "statistics": "packet_statistics",

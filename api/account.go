@@ -40,7 +40,7 @@ func (a *Account) doMcApiRequest(method string, url string, from any, to any) (e
 	r.Header.Set("Content-Type", "application/json")
 	r.Header.Set("Accept", "application/json")
 	r.Header.Set("x-xbl-contract-version", "1")
-	r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", a.Ygg))
+	r.Header.Set("Authorization", "Bearer "+a.Ygg)
 
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {

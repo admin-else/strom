@@ -19,12 +19,12 @@ func (c *ConfigIgnorer) Default(event any) (err error) {
 	return
 }
 
-func (c *ConfigIgnorer) OnKnownPacks(packet v1_21_8.PacketCommonSelectKnownPacks) (err error) {
+func (c *ConfigIgnorer) OnKnownPacks(packet *v1_21_8.PacketCommonSelectKnownPacks) (err error) {
 	return c.Send(packet)
 }
 
 func (c *ConfigIgnorer) OnFinish(_ v1_21_8.ConfigurationToClientPacketFinishConfiguration) (err error) {
-	err = c.Send(v1_21_8.ConfigurationToServerPacketFinishConfiguration{})
+	err = c.Send(&v1_21_8.ConfigurationToServerPacketFinishConfiguration{})
 	if err != nil {
 		return
 	}
@@ -33,18 +33,18 @@ func (c *ConfigIgnorer) OnFinish(_ v1_21_8.ConfigurationToClientPacketFinishConf
 	return
 }
 
-func (c *ConfigIgnorer) OnPing(packet v1_21_8.ConfigurationToClientPacketPing) (err error) {
-	err = c.Send(v1_21_8.ConfigurationToServerPacketPong(packet))
+func (c *ConfigIgnorer) OnPing(packet *v1_21_8.ConfigurationToClientPacketPing) (err error) {
+	err = c.Send(&v1_21_8.ConfigurationToServerPacketPong{Id: packet.Id})
 	return
 }
 
-func (c *ConfigIgnorer) OnKeepAlive(packet v1_21_8.ConfigurationToClientPacketKeepAlive) (err error) {
-	err = c.Send(v1_21_8.ConfigurationToServerPacketKeepAlive(packet))
+func (c *ConfigIgnorer) OnKeepAlive(packet *v1_21_8.ConfigurationToClientPacketKeepAlive) (err error) {
+	err = c.Send(&v1_21_8.ConfigurationToServerPacketKeepAlive{KeepAliveId: packet.KeepAliveId})
 	return
 }
 
 func IgnoreConfig(c *proto.Conn) (err error) {
-	err = c.Start(&ConfigIgnorer{c})
+	err = c.StartOne(&ConfigIgnorer{c})
 	if err != nil {
 		err = errors.Join(err, errors.New("failed to ignore config"))
 	}

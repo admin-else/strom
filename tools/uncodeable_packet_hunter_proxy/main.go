@@ -11,7 +11,6 @@ import (
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
-	"github.com/admin-else/strom/proto_generated"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/server"
 	"github.com/admin-else/strom/server/server_modules"
@@ -23,7 +22,11 @@ type ProxyClient struct {
 }
 
 func (p *ProxyClient) OnDefault(event event.Default) (err error) {
-	err = p.Server.Send(event.Val)
+	packet, isPacket := event.Val.(proto_base.EncodeDecodeAble)
+	if !isPacket {
+		return
+	}
+	err = p.Server.Send(packet)
 	return
 }
 
@@ -49,8 +52,12 @@ type Proxy struct {
 	Client *ProxyClient
 }
 
-func (p *Proxy) Default(event any) (err error) {
-	err = p.Client.Send(event)
+func (p *Proxy) OnDefault(event event.Default) (err error) {
+	packet, isPacket := event.Val.(proto_base.EncodeDecodeAble)
+	if !isPacket {
+		return
+	}
+	err = p.Client.Send(packet)
 	return
 }
 
@@ -62,8 +69,8 @@ func (p *Proxy) OnStart(_ event.OnStart) (err error) {
 	return
 }
 
-func (p *Proxy) OnFinishConfiguration(packet v1_21_8.ConfigurationToServerPacketFinishConfiguration) (err error) {
-	err = p.Default(packet)
+func (p *Proxy) OnFinishConfiguration(packet *v1_21_8.ConfigurationToServerPacketFinishConfiguration) (err error) {
+	err = p.OnDefault(event.Default{Val: packet})
 	if err != nil {
 		return
 	}
@@ -73,7 +80,7 @@ func (p *Proxy) OnFinishConfiguration(packet v1_21_8.ConfigurationToServerPacket
 }
 
 func (p *Proxy) OnUnCodeAble(packet proto.UnCodablePacket) (err error) {
-	err = p.Default(packet)
+	err = p.OnDefault(event.Default{Val: packet})
 	if err != nil {
 		return
 	}

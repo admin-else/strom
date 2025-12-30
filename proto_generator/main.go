@@ -28,10 +28,6 @@ type Protocol struct {
 	Handshaking, Status, Login, Configuration, Play State
 }
 
-type Settings struct {
-	ReplaceWithTodoNames []string
-}
-
 type ContainerStackEntry struct {
 	Data []struct {
 		Name string
@@ -43,7 +39,6 @@ type ContainerStackEntry struct {
 
 type Generator struct {
 	// These persist the entire generate-call
-	Settings         Settings
 	Natives          map[string]ExprGeneratorFunc
 	DecoderNatives   map[string]FunctionGeneratorFunc
 	EncoderNatives   map[string]FunctionGeneratorFunc
@@ -202,10 +197,6 @@ func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 	g.CurrentlyGeneratingTypesPrefix = prefix
 	for _, k := range OrderedKeys(types.Types) {
 		v := types.Types[k]
-		if slices.Contains(g.Settings.ReplaceWithTodoNames, k) {
-			v = "todo"
-		}
-
 		g.Depth = 0
 		e, err2 := g.VisitType(v)
 		if errors.Is(err2, ToDoError) {
@@ -232,9 +223,7 @@ func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 		s, err2 := g.VisitDecoder(retExpr, v, tName)
 		if err2 != nil {
 			s = ToDoStmts
-			if !errors.Is(err2, ToDoError) {
-				fmt.Println("failed to make decoder for", k, err2)
-			}
+			fmt.Println("failed to make decoder for", k, err2)
 		}
 		decodeFunction.Body = NewBlock(append(s, Return()))
 		AppendDecl(g.File, decodeFunction)
@@ -246,13 +235,10 @@ func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 		s, err2 = g.VisitEncoder(retExpr, v, tName)
 		if err2 != nil {
 			s = ToDoStmts
-			if !errors.Is(err2, ToDoError) {
-				fmt.Println("failed to make encoder for", k, err2)
-			}
+			fmt.Println("failed to make encoder for", k, err2)
 		}
 		encodeFunction.Body = NewBlock(append(s, Return()))
 		AppendDecl(g.File, encodeFunction)
-
 	}
 	return
 }
@@ -300,9 +286,6 @@ func Generate(version string, w io.Writer) (err error) {
 
 	g := &Generator{Protocol: protocol}
 
-	// These have annoying edge cases that would require me to implement a whole new compareTo parser
-	g.Settings.ReplaceWithTodoNames = []string{}
-
 	g.File = NewFile("v" + strings.ReplaceAll(version, ".", "_"))
 	AppendDecl(g.File, Import("encoding/binary", "io", "github.com/admin-else/strom/proto_base", "github.com/admin-else/strom/nbt", "github.com/google/uuid"))
 	g.RegisterNatives()
@@ -322,7 +305,7 @@ func generateVersion(v string) (err error) {
 	if err != nil {
 		return
 	}
-	f, err := os.Create("proto_generated/v" + vUnderscore + "/proto_base.go")
+	f, err := os.Create("proto_generated/v" + vUnderscore + "/proto.go")
 	if err != nil {
 		return
 	}

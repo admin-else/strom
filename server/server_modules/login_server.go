@@ -34,7 +34,7 @@ type LoginServer struct {
 	CompressionThreshold int32
 }
 
-func (l *LoginServer) OnHandshake(packet v1_21_8.HandshakingToServerPacketSetProtocol) (err error) {
+func (l *LoginServer) OnHandshake(packet *v1_21_8.HandshakingToServerPacketSetProtocol) (err error) {
 	l.State = proto_base.State(packet.NextState)
 	if packet.NextState != int32(proto_base.Login) {
 		err = UnexpectedNextStateError{proto_base.State(packet.NextState)}
@@ -44,7 +44,7 @@ func (l *LoginServer) OnHandshake(packet v1_21_8.HandshakingToServerPacketSetPro
 }
 
 func (l *LoginServer) SetCompressionThreshold(threshold int32) (err error) {
-	err = l.Send(v1_21_8.LoginToClientPacketCompress{Threshold: threshold})
+	err = l.Send(&v1_21_8.LoginToClientPacketCompress{Threshold: threshold})
 	if err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ func (l *LoginServer) SetCompressionThreshold(threshold int32) (err error) {
 	return
 }
 
-func (l *LoginServer) OnLoginStart(packet v1_21_8.LoginToServerPacketLoginStart) (err error) {
+func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart) (err error) {
 	l.Requested = NameAndUUID{packet.Username, packet.PlayerUUID}
 	//err = l.SetCompressionThreshold(l.CompressionThreshold)
 	//if err != nil {
@@ -61,7 +61,7 @@ func (l *LoginServer) OnLoginStart(packet v1_21_8.LoginToServerPacketLoginStart)
 	if l.Given == nil {
 		l.Given = &l.Requested
 	}
-	err = l.Send(v1_21_8.LoginToClientPacketSuccess{
+	err = l.Send(&v1_21_8.LoginToClientPacketSuccess{
 		Uuid:       l.Given.UUID,
 		Username:   l.Given.Name,
 		Properties: nil,
@@ -69,13 +69,13 @@ func (l *LoginServer) OnLoginStart(packet v1_21_8.LoginToServerPacketLoginStart)
 	return
 }
 
-func (l *LoginServer) OnLoginAcknowledged(_ v1_21_8.LoginToServerPacketLoginAcknowledged) (err error) {
+func (l *LoginServer) OnLoginAcknowledged(_ *v1_21_8.LoginToServerPacketLoginAcknowledged) (err error) {
 	l.State = proto_base.Configuration
 	err = event.HandlerDone
 	return
 }
 
-func (l *LoginServer) Default(event any) (err error) {
+func (l *LoginServer) OnDefault(event event.Default) (err error) {
 	err = fmt.Errorf("unexpected event during login: %#v", event)
 	fmt.Println(err)
 	return
@@ -92,7 +92,7 @@ func (l *LoginServer) OnCycle(_ event.OnLoopCycle) (err error) {
 func ServeLogin(c *proto.Conn) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
 	ret.CompressionThreshold = 256
-	err = ret.Start(ret)
+	err = ret.StartOne(ret)
 	return
 }
 
@@ -102,6 +102,6 @@ func ServeLoginWithOtherAccount(c *proto.Conn, a *api.Account) (ret *LoginServer
 		UUID: a.Uuid,
 	}}
 	ret.CompressionThreshold = 256
-	err = ret.Start(ret)
+	err = ret.StartOne(ret)
 	return
 }

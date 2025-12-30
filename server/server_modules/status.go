@@ -37,12 +37,12 @@ func (p *StatusServer) Default(_ any) (err error) {
 	return
 }
 
-func (p *StatusServer) OnStatusRequest(_ v1_21_8.StatusToServerPacketPingStart) (err error) {
-	return p.Send(v1_21_8.StatusToClientPacketServerInfo{Response: p.Status})
+func (p *StatusServer) OnStatusRequest(_ *v1_21_8.StatusToServerPacketPingStart) (err error) {
+	return p.Send(&v1_21_8.StatusToClientPacketServerInfo{Response: p.Status})
 }
 
-func (p *StatusServer) OnStatusPing(packet v1_21_8.StatusToServerPacketPing) (err error) {
-	return p.Send(v1_21_8.StatusToClientPacketPing(packet))
+func (p *StatusServer) OnStatusPing(packet *v1_21_8.StatusToServerPacketPing) (err error) {
+	return p.Send(&v1_21_8.StatusToClientPacketPing{Time: packet.Time})
 }
 
 func ServeStatus(c *proto.Conn, s StatusResponse) (err error) {
@@ -54,6 +54,6 @@ func ServeStatus(c *proto.Conn, s StatusResponse) (err error) {
 		Conn:   c,
 		Status: string(status),
 	}
-	err = server.Start(server)
+	err = server.StartOne(server)
 	return
 }

@@ -9,15 +9,26 @@ import (
 
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto_base"
-	"github.com/admin-else/strom/proto_generated"
 )
 
 var BadPacketTypeError = errors.New("bad packet type")
+var BadPacketIdError = errors.New("bad packet id")
 
 // UnCodablePacket represents a packet that could not be decoded due to proto_generated not supporting all packets.
 type UnCodablePacket struct {
-	Err  error
-	Data []byte
+	Err       error
+	Data      []byte
+	Direction proto_base.Direction
+}
+
+func (u *UnCodablePacket) Encode(w io.Writer) (err error) {
+	_, err = w.Write(u.Data)
+	return
+}
+
+func (u *UnCodablePacket) Decode(r io.Reader) (err error) {
+	err = errors.New("how did you even get here")
+	return
 }
 
 type Conn struct {
@@ -28,27 +39,33 @@ type Conn struct {
 	State                            proto_base.State
 	Actor                            proto_base.Actor
 	Version                          string
+	ProtocolVersion                  int32
 	DontDecodePacketsWithoutHandlers bool
 }
 
-func (c *Conn) Send(packet any) (err error) {
-	var rawPacketBytes []byte
+func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
 	switch packet := packet.(type) {
-	case UnCodablePacket:
-		rawPacketBytes = packet.Data
+	case *UnCodablePacket:
+		err = c.SendRaw(packet.Data)
 	default:
-		packetIdentifier := proto_generated.TypeToPacketIdentifier(c.Version, c.Actor.SendDirection(), c.State, packet)
-		if packetIdentifier == "" {
+		i, ok := LookupPacketInfoByTypeAndMore(packet, c.State)
+		if !ok {
 			err = BadPacketTypeError
-			return
 		}
-		rawPacketBuffer := bytes.NewBuffer(nil)
-		err = proto_generated.EncodePacket(c.Version, c.Actor.SendDirection(), c.State, packetIdentifier, packet, rawPacketBuffer)
+		var packetBuff = bytes.NewBuffer(nil)
+		err = proto_base.EncodeVarInt(packetBuff, i.PacketId)
 		if err != nil {
 			return
 		}
-		rawPacketBytes = rawPacketBuffer.Bytes()
+		err = packet.Encode(packetBuff)
+		if err != nil {
+			return
+		}
+		err = c.SendRaw(packetBuff.Bytes())
 	}
+	return
+}
+func (c *Conn) SendRaw(rawPacketBytes []byte) (err error) {
 	var packetBytes []byte
 	if c.CompressionThreshold > 0 {
 		packetBuffer := bytes.NewBuffer(nil)
@@ -83,7 +100,7 @@ func (c *Conn) Send(packet any) (err error) {
 	return
 }
 
-func (c *Conn) Receive() (packet any, err error) {
+func (c *Conn) ReceiveRaw() (packetBytes []byte, err error) {
 	rawPacketLen, err := proto_base.DecodeVarInt(c.R)
 	if err != nil {
 		return
@@ -93,7 +110,6 @@ func (c *Conn) Receive() (packet any, err error) {
 		return
 	}
 	rawPacketBuffer := bytes.NewBuffer(rawPacketBytes)
-	var packetBytes []byte
 	if c.CompressionThreshold > 0 {
 		var packetLen int32
 		packetLen, err = proto_base.DecodeVarInt(rawPacketBuffer)
@@ -120,10 +136,27 @@ func (c *Conn) Receive() (packet any, err error) {
 	} else {
 		packetBytes = rawPacketBytes
 	}
-	packetBuff := bytes.NewBuffer(packetBytes)
-	packet, err = proto_generated.DecodePacket(c.Version, c.Actor.ReceiveDirection(), c.State, packetBuff)
+	return
+}
+
+func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
+	packetBytes, err := c.ReceiveRaw()
 	if err != nil {
-		packet = UnCodablePacket{Err: err, Data: packetBytes}
+		return
+	}
+	b := bytes.NewBuffer(packetBytes)
+	id, err := proto_base.DecodeVarInt(b)
+	if err != nil {
+		return
+	}
+	packet, ok := LookUpTypeByPacketInfoAndCopyType(c.Actor.ReceiveDirection(), c.State, id, c.ProtocolVersion)
+	if !ok {
+		packet = &UnCodablePacket{Err: BadPacketIdError, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
+		return
+	}
+	err = packet.Decode(b)
+	if err != nil {
+		packet = &UnCodablePacket{Err: err, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		err = nil
 	}
 	return

@@ -25,7 +25,7 @@ func FindHandlers(insts []any) (handlers map[reflect.Type][]reflect.Value) {
 			method := t.Method(i)
 			if strings.HasPrefix(method.Name, "On") {
 				if method.Type.NumIn() != 2 || method.Type.NumOut() != 1 || method.Type.Out(0) != reflect.TypeFor[error]() {
-					fmt.Println("Invalid event handler signature:", method.Name)
+					fmt.Println("Invalid event handler signature:", t.String(), ".", method.Name)
 					continue
 				}
 			} else {
