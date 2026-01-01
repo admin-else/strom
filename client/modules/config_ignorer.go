@@ -19,8 +19,8 @@ func (c *ConfigIgnorer) Default(event any) (err error) {
 	return
 }
 
-func (c *ConfigIgnorer) OnKnownPacks(packet *v1_21_8.PacketCommonSelectKnownPacks) (err error) {
-	return c.Send(packet)
+func (c *ConfigIgnorer) OnKnownPacks(packet *v1_21_8.ConfigurationToClientPacketCommonSelectKnownPacks) (err error) {
+	return c.Send(&v1_21_8.ConfigurationToServerPacketCommonSelectKnownPacks{Packs: packet.Packs})
 }
 
 func (c *ConfigIgnorer) OnFinish(_ v1_21_8.ConfigurationToClientPacketFinishConfiguration) (err error) {

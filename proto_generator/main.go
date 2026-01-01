@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/admin-else/strom/data"
@@ -38,6 +39,8 @@ type ContainerStackEntry struct {
 }
 
 type Generator struct {
+	packetInfos []PacketInfo
+
 	// These persist the entire generate-call
 	Natives          map[string]ExprGeneratorFunc
 	DecoderNatives   map[string]FunctionGeneratorFunc
@@ -243,41 +246,75 @@ func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 	return
 }
 
-func (g *Generator) GenerateState(prefix string, state State) (err error) {
-	err = g.GenerateTypes(prefix+"ToServer", state.ToServer)
+func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err error) {
+	versionData, err := data.LookUpProtocolVersionByName(version)
 	if err != nil {
 		return
 	}
-	err = g.GenerateTypes(prefix+"ToClient", state.ToClient)
+
+	prefixTypeMap := map[string]TypesInfo{
+		"":                      {protocol.Types, "", ""},
+		"HandshakingToServer":   {protocol.Handshaking.ToServer, "ToServer", "Handshaking"},
+		"HandshakingToClient":   {protocol.Handshaking.ToClient, "ToClient", "Handshaking"},
+		"StatusToServer":        {protocol.Status.ToServer, "ToServer", "Status"},
+		"StatusToClient":        {protocol.Status.ToClient, "ToClient", "Status"},
+		"LoginToServer":         {protocol.Login.ToServer, "ToServer", "Login"},
+		"LoginToClient":         {protocol.Login.ToClient, "ToClient", "Login"},
+		"ConfigurationToServer": {protocol.Configuration.ToServer, "ToServer", "Configuration"},
+		"ConfigurationToClient": {protocol.Configuration.ToClient, "ToClient", "Configuration"},
+		"PlayToServer":          {protocol.Play.ToServer, "ToServer", "Play"},
+		"PlayToClient":          {protocol.Play.ToClient, "ToClient", "Play"},
+	}
+
+	// Move common packet to their own areas to make packets more identifiable
+	for _, k := range OrderedKeys(protocol.Types.Types) {
+		v := protocol.Types.Types[k]
+		if strings.Contains(k, "packet") {
+			delete(protocol.Types.Types, k)
+			for prefix, types := range prefixTypeMap {
+				if prefix == "" {
+					continue
+				}
+				types.Types.Types[k] = v
+			}
+		}
+	}
+
+	for prefix, types := range prefixTypeMap {
+		for k, v := range types.Types.Types {
+			if k != "packet" {
+				continue
+			}
+			packetIds := v.([]any)[1].([]any)[0].(map[string]any)["type"].([]any)[1].(map[string]any)["mappings"].(map[string]any)
+			packetIdsStrings := AssertAndConvertMapValues[string](packetIds)
+			packetIdsRev := ReverseMap(packetIdsStrings)
+			v := v.([]any)[1].([]any)[1].(map[string]any)["type"].([]any)[1].(map[string]any)["fields"].(map[string]any)
+			for k2, v2 := range v {
+				v2 := v2.(string)
+				typeName := prefix + CamelCase(v2)
+				g.packetInfos = append(g.packetInfos, PacketInfo{
+					TName:            typeName,
+					Name:             k2,
+					Direction:        types.Direction,
+					State:            types.State,
+					PacketId:         packetIdsRev[k2],
+					ProtocolVersion:  strconv.Itoa(versionData.Version),
+					MinecraftVersion: version,
+				})
+			}
+		}
+	}
+
+	for prefix, types := range prefixTypeMap {
+		err = g.GenerateTypes(prefix, types.Types)
+		if err != nil {
+			return
+		}
+	}
 	return
 }
 
-func (g *Generator) GenerateProtocol(protocol Protocol) (err error) {
-	err = g.GenerateTypes("", protocol.Types)
-	if err != nil {
-		return
-	}
-	err = g.GenerateState("Handshaking", protocol.Handshaking)
-	if err != nil {
-		return
-	}
-	err = g.GenerateState("Status", protocol.Status)
-	if err != nil {
-		return
-	}
-	err = g.GenerateState("Login", protocol.Login)
-	if err != nil {
-		return
-	}
-	err = g.GenerateState("Configuration", protocol.Configuration)
-	if err != nil {
-		return
-	}
-	err = g.GenerateState("Play", protocol.Play)
-	return
-}
-
-func Generate(version string, w io.Writer) (err error) {
+func Generate(version string, w io.Writer) (packetInfos []PacketInfo, err error) {
 	protocol := Protocol{}
 	err = data.LoadVersionedJson(version, "protocol", &protocol)
 	if err != nil {
@@ -292,14 +329,16 @@ func Generate(version string, w io.Writer) (err error) {
 	g.RegisterDecoderNatives()
 	g.RegisterEncoderNatives()
 	g.RegisterCompareToNatives()
-	err = g.GenerateProtocol(protocol)
+	err = g.GenerateProtocol(protocol, version)
 	if err != nil {
 		return
 	}
-	return PrintToFile(g.File, w)
+	packetInfos = g.packetInfos
+	err = PrintToFile(g.File, w)
+	return
 }
 
-func generateVersion(v string) (err error) {
+func generateVersion(v string) (packetInfos []PacketInfo, err error) {
 	vUnderscore := strings.ReplaceAll(v, ".", "_")
 	err = os.MkdirAll("proto_generated/v"+vUnderscore, 0755)
 	if err != nil {
@@ -310,7 +349,7 @@ func generateVersion(v string) (err error) {
 		return
 	}
 	defer f.Close()
-	err = Generate(v, f)
+	packetInfos, err = Generate(v, f)
 	if err != nil {
 		return
 	}
@@ -326,14 +365,16 @@ func GenerateVersions(versions []string) (err error) {
 	if err != nil {
 		return
 	}
+	var packetInfos, newPacketInfos []PacketInfo
 	for _, version := range versions {
 		fmt.Println("generating", version)
-		err = generateVersion(version)
+		newPacketInfos, err = generateVersion(version)
 		if err != nil {
 			return
 		}
+		packetInfos = append(packetInfos, newPacketInfos...)
 	}
-	return GeneratePacketInfoFile(versions)
+	return GeneratePacketInfoFile(versions, packetInfos)
 }
 
 func main() {

@@ -45,6 +45,8 @@ func FireFound(event any, handlersMap map[reflect.Type][]reflect.Value) (found b
 			errV := handler.Call([]reflect.Value{reflect.ValueOf(event)})[0]
 			if !errV.IsNil() {
 				err = errV.Interface().(error)
+				err = errors.Join(err, fmt.Errorf("event handler failed: at "))
+				return
 			}
 		}
 	}

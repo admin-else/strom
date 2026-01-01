@@ -5,8 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/admin-else/strom/data"
 )
 
 type TypesInfo struct {
@@ -19,71 +17,7 @@ type PacketInfo struct {
 	TName, Name, Direction, State, PacketId, ProtocolVersion, MinecraftVersion string
 }
 
-func CollectPacketInfo(versions []string) (packetInfos []PacketInfo, err error) {
-	var versionData data.ProtocolVersion
-	for _, version := range versions {
-		versionData, err = data.LookUpProtocolVersionByName(version)
-		if err != nil {
-			return
-		}
-		protocol := Protocol{}
-		err = data.LoadVersionedJson(version, "protocol", &protocol)
-		if err != nil {
-			return
-		}
-		prefixTypeMap := map[string]TypesInfo{
-			"HandshakingToServer":   {protocol.Handshaking.ToServer, "ToServer", "Handshaking"},
-			"HandshakingToClient":   {protocol.Handshaking.ToClient, "ToClient", "Handshaking"},
-			"StatusToServer":        {protocol.Status.ToServer, "ToServer", "Status"},
-			"StatusToClient":        {protocol.Status.ToClient, "ToClient", "Status"},
-			"LoginToServer":         {protocol.Login.ToServer, "ToServer", "Login"},
-			"LoginToClient":         {protocol.Login.ToClient, "ToClient", "Login"},
-			"ConfigurationToServer": {protocol.Configuration.ToServer, "ToServer", "Configuration"},
-			"ConfigurationToClient": {protocol.Configuration.ToClient, "ToClient", "Configuration"},
-			"PlayToServer":          {protocol.Play.ToServer, "ToServer", "Play"},
-			"PlayToClient":          {protocol.Play.ToClient, "ToClient", "Play"},
-		}
-		for prefix, types := range prefixTypeMap {
-			for k, v := range types.Types.Types {
-				if k != "packet" {
-					continue
-				}
-				packetIds := v.([]any)[1].([]any)[0].(map[string]any)["type"].([]any)[1].(map[string]any)["mappings"].(map[string]any)
-				packetIdsStrings := AssertAndConvertMapValues[string](packetIds)
-				packetIdsRev := ReverseMap(packetIdsStrings)
-				v := v.([]any)[1].([]any)[1].(map[string]any)["type"].([]any)[1].(map[string]any)["fields"].(map[string]any)
-				for k2, v2 := range v {
-					v2 := v2.(string)
-					var typeName string
-					if strings.HasPrefix(v2, "packet_common") {
-						typeName = CamelCase(v2)
-					} else if v2 == "void" {
-						typeName = "struct{}"
-					} else {
-						typeName = prefix + CamelCase(v2)
-					}
-					packetInfos = append(packetInfos, PacketInfo{
-						TName:            typeName,
-						Name:             k2,
-						Direction:        types.Direction,
-						State:            types.State,
-						PacketId:         packetIdsRev[k2],
-						ProtocolVersion:  strconv.Itoa(versionData.Version),
-						MinecraftVersion: version,
-					})
-				}
-			}
-		}
-	}
-	return
-}
-
-func GeneratePacketInfoFile(versions []string) (err error) {
-	packetInfos, err := CollectPacketInfo(versions)
-	if err != nil {
-		return
-	}
-
+func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err error) {
 	f := NewFile("proto_generated")
 	imports := []string{"github.com/admin-else/strom/proto_base"}
 	for _, v := range versions {

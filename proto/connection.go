@@ -7,12 +7,14 @@ import (
 	"io"
 	"net"
 
+	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto_base"
 )
 
 var BadPacketTypeError = errors.New("bad packet type")
 var BadPacketIdError = errors.New("bad packet id")
+var PacketNotFullyDecodedError = errors.New("packet not fully decoded")
 
 // UnCodablePacket represents a packet that could not be decoded due to proto_generated not supporting all packets.
 type UnCodablePacket struct {
@@ -33,14 +35,23 @@ func (u *UnCodablePacket) Decode(r io.Reader) (err error) {
 
 type Conn struct {
 	net.Conn
-	R                                io.Reader
-	W                                io.Writer
-	CompressionThreshold             int32
-	State                            proto_base.State
-	Actor                            proto_base.Actor
-	Version                          string
-	ProtocolVersion                  int32
-	DontDecodePacketsWithoutHandlers bool
+	R                    io.Reader
+	W                    io.Writer
+	CompressionThreshold int32
+	State                proto_base.State
+	Actor                proto_base.Actor
+	Version              string
+	ProtocolVersion      int32
+}
+
+func (c *Conn) SetVersion(version string) (err error) {
+	c.Version = version
+	versionData, err := data.LookUpProtocolVersionByName(c.Version)
+	if err != nil {
+		return
+	}
+	c.ProtocolVersion = int32(versionData.Version)
+	return
 }
 
 func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
@@ -48,7 +59,7 @@ func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
 	case *UnCodablePacket:
 		err = c.SendRaw(packet.Data)
 	default:
-		i, ok := LookupPacketInfoByTypeAndMore(packet, c.State)
+		i, ok := LookupPacketInfoByTypeLookupPacketInfoByTypeAndMore(packet, c.State)
 		if !ok {
 			err = BadPacketTypeError
 		}
@@ -109,6 +120,10 @@ func (c *Conn) ReceiveRaw() (packetBytes []byte, err error) {
 	if err != nil {
 		return
 	}
+	if len(rawPacketBytes) != int(rawPacketLen) {
+		err = errors.New("bad packet length")
+		return
+	}
 	rawPacketBuffer := bytes.NewBuffer(rawPacketBytes)
 	if c.CompressionThreshold > 0 {
 		var packetLen int32
@@ -159,6 +174,11 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		packet = &UnCodablePacket{Err: err, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		err = nil
 	}
+	if b.Len() != 0 {
+		err = nil
+		packet = &UnCodablePacket{Err: PacketNotFullyDecodedError, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
+		return
+	}
 	return
 }
 
@@ -174,7 +194,7 @@ func (c *Conn) Start(insts []any) (err error) {
 		var packet any
 		packet, err = c.Receive()
 		if err != nil {
-			return
+			break
 		}
 		err = event.Fire(packet, handlers)
 		if err != nil {

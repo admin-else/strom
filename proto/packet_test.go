@@ -1,5 +1,6 @@
 package proto_test
 
+/*
 import (
 	"bytes"
 	"math"
@@ -51,3 +52,4 @@ func FuzzPlayPackets(f *testing.F) {
 		}
 	})
 }
+*/

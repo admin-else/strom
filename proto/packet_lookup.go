@@ -39,6 +39,7 @@ func LookupPacketInfoByType(packet proto_base.EncodeDecodeAble) (p proto_base.Pa
 			PacketId:        -1,
 			ProtocolVersion: -1,
 		}
+		ok = true
 	default:
 		for _, p := range proto_generated.Packets {
 			if reflect.TypeOf(p.Type) == reflect.TypeOf(packet) {
@@ -49,7 +50,7 @@ func LookupPacketInfoByType(packet proto_base.EncodeDecodeAble) (p proto_base.Pa
 	return
 }
 
-func LookupPacketInfoByTypeAndMore(packet proto_base.EncodeDecodeAble, state proto_base.State) (p proto_base.PacketInfo, ok bool) {
+func LookupPacketInfoByTypeLookupPacketInfoByTypeAndMore(packet proto_base.EncodeDecodeAble, state proto_base.State) (p proto_base.PacketInfo, ok bool) {
 	switch packet := packet.(type) {
 	case *UnCodablePacket:
 		p = proto_base.PacketInfo{

@@ -25,6 +25,8 @@ const (
 
 var Order binary.ByteOrder = binary.BigEndian
 
+var BadStringLengthError = errors.New("bad string length")
+
 type Tag struct {
 	Name  string
 	Value any
@@ -190,7 +192,7 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 			return
 		}
 		if len(s) != int(l) {
-			err = errors.New("bad string length")
+			err = BadStringLengthError
 			return
 		}
 		ret = string(s)
