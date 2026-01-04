@@ -75,7 +75,7 @@ func (l *LoginServer) OnLoginAcknowledged(_ *v1_21_8.LoginToServerPacketLoginAck
 	return
 }
 
-func (l *LoginServer) OnDefault(event event.Default) (err error) {
+func (l *LoginServer) OnDefault(event event.Unhandled) (err error) {
 	err = fmt.Errorf("unexpected event during login: %#v", event)
 	fmt.Println(err)
 	return

@@ -1,3 +1,4 @@
+// Package event is the event handler
 package event
 
 import (
@@ -7,17 +8,32 @@ import (
 	"strings"
 )
 
-type Default struct {
+type Loop struct {
+	HandlerFunctions map[reflect.Type][]reflect.Value
+	Handlers         []any
+}
+
+type Unhandled struct {
 	Val any
 }
 
-type OnStart struct{}
-type OnLoopCycle struct{}
+type Anything struct {
+	Val any
+}
 
-var HandlerDone = errors.New("handler done")
+type (
+	OnStart     struct{}
+	OnLoopCycle struct{}
+)
 
-func FindHandlers(insts []any) (handlers map[reflect.Type][]reflect.Value) {
-	handlers = make(map[reflect.Type][]reflect.Value)
+// ErrHandlerDone will stop the event loop.
+var ErrHandlerDone = errors.New("handler done")
+
+// ErrDontForward will stop the event from being forwarded to other handlers, including anything handlers.
+var ErrDontForward = errors.New("dont forward")
+
+func (l *Loop) FindHandlers(insts []any) {
+	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
 	for _, inst := range insts {
 		t := reflect.TypeOf(inst)
 		v := reflect.ValueOf(inst)
@@ -32,15 +48,14 @@ func FindHandlers(insts []any) (handlers map[reflect.Type][]reflect.Value) {
 				continue
 			}
 			eventType := method.Type.In(1)
-			handlers[eventType] = append(handlers[eventType], v.Method(i))
+			l.HandlerFunctions[eventType] = append(l.HandlerFunctions[eventType], v.Method(i))
 		}
 	}
-	return
 }
 
-func FireFound(event any, handlersMap map[reflect.Type][]reflect.Value) (found bool, err error) {
+func (l *Loop) FireFound(event any) (found bool, err error) {
 	var handlers []reflect.Value
-	if handlers, found = handlersMap[reflect.TypeOf(event)]; found {
+	if handlers, found = l.HandlerFunctions[reflect.TypeOf(event)]; found {
 		for _, handler := range handlers {
 			errV := handler.Call([]reflect.Value{reflect.ValueOf(event)})[0]
 			if !errV.IsNil() {
@@ -53,13 +68,20 @@ func FireFound(event any, handlersMap map[reflect.Type][]reflect.Value) (found b
 	return
 }
 
-func Fire(event any, handlersMap map[reflect.Type][]reflect.Value) (err error) {
-	found, err := FireFound(event, handlersMap)
+func (l *Loop) Fire(event any) (err error) {
+	found, err := l.FireFound(event)
 	if err != nil {
+		if errors.Is(err, ErrDontForward) {
+			err = nil
+		}
 		return
 	}
 	if !found {
-		_, err = FireFound(Default{event}, handlersMap)
+		_, err = l.FireFound(Unhandled{event})
+		if err != nil {
+			return
+		}
 	}
+	_, err = l.FireFound(Anything{event})
 	return
 }

@@ -29,7 +29,7 @@ type LoginClient struct {
 	GivenAccount *v1_21_8.LoginToClientPacketSuccess
 }
 
-func (s *LoginClient) Default(event event.Default) (err error) {
+func (s *LoginClient) Default(event event.Unhandled) (err error) {
 	err = fmt.Errorf("unexpected event: %#v", event)
 	return
 }

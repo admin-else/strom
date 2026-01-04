@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"reflect"
 
 	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/event"
@@ -42,6 +43,8 @@ type Conn struct {
 	Actor                proto_base.Actor
 	Version              string
 	ProtocolVersion      int32
+
+	Handlers map[reflect.Type][]reflect.Value
 }
 
 func (c *Conn) SetVersion(version string) (err error) {
@@ -188,19 +191,19 @@ func (c *Conn) StartOne(inst any) (err error) {
 
 func (c *Conn) Start(insts []any) (err error) {
 	_ = *c // exit early on nil connection
-	handlers := event.FindHandlers(insts)
-	err = event.Fire(event.OnStart{}, handlers)
+	c.Handlers = event.FindHandlers(insts)
+	err = event.Fire(event.OnStart{}, c.Handlers)
 	for err == nil {
 		var packet any
 		packet, err = c.Receive()
 		if err != nil {
 			break
 		}
-		err = event.Fire(packet, handlers)
+		err = event.Fire(packet, c.Handlers)
 		if err != nil {
 			break
 		}
-		err = event.Fire(event.OnLoopCycle{}, handlers)
+		err = event.Fire(event.OnLoopCycle{}, c.Handlers)
 	}
 	if errors.Is(err, event.HandlerDone) {
 		err = nil

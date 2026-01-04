@@ -21,7 +21,7 @@ type ProxyClient struct {
 	Server *Proxy
 }
 
-func (p *ProxyClient) OnDefault(event event.Default) (err error) {
+func (p *ProxyClient) OnDefault(event event.Unhandled) (err error) {
 	packet, isPacket := event.Val.(proto_base.EncodeDecodeAble)
 	if !isPacket {
 		return
@@ -39,7 +39,7 @@ func (p *ProxyClient) OnStart(_ event.OnStart) (err error) {
 }
 
 func (p *ProxyClient) OnUnCodeAble(packet proto.UnCodablePacket) (err error) {
-	err = p.OnDefault(event.Default{Val: packet})
+	err = p.OnDefault(event.Unhandled{Val: packet})
 	if err != nil {
 		return
 	}
@@ -52,7 +52,7 @@ type Proxy struct {
 	Client *ProxyClient
 }
 
-func (p *Proxy) OnDefault(event event.Default) (err error) {
+func (p *Proxy) OnDefault(event event.Unhandled) (err error) {
 	packet, isPacket := event.Val.(proto_base.EncodeDecodeAble)
 	if !isPacket {
 		return
@@ -70,7 +70,7 @@ func (p *Proxy) OnStart(_ event.OnStart) (err error) {
 }
 
 func (p *Proxy) OnFinishConfiguration(packet *v1_21_8.ConfigurationToServerPacketFinishConfiguration) (err error) {
-	err = p.OnDefault(event.Default{Val: packet})
+	err = p.OnDefault(event.Unhandled{Val: packet})
 	if err != nil {
 		return
 	}
@@ -80,7 +80,7 @@ func (p *Proxy) OnFinishConfiguration(packet *v1_21_8.ConfigurationToServerPacke
 }
 
 func (p *Proxy) OnUnCodeAble(packet proto.UnCodablePacket) (err error) {
-	err = p.OnDefault(event.Default{Val: packet})
+	err = p.OnDefault(event.Unhandled{Val: packet})
 	if err != nil {
 		return
 	}
