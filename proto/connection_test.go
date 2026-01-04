@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/admin-else/strom/proto"
+	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/server"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -19,11 +20,13 @@ var nanIgnorer64 = cmp.Comparer(func(x, y float64) bool {
 	return (math.IsNaN(x) && math.IsNaN(y)) || x == y
 })
 
-func FuzzConn(f *testing.F) {
-	f.Fuzz(func(t *testing.T, inbytes []byte) {
+func NewStateFuzzer(state proto_base.State, actor proto_base.Actor) func(t *testing.T, inbytes []byte) {
+	return func(t *testing.T, inbytes []byte) {
 		b1 := bytes.NewBuffer(inbytes)
 		b2 := bytes.NewBuffer(nil)
 		conn := server.Servee(nil)
+		conn.State = state
+		conn.Actor = actor
 		conn.R = b1
 		conn.W = b2
 		_ = conn.SetVersion("1.21.8") // cant fail
@@ -55,5 +58,45 @@ func FuzzConn(f *testing.F) {
 			)
 		}
 		return
-	})
+	}
+}
+
+func FuzzConnHandshakingToServer(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Handshaking, proto_base.Server))
+}
+
+func FuzzConnHandshakingToClient(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Handshaking, proto_base.Client))
+}
+
+func FuzzConnStatusToServer(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Status, proto_base.Server))
+}
+
+func FuzzConnStatusToClient(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Status, proto_base.Client))
+}
+
+func FuzzConnLoginToServer(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Login, proto_base.Server))
+}
+
+func FuzzConnLoginToClient(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Login, proto_base.Client))
+}
+
+func FuzzConnConfigToServer(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Configuration, proto_base.Server))
+}
+
+func FuzzConnConfigToClient(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Configuration, proto_base.Client))
+}
+
+func FuzzConnPlayToServer(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Play, proto_base.Server))
+}
+
+func FuzzConnPlayToClient(f *testing.F) {
+	f.Fuzz(NewStateFuzzer(proto_base.Play, proto_base.Client))
 }
