@@ -1,8 +1,6 @@
 package modules
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -34,7 +32,7 @@ func (s *LoginClient) Default(event event.Unhandled) (err error) {
 	return
 }
 
-func (s *LoginClient) OnCycle(_ event.OnLoopCycle) (err error) {
+func (s *LoginClient) OnCycle(_ event.Tick) (err error) {
 	return
 }
 
@@ -109,20 +107,7 @@ func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegi
 	if err != nil {
 		return
 	}
-
-	var b cipher.Block
-	b, err = aes.NewCipher(sharedSecret)
-	if err != nil {
-		return
-	}
-	s.R = cipher.StreamReader{
-		S: crypto.NewCFB8Decrypt(b, sharedSecret),
-		R: s.Conn,
-	}
-	s.W = cipher.StreamWriter{
-		S: crypto.NewCFB8Encrypt(b, sharedSecret),
-		W: s.Conn,
-	}
+	err = s.SetSecret(sharedSecret)
 	return
 
 }
@@ -134,7 +119,7 @@ func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (er
 		return
 	}
 	s.State = proto_base.Configuration
-	err = event.HandlerDone
+	err = event.ErrHandlerDone
 	return
 }
 

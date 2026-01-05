@@ -2,11 +2,8 @@ package proto
 
 import (
 	"bytes"
-	"compress/zlib"
 	"errors"
 	"io"
-	"net"
-	"reflect"
 
 	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/event"
@@ -35,16 +32,12 @@ func (u *UnCodablePacket) Decode(r io.Reader) (err error) {
 }
 
 type Conn struct {
-	net.Conn
-	R                    io.Reader
-	W                    io.Writer
-	CompressionThreshold int32
-	State                proto_base.State
-	Actor                proto_base.Actor
-	Version              string
-	ProtocolVersion      int32
-
-	Handlers map[reflect.Type][]reflect.Value
+	RawConn
+	*event.Loop
+	State           proto_base.State
+	Actor           proto_base.Actor
+	Version         string
+	ProtocolVersion int32
 }
 
 func (c *Conn) SetVersion(version string) (err error) {
@@ -79,83 +72,6 @@ func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
 	}
 	return
 }
-func (c *Conn) SendRaw(rawPacketBytes []byte) (err error) {
-	var packetBytes []byte
-	if c.CompressionThreshold > 0 {
-		packetBuffer := bytes.NewBuffer(nil)
-		if int32(len(packetBytes)) >= c.CompressionThreshold {
-			err = proto_base.EncodeVarInt(packetBuffer, int32(len(packetBytes)))
-			if err != nil {
-				return
-			}
-			_, err = zlib.NewWriter(packetBuffer).Write(rawPacketBytes)
-			if err != nil {
-				return
-			}
-		} else {
-			err = proto_base.EncodeVarInt(packetBuffer, 0)
-			if err != nil {
-				return
-			}
-			_, err = packetBuffer.Write(rawPacketBytes)
-			if err != nil {
-				return
-			}
-		}
-		packetBytes = packetBuffer.Bytes()
-	} else {
-		packetBytes = rawPacketBytes
-	}
-	err = proto_base.EncodeVarInt(c.W, int32(len(packetBytes)))
-	if err != nil {
-		return
-	}
-	_, err = c.W.Write(packetBytes)
-	return
-}
-
-func (c *Conn) ReceiveRaw() (packetBytes []byte, err error) {
-	rawPacketLen, err := proto_base.DecodeVarInt(c.R)
-	if err != nil {
-		return
-	}
-	rawPacketBytes, err := io.ReadAll(io.LimitReader(c.R, int64(rawPacketLen)))
-	if err != nil {
-		return
-	}
-	if len(rawPacketBytes) != int(rawPacketLen) {
-		err = errors.New("bad packet length")
-		return
-	}
-	rawPacketBuffer := bytes.NewBuffer(rawPacketBytes)
-	if c.CompressionThreshold > 0 {
-		var packetLen int32
-		packetLen, err = proto_base.DecodeVarInt(rawPacketBuffer)
-		if err != nil {
-			return
-		}
-		if packetLen == 0 {
-			packetBytes, err = io.ReadAll(rawPacketBuffer)
-			if err != nil {
-				return
-			}
-		} else {
-			var zReader io.ReadCloser
-			zReader, err = zlib.NewReader(rawPacketBuffer)
-			if err != nil {
-				return
-			}
-			defer zReader.Close()
-			packetBytes, err = io.ReadAll(zReader)
-			if err != nil {
-				return
-			}
-		}
-	} else {
-		packetBytes = rawPacketBytes
-	}
-	return
-}
 
 func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	packetBytes, err := c.ReceiveRaw()
@@ -185,28 +101,23 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	return
 }
 
-func (c *Conn) StartOne(inst any) (err error) {
-	return c.Start([]any{inst})
+func (c *Conn) OnTick(_ event.Tick) (err error) {
+	packet, err := c.Receive()
+	if err != nil {
+		return
+	}
+	err = c.Loop.Fire(packet)
+	return
 }
 
-func (c *Conn) Start(insts []any) (err error) {
-	_ = *c // exit early on nil connection
-	c.Handlers = event.FindHandlers(insts)
-	err = event.Fire(event.OnStart{}, c.Handlers)
-	for err == nil {
-		var packet any
-		packet, err = c.Receive()
-		if err != nil {
-			break
-		}
-		err = event.Fire(packet, c.Handlers)
-		if err != nil {
-			break
-		}
-		err = event.Fire(event.OnLoopCycle{}, c.Handlers)
-	}
-	if errors.Is(err, event.HandlerDone) {
-		err = nil
-	}
+func (c *Conn) StartOne(handler any) (err error) {
+	return c.Start(handler)
+}
+
+func (c *Conn) Start(handlers ...any) (err error) {
+	c.Loop = &event.Loop{}
+	c.Handlers = append(c.Handlers, c)
+	c.Handlers = append(c.Handlers, handlers...)
+	err = c.Loop.Start()
 	return
 }

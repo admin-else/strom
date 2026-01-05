@@ -30,7 +30,7 @@ func (p *ProxyClient) OnDefault(event event.Unhandled) (err error) {
 	return
 }
 
-func (p *ProxyClient) OnCycle(_ event.OnLoopCycle) (err error) {
+func (p *ProxyClient) OnCycle(_ event.Tick) (err error) {
 	return
 }
 
@@ -61,7 +61,7 @@ func (p *Proxy) OnDefault(event event.Unhandled) (err error) {
 	return
 }
 
-func (p *Proxy) OnCycle(_ event.OnLoopCycle) (err error) {
+func (p *Proxy) OnCycle(_ event.Tick) (err error) {
 	return
 }
 

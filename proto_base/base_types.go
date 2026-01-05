@@ -81,14 +81,13 @@ type (
 var ToDoError = errors.New("to do")
 var BadTypeError = errors.New("bad type")
 
-func (r *RestBuffer) Encode(w io.Writer) (err error) {
-	_, err = w.Write(*r)
+func (b *RestBuffer) Encode(w io.Writer) (err error) {
+	_, err = w.Write(*b)
 	return
 }
 
-func (ret *RestBuffer) Decode(r io.Reader) (err error) {
-	b, err := io.ReadAll(r)
-	*ret = b
+func (b *RestBuffer) Decode(r io.Reader) (err error) {
+	*b, err = io.ReadAll(r)
 	return
 }
 

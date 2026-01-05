@@ -11,6 +11,7 @@ import (
 type Loop struct {
 	HandlerFunctions map[reflect.Type][]reflect.Value
 	Handlers         []any
+	HandlerIndex     int
 }
 
 type Unhandled struct {
@@ -22,8 +23,8 @@ type Anything struct {
 }
 
 type (
-	OnStart     struct{}
-	OnLoopCycle struct{}
+	OnStart struct{}
+	Tick    struct{}
 )
 
 // ErrHandlerDone will stop the event loop.
@@ -32,9 +33,9 @@ var ErrHandlerDone = errors.New("handler done")
 // ErrDontForward will stop the event from being forwarded to other handlers, including anything handlers.
 var ErrDontForward = errors.New("dont forward")
 
-func (l *Loop) FindHandlers(insts []any) {
+func (l *Loop) FindHandlers() {
 	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
-	for _, inst := range insts {
+	for _, inst := range l.Handlers {
 		t := reflect.TypeOf(inst)
 		v := reflect.ValueOf(inst)
 		for i := 0; i < t.NumMethod(); i++ {
@@ -53,6 +54,7 @@ func (l *Loop) FindHandlers(insts []any) {
 	}
 }
 
+// FireFound triggers all handlers registered for the specified event type and returns if handlers were found or an error occurred.
 func (l *Loop) FireFound(event any) (found bool, err error) {
 	var handlers []reflect.Value
 	if handlers, found = l.HandlerFunctions[reflect.TypeOf(event)]; found {
@@ -68,6 +70,7 @@ func (l *Loop) FireFound(event any) (found bool, err error) {
 	return
 }
 
+// Fire dispatches the provided event to all appropriate handlers and invokes fallback handlers if the event is unhandled.
 func (l *Loop) Fire(event any) (err error) {
 	found, err := l.FireFound(event)
 	if err != nil {
@@ -83,5 +86,21 @@ func (l *Loop) Fire(event any) (err error) {
 		}
 	}
 	_, err = l.FireFound(Anything{event})
+	return
+}
+
+func (l *Loop) Start() (err error) {
+	_ = *l // exit early on nil connection
+	l.FindHandlers()
+	err = l.Fire(OnStart{})
+	for err == nil {
+		err = l.Fire(Tick{})
+		if err != nil {
+			break
+		}
+	}
+	if errors.Is(err, ErrHandlerDone) {
+		err = nil
+	}
 	return
 }

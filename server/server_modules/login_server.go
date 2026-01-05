@@ -71,7 +71,7 @@ func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart
 
 func (l *LoginServer) OnLoginAcknowledged(_ *v1_21_8.LoginToServerPacketLoginAcknowledged) (err error) {
 	l.State = proto_base.Configuration
-	err = event.HandlerDone
+	err = event.ErrHandlerDone
 	return
 }
 
@@ -85,7 +85,7 @@ func (l *LoginServer) OnStart(_ event.OnStart) (err error) {
 	return
 }
 
-func (l *LoginServer) OnCycle(_ event.OnLoopCycle) (err error) {
+func (l *LoginServer) OnCycle(_ event.Tick) (err error) {
 	return
 }
 
