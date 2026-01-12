@@ -25,7 +25,7 @@ func NewStateFuzzer(state proto_base.State, actor proto_base.Actor) func(t *test
 		b1 := bytes.NewBuffer(inbytes)
 		b2 := bytes.NewBuffer(nil)
 		conn := server.Servee(nil)
-		conn.State = state
+		conn.SetState(state)
 		conn.Actor = actor
 		conn.R = b1
 		conn.W = b2

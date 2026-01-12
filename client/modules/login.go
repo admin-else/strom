@@ -16,13 +16,14 @@ import (
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 
-	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 )
 
 type LoginClient struct {
 	*proto.Conn
-	Account *api.Account
+	Account    *api.Account
+	ServerHost string
+	ServerPort uint16
 
 	GivenAccount *v1_21_8.LoginToClientPacketSuccess
 }
@@ -37,29 +38,30 @@ func (s *LoginClient) OnCycle(_ event.Tick) (err error) {
 }
 
 func (s *LoginClient) OnStart(_ event.OnStart) (err error) {
-	host, portStr, err := net.SplitHostPort(s.RemoteAddr().String())
-	if err != nil {
-		return
+	if s.ServerHost == "" && s.ServerPort == 0 {
+		var portStr string
+		s.ServerHost, portStr, err = net.SplitHostPort(s.RemoteAddr().String())
+		if err != nil {
+			return
+		}
+		var portUint uint64
+		portUint, err = strconv.ParseUint(portStr, 10, 16)
+		if err != nil {
+			return
+		}
+		s.ServerPort = uint16(portUint)
 	}
-	versionData, err := data.LookUpProtocolVersionByName(s.Version)
-	if err != nil {
-		return
-	}
-	s.ProtocolVersion = int32(versionData.Version)
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		return
-	}
+
 	err = s.Send(&v1_21_8.HandshakingToServerPacketSetProtocol{
 		ProtocolVersion: s.ProtocolVersion,
-		ServerHost:      host,
-		ServerPort:      uint16(port),
+		ServerHost:      s.ServerHost,
+		ServerPort:      s.ServerPort,
 		NextState:       int32(proto_base.Login),
 	})
 	if err != nil {
 		return
 	}
-	s.State = proto_base.Login
+	s.SetState(proto_base.Login)
 	err = s.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Name, PlayerUUID: s.Account.Uuid})
 	return
 }
@@ -118,13 +120,13 @@ func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (er
 	if err != nil {
 		return
 	}
-	s.State = proto_base.Configuration
+	s.SetState(proto_base.Configuration)
 	err = event.ErrHandlerDone
 	return
 }
 
 func Login(c *proto.Conn, account *api.Account) (err error) {
-	err = c.StartOne(&LoginClient{
+	err = c.Start(&LoginClient{
 		Conn:    c,
 		Account: account,
 	})
@@ -139,12 +141,12 @@ func ConnectAndLogin(connectTo string, account *api.Account) (c *proto.Conn, err
 	if err != nil {
 		return
 	}
-	err = c.StartOne(&LoginClient{
+	err = c.Start(&LoginClient{
 		Conn:    c,
 		Account: account,
 	})
 	if err != nil {
-		err = errors.Join(err, errors.New("failed to login"))
+		err = errors.Join(errors.New("failed to login"), err)
 	}
 	return
 }

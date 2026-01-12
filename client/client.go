@@ -9,8 +9,11 @@ import (
 
 func Connect(addr string) (ret *proto.Conn, err error) {
 	ret = &proto.Conn{}
-	ret.Version = "1.21.8"
-	ret.State = proto_base.Handshaking
+	err = ret.SetVersion("1.21.8")
+	if err != nil {
+		return
+	}
+	ret.SetState(proto_base.Handshaking)
 	ret.CompressionThreshold = -1
 	ret.Actor = proto_base.Client
 	ret.Conn, err = net.Dial("tcp", addr)

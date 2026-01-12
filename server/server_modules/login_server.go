@@ -28,14 +28,16 @@ func (u UnexpectedNextStateError) Error() string {
 
 type LoginServer struct {
 	*proto.Conn
-	//OnlineMode           bool TODO: implement this
+	//OnlineMode           bool FIXME: implement this
+	ServerHost           string
 	Requested            NameAndUUID
 	Given                *NameAndUUID
 	CompressionThreshold int32
 }
 
 func (l *LoginServer) OnHandshake(packet *v1_21_8.HandshakingToServerPacketSetProtocol) (err error) {
-	l.State = proto_base.State(packet.NextState)
+	l.SetState(proto_base.State(packet.NextState))
+	l.ServerHost = packet.ServerHost
 	if packet.NextState != int32(proto_base.Login) {
 		err = UnexpectedNextStateError{proto_base.State(packet.NextState)}
 		return
@@ -70,7 +72,7 @@ func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart
 }
 
 func (l *LoginServer) OnLoginAcknowledged(_ *v1_21_8.LoginToServerPacketLoginAcknowledged) (err error) {
-	l.State = proto_base.Configuration
+	l.SetState(proto_base.Configuration)
 	err = event.ErrHandlerDone
 	return
 }
@@ -92,7 +94,7 @@ func (l *LoginServer) OnCycle(_ event.Tick) (err error) {
 func ServeLogin(c *proto.Conn) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
 	ret.CompressionThreshold = 256
-	err = ret.StartOne(ret)
+	err = ret.Start(ret)
 	return
 }
 
@@ -102,6 +104,6 @@ func ServeLoginWithOtherAccount(c *proto.Conn, a *api.Account) (ret *LoginServer
 		UUID: a.Uuid,
 	}}
 	ret.CompressionThreshold = 256
-	err = ret.StartOne(ret)
+	err = ret.Start(ret)
 	return
 }

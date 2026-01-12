@@ -33,6 +33,7 @@ var ErrHandlerDone = errors.New("handler done")
 // ErrDontForward will stop the event from being forwarded to other handlers, including anything handlers.
 var ErrDontForward = errors.New("dont forward")
 
+// FindHandlers initializes and populates the HandlerFunctions map by reflecting over methods of registered handlers.
 func (l *Loop) FindHandlers() {
 	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
 	for _, inst := range l.Handlers {
@@ -62,7 +63,7 @@ func (l *Loop) FireFound(event any) (found bool, err error) {
 			errV := handler.Call([]reflect.Value{reflect.ValueOf(event)})[0]
 			if !errV.IsNil() {
 				err = errV.Interface().(error)
-				err = errors.Join(err, fmt.Errorf("event handler failed: at "))
+				err = errors.Join(fmt.Errorf("event handler failed at: %s(%T)", handler.Type().In(0), event), err)
 				return
 			}
 		}

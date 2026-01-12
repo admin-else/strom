@@ -74,8 +74,8 @@ func (p *Proxy) OnFinishConfiguration(packet *v1_21_8.ConfigurationToServerPacke
 	if err != nil {
 		return
 	}
-	p.State = proto_base.Play
-	p.Client.State = proto_base.Play
+	p.SetState(proto_base.Play)
+	p.Client.SetState(proto_base.Play)
 	return
 }
 
@@ -151,10 +151,10 @@ func main() {
 		defer pc.Close()
 		defer p.Close()
 		go func() {
-			errChan <- pc.StartOne(pc)
+			errChan <- pc.Start(pc)
 		}()
 		go func() {
-			errChan <- p.StartOne(p)
+			errChan <- p.Start(p)
 		}()
 		err = <-errChan
 		return

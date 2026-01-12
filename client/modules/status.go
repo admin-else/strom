@@ -42,7 +42,7 @@ func (s *StatusClient) OnStart(_ event.OnStart) (err error) {
 	if err != nil {
 		return
 	}
-	s.State = proto_base.Status
+	s.SetState(proto_base.Status)
 	err = s.Send(&v1_21_8.StatusToServerPacketPingStart{})
 	return
 }

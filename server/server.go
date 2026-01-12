@@ -10,9 +10,8 @@ import (
 
 func Servee(c net.Conn) (ret *proto.Conn) {
 	ret = &proto.Conn{}
-	ret.Version = "1.21.8"
-	ret.ProtocolVersion = 772
-	ret.State = proto_base.Handshaking
+	_ = ret.SetVersion("1.21.8") // cant fail
+	ret.SetState(proto_base.Handshaking)
 	ret.CompressionThreshold = -1
 	ret.Actor = proto_base.Server
 	ret.Conn = c
@@ -27,7 +26,7 @@ func ServeClient(cNet net.Conn, factory func(c *proto.Conn) (h any, err error)) 
 	if err != nil {
 		return
 	}
-	err = c.StartOne(h)
+	err = c.Start(h)
 	return
 }
 

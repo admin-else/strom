@@ -28,7 +28,7 @@ func (d Direction) Opposite() Direction {
 	return d ^ 1
 }
 
-type State int
+type State int32
 
 const (
 	Handshaking State = iota
@@ -82,7 +82,10 @@ var ToDoError = errors.New("to do")
 var BadTypeError = errors.New("bad type")
 
 func (b *RestBuffer) Encode(w io.Writer) (err error) {
-	_, err = w.Write(*b)
+	n, err := w.Write(*b)
+	if n != len(*b) {
+		panic("fucking write not writing all")
+	}
 	return
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"sync"
 
 	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/event"
@@ -34,10 +35,23 @@ func (u *UnCodablePacket) Decode(r io.Reader) (err error) {
 type Conn struct {
 	RawConn
 	*event.Loop
-	State           proto_base.State
+	state           proto_base.State
+	stateMutex      sync.RWMutex
 	Actor           proto_base.Actor
 	Version         string
 	ProtocolVersion int32
+}
+
+func (c *Conn) SetState(state proto_base.State) {
+	c.stateMutex.Lock()
+	defer c.stateMutex.Unlock()
+	c.state = state
+}
+
+func (c *Conn) State() proto_base.State {
+	c.stateMutex.RLock()
+	defer c.stateMutex.RUnlock()
+	return c.state
 }
 
 func (c *Conn) SetVersion(version string) (err error) {
@@ -55,7 +69,7 @@ func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
 	case *UnCodablePacket:
 		err = c.SendRaw(packet.Data)
 	default:
-		i, ok := LookupPacketInfoByTypeLookupPacketInfoByTypeAndMore(packet, c.State)
+		i, ok := LookupPacketInfoByTypeLookupPacketInfoByTypeAndMore(packet, c.State())
 		if !ok {
 			err = BadPacketTypeError
 		}
@@ -83,7 +97,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	if err != nil {
 		return
 	}
-	packet, ok := LookUpTypeByPacketInfoAndCopyType(c.Actor.ReceiveDirection(), c.State, id, c.ProtocolVersion)
+	packet, ok := LookUpTypeByPacketInfoAndCopyType(c.Actor.ReceiveDirection(), c.State(), id, c.ProtocolVersion)
 	if !ok {
 		packet = &UnCodablePacket{Err: BadPacketIdError, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
@@ -108,10 +122,6 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 	}
 	err = c.Loop.Fire(packet)
 	return
-}
-
-func (c *Conn) StartOne(handler any) (err error) {
-	return c.Start(handler)
 }
 
 func (c *Conn) Start(handlers ...any) (err error) {

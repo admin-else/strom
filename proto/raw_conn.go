@@ -21,15 +21,21 @@ type RawConn struct {
 }
 
 func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
+	//fmt.Println("send:", rawPacketBytes)
 	var packetBytes []byte
 	if c.CompressionThreshold > 0 {
 		packetBuffer := bytes.NewBuffer(nil)
-		if int32(len(packetBytes)) >= c.CompressionThreshold {
-			err = proto_base.EncodeVarInt(packetBuffer, int32(len(packetBytes)))
+		if int32(len(rawPacketBytes)) >= c.CompressionThreshold {
+			err = proto_base.EncodeVarInt(packetBuffer, int32(len(rawPacketBytes)))
 			if err != nil {
 				return
 			}
-			_, err = zlib.NewWriter(packetBuffer).Write(rawPacketBytes)
+			zW := zlib.NewWriter(packetBuffer)
+			_, err = zW.Write(rawPacketBytes)
+			if err != nil {
+				return
+			}
+			err = zW.Close()
 			if err != nil {
 				return
 			}
@@ -47,11 +53,16 @@ func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
 	} else {
 		packetBytes = rawPacketBytes
 	}
-	err = proto_base.EncodeVarInt(c.W, int32(len(packetBytes)))
+	packetWithLenBuffer := bytes.NewBuffer(nil)
+	err = proto_base.EncodeVarInt(packetWithLenBuffer, int32(len(packetBytes)))
 	if err != nil {
 		return
 	}
-	_, err = c.W.Write(packetBytes)
+	_, err = packetWithLenBuffer.Write(packetBytes)
+	if err != nil {
+		return
+	}
+	_, err = c.W.Write(packetWithLenBuffer.Bytes())
 	return
 }
 
@@ -86,15 +97,16 @@ func (c *RawConn) ReceiveRaw() (packetBytes []byte, err error) {
 			if err != nil {
 				return
 			}
-			defer zReader.Close()
 			packetBytes, err = io.ReadAll(zReader)
 			if err != nil {
 				return
 			}
+			err = zReader.Close()
 		}
 	} else {
 		packetBytes = rawPacketBytes
 	}
+	//fmt.Println("recv:", packetBytes)
 	return
 }
 

@@ -46,7 +46,7 @@ func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err er
 			KeyValueExpr(Ident("Type"), AddrOf(CompLit(typeExpr, nil))),
 			KeyValueExpr(Ident("Name"), StrLit(p.Name)),
 			KeyValueExpr(Ident("Direction"), Selector("proto_base", p.Direction)),
-			KeyValueExpr(Ident("State"), Selector("proto_base", p.State)),
+			KeyValueExpr(Ident("state"), Selector("proto_base", p.State)),
 			KeyValueExpr(Ident("PacketId"), NumLit(int(packetId))),
 			KeyValueExpr(Ident("ProtocolVersion"), NumLit(protocolVersion)),
 		}))

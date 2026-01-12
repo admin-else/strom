@@ -54,6 +54,6 @@ func ServeStatus(c *proto.Conn, s StatusResponse) (err error) {
 		Conn:   c,
 		Status: string(status),
 	}
-	err = server.StartOne(server)
+	err = server.Start(server)
 	return
 }

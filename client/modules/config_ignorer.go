@@ -28,7 +28,7 @@ func (c *ConfigIgnorer) OnFinish(_ v1_21_8.ConfigurationToClientPacketFinishConf
 	if err != nil {
 		return
 	}
-	c.State = proto_base.Play
+	c.SetState(proto_base.Play)
 	err = event.ErrHandlerDone
 	return
 }
@@ -44,7 +44,7 @@ func (c *ConfigIgnorer) OnKeepAlive(packet *v1_21_8.ConfigurationToClientPacketK
 }
 
 func IgnoreConfig(c *proto.Conn) (err error) {
-	err = c.StartOne(&ConfigIgnorer{c})
+	err = c.Start(&ConfigIgnorer{c})
 	if err != nil {
 		err = errors.Join(err, errors.New("failed to ignore config"))
 	}
