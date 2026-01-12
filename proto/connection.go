@@ -65,6 +65,7 @@ func (c *Conn) SetVersion(version string) (err error) {
 }
 
 func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
+	//fmt.Println("send:", packet)
 	switch packet := packet.(type) {
 	case *UnCodablePacket:
 		err = c.SendRaw(packet.Data)
@@ -112,6 +113,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		packet = &UnCodablePacket{Err: PacketNotFullyDecodedError, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
 	}
+	//fmt.Println("recv:", packet)
 	return
 }
 

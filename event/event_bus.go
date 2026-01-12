@@ -51,6 +51,7 @@ func (l *Loop) FindHandlers() {
 			}
 			eventType := method.Type.In(1)
 			l.HandlerFunctions[eventType] = append(l.HandlerFunctions[eventType], v.Method(i))
+			//fmt.Println("Registered Handler:", t.String(), ".", method.Name, "(", eventType.String(), ")")
 		}
 	}
 }

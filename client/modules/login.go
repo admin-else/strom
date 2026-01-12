@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -15,6 +16,7 @@ import (
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
+	"github.com/admin-else/strom/text"
 
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 )
@@ -26,6 +28,14 @@ type LoginClient struct {
 	ServerPort uint16
 
 	GivenAccount *v1_21_8.LoginToClientPacketSuccess
+}
+
+type KickedDuringLoginErr struct {
+	text.Component
+}
+
+func (k KickedDuringLoginErr) Error() string {
+	return k.String()
 }
 
 func (s *LoginClient) Default(event event.Unhandled) (err error) {
@@ -67,11 +77,11 @@ func (s *LoginClient) OnStart(_ event.OnStart) (err error) {
 }
 
 func (s *LoginClient) OnCompress(compress *v1_21_8.LoginToClientPacketCompress) (err error) {
-	s.CompressionThreshold = int32(compress.Threshold)
+	s.CompressionThreshold = compress.Threshold
 	return
 }
 
-func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegin) (err error) {
+func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBegin) (err error) {
 	sharedSecret := make([]byte, 16)
 	_, _ = rand.Read(sharedSecret) //never fails
 
@@ -112,6 +122,16 @@ func (s *LoginClient) OnEncrypt(packet v1_21_8.LoginToClientPacketEncryptionBegi
 	err = s.SetSecret(sharedSecret)
 	return
 
+}
+
+func (s *LoginClient) OnDisconnect(packet *v1_21_8.LoginToClientPacketDisconnect) (err error) {
+	var reason text.Component
+	err = json.Unmarshal([]byte(packet.Reason), &reason)
+	if err != nil {
+		return
+	}
+	err = KickedDuringLoginErr{reason}
+	return
 }
 
 func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (err error) {

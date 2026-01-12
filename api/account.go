@@ -78,8 +78,7 @@ func (a *Account) FetchKeys() (keys PlayerKeys, err error) {
 }
 
 func (a *Account) JoinServer(serverId string) (err error) {
-	var body []byte
-	body, err = json.Marshal(struct {
+	body, err := json.Marshal(struct {
 		AccessToken     string `json:"accessToken"`
 		SelectedProfile string `json:"selectedProfile"`
 		ServerId        string `json:"serverId"`
@@ -91,8 +90,7 @@ func (a *Account) JoinServer(serverId string) (err error) {
 	if err != nil {
 		return
 	}
-	var resp *http.Response
-	resp, err = http.Post("https://sessionserver.mojang.com/session/minecraft/join", "application/json", bytes.NewReader(body))
+	resp, err := http.Post("https://sessionserver.mojang.com/session/minecraft/join", "application/json", bytes.NewReader(body))
 	if err != nil {
 		return
 	}

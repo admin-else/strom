@@ -6,6 +6,8 @@ import (
 )
 
 func LookupMinecraftSRV(host string, port uint16) (hostRet string, portRet uint16) {
+	hostRet = host // in case of error
+	portRet = port
 	if port != 25565 {
 		return
 	}
