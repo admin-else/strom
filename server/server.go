@@ -1,11 +1,13 @@
 package server
 
 import (
-	"log"
+	"log/slog"
 	"net"
 
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
+	"github.com/admin-else/strom/server/server_modules"
+	"github.com/admin-else/strom/text"
 )
 
 func Servee(c net.Conn) (ret *proto.Conn) {
@@ -13,7 +15,7 @@ func Servee(c net.Conn) (ret *proto.Conn) {
 	_ = ret.SetVersion("1.21.8") // cant fail
 	ret.SetState(proto_base.Handshaking)
 	ret.CompressionThreshold = -1
-	ret.Actor = proto_base.Server
+	ret.Actor = proto_base.Servee
 	ret.Conn = c
 	ret.R = c
 	ret.W = c
@@ -57,9 +59,15 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 			return
 		}
 		go func() {
-			connErr := onConn(Servee(cNet))
+			c := Servee(cNet)
+			defer c.Close()
+			connErr := onConn(c)
 			if connErr != nil {
-				log.Println(connErr)
+				slog.Error("Error while handling client", "error", connErr, "client", c.Conn.RemoteAddr())
+				connErr = server_modules.Kick(c, text.Pretty(connErr.Error()))
+				if connErr != nil {
+					slog.Error("Error while kicking client", "error", connErr, "client", c.Conn.RemoteAddr())
+				}
 			}
 		}()
 	}

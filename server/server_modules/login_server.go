@@ -1,7 +1,11 @@
 package server_modules
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"log/slog"
+	"slices"
 
 	"github.com/admin-else/strom/api"
 	"github.com/admin-else/strom/event"
@@ -10,6 +14,8 @@ import (
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 	"github.com/google/uuid"
 )
+
+var StatusServedError = errors.New("status served")
 
 var UnexpectedStatusRequest = UnexpectedNextStateError{proto_base.Status}
 
@@ -26,23 +32,49 @@ func (u UnexpectedNextStateError) Error() string {
 	return fmt.Sprintf("unexpected next state: %v", u.NextState)
 }
 
+var IncompatibleProtocolVersionError = fmt.Errorf("incompatible protocol version")
+
 type LoginServer struct {
 	*proto.Conn
 	//OnlineMode           bool FIXME: implement this
 	ServerHost           string
+	ServerPort           uint16
 	Requested            NameAndUUID
 	Given                *NameAndUUID
 	CompressionThreshold int32
+	Status               []byte
+	CompatibleVersions   []int32
 }
 
 func (l *LoginServer) OnHandshake(packet *v1_21_8.HandshakingToServerPacketSetProtocol) (err error) {
 	l.SetState(proto_base.State(packet.NextState))
 	l.ServerHost = packet.ServerHost
-	if packet.NextState != int32(proto_base.Login) {
+	l.ServerPort = packet.ServerPort
+
+	if len(l.CompatibleVersions) != 0 {
+		if !slices.Contains(l.CompatibleVersions, packet.ProtocolVersion) {
+			err = IncompatibleProtocolVersionError
+			return
+		}
+	}
+
+	if packet.NextState != int32(proto_base.Login) && !(l.Status != nil && packet.NextState == int32(proto_base.Status)) {
 		err = UnexpectedNextStateError{proto_base.State(packet.NextState)}
-		return
 	}
 	return
+}
+
+func (l *LoginServer) OnStatusRequest(_ *v1_21_8.StatusToServerPacketPingStart) (err error) {
+	err = l.Send(&v1_21_8.StatusToClientPacketServerInfo{Response: string(l.Status)})
+	return
+}
+
+func (l *LoginServer) OnStatusPing(packet *v1_21_8.StatusToServerPacketPing) (err error) {
+	err = l.Send(&v1_21_8.StatusToClientPacketPing{Time: packet.Time})
+	if err != nil {
+		return
+	}
+	return event.HandlerDoneErr{Return: StatusServedError}
 }
 
 func (l *LoginServer) SetCompressionThreshold(threshold int32) (err error) {
@@ -73,7 +105,7 @@ func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart
 
 func (l *LoginServer) OnLoginAcknowledged(_ *v1_21_8.LoginToServerPacketLoginAcknowledged) (err error) {
 	l.SetState(proto_base.Configuration)
-	err = event.ErrHandlerDone
+	err = event.HandlerDoneErr{}
 	return
 }
 
@@ -91,18 +123,59 @@ func (l *LoginServer) OnCycle(_ event.Tick) (err error) {
 	return
 }
 
-func ServeLogin(c *proto.Conn) (ret *LoginServer, err error) {
-	ret = &LoginServer{Conn: c}
-	ret.CompressionThreshold = 256
-	err = ret.Start(ret)
-	return
+type LoginServerSetting func(*LoginServer)
+
+func WithOtherAccount(a *api.Account) LoginServerSetting {
+	return func(s *LoginServer) {
+		if s.Given == nil {
+			return
+		}
+		s.Given = &NameAndUUID{
+			Name: a.Name,
+			UUID: a.Uuid,
+		}
+	}
 }
 
-func ServeLoginWithOtherAccount(c *proto.Conn, a *api.Account) (ret *LoginServer, err error) {
-	ret = &LoginServer{Conn: c, Given: &NameAndUUID{
-		Name: a.Name,
-		UUID: a.Uuid,
-	}}
+func WithRawStatus(status []byte) LoginServerSetting {
+	return func(s *LoginServer) {
+		s.Status = status
+	}
+}
+
+func WithStatus(response StatusResponse) LoginServerSetting {
+	var status []byte
+	status, err := json.Marshal(response)
+	if err != nil {
+		panic(err)
+	}
+	slog.Debug("With status", "status", status)
+	return WithRawStatus(status)
+}
+
+func WithCompatibleVersion(versions int32) LoginServerSetting {
+	return WithCompatibleVersions([]int32{versions})
+}
+
+func WithCompatibleVersionsRange(start, end int32) LoginServerSetting {
+	var versions []int32
+	for i := start; i <= end; i++ {
+		versions = append(versions, i)
+	}
+	return WithCompatibleVersions(versions)
+}
+
+func WithCompatibleVersions(versions []int32) LoginServerSetting {
+	return func(s *LoginServer) {
+		s.CompatibleVersions = versions
+	}
+}
+
+func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer, err error) {
+	ret = &LoginServer{Conn: c}
+	for _, s := range settings {
+		s(ret)
+	}
 	ret.CompressionThreshold = 256
 	err = ret.Start(ret)
 	return

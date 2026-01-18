@@ -27,8 +27,18 @@ type (
 	Tick    struct{}
 )
 
-// ErrHandlerDone will stop the event loop.
-var ErrHandlerDone = errors.New("handler done")
+// HandlerDoneErr will stop the event loop and return the error if provided.
+type HandlerDoneErr struct {
+	Return error
+}
+
+func (e HandlerDoneErr) Error() string {
+	return "HandlerDoneErr"
+}
+
+func (e HandlerDoneErr) Unwrap() error {
+	return e.Return
+}
 
 // ErrDontForward will stop the event from being forwarded to other handlers, including anything handlers.
 var ErrDontForward = errors.New("dont forward")
@@ -101,8 +111,8 @@ func (l *Loop) Start() (err error) {
 			break
 		}
 	}
-	if errors.Is(err, ErrHandlerDone) {
-		err = nil
+	if errors.Is(err, HandlerDoneErr{}) {
+		err = errors.Unwrap(err)
 	}
 	return
 }

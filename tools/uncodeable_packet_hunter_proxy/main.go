@@ -1,8 +1,8 @@
+// THIS THING IS BROKEN
 package main
 
 import (
 	"crypto/sha256"
-	"errors"
 	"fmt"
 	"os"
 
@@ -14,6 +14,7 @@ import (
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/server"
 	"github.com/admin-else/strom/server/server_modules"
+	"github.com/admin-else/strom/text"
 )
 
 type ProxyClient struct {
@@ -123,22 +124,33 @@ func SaveUnCodeAbleAsTest(d proto_base.Direction, packet proto.UnCodablePacket) 
 	fmt.Println("Error", packet.Err, "saved to", f.Name(), "data:", packet.Data)
 }
 
-var StatusResponse = server_modules.StatusResponse{Description: struct {
-	Text string `json:"text"`
-}{Text: "Un-code-able packet hunter proxy"}, Version: struct {
-	Name     string `json:"name"`
-	Protocol int    `json:"protocol"`
-}{Name: "STROM", Protocol: 772}}
+var StatusResponse = server_modules.StatusResponse{
+	Version: struct {
+		Name     *text.Component `json:"name"`
+		Protocol int             `json:"protocol"`
+	}{
+		Name:     text.Pretty("STROM"),
+		Protocol: 772,
+	},
+	Players: struct {
+		Max    int `json:"max"`
+		Online int `json:"online"`
+		Sample []struct {
+			Name *text.Component `json:"name"`
+			ID   string          `json:"id"`
+		} `json:"sample"`
+	}{},
+	Description:        text.Pretty("Hunt the uncodeable packets"),
+	Favicon:            "",
+	EnforcesSecureChat: false,
+}
 
 func main() {
 	err := server.StartServerWithOnConn(":25565", func(serveeConn *proto.Conn) (err error) {
 		p := &Proxy{Conn: serveeConn, Client: nil}
 		acc := api.NewOfflineAccount("sigma")
-		_, err = server_modules.ServeLoginWithOtherAccount(serveeConn, acc)
+		_, err = server_modules.ServeLogin(serveeConn, server_modules.WithOtherAccount(acc), server_modules.WithStatus(StatusResponse))
 		if err != nil {
-			if errors.Is(err, server_modules.UnexpectedStatusRequest) {
-				err = server_modules.ServeStatus(serveeConn, StatusResponse)
-			}
 			return
 		}
 		c, err := modules.ConnectAndLogin("127.0.0.1:25566", acc)

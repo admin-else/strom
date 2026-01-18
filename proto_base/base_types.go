@@ -41,13 +41,13 @@ const (
 type Actor int
 
 const (
-	Server Actor = iota
+	Servee Actor = iota // Servee is the one being served
 	Client
 )
 
 func (a Actor) SendDirection() Direction {
 	switch a {
-	case Server:
+	case Servee:
 		return ToClient
 	case Client:
 		return ToServer
@@ -58,7 +58,7 @@ func (a Actor) SendDirection() Direction {
 
 func (a Actor) ReceiveDirection() Direction {
 	switch a {
-	case Server:
+	case Servee:
 		return ToServer
 	case Client:
 		return ToClient

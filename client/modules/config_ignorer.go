@@ -29,7 +29,7 @@ func (c *ConfigIgnorer) OnFinish(_ v1_21_8.ConfigurationToClientPacketFinishConf
 		return
 	}
 	c.SetState(proto_base.Play)
-	err = event.ErrHandlerDone
+	err = event.HandlerDoneErr{}
 	return
 }
 

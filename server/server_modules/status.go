@@ -5,27 +5,26 @@ import (
 
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/text"
 )
 
 // StatusResponse here is the structure I used: https://minecraft.wiki/w/Java_Edition_protocol/Server_List_Ping#Status_Response
 type StatusResponse struct {
 	Version struct {
-		Name     string `json:"name"`
-		Protocol int    `json:"protocol"`
+		Name     *text.Component `json:"name"`
+		Protocol int             `json:"protocol"`
 	} `json:"version"`
 	Players struct {
 		Max    int `json:"max"`
 		Online int `json:"online"`
 		Sample []struct {
-			Name string `json:"name"`
-			ID   string `json:"id"`
+			Name *text.Component `json:"name"`
+			ID   string          `json:"id"`
 		} `json:"sample"`
 	} `json:"players"`
-	Description struct {
-		Text string `json:"text"`
-	} `json:"description"`
-	Favicon            string `json:"favicon"`
-	EnforcesSecureChat bool   `json:"enforcesSecureChat"`
+	Description        *text.Component `json:"description"`
+	Favicon            string          `json:"favicon"`
+	EnforcesSecureChat bool            `json:"enforcesSecureChat"`
 }
 
 type StatusServer struct {

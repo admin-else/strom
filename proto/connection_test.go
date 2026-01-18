@@ -62,7 +62,7 @@ func NewStateFuzzer(state proto_base.State, actor proto_base.Actor) func(t *test
 }
 
 func FuzzConnHandshakingToServer(f *testing.F) {
-	f.Fuzz(NewStateFuzzer(proto_base.Handshaking, proto_base.Server))
+	f.Fuzz(NewStateFuzzer(proto_base.Handshaking, proto_base.Servee))
 }
 
 func FuzzConnHandshakingToClient(f *testing.F) {
@@ -70,7 +70,7 @@ func FuzzConnHandshakingToClient(f *testing.F) {
 }
 
 func FuzzConnStatusToServer(f *testing.F) {
-	f.Fuzz(NewStateFuzzer(proto_base.Status, proto_base.Server))
+	f.Fuzz(NewStateFuzzer(proto_base.Status, proto_base.Servee))
 }
 
 func FuzzConnStatusToClient(f *testing.F) {
@@ -78,7 +78,7 @@ func FuzzConnStatusToClient(f *testing.F) {
 }
 
 func FuzzConnLoginToServer(f *testing.F) {
-	f.Fuzz(NewStateFuzzer(proto_base.Login, proto_base.Server))
+	f.Fuzz(NewStateFuzzer(proto_base.Login, proto_base.Servee))
 }
 
 func FuzzConnLoginToClient(f *testing.F) {
@@ -86,7 +86,7 @@ func FuzzConnLoginToClient(f *testing.F) {
 }
 
 func FuzzConnConfigToServer(f *testing.F) {
-	f.Fuzz(NewStateFuzzer(proto_base.Configuration, proto_base.Server))
+	f.Fuzz(NewStateFuzzer(proto_base.Configuration, proto_base.Servee))
 }
 
 func FuzzConnConfigToClient(f *testing.F) {
@@ -94,7 +94,7 @@ func FuzzConnConfigToClient(f *testing.F) {
 }
 
 func FuzzConnPlayToServer(f *testing.F) {
-	f.Fuzz(NewStateFuzzer(proto_base.Play, proto_base.Server))
+	f.Fuzz(NewStateFuzzer(proto_base.Play, proto_base.Servee))
 }
 
 func FuzzConnPlayToClient(f *testing.F) {

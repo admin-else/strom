@@ -141,7 +141,7 @@ func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (er
 		return
 	}
 	s.SetState(proto_base.Configuration)
-	err = event.ErrHandlerDone
+	err = event.HandlerDoneErr{}
 	return
 }
 

@@ -49,6 +49,6 @@ func (s *StatusClient) OnStart(_ event.OnStart) (err error) {
 
 func (s *StatusClient) OnStatus(p v1_21_8.StatusToClientPacketServerInfo) (err error) {
 	s.Status = p.Response
-	err = event.ErrHandlerDone
+	err = event.HandlerDoneErr{}
 	return
 }
