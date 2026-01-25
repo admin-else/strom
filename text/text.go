@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/admin-else/strom/nbt"
 )
 
 // Component represents a Minecraft text component.
@@ -536,5 +538,16 @@ func (c *Component) writePretty(sb *strings.Builder) {
 
 	for _, extra := range c.Extra {
 		extra.writePretty(sb)
+	}
+}
+
+func (c *Component) AsNBT() nbt.Anon {
+	return nbt.Anon{Value: c.ToNBT()}
+}
+
+func (c *Component) AsOldNBT() nbt.Tag {
+	return nbt.Tag{
+		Name:  "",
+		Value: c.ToNBT(),
 	}
 }

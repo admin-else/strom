@@ -63,6 +63,9 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 			defer c.Close()
 			connErr := onConn(c)
 			if connErr != nil {
+				if c.State() == proto_base.Status || c.State() == proto_base.Handshaking {
+					return // we dont care about status packets
+				}
 				slog.Error("Error while handling client", "error", connErr, "client", c.Conn.RemoteAddr())
 				connErr = server_modules.Kick(c, text.Pretty(connErr.Error()))
 				if connErr != nil {

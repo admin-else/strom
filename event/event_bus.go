@@ -4,6 +4,7 @@ package event
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"reflect"
 	"strings"
 )
@@ -61,7 +62,7 @@ func (l *Loop) FindHandlers() {
 			}
 			eventType := method.Type.In(1)
 			l.HandlerFunctions[eventType] = append(l.HandlerFunctions[eventType], v.Method(i))
-			//fmt.Println("Registered Handler:", t.String(), ".", method.Name, "(", eventType.String(), ")")
+			slog.Debug("Registered Handler", "at", t.String()+"."+method.Name, "for", eventType.String())
 		}
 	}
 }

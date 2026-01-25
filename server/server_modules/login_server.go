@@ -32,8 +32,6 @@ func (u UnexpectedNextStateError) Error() string {
 	return fmt.Sprintf("unexpected next state: %v", u.NextState)
 }
 
-var IncompatibleProtocolVersionError = fmt.Errorf("incompatible protocol version")
-
 type LoginServer struct {
 	*proto.Conn
 	//OnlineMode           bool FIXME: implement this
@@ -51,16 +49,17 @@ func (l *LoginServer) OnHandshake(packet *v1_21_8.HandshakingToServerPacketSetPr
 	l.ServerHost = packet.ServerHost
 	l.ServerPort = packet.ServerPort
 
+	if packet.NextState != int32(proto_base.Login) && !(l.Status != nil && packet.NextState == int32(proto_base.Status)) {
+		err = UnexpectedNextStateError{proto_base.State(packet.NextState)}
+	}
+
 	if len(l.CompatibleVersions) != 0 {
 		if !slices.Contains(l.CompatibleVersions, packet.ProtocolVersion) {
-			err = IncompatibleProtocolVersionError
+			err = fmt.Errorf("incompatible protocol version please use one of %v you can look up the real coresponding version at https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers", l.CompatibleVersions)
 			return
 		}
 	}
 
-	if packet.NextState != int32(proto_base.Login) && !(l.Status != nil && packet.NextState == int32(proto_base.Status)) {
-		err = UnexpectedNextStateError{proto_base.State(packet.NextState)}
-	}
 	return
 }
 
