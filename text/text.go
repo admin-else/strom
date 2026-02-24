@@ -62,9 +62,54 @@ func (c *Component) MarshalJSON() ([]byte, error) {
 	if c.isSimpleText() {
 		return json.Marshal(c.Text)
 	}
+	if c.hasFormattingButNoContent() {
+		// just like component but text does not have omitempty
+		type AliasWithText struct {
+			Bold          *bool       `json:"bold,omitempty"`
+			Italic        *bool       `json:"italic,omitempty"`
+			Underlined    *bool       `json:"underlined,omitempty"`
+			Strikethrough *bool       `json:"strikethrough,omitempty"`
+			Obfuscated    *bool       `json:"obfuscated,omitempty"`
+			Font          string      `json:"font,omitempty"`
+			Color         string      `json:"color,omitempty"`
+			Insertion     string      `json:"insertion,omitempty"`
+			ClickEvent    *ClickEvent `json:"clickEvent,omitempty"`
+			HoverEvent    *HoverEvent `json:"hoverEvent,omitempty"`
+			Extra         []Component `json:"extra,omitempty"`
 
+			Text string `json:"text"`
+
+			Translate string      `json:"translate,omitempty"`
+			With      []Component `json:"with,omitempty"`
+			Score     *Score      `json:"score,omitempty"`
+			Selector  string      `json:"selector,omitempty"`
+			Keybind   string      `json:"keybind,omitempty"`
+			NBT       string      `json:"nbt,omitempty"`
+			Interpret bool        `json:"interpret,omitempty"`
+			Block     string      `json:"block,omitempty"`
+			Entity    string      `json:"entity,omitempty"`
+			Storage   string      `json:"storage,omitempty"`
+			Separator *Component  `json:"separator,omitempty"`
+		}
+		return json.Marshal(AliasWithText(*c))
+	}
 	type Alias Component
+
 	return json.Marshal(Alias(*c))
+}
+
+// hasFormattingButNoContent checks if the component has formatting/styling but no content fields
+func (c *Component) hasFormattingButNoContent() bool {
+	hasFormatting := c.Bold != nil || c.Italic != nil || c.Underlined != nil ||
+		c.Strikethrough != nil || c.Obfuscated != nil || c.Font != "" ||
+		c.Color != "" || c.Insertion != "" || c.ClickEvent != nil ||
+		c.HoverEvent != nil || len(c.Extra) > 0 || c.Separator != nil
+
+	hasContent := c.Text != "" || c.Translate != "" || len(c.With) > 0 ||
+		c.Score != nil || c.Selector != "" || c.Keybind != "" ||
+		c.NBT != "" || c.Block != "" || c.Entity != "" || c.Storage != ""
+
+	return hasFormatting && !hasContent
 }
 
 func (c *Component) isSimpleText() bool {
@@ -213,6 +258,10 @@ func (c *Component) ToNBT() any {
 	}
 	if c.Separator != nil {
 		m["separator"] = c.Separator.ToNBT()
+	}
+
+	if c.hasFormattingButNoContent() {
+		m["text"] = ""
 	}
 
 	return m

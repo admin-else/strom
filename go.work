@@ -1,8 +1,0 @@
-go 1.25
-
-use (
-	.devres/examples/ishacking
-	.
-	.devres/examples/ishackingapis
-	.devres/examples/testmod
-)

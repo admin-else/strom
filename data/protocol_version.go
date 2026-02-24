@@ -9,18 +9,18 @@ package data
 //    "releaseType": "snapshot"
 //  },
 
-type ProtocolVersion struct {
+type VersionInfo struct {
 	MinecraftVersion string
-	Version          int
+	Version          int32
 	DataVersion      int
 	UsesNetty        bool
 	MajorVersion     string
 	ReleaseType      string
 }
 
-var ProtocolVersions []ProtocolVersion
+var ProtocolVersions []VersionInfo
 
-func LookUpProtocolVersionByName(name string) (ret ProtocolVersion, err error) {
+func LookUpVersionByName(name string) (ret VersionInfo, err error) {
 	for _, v := range ProtocolVersions {
 		if v.MinecraftVersion == name {
 			ret = v
@@ -31,7 +31,7 @@ func LookUpProtocolVersionByName(name string) (ret ProtocolVersion, err error) {
 	return
 }
 
-func LookUpProtocolVersionByVersion(version int) (ret ProtocolVersion, err error) {
+func LookUpVersionByProtocolVersion(version int32) (ret VersionInfo, err error) {
 	for _, v := range ProtocolVersions {
 		if v.Version == version {
 			ret = v

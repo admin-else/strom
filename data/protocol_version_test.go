@@ -7,7 +7,7 @@ import (
 )
 
 func TestLookUpProtocolVersion(t *testing.T) {
-	version, err := data.LookUpProtocolVersionByVersion(772)
+	version, err := data.LookUpVersionByProtocolVersion(772)
 	if err != nil {
 		t.Fatalf("Expected to find version 772, got error: %v", err)
 	}

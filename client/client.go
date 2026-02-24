@@ -7,6 +7,7 @@ import (
 	"github.com/admin-else/strom/proto_base"
 )
 
+// Connect connects to the given address note that it does not resolve the SRV records its just a raw net.Dial
 func Connect(addr string) (ret *proto.Conn, err error) {
 	ret = &proto.Conn{}
 	err = ret.SetVersion("1.21.8")

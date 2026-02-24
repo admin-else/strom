@@ -4,6 +4,7 @@ package main
 import (
 	"crypto/sha256"
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/admin-else/strom/api"
@@ -13,7 +14,6 @@ import (
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/server"
-	"github.com/admin-else/strom/server/server_modules"
 	"github.com/admin-else/strom/text"
 )
 
@@ -116,6 +116,7 @@ func SaveUnCodeAbleAsTest(d proto_base.Direction, packet proto.UnCodablePacket) 
 	if err != nil {
 		panic(err)
 	}
+	//goland:noinspection GoUnhandledErrorResult
 	defer f.Close()
 	_, err = fmt.Fprintf(f, TestSrcF, packet.Err, h, d.Opposite(), packet.Data)
 	if err != nil {
@@ -124,32 +125,23 @@ func SaveUnCodeAbleAsTest(d proto_base.Direction, packet proto.UnCodablePacket) 
 	fmt.Println("Error", packet.Err, "saved to", f.Name(), "data:", packet.Data)
 }
 
-var StatusResponse = server_modules.StatusResponse{
-	Version: struct {
-		Name     *text.Component `json:"name"`
-		Protocol int             `json:"protocol"`
-	}{
+var StatusResponse = server.StatusResponse{
+	Version: server.StatusResponseVersion{
 		Name:     text.Pretty("STROM"),
 		Protocol: 772,
 	},
-	Players: struct {
-		Max    int `json:"max"`
-		Online int `json:"online"`
-		Sample []struct {
-			Name *text.Component `json:"name"`
-			ID   string          `json:"id"`
-		} `json:"sample"`
-	}{},
+	Players:            server.StatusResponsePlayers{},
 	Description:        text.Pretty("Hunt the uncodeable packets"),
 	Favicon:            "",
 	EnforcesSecureChat: false,
 }
 
 func main() {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	err := server.StartServerWithOnConn(":25565", func(serveeConn *proto.Conn) (err error) {
 		p := &Proxy{Conn: serveeConn, Client: nil}
 		acc := api.NewOfflineAccount("sigma")
-		_, err = server_modules.ServeLogin(serveeConn, server_modules.WithOtherAccount(acc), server_modules.WithStatus(StatusResponse))
+		_, err = server.ServeLogin(serveeConn, server.WithOtherAccount(acc), server.WithStatus(StatusResponse))
 		if err != nil {
 			return
 		}
@@ -161,7 +153,6 @@ func main() {
 		p.Client = pc
 		errChan := make(chan error)
 		defer pc.Close()
-		defer p.Close()
 		go func() {
 			errChan <- pc.Start(pc)
 		}()

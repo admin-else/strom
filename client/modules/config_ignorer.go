@@ -3,6 +3,7 @@ package modules
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
@@ -14,8 +15,8 @@ type ConfigIgnorer struct {
 	*proto.Conn
 }
 
-func (c *ConfigIgnorer) Default(event any) (err error) {
-	fmt.Printf("%#v\n", event)
+func (c *ConfigIgnorer) Default(event event.Anything) (err error) {
+	slog.Debug("Config ignorer", "packet", fmt.Sprintf("%#v", event))
 	return
 }
 
@@ -23,7 +24,7 @@ func (c *ConfigIgnorer) OnKnownPacks(packet *v1_21_8.ConfigurationToClientPacket
 	return c.Send(&v1_21_8.ConfigurationToServerPacketCommonSelectKnownPacks{Packs: packet.Packs})
 }
 
-func (c *ConfigIgnorer) OnFinish(_ v1_21_8.ConfigurationToClientPacketFinishConfiguration) (err error) {
+func (c *ConfigIgnorer) OnFinish(_ *v1_21_8.ConfigurationToClientPacketFinishConfiguration) (err error) {
 	err = c.Send(&v1_21_8.ConfigurationToServerPacketFinishConfiguration{})
 	if err != nil {
 		return

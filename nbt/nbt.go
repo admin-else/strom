@@ -62,7 +62,7 @@ func (s *Anon) Encode(w io.Writer) (err error) {
 	return
 }
 
-func (s *Tag) Read(r io.Reader) (err error) {
+func (s *Tag) Decode(r io.Reader) (err error) {
 	id := int8(0)
 	err = binary.Read(r, Order, &id)
 	if err != nil {
@@ -81,7 +81,7 @@ func (s *Tag) Read(r io.Reader) (err error) {
 	return
 }
 
-func (s *Tag) Write(w io.Writer) (err error) {
+func (s *Tag) Encode(w io.Writer) (err error) {
 	id, err := getId(s.Value)
 	if err != nil {
 		return

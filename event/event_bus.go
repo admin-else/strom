@@ -44,8 +44,8 @@ func (e HandlerDoneErr) Unwrap() error {
 // ErrDontForward will stop the event from being forwarded to other handlers, including anything handlers.
 var ErrDontForward = errors.New("dont forward")
 
-// FindHandlers initializes and populates the HandlerFunctions map by reflecting over methods of registered handlers.
-func (l *Loop) FindHandlers() {
+// SetHandlerFunctions initializes and populates the HandlerFunctions map by reflecting over methods of registered handlers.
+func (l *Loop) SetHandlerFunctions() {
 	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
 	for _, inst := range l.Handlers {
 		t := reflect.TypeOf(inst)
@@ -104,7 +104,7 @@ func (l *Loop) Fire(event any) (err error) {
 
 func (l *Loop) Start() (err error) {
 	_ = *l // exit early on nil connection
-	l.FindHandlers()
+	l.SetHandlerFunctions()
 	err = l.Fire(OnStart{})
 	for err == nil {
 		err = l.Fire(Tick{})

@@ -45,6 +45,17 @@ const (
 	Client
 )
 
+func (a Actor) String() string {
+	switch a {
+	case Servee:
+		return "Servee"
+	case Client:
+		return "Client"
+	default:
+		return "Unknown"
+	}
+}
+
 func (a Actor) SendDirection() Direction {
 	switch a {
 	case Servee:
@@ -65,12 +76,6 @@ func (a Actor) ReceiveDirection() Direction {
 	default:
 		panic("invalid actor")
 	}
-}
-
-type PacketIdentifier struct {
-	Direction Direction
-	State     State
-	Name      string
 }
 
 type (

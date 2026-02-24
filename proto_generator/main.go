@@ -247,7 +247,7 @@ func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 }
 
 func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err error) {
-	versionData, err := data.LookUpProtocolVersionByName(version)
+	versionData, err := data.LookUpVersionByName(version)
 	if err != nil {
 		return
 	}
@@ -298,7 +298,7 @@ func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err err
 					Direction:        types.Direction,
 					State:            types.State,
 					PacketId:         packetIdsRev[k2],
-					ProtocolVersion:  strconv.Itoa(versionData.Version),
+					ProtocolVersion:  strconv.Itoa(int(versionData.Version)),
 					MinecraftVersion: version,
 				})
 			}

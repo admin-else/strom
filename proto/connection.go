@@ -3,7 +3,9 @@ package proto
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
+	"log/slog"
 	"sync"
 
 	"github.com/admin-else/strom/data"
@@ -56,7 +58,7 @@ func (c *Conn) State() proto_base.State {
 
 func (c *Conn) SetVersion(version string) (err error) {
 	c.Version = version
-	versionData, err := data.LookUpProtocolVersionByName(c.Version)
+	versionData, err := data.LookUpVersionByName(c.Version)
 	if err != nil {
 		return
 	}
@@ -122,6 +124,7 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 	if err != nil {
 		return
 	}
+	slog.Debug("packet", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 	err = c.Loop.Fire(packet)
 	return
 }
@@ -131,5 +134,7 @@ func (c *Conn) Start(handlers ...any) (err error) {
 	c.Handlers = append(c.Handlers, c)
 	c.Handlers = append(c.Handlers, handlers...)
 	err = c.Loop.Start()
+	c.Handlers = c.Handlers[:len(c.Handlers)-len(handlers)]
+	c.Loop.SetHandlerFunctions()
 	return
 }

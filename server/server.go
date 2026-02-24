@@ -6,7 +6,6 @@ import (
 
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
-	"github.com/admin-else/strom/server/server_modules"
 	"github.com/admin-else/strom/text"
 )
 
@@ -43,7 +42,12 @@ func StartServerWithFactory(listenAddr string, factory func(c *proto.Conn) (h an
 		if err != nil {
 			return
 		}
-		go ServeClient(cNet, factory)
+		go func() {
+			err := ServeClient(cNet, factory)
+			if err != nil {
+				slog.Error("error while serving client", "error", err, "client", cNet.RemoteAddr())
+			}
+		}()
 	}
 }
 
@@ -67,7 +71,7 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 					return // we dont care about status packets
 				}
 				slog.Error("Error while handling client", "error", connErr, "client", c.Conn.RemoteAddr())
-				connErr = server_modules.Kick(c, text.Pretty(connErr.Error()))
+				connErr = Kick(c, text.Pretty(connErr.Error()))
 				if connErr != nil {
 					slog.Error("Error while kicking client", "error", connErr, "client", c.Conn.RemoteAddr())
 				}

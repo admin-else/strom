@@ -25,7 +25,7 @@ func (s *StatusClient) Default(event any) (err error) {
 
 func (s *StatusClient) OnStart(_ event.OnStart) (err error) {
 	parts := strings.Split(s.RemoteAddr().String(), ":")
-	versionData, err := data.LookUpProtocolVersionByName(s.Version)
+	versionData, err := data.LookUpVersionByName(s.Version)
 	if err != nil {
 		return
 	}
@@ -34,7 +34,7 @@ func (s *StatusClient) OnStart(_ event.OnStart) (err error) {
 		return
 	}
 	err = s.Send(&v1_21_8.HandshakingToServerPacketSetProtocol{
-		ProtocolVersion: int32(versionData.Version),
+		ProtocolVersion: versionData.Version,
 		ServerHost:      parts[0],
 		ServerPort:      uint16(port),
 		NextState:       int32(proto_base.Status),
