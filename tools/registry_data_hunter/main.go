@@ -3,14 +3,14 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log/slog"
+	"os"
 
 	"github.com/admin-else/strom/api"
 	"github.com/admin-else/strom/client"
-	"github.com/admin-else/strom/client/modules"
 	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/event"
+	"github.com/admin-else/strom/nbt"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
@@ -26,7 +26,12 @@ func wontFail[T any](v T, err error) T {
 }
 
 var (
-	CompatibleProtocolVersion = wontFail(data.LookUpVersionByName("1.21.8")).Version
+	// Edit these two
+
+	SaveAs  = "1.21.8"
+	Version = "1.21.8"
+
+	CompatibleProtocolVersion = wontFail(data.LookUpVersionByName(Version)).Version
 	FinishedConfigErr         = errors.New("finished configuration")
 )
 
@@ -40,6 +45,7 @@ var Status = wontFail(json.Marshal(server.StatusResponse{
 
 type Proxy struct {
 	Client, Servee *proto.Conn
+	Data           nbt.Tag
 }
 
 func (p *Proxy) OnAnything(e event.Anything) (err error) {
@@ -51,7 +57,6 @@ func (p *Proxy) OnAnything(e event.Anything) (err error) {
 	if !ok {
 		return
 	}
-	slog.Debug("packet", "type", packetInfo.Name, "packet", fmt.Sprintf("%#v", packet))
 	switch packetInfo.Direction {
 	case proto_base.ToServer:
 		err = p.Client.Send(packet)
@@ -61,12 +66,32 @@ func (p *Proxy) OnAnything(e event.Anything) (err error) {
 	return
 }
 
-func (p *Proxy) OnFinishConfiguration(_ *v1_21_8.ConfigurationToServerPacketFinishConfiguration) (err error) {
+func (p *Proxy) OnFinishConfiguration(_ *v1_21_8.ConfigurationToClientPacketFinishConfiguration) (err error) {
 	err = FinishedConfigErr
 	return
 }
 
 func (p *Proxy) OnData(data *v1_21_8.ConfigurationToClientPacketRegistryData) (err error) {
+	d := p.Data.Value.(map[string]any)["Registries"].([]any)
+	var entries []any
+	for _, entry := range data.Entries {
+		entries = append(entries, map[string]any{"TagType": entry.Key, "Value": entry.Value.Value})
+	}
+	d = append(d, map[string]any{"Id": data.Id, "Entries": entries})
+	p.Data.Value.(map[string]any)["Registries"] = d
+	return
+}
+
+func (p *Proxy) OnTags(data *v1_21_8.ConfigurationToClientPacketTags) (err error) {
+	var tags []any
+	for _, tag := range data.Tags {
+		var entries []any
+		for _, entry := range tag.Tags.Val {
+			entries = append(entries, map[string]any{"TagName": entry.TagName, "Entries": entry.Entries})
+		}
+		tags = append(tags, map[string]any{"TagType": tag.TagType, "Entries": entries})
+	}
+	p.Data.Value.(map[string]any)["Tags"] = tags
 	return
 }
 
@@ -83,7 +108,7 @@ func handleClient(c *proto.Conn) (err error) {
 		return
 	}
 	defer sockPuppet.Close()
-	err = sockPuppet.Start(&modules.LoginClient{
+	err = sockPuppet.Start(&client.LoginClient{
 		Conn:    sockPuppet,
 		Account: acc,
 	})
@@ -92,6 +117,7 @@ func handleClient(c *proto.Conn) (err error) {
 	}
 	errChan := make(chan error)
 	p := &Proxy{Client: sockPuppet, Servee: c}
+	p.Data.Value = map[string]any{"Registries": []any{}}
 	go func() {
 		errChan <- p.Client.Start(p)
 	}()
@@ -99,6 +125,12 @@ func handleClient(c *proto.Conn) (err error) {
 		errChan <- p.Servee.Start(p)
 	}()
 	err = <-errChan
+	f, err := os.Create("data/registry/" + SaveAs + ".nbt")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	err = nbt.WriteFile(f, p.Data)
 	return
 }
 

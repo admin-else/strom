@@ -6,6 +6,10 @@ import (
 	"io"
 )
 
+var (
+	UnimplementedErr = errors.New("unimplemented")
+)
+
 type Direction int
 
 const (
@@ -216,6 +220,29 @@ func ErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
 type EncodeDecodeAble interface {
 	Encode(w io.Writer) (err error)
 	Decode(r io.Reader) (err error)
+}
+
+type LpVec3d struct {
+	X, Y, Z float64
+}
+
+func (v LpVec3d) Encode(w io.Writer) (err error) {
+	err = UnimplementedErr
+	return
+}
+
+func (v LpVec3d) Decode(r io.Reader) (err error) {
+	err = UnimplementedErr
+	return
+}
+
+type Void struct{}
+
+func (v Void) Encode(w io.Writer) (err error) {
+	return
+}
+func (v Void) Decode(r io.Reader) (err error) {
+	return
 }
 
 type PacketInfo struct {

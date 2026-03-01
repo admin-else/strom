@@ -359,6 +359,7 @@ func (g *Generator) RegisterEncoderNatives() {
 		"anonOptionalNbt": DefaultEncoder, // I have no idea what the difference is between these two
 		"UUID":            UUIDEncoder,
 		"restBuffer":      DefaultEncoder,
+		"lpVec3":          DefaultEncoder,
 		"string":          StringEncoder,
 
 		"f32":  SimpleTypeEncoder,

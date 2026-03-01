@@ -67,7 +67,7 @@ func (c *Conn) SetVersion(version string) (err error) {
 }
 
 func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
-	//fmt.Println("send:", packet)
+	slog.Debug("send", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 	switch packet := packet.(type) {
 	case *UnCodablePacket:
 		err = c.SendRaw(packet.Data)
@@ -124,7 +124,7 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 	if err != nil {
 		return
 	}
-	slog.Debug("packet", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
+	slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 	err = c.Loop.Fire(packet)
 	return
 }

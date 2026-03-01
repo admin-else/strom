@@ -1,6 +1,9 @@
-package modules
+package client
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 type IntervalTask struct {
 	F           func() error
@@ -33,18 +36,15 @@ func (t *Timer) Tick() (err error) {
 		}
 		t.Interval[i] = task
 	}
-	var triggerLater []OnceTask
-	for _, task := range t.Once {
+	for i, task := range t.Once {
 		if task.Trigger.After(time.Now()) {
 			err = task.F()
 			if err != nil {
 				return
 			}
-		} else {
-			triggerLater = append(triggerLater, task)
+			slices.Delete(t.Once, i, i)
 		}
 	}
-	t.Once = triggerLater
 	return
 }
 

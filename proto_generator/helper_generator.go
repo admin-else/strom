@@ -15,6 +15,7 @@ type TypesInfo struct {
 
 type PacketInfo struct {
 	TName, Name, Direction, State, PacketId, ProtocolVersion, MinecraftVersion string
+	PacketDef                                                                  any
 }
 
 func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err error) {
@@ -31,10 +32,8 @@ func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err er
 		vUnderscore := "v" + strings.ReplaceAll(p.MinecraftVersion, ".", "_")
 		typeName := p.TName
 		var typeExpr ast.Expr
-		if typeName == "struct{}" {
-			typeExpr = &ast.StructType{Fields: &ast.FieldList{}}
-		} else if strings.HasPrefix(typeName, "proto_base.") {
-			typeExpr = Selector("proto_base", strings.TrimPrefix(typeName, "proto_base."))
+		if p.PacketDef == "void" {
+			typeExpr = Selector("proto_base", "Void")
 		} else {
 			typeExpr = Selector(vUnderscore, typeName)
 		}
@@ -46,7 +45,7 @@ func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err er
 			KeyValueExpr(Ident("Type"), AddrOf(CompLit(typeExpr, nil))),
 			KeyValueExpr(Ident("Name"), StrLit(p.Name)),
 			KeyValueExpr(Ident("Direction"), Selector("proto_base", p.Direction)),
-			KeyValueExpr(Ident("state"), Selector("proto_base", p.State)),
+			KeyValueExpr(Ident("State"), Selector("proto_base", p.State)),
 			KeyValueExpr(Ident("PacketId"), NumLit(int(packetId))),
 			KeyValueExpr(Ident("ProtocolVersion"), NumLit(protocolVersion)),
 		}))

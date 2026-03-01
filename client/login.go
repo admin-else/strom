@@ -1,4 +1,4 @@
-package modules
+package client
 
 import (
 	"crypto/rand"
@@ -11,7 +11,6 @@ import (
 	"strconv"
 
 	"github.com/admin-else/strom/api"
-	"github.com/admin-else/strom/client"
 	"github.com/admin-else/strom/crypto"
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
@@ -157,7 +156,7 @@ func Login(c *proto.Conn, account *api.Account) (err error) {
 }
 
 func ConnectAndLogin(connectTo string, account *api.Account) (c *proto.Conn, err error) {
-	c, err = client.Connect(connectTo)
+	c, err = Connect(connectTo)
 	if err != nil {
 		return
 	}

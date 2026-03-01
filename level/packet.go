@@ -60,7 +60,7 @@ func UnpackSingleValuePalette(r io.Reader, numberOfEntries int) (data []int32, e
 	}
 	data = make([]int32, numberOfEntries)
 	for i := range data {
-		data[i] = int32(entry)
+		data[i] = entry
 	}
 	return
 }

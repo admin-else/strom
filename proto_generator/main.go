@@ -293,6 +293,7 @@ func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err err
 				v2 := v2.(string)
 				typeName := prefix + CamelCase(v2)
 				g.packetInfos = append(g.packetInfos, PacketInfo{
+					PacketDef:        v2,
 					TName:            typeName,
 					Name:             k2,
 					Direction:        types.Direction,
@@ -378,7 +379,7 @@ func GenerateVersions(versions []string) (err error) {
 }
 
 func main() {
-	err := GenerateVersions([]string{"1.21.8"})
+	err := GenerateVersions([]string{"1.21.8", "1.21.9", "1.21.11"})
 	if err != nil {
 		panic(err)
 	}

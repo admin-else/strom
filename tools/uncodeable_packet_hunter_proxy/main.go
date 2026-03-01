@@ -1,4 +1,3 @@
-// THIS THING IS BROKEN
 package main
 
 import (
@@ -8,7 +7,7 @@ import (
 	"os"
 
 	"github.com/admin-else/strom/api"
-	"github.com/admin-else/strom/client/modules"
+	"github.com/admin-else/strom/client"
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
@@ -39,7 +38,7 @@ func (p *ProxyClient) OnStart(_ event.OnStart) (err error) {
 	return
 }
 
-func (p *ProxyClient) OnUnCodeAble(packet proto.UnCodablePacket) (err error) {
+func (p *ProxyClient) OnUnCodeAble(packet *proto.UnCodablePacket) (err error) {
 	err = p.OnDefault(event.Unhandled{Val: packet})
 	if err != nil {
 		return
@@ -80,7 +79,7 @@ func (p *Proxy) OnFinishConfiguration(packet *v1_21_8.ConfigurationToServerPacke
 	return
 }
 
-func (p *Proxy) OnUnCodeAble(packet proto.UnCodablePacket) (err error) {
+func (p *Proxy) OnUnCodeAble(packet *proto.UnCodablePacket) (err error) {
 	err = p.OnDefault(event.Unhandled{Val: packet})
 	if err != nil {
 		return
@@ -109,7 +108,7 @@ func TestFailedPacket%10X(t *testing.T) {
 }
 `
 
-func SaveUnCodeAbleAsTest(d proto_base.Direction, packet proto.UnCodablePacket) {
+func SaveUnCodeAbleAsTest(d proto_base.Direction, packet *proto.UnCodablePacket) {
 	hUntrimmed := sha256.Sum256(packet.Data)
 	h := hUntrimmed[:8]
 	f, err := os.Create(fmt.Sprintf(".failed_packets/%v_%10x_test.go", len(packet.Data), h))
@@ -145,7 +144,7 @@ func main() {
 		if err != nil {
 			return
 		}
-		c, err := modules.ConnectAndLogin("127.0.0.1:25566", acc)
+		c, err := client.ConnectAndLogin("127.0.0.1:25566", acc)
 		if err != nil {
 			return
 		}
