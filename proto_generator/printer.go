@@ -95,7 +95,7 @@ func NumLit(n int) *ast.BasicLit {
 }
 
 func NumLitHex(n int) *ast.BasicLit {
-	return NumLitStr(fmt.Sprintf("%X", n))
+	return NumLitStr(fmt.Sprintf("0x%X", n))
 }
 
 func NumLitStr(n string) *ast.BasicLit {
@@ -190,6 +190,14 @@ func SubAssign(lhs, rhs ast.Expr) (s *ast.AssignStmt) {
 	return &ast.AssignStmt{
 		Lhs: []ast.Expr{lhs},
 		Tok: token.SUB_ASSIGN,
+		Rhs: []ast.Expr{rhs},
+	}
+}
+
+func OrAssign(lhs, rhs ast.Expr) (s *ast.AssignStmt) {
+	return &ast.AssignStmt{
+		Lhs: []ast.Expr{lhs},
+		Tok: token.OR_ASSIGN,
 		Rhs: []ast.Expr{rhs},
 	}
 }
@@ -509,5 +517,11 @@ func LeftShift(lhs, rhs ast.Expr) *ast.BinaryExpr {
 		X:  lhs,
 		Op: token.SHL,
 		Y:  rhs,
+	}
+}
+
+func Grouping(e ast.Expr) *ast.ParenExpr {
+	return &ast.ParenExpr{
+		X: e,
 	}
 }

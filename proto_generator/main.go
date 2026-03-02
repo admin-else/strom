@@ -270,7 +270,8 @@ func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err err
 		v := protocol.Types.Types[k]
 		if strings.Contains(k, "packet") {
 			delete(protocol.Types.Types, k)
-			for prefix, types := range prefixTypeMap {
+			for _, prefix := range OrderedKeys(prefixTypeMap) {
+				types := prefixTypeMap[prefix]
 				if prefix == "" {
 					continue
 				}

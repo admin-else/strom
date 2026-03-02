@@ -253,3 +253,31 @@ type PacketInfo struct {
 	PacketId        int32
 	ProtocolVersion int32
 }
+
+func Bool2uint8(b bool) uint8 {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func Bool2uint16(b bool) uint16 {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func Bool2uint32(b bool) uint32 {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+func Bool2uint64(b bool) uint64 {
+	if b {
+		return 1
+	}
+	return 0
+}

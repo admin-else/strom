@@ -60,13 +60,16 @@ func VisitBufferType(_ *Generator, dataRaw any) (e ast.Expr, err error) {
 	return
 }
 
-func VisitArrayTypeVisitorType(g *Generator, dataRaw any) (ast.Expr, error) {
+func VisitArrayTypeVisitorType(g *Generator, dataRaw any) (e ast.Expr, err error) {
 	var data struct {
 		CountType any
 		Type      any
 	}
-	must(mapstructure.Decode(dataRaw, &data))
-	e, err := g.VisitType(data.Type)
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+	e, err = g.VisitType(data.Type)
 	if err != nil {
 		return nil, err
 	}

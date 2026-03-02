@@ -8,6 +8,740 @@ import (
 	"io"
 )
 
+type HandshakingToServerPacket struct {
+	Name   string
+	Params any
+}
+
+var HandshakingToServerPacketNameMap = map[int32]string{0x00: "set_protocol", 0xfe: "legacy_server_list_ping"}
+
+func (ret *HandshakingToServerPacket) Decode(r io.Reader) (err error) {
+	var HandshakingToServerPacketNameKey int32
+	HandshakingToServerPacketNameKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Name, err = proto_base.ErroringIndex(HandshakingToServerPacketNameMap, HandshakingToServerPacketNameKey)
+	if err != nil {
+		return
+	}
+	switch ret.Name {
+	case "legacy_server_list_ping":
+		var HandshakingToServerPacketParamsLegacyServerListPingTmp HandshakingToServerPacketLegacyServerListPing
+		err = HandshakingToServerPacketParamsLegacyServerListPingTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = HandshakingToServerPacketParamsLegacyServerListPingTmp
+	case "set_protocol":
+		var HandshakingToServerPacketParamsSetProtocolTmp HandshakingToServerPacketSetProtocol
+		err = HandshakingToServerPacketParamsSetProtocolTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = HandshakingToServerPacketParamsSetProtocolTmp
+	}
+	return
+}
+
+var HandshakingToServerPacketNameReverseMap = map[string]int32{"set_protocol": 0x00, "legacy_server_list_ping": 0xfe}
+
+func (ret *HandshakingToServerPacket) Encode(w io.Writer) (err error) {
+	var vHandshakingToServerPacketName int32
+	vHandshakingToServerPacketName, err = proto_base.ErroringIndex(HandshakingToServerPacketNameReverseMap, ret.Name)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vHandshakingToServerPacketName)
+	if err != nil {
+		return
+	}
+	switch ret.Name {
+	case "legacy_server_list_ping":
+		HandshakingToServerPacketParams, ok := ret.Params.(HandshakingToServerPacketLegacyServerListPing)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = HandshakingToServerPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_protocol":
+		HandshakingToServerPacketParams, ok := ret.Params.(HandshakingToServerPacketSetProtocol)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = HandshakingToServerPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonAddResourcePack struct {
+	Uuid          uuid.UUID
+	Url           string
+	Hash          string
+	Forced        bool
+	PromptMessage *nbt.Anon
+}
+
+func (ret *HandshakingToServerPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+	_, err = io.ReadFull(r, ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	ret.Url, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Hash, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Forced)
+	if err != nil {
+		return
+	}
+	var HandshakingToServerPacketCommonAddResourcePackPromptMessagePresent bool
+	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonAddResourcePackPromptMessagePresent)
+	if err != nil {
+		return
+	}
+	if HandshakingToServerPacketCommonAddResourcePackPromptMessagePresent {
+		var HandshakingToServerPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
+		err = HandshakingToServerPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.PromptMessage = &HandshakingToServerPacketCommonAddResourcePackPromptMessagePresentValue
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
+	_, err = w.Write(ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Url)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Hash)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Forced)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
+	if err != nil {
+		return
+	}
+	if ret.PromptMessage != nil {
+		err = (*ret.PromptMessage).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonClearDialog struct {
+}
+
+func (ret *HandshakingToServerPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+	return
+}
+func (ret *HandshakingToServerPacketCommonClearDialog) Encode(w io.Writer) (err error) {
+	return
+}
+
+type HandshakingToServerPacketCommonCookieRequest struct {
+	Cookie string
+}
+
+func (ret *HandshakingToServerPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+	ret.Cookie, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Cookie)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonCookieResponse struct {
+	Key   string
+	Value *ByteArray
+}
+
+func (ret *HandshakingToServerPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var HandshakingToServerPacketCommonCookieResponseValuePresent bool
+	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonCookieResponseValuePresent)
+	if err != nil {
+		return
+	}
+	if HandshakingToServerPacketCommonCookieResponseValuePresent {
+		var HandshakingToServerPacketCommonCookieResponseValuePresentValue ByteArray
+		err = HandshakingToServerPacketCommonCookieResponseValuePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Value = &HandshakingToServerPacketCommonCookieResponseValuePresentValue
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
+	if err != nil {
+		return
+	}
+	if ret.Value != nil {
+		err = (*ret.Value).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonCustomClickAction struct {
+	Id  string
+	Nbt *nbt.Anon
+}
+
+func (ret *HandshakingToServerPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+	ret.Id, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var HandshakingToServerPacketCommonCustomClickActionNbtPresent bool
+	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonCustomClickActionNbtPresent)
+	if err != nil {
+		return
+	}
+	if HandshakingToServerPacketCommonCustomClickActionNbtPresent {
+		var HandshakingToServerPacketCommonCustomClickActionNbtPresentValue nbt.Anon
+		err = HandshakingToServerPacketCommonCustomClickActionNbtPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Nbt = &HandshakingToServerPacketCommonCustomClickActionNbtPresentValue
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Id)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
+	if err != nil {
+		return
+	}
+	if ret.Nbt != nil {
+		err = (*ret.Nbt).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonCustomReportDetails struct {
+	Details []struct {
+		Key   string
+		Value string
+	}
+}
+
+func (ret *HandshakingToServerPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+	var lHandshakingToServerPacketCommonCustomReportDetailsDetails int32
+	lHandshakingToServerPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Details = []struct {
+		Key   string
+		Value string
+	}{}
+	for range lHandshakingToServerPacketCommonCustomReportDetailsDetails {
+		var HandshakingToServerPacketCommonCustomReportDetailsDetailsElement struct {
+			Key   string
+			Value string
+		}
+		HandshakingToServerPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		HandshakingToServerPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Details = append(ret.Details, HandshakingToServerPacketCommonCustomReportDetailsDetailsElement)
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
+	if err != nil {
+		return
+	}
+	for iHandshakingToServerPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
+		err = proto_base.EncodeString(w, ret.Details[iHandshakingToServerPacketCommonCustomReportDetailsDetails].Key)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Details[iHandshakingToServerPacketCommonCustomReportDetailsDetails].Value)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonRemoveResourcePack struct {
+	Uuid *uuid.UUID
+}
+
+func (ret *HandshakingToServerPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+	var HandshakingToServerPacketCommonRemoveResourcePackUuidPresent bool
+	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonRemoveResourcePackUuidPresent)
+	if err != nil {
+		return
+	}
+	if HandshakingToServerPacketCommonRemoveResourcePackUuidPresent {
+		var HandshakingToServerPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
+		_, err = io.ReadFull(r, HandshakingToServerPacketCommonRemoveResourcePackUuidPresentValue[:])
+		if err != nil {
+			return
+		}
+		ret.Uuid = &HandshakingToServerPacketCommonRemoveResourcePackUuidPresentValue
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
+	if err != nil {
+		return
+	}
+	if ret.Uuid != nil {
+		_, err = w.Write((*ret.Uuid)[:])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonSelectKnownPacks struct {
+	Packs []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}
+}
+
+func (ret *HandshakingToServerPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+	var lHandshakingToServerPacketCommonSelectKnownPacksPacks int32
+	lHandshakingToServerPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Packs = []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}{}
+	for range lHandshakingToServerPacketCommonSelectKnownPacksPacks {
+		var HandshakingToServerPacketCommonSelectKnownPacksPacksElement struct {
+			Namespace string
+			Id        string
+			Version   string
+		}
+		HandshakingToServerPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		HandshakingToServerPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		HandshakingToServerPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Packs = append(ret.Packs, HandshakingToServerPacketCommonSelectKnownPacksPacksElement)
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
+	if err != nil {
+		return
+	}
+	for iHandshakingToServerPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
+		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToServerPacketCommonSelectKnownPacksPacks].Namespace)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToServerPacketCommonSelectKnownPacksPacks].Id)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToServerPacketCommonSelectKnownPacksPacks].Version)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonServerLinks struct {
+	Links []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}
+}
+
+func (ret *HandshakingToServerPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+	var lHandshakingToServerPacketCommonServerLinksLinks int32
+	lHandshakingToServerPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Links = []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}{}
+	for range lHandshakingToServerPacketCommonServerLinksLinks {
+		var HandshakingToServerPacketCommonServerLinksLinksElement struct {
+			HasKnownType bool
+			KnownType    any
+			UnknownType  any
+			Link         string
+		}
+		err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonServerLinksLinksElement.HasKnownType)
+		if err != nil {
+			return
+		}
+		switch HandshakingToServerPacketCommonServerLinksLinksElement.HasKnownType {
+		case true:
+			var HandshakingToServerPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
+			err = HandshakingToServerPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			HandshakingToServerPacketCommonServerLinksLinksElement.KnownType = HandshakingToServerPacketCommonServerLinksLinksElementKnownTypeTrueTmp
+		}
+		switch HandshakingToServerPacketCommonServerLinksLinksElement.HasKnownType {
+		case false:
+			var HandshakingToServerPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
+			err = HandshakingToServerPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			HandshakingToServerPacketCommonServerLinksLinksElement.UnknownType = HandshakingToServerPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
+		}
+		HandshakingToServerPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Links = append(ret.Links, HandshakingToServerPacketCommonServerLinksLinksElement)
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonServerLinks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
+	if err != nil {
+		return
+	}
+	for iHandshakingToServerPacketCommonServerLinksLinks := range len(ret.Links) {
+		err = binary.Write(w, binary.BigEndian, ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].HasKnownType)
+		if err != nil {
+			return
+		}
+		switch ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].HasKnownType {
+		case true:
+			HandshakingToServerPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = HandshakingToServerPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		switch ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].HasKnownType {
+		case false:
+			HandshakingToServerPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = HandshakingToServerPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeString(w, ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].Link)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonSettings struct {
+	Locale              string
+	ViewDistance        int8
+	ChatFlags           int32
+	ChatColors          bool
+	SkinParts           uint8
+	MainHand            int32
+	EnableTextFiltering bool
+	EnableServerListing bool
+	ParticleStatus      string
+}
+
+var HandshakingToServerPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
+
+func (ret *HandshakingToServerPacketCommonSettings) Decode(r io.Reader) (err error) {
+	ret.Locale, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
+	if err != nil {
+		return
+	}
+	ret.MainHand, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var HandshakingToServerPacketCommonSettingsParticleStatusKey int32
+	HandshakingToServerPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ParticleStatus, err = proto_base.ErroringIndex(HandshakingToServerPacketCommonSettingsParticleStatusMap, HandshakingToServerPacketCommonSettingsParticleStatusKey)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var HandshakingToServerPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
+
+func (ret *HandshakingToServerPacketCommonSettings) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Locale)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.MainHand)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var vHandshakingToServerPacketCommonSettingsParticleStatus int32
+	vHandshakingToServerPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(HandshakingToServerPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vHandshakingToServerPacketCommonSettingsParticleStatus)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonStoreCookie struct {
+	Key   string
+	Value ByteArray
+}
+
+func (ret *HandshakingToServerPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToServerPacketCommonTransfer struct {
+	Host string
+	Port int32
+}
+
+func (ret *HandshakingToServerPacketCommonTransfer) Decode(r io.Reader) (err error) {
+	ret.Host, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Port, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *HandshakingToServerPacketCommonTransfer) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Host)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Port)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToServerPacketLegacyServerListPing struct {
+	Payload uint8
+}
+
+func (ret *HandshakingToServerPacketLegacyServerListPing) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Payload)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *HandshakingToServerPacketLegacyServerListPing) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Payload)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToServerPacketSetProtocol struct {
+	ProtocolVersion int32
+	ServerHost      string
+	ServerPort      uint16
+	NextState       int32
+}
+
+func (ret *HandshakingToServerPacketSetProtocol) Decode(r io.Reader) (err error) {
+	ret.ProtocolVersion, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ServerHost, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ServerPort)
+	if err != nil {
+		return
+	}
+	ret.NextState, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *HandshakingToServerPacketSetProtocol) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.ProtocolVersion)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.ServerHost)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ServerPort)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.NextState)
+	if err != nil {
+		return
+	}
+	return
+}
+
 type StatusToServerPacket struct {
 	Name   string
 	Params any
@@ -703,6 +1437,713 @@ func (ret *StatusToServerPacketPingStart) Decode(r io.Reader) (err error) {
 	return
 }
 func (ret *StatusToServerPacketPingStart) Encode(w io.Writer) (err error) {
+	return
+}
+
+type StatusToClientPacket struct {
+	Name   string
+	Params any
+}
+
+var StatusToClientPacketNameMap = map[int32]string{0x00: "server_info", 0x01: "ping"}
+
+func (ret *StatusToClientPacket) Decode(r io.Reader) (err error) {
+	var StatusToClientPacketNameKey int32
+	StatusToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Name, err = proto_base.ErroringIndex(StatusToClientPacketNameMap, StatusToClientPacketNameKey)
+	if err != nil {
+		return
+	}
+	switch ret.Name {
+	case "ping":
+		var StatusToClientPacketParamsPingTmp StatusToClientPacketPing
+		err = StatusToClientPacketParamsPingTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = StatusToClientPacketParamsPingTmp
+	case "server_info":
+		var StatusToClientPacketParamsServerInfoTmp StatusToClientPacketServerInfo
+		err = StatusToClientPacketParamsServerInfoTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = StatusToClientPacketParamsServerInfoTmp
+	}
+	return
+}
+
+var StatusToClientPacketNameReverseMap = map[string]int32{"server_info": 0x00, "ping": 0x01}
+
+func (ret *StatusToClientPacket) Encode(w io.Writer) (err error) {
+	var vStatusToClientPacketName int32
+	vStatusToClientPacketName, err = proto_base.ErroringIndex(StatusToClientPacketNameReverseMap, ret.Name)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vStatusToClientPacketName)
+	if err != nil {
+		return
+	}
+	switch ret.Name {
+	case "ping":
+		StatusToClientPacketParams, ok := ret.Params.(StatusToClientPacketPing)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = StatusToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "server_info":
+		StatusToClientPacketParams, ok := ret.Params.(StatusToClientPacketServerInfo)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = StatusToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type StatusToClientPacketCommonAddResourcePack struct {
+	Uuid          uuid.UUID
+	Url           string
+	Hash          string
+	Forced        bool
+	PromptMessage *nbt.Anon
+}
+
+func (ret *StatusToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+	_, err = io.ReadFull(r, ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	ret.Url, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Hash, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Forced)
+	if err != nil {
+		return
+	}
+	var StatusToClientPacketCommonAddResourcePackPromptMessagePresent bool
+	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonAddResourcePackPromptMessagePresent)
+	if err != nil {
+		return
+	}
+	if StatusToClientPacketCommonAddResourcePackPromptMessagePresent {
+		var StatusToClientPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
+		err = StatusToClientPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.PromptMessage = &StatusToClientPacketCommonAddResourcePackPromptMessagePresentValue
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
+	_, err = w.Write(ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Url)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Hash)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Forced)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
+	if err != nil {
+		return
+	}
+	if ret.PromptMessage != nil {
+		err = (*ret.PromptMessage).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type StatusToClientPacketCommonClearDialog struct {
+}
+
+func (ret *StatusToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+	return
+}
+func (ret *StatusToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
+	return
+}
+
+type StatusToClientPacketCommonCookieRequest struct {
+	Cookie string
+}
+
+func (ret *StatusToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+	ret.Cookie, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Cookie)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type StatusToClientPacketCommonCookieResponse struct {
+	Key   string
+	Value *ByteArray
+}
+
+func (ret *StatusToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var StatusToClientPacketCommonCookieResponseValuePresent bool
+	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonCookieResponseValuePresent)
+	if err != nil {
+		return
+	}
+	if StatusToClientPacketCommonCookieResponseValuePresent {
+		var StatusToClientPacketCommonCookieResponseValuePresentValue ByteArray
+		err = StatusToClientPacketCommonCookieResponseValuePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Value = &StatusToClientPacketCommonCookieResponseValuePresentValue
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
+	if err != nil {
+		return
+	}
+	if ret.Value != nil {
+		err = (*ret.Value).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type StatusToClientPacketCommonCustomClickAction struct {
+	Id  string
+	Nbt *nbt.Anon
+}
+
+func (ret *StatusToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+	ret.Id, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var StatusToClientPacketCommonCustomClickActionNbtPresent bool
+	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonCustomClickActionNbtPresent)
+	if err != nil {
+		return
+	}
+	if StatusToClientPacketCommonCustomClickActionNbtPresent {
+		var StatusToClientPacketCommonCustomClickActionNbtPresentValue nbt.Anon
+		err = StatusToClientPacketCommonCustomClickActionNbtPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Nbt = &StatusToClientPacketCommonCustomClickActionNbtPresentValue
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Id)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
+	if err != nil {
+		return
+	}
+	if ret.Nbt != nil {
+		err = (*ret.Nbt).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type StatusToClientPacketCommonCustomReportDetails struct {
+	Details []struct {
+		Key   string
+		Value string
+	}
+}
+
+func (ret *StatusToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+	var lStatusToClientPacketCommonCustomReportDetailsDetails int32
+	lStatusToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Details = []struct {
+		Key   string
+		Value string
+	}{}
+	for range lStatusToClientPacketCommonCustomReportDetailsDetails {
+		var StatusToClientPacketCommonCustomReportDetailsDetailsElement struct {
+			Key   string
+			Value string
+		}
+		StatusToClientPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		StatusToClientPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Details = append(ret.Details, StatusToClientPacketCommonCustomReportDetailsDetailsElement)
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
+	if err != nil {
+		return
+	}
+	for iStatusToClientPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
+		err = proto_base.EncodeString(w, ret.Details[iStatusToClientPacketCommonCustomReportDetailsDetails].Key)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Details[iStatusToClientPacketCommonCustomReportDetailsDetails].Value)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type StatusToClientPacketCommonRemoveResourcePack struct {
+	Uuid *uuid.UUID
+}
+
+func (ret *StatusToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+	var StatusToClientPacketCommonRemoveResourcePackUuidPresent bool
+	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonRemoveResourcePackUuidPresent)
+	if err != nil {
+		return
+	}
+	if StatusToClientPacketCommonRemoveResourcePackUuidPresent {
+		var StatusToClientPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
+		_, err = io.ReadFull(r, StatusToClientPacketCommonRemoveResourcePackUuidPresentValue[:])
+		if err != nil {
+			return
+		}
+		ret.Uuid = &StatusToClientPacketCommonRemoveResourcePackUuidPresentValue
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
+	if err != nil {
+		return
+	}
+	if ret.Uuid != nil {
+		_, err = w.Write((*ret.Uuid)[:])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type StatusToClientPacketCommonSelectKnownPacks struct {
+	Packs []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}
+}
+
+func (ret *StatusToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+	var lStatusToClientPacketCommonSelectKnownPacksPacks int32
+	lStatusToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Packs = []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}{}
+	for range lStatusToClientPacketCommonSelectKnownPacksPacks {
+		var StatusToClientPacketCommonSelectKnownPacksPacksElement struct {
+			Namespace string
+			Id        string
+			Version   string
+		}
+		StatusToClientPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		StatusToClientPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		StatusToClientPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Packs = append(ret.Packs, StatusToClientPacketCommonSelectKnownPacksPacksElement)
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
+	if err != nil {
+		return
+	}
+	for iStatusToClientPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
+		err = proto_base.EncodeString(w, ret.Packs[iStatusToClientPacketCommonSelectKnownPacksPacks].Namespace)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iStatusToClientPacketCommonSelectKnownPacksPacks].Id)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iStatusToClientPacketCommonSelectKnownPacksPacks].Version)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type StatusToClientPacketCommonServerLinks struct {
+	Links []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}
+}
+
+func (ret *StatusToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+	var lStatusToClientPacketCommonServerLinksLinks int32
+	lStatusToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Links = []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}{}
+	for range lStatusToClientPacketCommonServerLinksLinks {
+		var StatusToClientPacketCommonServerLinksLinksElement struct {
+			HasKnownType bool
+			KnownType    any
+			UnknownType  any
+			Link         string
+		}
+		err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonServerLinksLinksElement.HasKnownType)
+		if err != nil {
+			return
+		}
+		switch StatusToClientPacketCommonServerLinksLinksElement.HasKnownType {
+		case true:
+			var StatusToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
+			err = StatusToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			StatusToClientPacketCommonServerLinksLinksElement.KnownType = StatusToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp
+		}
+		switch StatusToClientPacketCommonServerLinksLinksElement.HasKnownType {
+		case false:
+			var StatusToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
+			err = StatusToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			StatusToClientPacketCommonServerLinksLinksElement.UnknownType = StatusToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
+		}
+		StatusToClientPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Links = append(ret.Links, StatusToClientPacketCommonServerLinksLinksElement)
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
+	if err != nil {
+		return
+	}
+	for iStatusToClientPacketCommonServerLinksLinks := range len(ret.Links) {
+		err = binary.Write(w, binary.BigEndian, ret.Links[iStatusToClientPacketCommonServerLinksLinks].HasKnownType)
+		if err != nil {
+			return
+		}
+		switch ret.Links[iStatusToClientPacketCommonServerLinksLinks].HasKnownType {
+		case true:
+			StatusToClientPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iStatusToClientPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = StatusToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		switch ret.Links[iStatusToClientPacketCommonServerLinksLinks].HasKnownType {
+		case false:
+			StatusToClientPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iStatusToClientPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = StatusToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeString(w, ret.Links[iStatusToClientPacketCommonServerLinksLinks].Link)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type StatusToClientPacketCommonSettings struct {
+	Locale              string
+	ViewDistance        int8
+	ChatFlags           int32
+	ChatColors          bool
+	SkinParts           uint8
+	MainHand            int32
+	EnableTextFiltering bool
+	EnableServerListing bool
+	ParticleStatus      string
+}
+
+var StatusToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
+
+func (ret *StatusToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+	ret.Locale, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
+	if err != nil {
+		return
+	}
+	ret.MainHand, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var StatusToClientPacketCommonSettingsParticleStatusKey int32
+	StatusToClientPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ParticleStatus, err = proto_base.ErroringIndex(StatusToClientPacketCommonSettingsParticleStatusMap, StatusToClientPacketCommonSettingsParticleStatusKey)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var StatusToClientPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
+
+func (ret *StatusToClientPacketCommonSettings) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Locale)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.MainHand)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var vStatusToClientPacketCommonSettingsParticleStatus int32
+	vStatusToClientPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(StatusToClientPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vStatusToClientPacketCommonSettingsParticleStatus)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type StatusToClientPacketCommonStoreCookie struct {
+	Key   string
+	Value ByteArray
+}
+
+func (ret *StatusToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type StatusToClientPacketCommonTransfer struct {
+	Host string
+	Port int32
+}
+
+func (ret *StatusToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+	ret.Host, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Port, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *StatusToClientPacketCommonTransfer) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Host)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Port)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type StatusToClientPacketPing struct {
+	Time int64
+}
+
+func (ret *StatusToClientPacketPing) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Time)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *StatusToClientPacketPing) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Time)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type StatusToClientPacketServerInfo struct {
+	Response string
+}
+
+func (ret *StatusToClientPacketServerInfo) Decode(r io.Reader) (err error) {
+	ret.Response, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *StatusToClientPacketServerInfo) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Response)
+	if err != nil {
+		return
+	}
 	return
 }
 
@@ -1549,6 +2990,14041 @@ func (ret *LoginToServerPacketLoginStart) Encode(w io.Writer) (err error) {
 	_, err = w.Write(ret.PlayerUUID[:])
 	if err != nil {
 		return
+	}
+	return
+}
+
+type PlayToClientChatType struct {
+	TranslationKey string
+	Parameters     []PlayToClientChatTypeParameterType
+	Style          nbt.Anon
+}
+
+func (ret *PlayToClientChatType) Decode(r io.Reader) (err error) {
+	ret.TranslationKey, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientChatTypeParameters int32
+	lPlayToClientChatTypeParameters, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Parameters = []PlayToClientChatTypeParameterType{}
+	for range lPlayToClientChatTypeParameters {
+		var PlayToClientChatTypeParametersElement PlayToClientChatTypeParameterType
+		err = PlayToClientChatTypeParametersElement.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Parameters = append(ret.Parameters, PlayToClientChatTypeParametersElement)
+	}
+	err = ret.Style.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientChatType) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.TranslationKey)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Parameters)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientChatTypeParameters := range len(ret.Parameters) {
+		err = ret.Parameters[iPlayToClientChatTypeParameters].Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = ret.Style.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientChatTypeParameterType struct {
+	Val string
+}
+
+var PlayToClientChatTypeParameterTypeMap = map[int32]string{0: "content", 1: "sender", 2: "target"}
+
+func (ret *PlayToClientChatTypeParameterType) Decode(r io.Reader) (err error) {
+	var PlayToClientChatTypeParameterTypeKey int32
+	PlayToClientChatTypeParameterTypeKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Val, err = proto_base.ErroringIndex(PlayToClientChatTypeParameterTypeMap, PlayToClientChatTypeParameterTypeKey)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var PlayToClientChatTypeParameterTypeReverseMap = map[string]int32{"content": 0, "sender": 1, "target": 2}
+
+func (ret *PlayToClientChatTypeParameterType) Encode(w io.Writer) (err error) {
+	var vPlayToClientChatTypeParameterType int32
+	vPlayToClientChatTypeParameterType, err = proto_base.ErroringIndex(PlayToClientChatTypeParameterTypeReverseMap, ret.Val)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vPlayToClientChatTypeParameterType)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientChatTypes struct {
+	Chat      PlayToClientChatType
+	Narration PlayToClientChatType
+}
+
+func (ret *PlayToClientChatTypes) Decode(r io.Reader) (err error) {
+	err = ret.Chat.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Narration.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientChatTypes) Encode(w io.Writer) (err error) {
+	err = ret.Chat.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Narration.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientChatTypesHolder struct {
+	Val any
+}
+
+func (ret *PlayToClientChatTypesHolder) Decode(r io.Reader) (err error) {
+	var PlayToClientChatTypesHolderId int32
+	PlayToClientChatTypesHolderId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	if PlayToClientChatTypesHolderId != 0 {
+		ret.Val = PlayToClientChatTypesHolderId
+	} else {
+		var PlayToClientChatTypesHolderResult PlayToClientChatTypes
+		err = PlayToClientChatTypesHolderResult.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Val = PlayToClientChatTypesHolderResult
+	}
+	return
+}
+func (ret *PlayToClientChatTypesHolder) Encode(w io.Writer) (err error) {
+	switch PlayToClientChatTypesHolderKnownType := ret.Val.(type) {
+	case int32:
+		err = proto_base.EncodeVarInt(w, PlayToClientChatTypesHolderKnownType)
+		if err != nil {
+			return
+		}
+	case PlayToClientChatTypes:
+		err = proto_base.EncodeVarInt(w, 0)
+		if err != nil {
+			return
+		}
+		err = PlayToClientChatTypesHolderKnownType.Encode(w)
+		if err != nil {
+			return
+		}
+	default:
+		err = proto_base.BadTypeError
+	}
+	return
+}
+
+type PlayToClientExplosionParticleEntry struct {
+	Data   PlayToClientExplosionParticleInfo
+	Weight int32
+}
+
+func (ret *PlayToClientExplosionParticleEntry) Decode(r io.Reader) (err error) {
+	err = ret.Data.Decode(r)
+	if err != nil {
+		return
+	}
+	ret.Weight, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientExplosionParticleEntry) Encode(w io.Writer) (err error) {
+	err = ret.Data.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Weight)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientExplosionParticleInfo struct {
+	Particle Particle
+	Scaling  float32
+	Speed    float32
+}
+
+func (ret *PlayToClientExplosionParticleInfo) Decode(r io.Reader) (err error) {
+	err = ret.Particle.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Scaling)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Speed)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientExplosionParticleInfo) Encode(w io.Writer) (err error) {
+	err = ret.Particle.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Scaling)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Speed)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPositionUpdateRelatives struct {
+	Val uint32
+}
+
+func (ret *PlayToClientPositionUpdateRelatives) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Val)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPositionUpdateRelatives) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Val)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientRecipeBookSetting struct {
+	Open      bool
+	Filtering bool
+}
+
+func (ret *PlayToClientRecipeBookSetting) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Open)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Filtering)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientRecipeBookSetting) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Open)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Filtering)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientRecipeDisplay struct {
+	Type string
+	Data any
+}
+
+var PlayToClientRecipeDisplayTypeMap = map[int32]string{0: "crafting_shapeless", 1: "crafting_shaped", 2: "furnace", 3: "stonecutter", 4: "smithing"}
+
+func (ret *PlayToClientRecipeDisplay) Decode(r io.Reader) (err error) {
+	var PlayToClientRecipeDisplayTypeKey int32
+	PlayToClientRecipeDisplayTypeKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Type, err = proto_base.ErroringIndex(PlayToClientRecipeDisplayTypeMap, PlayToClientRecipeDisplayTypeKey)
+	if err != nil {
+		return
+	}
+	switch ret.Type {
+	case "crafting_shaped":
+		var PlayToClientRecipeDisplayDataCraftingShapedTmp struct {
+			Width           int32
+			Height          int32
+			Ingredients     []PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+		}
+		PlayToClientRecipeDisplayDataCraftingShapedTmp.Width, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientRecipeDisplayDataCraftingShapedTmp.Height, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		var lPlayToClientRecipeDisplayDataIngredients int32
+		lPlayToClientRecipeDisplayDataIngredients, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients = []PlayToClientSlotDisplay{}
+		for range lPlayToClientRecipeDisplayDataIngredients {
+			var PlayToClientRecipeDisplayDataIngredientsElement PlayToClientSlotDisplay
+			err = PlayToClientRecipeDisplayDataIngredientsElement.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients = append(PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients, PlayToClientRecipeDisplayDataIngredientsElement)
+		}
+		err = PlayToClientRecipeDisplayDataCraftingShapedTmp.Result.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataCraftingShapedTmp.CraftingStation.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientRecipeDisplayDataCraftingShapedTmp
+	case "crafting_shapeless":
+		var PlayToClientRecipeDisplayDataCraftingShapelessTmp struct {
+			Ingredients     []PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+		}
+		var lPlayToClientRecipeDisplayDataIngredients int32
+		lPlayToClientRecipeDisplayDataIngredients, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients = []PlayToClientSlotDisplay{}
+		for range lPlayToClientRecipeDisplayDataIngredients {
+			var PlayToClientRecipeDisplayDataIngredientsElement PlayToClientSlotDisplay
+			err = PlayToClientRecipeDisplayDataIngredientsElement.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients = append(PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients, PlayToClientRecipeDisplayDataIngredientsElement)
+		}
+		err = PlayToClientRecipeDisplayDataCraftingShapelessTmp.Result.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataCraftingShapelessTmp.CraftingStation.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientRecipeDisplayDataCraftingShapelessTmp
+	case "furnace":
+		var PlayToClientRecipeDisplayDataFurnaceTmp struct {
+			Ingredient      PlayToClientSlotDisplay
+			Fuel            PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+			Duration        int32
+			Experience      float32
+		}
+		err = PlayToClientRecipeDisplayDataFurnaceTmp.Ingredient.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataFurnaceTmp.Fuel.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataFurnaceTmp.Result.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataFurnaceTmp.CraftingStation.Decode(r)
+		if err != nil {
+			return
+		}
+		PlayToClientRecipeDisplayDataFurnaceTmp.Duration, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientRecipeDisplayDataFurnaceTmp.Experience)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientRecipeDisplayDataFurnaceTmp
+	case "smithing":
+		var PlayToClientRecipeDisplayDataSmithingTmp struct {
+			Template        PlayToClientSlotDisplay
+			Base            PlayToClientSlotDisplay
+			Addition        PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+		}
+		err = PlayToClientRecipeDisplayDataSmithingTmp.Template.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataSmithingTmp.Base.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataSmithingTmp.Addition.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataSmithingTmp.Result.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataSmithingTmp.CraftingStation.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientRecipeDisplayDataSmithingTmp
+	case "stonecutter":
+		var PlayToClientRecipeDisplayDataStonecutterTmp struct {
+			Ingredient      PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+		}
+		err = PlayToClientRecipeDisplayDataStonecutterTmp.Ingredient.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataStonecutterTmp.Result.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayDataStonecutterTmp.CraftingStation.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientRecipeDisplayDataStonecutterTmp
+	}
+	return
+}
+
+var PlayToClientRecipeDisplayTypeReverseMap = map[string]int32{"crafting_shapeless": 0, "crafting_shaped": 1, "furnace": 2, "stonecutter": 3, "smithing": 4}
+
+func (ret *PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
+	var vPlayToClientRecipeDisplayType int32
+	vPlayToClientRecipeDisplayType, err = proto_base.ErroringIndex(PlayToClientRecipeDisplayTypeReverseMap, ret.Type)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vPlayToClientRecipeDisplayType)
+	if err != nil {
+		return
+	}
+	switch ret.Type {
+	case "crafting_shaped":
+		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
+			Width           int32
+			Height          int32
+			Ingredients     []PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientRecipeDisplayData.Width)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientRecipeDisplayData.Height)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientRecipeDisplayData.Ingredients)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientRecipeDisplayDataIngredients := range len(PlayToClientRecipeDisplayData.Ingredients) {
+			err = PlayToClientRecipeDisplayData.Ingredients[iPlayToClientRecipeDisplayDataIngredients].Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		if err != nil {
+			return
+		}
+	case "crafting_shapeless":
+		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
+			Ingredients     []PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientRecipeDisplayData.Ingredients)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientRecipeDisplayDataIngredients := range len(PlayToClientRecipeDisplayData.Ingredients) {
+			err = PlayToClientRecipeDisplayData.Ingredients[iPlayToClientRecipeDisplayDataIngredients].Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		if err != nil {
+			return
+		}
+	case "furnace":
+		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
+			Ingredient      PlayToClientSlotDisplay
+			Fuel            PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+			Duration        int32
+			Experience      float32
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Ingredient.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Fuel.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientRecipeDisplayData.Duration)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientRecipeDisplayData.Experience)
+		if err != nil {
+			return
+		}
+	case "smithing":
+		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
+			Template        PlayToClientSlotDisplay
+			Base            PlayToClientSlotDisplay
+			Addition        PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Template.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Base.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Addition.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		if err != nil {
+			return
+		}
+	case "stonecutter":
+		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
+			Ingredient      PlayToClientSlotDisplay
+			Result          PlayToClientSlotDisplay
+			CraftingStation PlayToClientSlotDisplay
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Ingredient.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientSlotDisplay struct {
+	Type string
+	Data any
+}
+
+var PlayToClientSlotDisplayTypeMap = map[int32]string{0: "empty", 1: "any_fuel", 2: "item", 3: "item_stack", 4: "tag", 5: "smithing_trim", 6: "with_remainder", 7: "composite"}
+
+func (ret *PlayToClientSlotDisplay) Decode(r io.Reader) (err error) {
+	var PlayToClientSlotDisplayTypeKey int32
+	PlayToClientSlotDisplayTypeKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Type, err = proto_base.ErroringIndex(PlayToClientSlotDisplayTypeMap, PlayToClientSlotDisplayTypeKey)
+	if err != nil {
+		return
+	}
+	switch ret.Type {
+	case "any_fuel":
+		var PlayToClientSlotDisplayDataAnyFuelTmp struct {
+		}
+		ret.Data = PlayToClientSlotDisplayDataAnyFuelTmp
+	case "composite":
+		var PlayToClientSlotDisplayDataCompositeTmp []PlayToClientSlotDisplay
+		var lPlayToClientSlotDisplayData int32
+		lPlayToClientSlotDisplayData, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientSlotDisplayDataCompositeTmp = []PlayToClientSlotDisplay{}
+		for range lPlayToClientSlotDisplayData {
+			var PlayToClientSlotDisplayDataElement PlayToClientSlotDisplay
+			err = PlayToClientSlotDisplayDataElement.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientSlotDisplayDataCompositeTmp = append(PlayToClientSlotDisplayDataCompositeTmp, PlayToClientSlotDisplayDataElement)
+		}
+		ret.Data = PlayToClientSlotDisplayDataCompositeTmp
+	case "empty":
+		var PlayToClientSlotDisplayDataEmptyTmp struct {
+		}
+		ret.Data = PlayToClientSlotDisplayDataEmptyTmp
+	case "item":
+		var PlayToClientSlotDisplayDataItemTmp int32
+		PlayToClientSlotDisplayDataItemTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientSlotDisplayDataItemTmp
+	case "item_stack":
+		var PlayToClientSlotDisplayDataItemStackTmp Slot
+		err = PlayToClientSlotDisplayDataItemStackTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientSlotDisplayDataItemStackTmp
+	case "smithing_trim":
+		var PlayToClientSlotDisplayDataSmithingTrimTmp struct {
+			Base     PlayToClientSlotDisplay
+			Material PlayToClientSlotDisplay
+			Pattern  any
+		}
+		err = PlayToClientSlotDisplayDataSmithingTrimTmp.Base.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientSlotDisplayDataSmithingTrimTmp.Material.Decode(r)
+		if err != nil {
+			return
+		}
+		var PlayToClientSlotDisplayDataPatternId int32
+		PlayToClientSlotDisplayDataPatternId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		if PlayToClientSlotDisplayDataPatternId != 0 {
+			PlayToClientSlotDisplayDataSmithingTrimTmp.Pattern = PlayToClientSlotDisplayDataPatternId
+		} else {
+			var PlayToClientSlotDisplayDataPatternResult ArmorTrimPattern
+			err = PlayToClientSlotDisplayDataPatternResult.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientSlotDisplayDataSmithingTrimTmp.Pattern = PlayToClientSlotDisplayDataPatternResult
+		}
+		ret.Data = PlayToClientSlotDisplayDataSmithingTrimTmp
+	case "tag":
+		var PlayToClientSlotDisplayDataTagTmp string
+		PlayToClientSlotDisplayDataTagTmp, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientSlotDisplayDataTagTmp
+	case "with_remainder":
+		var PlayToClientSlotDisplayDataWithRemainderTmp struct {
+			Input     PlayToClientSlotDisplay
+			Remainder PlayToClientSlotDisplay
+		}
+		err = PlayToClientSlotDisplayDataWithRemainderTmp.Input.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientSlotDisplayDataWithRemainderTmp.Remainder.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientSlotDisplayDataWithRemainderTmp
+	}
+	return
+}
+
+var PlayToClientSlotDisplayTypeReverseMap = map[string]int32{"empty": 0, "any_fuel": 1, "item": 2, "item_stack": 3, "tag": 4, "smithing_trim": 5, "with_remainder": 6, "composite": 7}
+
+func (ret *PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
+	var vPlayToClientSlotDisplayType int32
+	vPlayToClientSlotDisplayType, err = proto_base.ErroringIndex(PlayToClientSlotDisplayTypeReverseMap, ret.Type)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vPlayToClientSlotDisplayType)
+	if err != nil {
+		return
+	}
+	switch ret.Type {
+	case "any_fuel":
+		_, ok := ret.Data.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	case "composite":
+		PlayToClientSlotDisplayData, ok := ret.Data.([]PlayToClientSlotDisplay)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientSlotDisplayData)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientSlotDisplayData := range len(PlayToClientSlotDisplayData) {
+			err = PlayToClientSlotDisplayData[iPlayToClientSlotDisplayData].Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "empty":
+		_, ok := ret.Data.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	case "item":
+		PlayToClientSlotDisplayData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientSlotDisplayData)
+		if err != nil {
+			return
+		}
+	case "item_stack":
+		PlayToClientSlotDisplayData, ok := ret.Data.(Slot)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientSlotDisplayData.Encode(w)
+		if err != nil {
+			return
+		}
+	case "smithing_trim":
+		PlayToClientSlotDisplayData, ok := ret.Data.(struct {
+			Base     PlayToClientSlotDisplay
+			Material PlayToClientSlotDisplay
+			Pattern  any
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientSlotDisplayData.Base.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientSlotDisplayData.Material.Encode(w)
+		if err != nil {
+			return
+		}
+		switch PlayToClientSlotDisplayDataPatternKnownType := PlayToClientSlotDisplayData.Pattern.(type) {
+		case int32:
+			err = proto_base.EncodeVarInt(w, PlayToClientSlotDisplayDataPatternKnownType)
+			if err != nil {
+				return
+			}
+		case ArmorTrimPattern:
+			err = proto_base.EncodeVarInt(w, 0)
+			if err != nil {
+				return
+			}
+			err = PlayToClientSlotDisplayDataPatternKnownType.Encode(w)
+			if err != nil {
+				return
+			}
+		default:
+			err = proto_base.BadTypeError
+		}
+	case "tag":
+		PlayToClientSlotDisplayData, ok := ret.Data.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, PlayToClientSlotDisplayData)
+		if err != nil {
+			return
+		}
+	case "with_remainder":
+		PlayToClientSlotDisplayData, ok := ret.Data.(struct {
+			Input     PlayToClientSlotDisplay
+			Remainder PlayToClientSlotDisplay
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientSlotDisplayData.Input.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientSlotDisplayData.Remainder.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientSpawnInfo struct {
+	Dimension        int32
+	Name             string
+	HashedSeed       int64
+	Gamemode         string
+	PreviousGamemode uint8
+	IsDebug          bool
+	IsFlat           bool
+	Death            *GlobalPos
+	PortalCooldown   int32
+	SeaLevel         int32
+}
+
+var PlayToClientSpawnInfoGamemodeMap = map[int8]string{0: "survival", 1: "creative", 2: "adventure", 3: "spectator"}
+
+func (ret *PlayToClientSpawnInfo) Decode(r io.Reader) (err error) {
+	ret.Dimension, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Name, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.HashedSeed)
+	if err != nil {
+		return
+	}
+	var PlayToClientSpawnInfoGamemodeKey int8
+	err = binary.Read(r, binary.BigEndian, &PlayToClientSpawnInfoGamemodeKey)
+	if err != nil {
+		return
+	}
+	ret.Gamemode, err = proto_base.ErroringIndex(PlayToClientSpawnInfoGamemodeMap, PlayToClientSpawnInfoGamemodeKey)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.PreviousGamemode)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.IsDebug)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.IsFlat)
+	if err != nil {
+		return
+	}
+	var PlayToClientSpawnInfoDeathPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientSpawnInfoDeathPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientSpawnInfoDeathPresent {
+		var PlayToClientSpawnInfoDeathPresentValue GlobalPos
+		err = PlayToClientSpawnInfoDeathPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Death = &PlayToClientSpawnInfoDeathPresentValue
+	}
+	ret.PortalCooldown, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SeaLevel, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var PlayToClientSpawnInfoGamemodeReverseMap = map[string]int8{"survival": 0, "creative": 1, "adventure": 2, "spectator": 3}
+
+func (ret *PlayToClientSpawnInfo) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Dimension)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Name)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.HashedSeed)
+	if err != nil {
+		return
+	}
+	var vPlayToClientSpawnInfoGamemode int8
+	vPlayToClientSpawnInfoGamemode, err = proto_base.ErroringIndex(PlayToClientSpawnInfoGamemodeReverseMap, ret.Gamemode)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, vPlayToClientSpawnInfoGamemode)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.PreviousGamemode)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IsDebug)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IsFlat)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Death != nil)
+	if err != nil {
+		return
+	}
+	if ret.Death != nil {
+		err = (*ret.Death).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, ret.PortalCooldown)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.SeaLevel)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacket struct {
+	Name   string
+	Params any
+}
+
+var PlayToClientPacketNameMap = map[int32]string{0x00: "bundle_delimiter", 0x01: "spawn_entity", 0x02: "animation", 0x03: "statistics", 0x04: "acknowledge_player_digging", 0x05: "block_break_animation", 0x06: "tile_entity_data", 0x07: "block_action", 0x08: "block_change", 0x09: "boss_bar", 0x0a: "difficulty", 0x0b: "chunk_batch_finished", 0x0c: "chunk_batch_start", 0x0d: "chunk_biomes", 0x0e: "clear_titles", 0x0f: "tab_complete", 0x10: "declare_commands", 0x11: "close_window", 0x12: "window_items", 0x13: "craft_progress_bar", 0x14: "set_slot", 0x15: "cookie_request", 0x16: "set_cooldown", 0x17: "chat_suggestions", 0x18: "custom_payload", 0x19: "damage_event", 0x1a: "debug_block_value", 0x1b: "debug_chunk_value", 0x1c: "debug_entity_value", 0x1d: "debug_event", 0x1e: "debug_sample", 0x1f: "hide_message", 0x20: "kick_disconnect", 0x21: "profileless_chat", 0x22: "entity_status", 0x23: "sync_entity_position", 0x24: "explosion", 0x25: "unload_chunk", 0x26: "game_state_change", 0x27: "game_test_highlight_pos", 0x28: "open_horse_window", 0x29: "hurt_animation", 0x2a: "initialize_world_border", 0x2b: "keep_alive", 0x2c: "map_chunk", 0x2d: "world_event", 0x2e: "world_particles", 0x2f: "update_light", 0x30: "login", 0x31: "map", 0x32: "trade_list", 0x33: "rel_entity_move", 0x34: "entity_move_look", 0x35: "move_minecart", 0x36: "entity_look", 0x37: "vehicle_move", 0x38: "open_book", 0x39: "open_window", 0x3a: "open_sign_entity", 0x3b: "ping", 0x3c: "ping_response", 0x3d: "craft_recipe_response", 0x3e: "abilities", 0x3f: "player_chat", 0x40: "end_combat_event", 0x41: "enter_combat_event", 0x42: "death_combat_event", 0x43: "player_remove", 0x44: "player_info", 0x45: "face_player", 0x46: "position", 0x47: "player_rotation", 0x48: "recipe_book_add", 0x49: "recipe_book_remove", 0x4a: "recipe_book_settings", 0x4b: "entity_destroy", 0x4c: "remove_entity_effect", 0x4d: "reset_score", 0x4e: "remove_resource_pack", 0x4f: "add_resource_pack", 0x50: "respawn", 0x51: "entity_head_rotation", 0x52: "multi_block_change", 0x53: "select_advancement_tab", 0x54: "server_data", 0x55: "action_bar", 0x56: "world_border_center", 0x57: "world_border_lerp_size", 0x58: "world_border_size", 0x59: "world_border_warning_delay", 0x5a: "world_border_warning_reach", 0x5b: "camera", 0x5c: "update_view_position", 0x5d: "update_view_distance", 0x5e: "set_cursor_item", 0x5f: "spawn_position", 0x60: "scoreboard_display_objective", 0x61: "entity_metadata", 0x62: "attach_entity", 0x63: "entity_velocity", 0x64: "entity_equipment", 0x65: "experience", 0x66: "update_health", 0x67: "held_item_slot", 0x68: "scoreboard_objective", 0x69: "set_passengers", 0x6a: "set_player_inventory", 0x6b: "teams", 0x6c: "scoreboard_score", 0x6d: "simulation_distance", 0x6e: "set_title_subtitle", 0x6f: "update_time", 0x70: "set_title_text", 0x71: "set_title_time", 0x72: "entity_sound_effect", 0x73: "sound_effect", 0x74: "start_configuration", 0x75: "stop_sound", 0x76: "store_cookie", 0x77: "system_chat", 0x78: "playerlist_header", 0x79: "nbt_query_response", 0x7a: "collect", 0x7b: "entity_teleport", 0x7c: "test_instance_block_status", 0x7d: "set_ticking_state", 0x7e: "step_tick", 0x7f: "transfer", 0x80: "advancements", 0x81: "entity_update_attributes", 0x82: "entity_effect", 0x83: "declare_recipes", 0x84: "tags", 0x85: "set_projectile_power", 0x86: "custom_report_details", 0x87: "server_links", 0x88: "tracked_waypoint", 0x89: "clear_dialog", 0x8a: "show_dialog"}
+
+func (ret *PlayToClientPacket) Decode(r io.Reader) (err error) {
+	var PlayToClientPacketNameKey int32
+	PlayToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Name, err = proto_base.ErroringIndex(PlayToClientPacketNameMap, PlayToClientPacketNameKey)
+	if err != nil {
+		return
+	}
+	switch ret.Name {
+	case "abilities":
+		var PlayToClientPacketParamsAbilitiesTmp PlayToClientPacketAbilities
+		err = PlayToClientPacketParamsAbilitiesTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsAbilitiesTmp
+	case "acknowledge_player_digging":
+		var PlayToClientPacketParamsAcknowledgePlayerDiggingTmp PlayToClientPacketAcknowledgePlayerDigging
+		err = PlayToClientPacketParamsAcknowledgePlayerDiggingTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsAcknowledgePlayerDiggingTmp
+	case "action_bar":
+		var PlayToClientPacketParamsActionBarTmp PlayToClientPacketActionBar
+		err = PlayToClientPacketParamsActionBarTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsActionBarTmp
+	case "add_resource_pack":
+		var PlayToClientPacketParamsAddResourcePackTmp PlayToClientPacketCommonAddResourcePack
+		err = PlayToClientPacketParamsAddResourcePackTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsAddResourcePackTmp
+	case "advancements":
+		var PlayToClientPacketParamsAdvancementsTmp PlayToClientPacketAdvancements
+		err = PlayToClientPacketParamsAdvancementsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsAdvancementsTmp
+	case "animation":
+		var PlayToClientPacketParamsAnimationTmp PlayToClientPacketAnimation
+		err = PlayToClientPacketParamsAnimationTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsAnimationTmp
+	case "attach_entity":
+		var PlayToClientPacketParamsAttachEntityTmp PlayToClientPacketAttachEntity
+		err = PlayToClientPacketParamsAttachEntityTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsAttachEntityTmp
+	case "block_action":
+		var PlayToClientPacketParamsBlockActionTmp PlayToClientPacketBlockAction
+		err = PlayToClientPacketParamsBlockActionTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsBlockActionTmp
+	case "block_break_animation":
+		var PlayToClientPacketParamsBlockBreakAnimationTmp PlayToClientPacketBlockBreakAnimation
+		err = PlayToClientPacketParamsBlockBreakAnimationTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsBlockBreakAnimationTmp
+	case "block_change":
+		var PlayToClientPacketParamsBlockChangeTmp PlayToClientPacketBlockChange
+		err = PlayToClientPacketParamsBlockChangeTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsBlockChangeTmp
+	case "boss_bar":
+		var PlayToClientPacketParamsBossBarTmp PlayToClientPacketBossBar
+		err = PlayToClientPacketParamsBossBarTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsBossBarTmp
+	case "bundle_delimiter":
+		var PlayToClientPacketParamsBundleDelimiterTmp struct {
+		}
+		ret.Params = PlayToClientPacketParamsBundleDelimiterTmp
+	case "camera":
+		var PlayToClientPacketParamsCameraTmp PlayToClientPacketCamera
+		err = PlayToClientPacketParamsCameraTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsCameraTmp
+	case "chat_suggestions":
+		var PlayToClientPacketParamsChatSuggestionsTmp PlayToClientPacketChatSuggestions
+		err = PlayToClientPacketParamsChatSuggestionsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsChatSuggestionsTmp
+	case "chunk_batch_finished":
+		var PlayToClientPacketParamsChunkBatchFinishedTmp PlayToClientPacketChunkBatchFinished
+		err = PlayToClientPacketParamsChunkBatchFinishedTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsChunkBatchFinishedTmp
+	case "chunk_batch_start":
+		var PlayToClientPacketParamsChunkBatchStartTmp PlayToClientPacketChunkBatchStart
+		err = PlayToClientPacketParamsChunkBatchStartTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsChunkBatchStartTmp
+	case "chunk_biomes":
+		var PlayToClientPacketParamsChunkBiomesTmp PlayToClientPacketChunkBiomes
+		err = PlayToClientPacketParamsChunkBiomesTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsChunkBiomesTmp
+	case "clear_dialog":
+		var PlayToClientPacketParamsClearDialogTmp PlayToClientPacketCommonClearDialog
+		err = PlayToClientPacketParamsClearDialogTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsClearDialogTmp
+	case "clear_titles":
+		var PlayToClientPacketParamsClearTitlesTmp PlayToClientPacketClearTitles
+		err = PlayToClientPacketParamsClearTitlesTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsClearTitlesTmp
+	case "close_window":
+		var PlayToClientPacketParamsCloseWindowTmp PlayToClientPacketCloseWindow
+		err = PlayToClientPacketParamsCloseWindowTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsCloseWindowTmp
+	case "collect":
+		var PlayToClientPacketParamsCollectTmp PlayToClientPacketCollect
+		err = PlayToClientPacketParamsCollectTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsCollectTmp
+	case "cookie_request":
+		var PlayToClientPacketParamsCookieRequestTmp PlayToClientPacketCommonCookieRequest
+		err = PlayToClientPacketParamsCookieRequestTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsCookieRequestTmp
+	case "craft_progress_bar":
+		var PlayToClientPacketParamsCraftProgressBarTmp PlayToClientPacketCraftProgressBar
+		err = PlayToClientPacketParamsCraftProgressBarTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsCraftProgressBarTmp
+	case "craft_recipe_response":
+		var PlayToClientPacketParamsCraftRecipeResponseTmp PlayToClientPacketCraftRecipeResponse
+		err = PlayToClientPacketParamsCraftRecipeResponseTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsCraftRecipeResponseTmp
+	case "custom_payload":
+		var PlayToClientPacketParamsCustomPayloadTmp PlayToClientPacketCustomPayload
+		err = PlayToClientPacketParamsCustomPayloadTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsCustomPayloadTmp
+	case "custom_report_details":
+		var PlayToClientPacketParamsCustomReportDetailsTmp PlayToClientPacketCommonCustomReportDetails
+		err = PlayToClientPacketParamsCustomReportDetailsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsCustomReportDetailsTmp
+	case "damage_event":
+		var PlayToClientPacketParamsDamageEventTmp PlayToClientPacketDamageEvent
+		err = PlayToClientPacketParamsDamageEventTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDamageEventTmp
+	case "death_combat_event":
+		var PlayToClientPacketParamsDeathCombatEventTmp PlayToClientPacketDeathCombatEvent
+		err = PlayToClientPacketParamsDeathCombatEventTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDeathCombatEventTmp
+	case "debug_block_value":
+		var PlayToClientPacketParamsDebugBlockValueTmp PlayToClientPacketDebugBlockValue
+		err = PlayToClientPacketParamsDebugBlockValueTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDebugBlockValueTmp
+	case "debug_chunk_value":
+		var PlayToClientPacketParamsDebugChunkValueTmp PlayToClientPacketDebugChunkValue
+		err = PlayToClientPacketParamsDebugChunkValueTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDebugChunkValueTmp
+	case "debug_entity_value":
+		var PlayToClientPacketParamsDebugEntityValueTmp PlayToClientPacketDebugEntityValue
+		err = PlayToClientPacketParamsDebugEntityValueTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDebugEntityValueTmp
+	case "debug_event":
+		var PlayToClientPacketParamsDebugEventTmp PlayToClientPacketDebugEvent
+		err = PlayToClientPacketParamsDebugEventTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDebugEventTmp
+	case "debug_sample":
+		var PlayToClientPacketParamsDebugSampleTmp PlayToClientPacketDebugSample
+		err = PlayToClientPacketParamsDebugSampleTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDebugSampleTmp
+	case "declare_commands":
+		var PlayToClientPacketParamsDeclareCommandsTmp PlayToClientPacketDeclareCommands
+		err = PlayToClientPacketParamsDeclareCommandsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDeclareCommandsTmp
+	case "declare_recipes":
+		var PlayToClientPacketParamsDeclareRecipesTmp PlayToClientPacketDeclareRecipes
+		err = PlayToClientPacketParamsDeclareRecipesTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDeclareRecipesTmp
+	case "difficulty":
+		var PlayToClientPacketParamsDifficultyTmp PlayToClientPacketDifficulty
+		err = PlayToClientPacketParamsDifficultyTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsDifficultyTmp
+	case "end_combat_event":
+		var PlayToClientPacketParamsEndCombatEventTmp PlayToClientPacketEndCombatEvent
+		err = PlayToClientPacketParamsEndCombatEventTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEndCombatEventTmp
+	case "enter_combat_event":
+		var PlayToClientPacketParamsEnterCombatEventTmp PlayToClientPacketEnterCombatEvent
+		err = PlayToClientPacketParamsEnterCombatEventTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEnterCombatEventTmp
+	case "entity_destroy":
+		var PlayToClientPacketParamsEntityDestroyTmp PlayToClientPacketEntityDestroy
+		err = PlayToClientPacketParamsEntityDestroyTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityDestroyTmp
+	case "entity_effect":
+		var PlayToClientPacketParamsEntityEffectTmp PlayToClientPacketEntityEffect
+		err = PlayToClientPacketParamsEntityEffectTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityEffectTmp
+	case "entity_equipment":
+		var PlayToClientPacketParamsEntityEquipmentTmp PlayToClientPacketEntityEquipment
+		err = PlayToClientPacketParamsEntityEquipmentTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityEquipmentTmp
+	case "entity_head_rotation":
+		var PlayToClientPacketParamsEntityHeadRotationTmp PlayToClientPacketEntityHeadRotation
+		err = PlayToClientPacketParamsEntityHeadRotationTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityHeadRotationTmp
+	case "entity_look":
+		var PlayToClientPacketParamsEntityLookTmp PlayToClientPacketEntityLook
+		err = PlayToClientPacketParamsEntityLookTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityLookTmp
+	case "entity_metadata":
+		var PlayToClientPacketParamsEntityMetadataTmp PlayToClientPacketEntityMetadata
+		err = PlayToClientPacketParamsEntityMetadataTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityMetadataTmp
+	case "entity_move_look":
+		var PlayToClientPacketParamsEntityMoveLookTmp PlayToClientPacketEntityMoveLook
+		err = PlayToClientPacketParamsEntityMoveLookTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityMoveLookTmp
+	case "entity_sound_effect":
+		var PlayToClientPacketParamsEntitySoundEffectTmp PlayToClientPacketEntitySoundEffect
+		err = PlayToClientPacketParamsEntitySoundEffectTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntitySoundEffectTmp
+	case "entity_status":
+		var PlayToClientPacketParamsEntityStatusTmp PlayToClientPacketEntityStatus
+		err = PlayToClientPacketParamsEntityStatusTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityStatusTmp
+	case "entity_teleport":
+		var PlayToClientPacketParamsEntityTeleportTmp PlayToClientPacketEntityTeleport
+		err = PlayToClientPacketParamsEntityTeleportTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityTeleportTmp
+	case "entity_update_attributes":
+		var PlayToClientPacketParamsEntityUpdateAttributesTmp PlayToClientPacketEntityUpdateAttributes
+		err = PlayToClientPacketParamsEntityUpdateAttributesTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityUpdateAttributesTmp
+	case "entity_velocity":
+		var PlayToClientPacketParamsEntityVelocityTmp PlayToClientPacketEntityVelocity
+		err = PlayToClientPacketParamsEntityVelocityTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsEntityVelocityTmp
+	case "experience":
+		var PlayToClientPacketParamsExperienceTmp PlayToClientPacketExperience
+		err = PlayToClientPacketParamsExperienceTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsExperienceTmp
+	case "explosion":
+		var PlayToClientPacketParamsExplosionTmp PlayToClientPacketExplosion
+		err = PlayToClientPacketParamsExplosionTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsExplosionTmp
+	case "face_player":
+		var PlayToClientPacketParamsFacePlayerTmp PlayToClientPacketFacePlayer
+		err = PlayToClientPacketParamsFacePlayerTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsFacePlayerTmp
+	case "game_state_change":
+		var PlayToClientPacketParamsGameStateChangeTmp PlayToClientPacketGameStateChange
+		err = PlayToClientPacketParamsGameStateChangeTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsGameStateChangeTmp
+	case "game_test_highlight_pos":
+		var PlayToClientPacketParamsGameTestHighlightPosTmp PlayToClientPacketGameTestHighlightPos
+		err = PlayToClientPacketParamsGameTestHighlightPosTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsGameTestHighlightPosTmp
+	case "held_item_slot":
+		var PlayToClientPacketParamsHeldItemSlotTmp PlayToClientPacketHeldItemSlot
+		err = PlayToClientPacketParamsHeldItemSlotTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsHeldItemSlotTmp
+	case "hide_message":
+		var PlayToClientPacketParamsHideMessageTmp PlayToClientPacketHideMessage
+		err = PlayToClientPacketParamsHideMessageTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsHideMessageTmp
+	case "hurt_animation":
+		var PlayToClientPacketParamsHurtAnimationTmp PlayToClientPacketHurtAnimation
+		err = PlayToClientPacketParamsHurtAnimationTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsHurtAnimationTmp
+	case "initialize_world_border":
+		var PlayToClientPacketParamsInitializeWorldBorderTmp PlayToClientPacketInitializeWorldBorder
+		err = PlayToClientPacketParamsInitializeWorldBorderTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsInitializeWorldBorderTmp
+	case "keep_alive":
+		var PlayToClientPacketParamsKeepAliveTmp PlayToClientPacketKeepAlive
+		err = PlayToClientPacketParamsKeepAliveTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsKeepAliveTmp
+	case "kick_disconnect":
+		var PlayToClientPacketParamsKickDisconnectTmp PlayToClientPacketKickDisconnect
+		err = PlayToClientPacketParamsKickDisconnectTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsKickDisconnectTmp
+	case "login":
+		var PlayToClientPacketParamsLoginTmp PlayToClientPacketLogin
+		err = PlayToClientPacketParamsLoginTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsLoginTmp
+	case "map":
+		var PlayToClientPacketParamsMapTmp PlayToClientPacketMap
+		err = PlayToClientPacketParamsMapTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsMapTmp
+	case "map_chunk":
+		var PlayToClientPacketParamsMapChunkTmp PlayToClientPacketMapChunk
+		err = PlayToClientPacketParamsMapChunkTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsMapChunkTmp
+	case "move_minecart":
+		var PlayToClientPacketParamsMoveMinecartTmp PlayToClientPacketMoveMinecart
+		err = PlayToClientPacketParamsMoveMinecartTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsMoveMinecartTmp
+	case "multi_block_change":
+		var PlayToClientPacketParamsMultiBlockChangeTmp PlayToClientPacketMultiBlockChange
+		err = PlayToClientPacketParamsMultiBlockChangeTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsMultiBlockChangeTmp
+	case "nbt_query_response":
+		var PlayToClientPacketParamsNbtQueryResponseTmp PlayToClientPacketNbtQueryResponse
+		err = PlayToClientPacketParamsNbtQueryResponseTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsNbtQueryResponseTmp
+	case "open_book":
+		var PlayToClientPacketParamsOpenBookTmp PlayToClientPacketOpenBook
+		err = PlayToClientPacketParamsOpenBookTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsOpenBookTmp
+	case "open_horse_window":
+		var PlayToClientPacketParamsOpenHorseWindowTmp PlayToClientPacketOpenHorseWindow
+		err = PlayToClientPacketParamsOpenHorseWindowTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsOpenHorseWindowTmp
+	case "open_sign_entity":
+		var PlayToClientPacketParamsOpenSignEntityTmp PlayToClientPacketOpenSignEntity
+		err = PlayToClientPacketParamsOpenSignEntityTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsOpenSignEntityTmp
+	case "open_window":
+		var PlayToClientPacketParamsOpenWindowTmp PlayToClientPacketOpenWindow
+		err = PlayToClientPacketParamsOpenWindowTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsOpenWindowTmp
+	case "ping":
+		var PlayToClientPacketParamsPingTmp PlayToClientPacketPing
+		err = PlayToClientPacketParamsPingTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsPingTmp
+	case "ping_response":
+		var PlayToClientPacketParamsPingResponseTmp PlayToClientPacketPingResponse
+		err = PlayToClientPacketParamsPingResponseTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsPingResponseTmp
+	case "player_chat":
+		var PlayToClientPacketParamsPlayerChatTmp PlayToClientPacketPlayerChat
+		err = PlayToClientPacketParamsPlayerChatTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsPlayerChatTmp
+	case "player_info":
+		var PlayToClientPacketParamsPlayerInfoTmp PlayToClientPacketPlayerInfo
+		err = PlayToClientPacketParamsPlayerInfoTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsPlayerInfoTmp
+	case "player_remove":
+		var PlayToClientPacketParamsPlayerRemoveTmp PlayToClientPacketPlayerRemove
+		err = PlayToClientPacketParamsPlayerRemoveTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsPlayerRemoveTmp
+	case "player_rotation":
+		var PlayToClientPacketParamsPlayerRotationTmp PlayToClientPacketPlayerRotation
+		err = PlayToClientPacketParamsPlayerRotationTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsPlayerRotationTmp
+	case "playerlist_header":
+		var PlayToClientPacketParamsPlayerlistHeaderTmp PlayToClientPacketPlayerlistHeader
+		err = PlayToClientPacketParamsPlayerlistHeaderTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsPlayerlistHeaderTmp
+	case "position":
+		var PlayToClientPacketParamsPositionTmp PlayToClientPacketPosition
+		err = PlayToClientPacketParamsPositionTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsPositionTmp
+	case "profileless_chat":
+		var PlayToClientPacketParamsProfilelessChatTmp PlayToClientPacketProfilelessChat
+		err = PlayToClientPacketParamsProfilelessChatTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsProfilelessChatTmp
+	case "recipe_book_add":
+		var PlayToClientPacketParamsRecipeBookAddTmp PlayToClientPacketRecipeBookAdd
+		err = PlayToClientPacketParamsRecipeBookAddTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsRecipeBookAddTmp
+	case "recipe_book_remove":
+		var PlayToClientPacketParamsRecipeBookRemoveTmp PlayToClientPacketRecipeBookRemove
+		err = PlayToClientPacketParamsRecipeBookRemoveTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsRecipeBookRemoveTmp
+	case "recipe_book_settings":
+		var PlayToClientPacketParamsRecipeBookSettingsTmp PlayToClientPacketRecipeBookSettings
+		err = PlayToClientPacketParamsRecipeBookSettingsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsRecipeBookSettingsTmp
+	case "rel_entity_move":
+		var PlayToClientPacketParamsRelEntityMoveTmp PlayToClientPacketRelEntityMove
+		err = PlayToClientPacketParamsRelEntityMoveTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsRelEntityMoveTmp
+	case "remove_entity_effect":
+		var PlayToClientPacketParamsRemoveEntityEffectTmp PlayToClientPacketRemoveEntityEffect
+		err = PlayToClientPacketParamsRemoveEntityEffectTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsRemoveEntityEffectTmp
+	case "remove_resource_pack":
+		var PlayToClientPacketParamsRemoveResourcePackTmp PlayToClientPacketCommonRemoveResourcePack
+		err = PlayToClientPacketParamsRemoveResourcePackTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsRemoveResourcePackTmp
+	case "reset_score":
+		var PlayToClientPacketParamsResetScoreTmp PlayToClientPacketResetScore
+		err = PlayToClientPacketParamsResetScoreTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsResetScoreTmp
+	case "respawn":
+		var PlayToClientPacketParamsRespawnTmp PlayToClientPacketRespawn
+		err = PlayToClientPacketParamsRespawnTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsRespawnTmp
+	case "scoreboard_display_objective":
+		var PlayToClientPacketParamsScoreboardDisplayObjectiveTmp PlayToClientPacketScoreboardDisplayObjective
+		err = PlayToClientPacketParamsScoreboardDisplayObjectiveTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsScoreboardDisplayObjectiveTmp
+	case "scoreboard_objective":
+		var PlayToClientPacketParamsScoreboardObjectiveTmp PlayToClientPacketScoreboardObjective
+		err = PlayToClientPacketParamsScoreboardObjectiveTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsScoreboardObjectiveTmp
+	case "scoreboard_score":
+		var PlayToClientPacketParamsScoreboardScoreTmp PlayToClientPacketScoreboardScore
+		err = PlayToClientPacketParamsScoreboardScoreTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsScoreboardScoreTmp
+	case "select_advancement_tab":
+		var PlayToClientPacketParamsSelectAdvancementTabTmp PlayToClientPacketSelectAdvancementTab
+		err = PlayToClientPacketParamsSelectAdvancementTabTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSelectAdvancementTabTmp
+	case "server_data":
+		var PlayToClientPacketParamsServerDataTmp PlayToClientPacketServerData
+		err = PlayToClientPacketParamsServerDataTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsServerDataTmp
+	case "server_links":
+		var PlayToClientPacketParamsServerLinksTmp PlayToClientPacketCommonServerLinks
+		err = PlayToClientPacketParamsServerLinksTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsServerLinksTmp
+	case "set_cooldown":
+		var PlayToClientPacketParamsSetCooldownTmp PlayToClientPacketSetCooldown
+		err = PlayToClientPacketParamsSetCooldownTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetCooldownTmp
+	case "set_cursor_item":
+		var PlayToClientPacketParamsSetCursorItemTmp PlayToClientPacketSetCursorItem
+		err = PlayToClientPacketParamsSetCursorItemTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetCursorItemTmp
+	case "set_passengers":
+		var PlayToClientPacketParamsSetPassengersTmp PlayToClientPacketSetPassengers
+		err = PlayToClientPacketParamsSetPassengersTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetPassengersTmp
+	case "set_player_inventory":
+		var PlayToClientPacketParamsSetPlayerInventoryTmp PlayToClientPacketSetPlayerInventory
+		err = PlayToClientPacketParamsSetPlayerInventoryTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetPlayerInventoryTmp
+	case "set_projectile_power":
+		var PlayToClientPacketParamsSetProjectilePowerTmp PlayToClientPacketSetProjectilePower
+		err = PlayToClientPacketParamsSetProjectilePowerTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetProjectilePowerTmp
+	case "set_slot":
+		var PlayToClientPacketParamsSetSlotTmp PlayToClientPacketSetSlot
+		err = PlayToClientPacketParamsSetSlotTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetSlotTmp
+	case "set_ticking_state":
+		var PlayToClientPacketParamsSetTickingStateTmp PlayToClientPacketSetTickingState
+		err = PlayToClientPacketParamsSetTickingStateTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetTickingStateTmp
+	case "set_title_subtitle":
+		var PlayToClientPacketParamsSetTitleSubtitleTmp PlayToClientPacketSetTitleSubtitle
+		err = PlayToClientPacketParamsSetTitleSubtitleTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetTitleSubtitleTmp
+	case "set_title_text":
+		var PlayToClientPacketParamsSetTitleTextTmp PlayToClientPacketSetTitleText
+		err = PlayToClientPacketParamsSetTitleTextTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetTitleTextTmp
+	case "set_title_time":
+		var PlayToClientPacketParamsSetTitleTimeTmp PlayToClientPacketSetTitleTime
+		err = PlayToClientPacketParamsSetTitleTimeTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSetTitleTimeTmp
+	case "show_dialog":
+		var PlayToClientPacketParamsShowDialogTmp PlayToClientPacketShowDialog
+		err = PlayToClientPacketParamsShowDialogTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsShowDialogTmp
+	case "simulation_distance":
+		var PlayToClientPacketParamsSimulationDistanceTmp PlayToClientPacketSimulationDistance
+		err = PlayToClientPacketParamsSimulationDistanceTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSimulationDistanceTmp
+	case "sound_effect":
+		var PlayToClientPacketParamsSoundEffectTmp PlayToClientPacketSoundEffect
+		err = PlayToClientPacketParamsSoundEffectTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSoundEffectTmp
+	case "spawn_entity":
+		var PlayToClientPacketParamsSpawnEntityTmp PlayToClientPacketSpawnEntity
+		err = PlayToClientPacketParamsSpawnEntityTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSpawnEntityTmp
+	case "spawn_position":
+		var PlayToClientPacketParamsSpawnPositionTmp PlayToClientPacketSpawnPosition
+		err = PlayToClientPacketParamsSpawnPositionTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSpawnPositionTmp
+	case "start_configuration":
+		var PlayToClientPacketParamsStartConfigurationTmp PlayToClientPacketStartConfiguration
+		err = PlayToClientPacketParamsStartConfigurationTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsStartConfigurationTmp
+	case "statistics":
+		var PlayToClientPacketParamsStatisticsTmp PlayToClientPacketStatistics
+		err = PlayToClientPacketParamsStatisticsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsStatisticsTmp
+	case "step_tick":
+		var PlayToClientPacketParamsStepTickTmp PlayToClientPacketStepTick
+		err = PlayToClientPacketParamsStepTickTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsStepTickTmp
+	case "stop_sound":
+		var PlayToClientPacketParamsStopSoundTmp PlayToClientPacketStopSound
+		err = PlayToClientPacketParamsStopSoundTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsStopSoundTmp
+	case "store_cookie":
+		var PlayToClientPacketParamsStoreCookieTmp PlayToClientPacketCommonStoreCookie
+		err = PlayToClientPacketParamsStoreCookieTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsStoreCookieTmp
+	case "sync_entity_position":
+		var PlayToClientPacketParamsSyncEntityPositionTmp PlayToClientPacketSyncEntityPosition
+		err = PlayToClientPacketParamsSyncEntityPositionTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSyncEntityPositionTmp
+	case "system_chat":
+		var PlayToClientPacketParamsSystemChatTmp PlayToClientPacketSystemChat
+		err = PlayToClientPacketParamsSystemChatTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsSystemChatTmp
+	case "tab_complete":
+		var PlayToClientPacketParamsTabCompleteTmp PlayToClientPacketTabComplete
+		err = PlayToClientPacketParamsTabCompleteTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsTabCompleteTmp
+	case "tags":
+		var PlayToClientPacketParamsTagsTmp PlayToClientPacketTags
+		err = PlayToClientPacketParamsTagsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsTagsTmp
+	case "teams":
+		var PlayToClientPacketParamsTeamsTmp PlayToClientPacketTeams
+		err = PlayToClientPacketParamsTeamsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsTeamsTmp
+	case "test_instance_block_status":
+		var PlayToClientPacketParamsTestInstanceBlockStatusTmp PlayToClientPacketTestInstanceBlockStatus
+		err = PlayToClientPacketParamsTestInstanceBlockStatusTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsTestInstanceBlockStatusTmp
+	case "tile_entity_data":
+		var PlayToClientPacketParamsTileEntityDataTmp PlayToClientPacketTileEntityData
+		err = PlayToClientPacketParamsTileEntityDataTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsTileEntityDataTmp
+	case "tracked_waypoint":
+		var PlayToClientPacketParamsTrackedWaypointTmp PlayToClientPacketTrackedWaypoint
+		err = PlayToClientPacketParamsTrackedWaypointTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsTrackedWaypointTmp
+	case "trade_list":
+		var PlayToClientPacketParamsTradeListTmp PlayToClientPacketTradeList
+		err = PlayToClientPacketParamsTradeListTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsTradeListTmp
+	case "transfer":
+		var PlayToClientPacketParamsTransferTmp PlayToClientPacketCommonTransfer
+		err = PlayToClientPacketParamsTransferTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsTransferTmp
+	case "unload_chunk":
+		var PlayToClientPacketParamsUnloadChunkTmp PlayToClientPacketUnloadChunk
+		err = PlayToClientPacketParamsUnloadChunkTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsUnloadChunkTmp
+	case "update_health":
+		var PlayToClientPacketParamsUpdateHealthTmp PlayToClientPacketUpdateHealth
+		err = PlayToClientPacketParamsUpdateHealthTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsUpdateHealthTmp
+	case "update_light":
+		var PlayToClientPacketParamsUpdateLightTmp PlayToClientPacketUpdateLight
+		err = PlayToClientPacketParamsUpdateLightTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsUpdateLightTmp
+	case "update_time":
+		var PlayToClientPacketParamsUpdateTimeTmp PlayToClientPacketUpdateTime
+		err = PlayToClientPacketParamsUpdateTimeTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsUpdateTimeTmp
+	case "update_view_distance":
+		var PlayToClientPacketParamsUpdateViewDistanceTmp PlayToClientPacketUpdateViewDistance
+		err = PlayToClientPacketParamsUpdateViewDistanceTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsUpdateViewDistanceTmp
+	case "update_view_position":
+		var PlayToClientPacketParamsUpdateViewPositionTmp PlayToClientPacketUpdateViewPosition
+		err = PlayToClientPacketParamsUpdateViewPositionTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsUpdateViewPositionTmp
+	case "vehicle_move":
+		var PlayToClientPacketParamsVehicleMoveTmp PlayToClientPacketVehicleMove
+		err = PlayToClientPacketParamsVehicleMoveTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsVehicleMoveTmp
+	case "window_items":
+		var PlayToClientPacketParamsWindowItemsTmp PlayToClientPacketWindowItems
+		err = PlayToClientPacketParamsWindowItemsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsWindowItemsTmp
+	case "world_border_center":
+		var PlayToClientPacketParamsWorldBorderCenterTmp PlayToClientPacketWorldBorderCenter
+		err = PlayToClientPacketParamsWorldBorderCenterTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsWorldBorderCenterTmp
+	case "world_border_lerp_size":
+		var PlayToClientPacketParamsWorldBorderLerpSizeTmp PlayToClientPacketWorldBorderLerpSize
+		err = PlayToClientPacketParamsWorldBorderLerpSizeTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsWorldBorderLerpSizeTmp
+	case "world_border_size":
+		var PlayToClientPacketParamsWorldBorderSizeTmp PlayToClientPacketWorldBorderSize
+		err = PlayToClientPacketParamsWorldBorderSizeTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsWorldBorderSizeTmp
+	case "world_border_warning_delay":
+		var PlayToClientPacketParamsWorldBorderWarningDelayTmp PlayToClientPacketWorldBorderWarningDelay
+		err = PlayToClientPacketParamsWorldBorderWarningDelayTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsWorldBorderWarningDelayTmp
+	case "world_border_warning_reach":
+		var PlayToClientPacketParamsWorldBorderWarningReachTmp PlayToClientPacketWorldBorderWarningReach
+		err = PlayToClientPacketParamsWorldBorderWarningReachTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsWorldBorderWarningReachTmp
+	case "world_event":
+		var PlayToClientPacketParamsWorldEventTmp PlayToClientPacketWorldEvent
+		err = PlayToClientPacketParamsWorldEventTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsWorldEventTmp
+	case "world_particles":
+		var PlayToClientPacketParamsWorldParticlesTmp PlayToClientPacketWorldParticles
+		err = PlayToClientPacketParamsWorldParticlesTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = PlayToClientPacketParamsWorldParticlesTmp
+	}
+	return
+}
+
+var PlayToClientPacketNameReverseMap = map[string]int32{"bundle_delimiter": 0x00, "spawn_entity": 0x01, "animation": 0x02, "statistics": 0x03, "acknowledge_player_digging": 0x04, "block_break_animation": 0x05, "tile_entity_data": 0x06, "block_action": 0x07, "block_change": 0x08, "boss_bar": 0x09, "difficulty": 0x0a, "chunk_batch_finished": 0x0b, "chunk_batch_start": 0x0c, "chunk_biomes": 0x0d, "clear_titles": 0x0e, "tab_complete": 0x0f, "declare_commands": 0x10, "close_window": 0x11, "window_items": 0x12, "craft_progress_bar": 0x13, "set_slot": 0x14, "cookie_request": 0x15, "set_cooldown": 0x16, "chat_suggestions": 0x17, "custom_payload": 0x18, "damage_event": 0x19, "debug_block_value": 0x1a, "debug_chunk_value": 0x1b, "debug_entity_value": 0x1c, "debug_event": 0x1d, "debug_sample": 0x1e, "hide_message": 0x1f, "kick_disconnect": 0x20, "profileless_chat": 0x21, "entity_status": 0x22, "sync_entity_position": 0x23, "explosion": 0x24, "unload_chunk": 0x25, "game_state_change": 0x26, "game_test_highlight_pos": 0x27, "open_horse_window": 0x28, "hurt_animation": 0x29, "initialize_world_border": 0x2a, "keep_alive": 0x2b, "map_chunk": 0x2c, "world_event": 0x2d, "world_particles": 0x2e, "update_light": 0x2f, "login": 0x30, "map": 0x31, "trade_list": 0x32, "rel_entity_move": 0x33, "entity_move_look": 0x34, "move_minecart": 0x35, "entity_look": 0x36, "vehicle_move": 0x37, "open_book": 0x38, "open_window": 0x39, "open_sign_entity": 0x3a, "ping": 0x3b, "ping_response": 0x3c, "craft_recipe_response": 0x3d, "abilities": 0x3e, "player_chat": 0x3f, "end_combat_event": 0x40, "enter_combat_event": 0x41, "death_combat_event": 0x42, "player_remove": 0x43, "player_info": 0x44, "face_player": 0x45, "position": 0x46, "player_rotation": 0x47, "recipe_book_add": 0x48, "recipe_book_remove": 0x49, "recipe_book_settings": 0x4a, "entity_destroy": 0x4b, "remove_entity_effect": 0x4c, "reset_score": 0x4d, "remove_resource_pack": 0x4e, "add_resource_pack": 0x4f, "respawn": 0x50, "entity_head_rotation": 0x51, "multi_block_change": 0x52, "select_advancement_tab": 0x53, "server_data": 0x54, "action_bar": 0x55, "world_border_center": 0x56, "world_border_lerp_size": 0x57, "world_border_size": 0x58, "world_border_warning_delay": 0x59, "world_border_warning_reach": 0x5a, "camera": 0x5b, "update_view_position": 0x5c, "update_view_distance": 0x5d, "set_cursor_item": 0x5e, "spawn_position": 0x5f, "scoreboard_display_objective": 0x60, "entity_metadata": 0x61, "attach_entity": 0x62, "entity_velocity": 0x63, "entity_equipment": 0x64, "experience": 0x65, "update_health": 0x66, "held_item_slot": 0x67, "scoreboard_objective": 0x68, "set_passengers": 0x69, "set_player_inventory": 0x6a, "teams": 0x6b, "scoreboard_score": 0x6c, "simulation_distance": 0x6d, "set_title_subtitle": 0x6e, "update_time": 0x6f, "set_title_text": 0x70, "set_title_time": 0x71, "entity_sound_effect": 0x72, "sound_effect": 0x73, "start_configuration": 0x74, "stop_sound": 0x75, "store_cookie": 0x76, "system_chat": 0x77, "playerlist_header": 0x78, "nbt_query_response": 0x79, "collect": 0x7a, "entity_teleport": 0x7b, "test_instance_block_status": 0x7c, "set_ticking_state": 0x7d, "step_tick": 0x7e, "transfer": 0x7f, "advancements": 0x80, "entity_update_attributes": 0x81, "entity_effect": 0x82, "declare_recipes": 0x83, "tags": 0x84, "set_projectile_power": 0x85, "custom_report_details": 0x86, "server_links": 0x87, "tracked_waypoint": 0x88, "clear_dialog": 0x89, "show_dialog": 0x8a}
+
+func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
+	var vPlayToClientPacketName int32
+	vPlayToClientPacketName, err = proto_base.ErroringIndex(PlayToClientPacketNameReverseMap, ret.Name)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vPlayToClientPacketName)
+	if err != nil {
+		return
+	}
+	switch ret.Name {
+	case "abilities":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAbilities)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "acknowledge_player_digging":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAcknowledgePlayerDigging)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "action_bar":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketActionBar)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "add_resource_pack":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonAddResourcePack)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "advancements":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAdvancements)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "animation":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAnimation)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "attach_entity":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAttachEntity)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "block_action":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockAction)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "block_break_animation":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockBreakAnimation)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "block_change":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockChange)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "boss_bar":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBossBar)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "bundle_delimiter":
+		_, ok := ret.Params.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	case "camera":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCamera)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "chat_suggestions":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChatSuggestions)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "chunk_batch_finished":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBatchFinished)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "chunk_batch_start":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBatchStart)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "chunk_biomes":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBiomes)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "clear_dialog":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonClearDialog)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "clear_titles":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketClearTitles)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "close_window":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCloseWindow)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "collect":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCollect)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "cookie_request":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonCookieRequest)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "craft_progress_bar":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCraftProgressBar)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "craft_recipe_response":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCraftRecipeResponse)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "custom_payload":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCustomPayload)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "custom_report_details":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonCustomReportDetails)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "damage_event":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDamageEvent)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "death_combat_event":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeathCombatEvent)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "debug_block_value":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugBlockValue)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "debug_chunk_value":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugChunkValue)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "debug_entity_value":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugEntityValue)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "debug_event":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugEvent)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "debug_sample":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugSample)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "declare_commands":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeclareCommands)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "declare_recipes":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeclareRecipes)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "difficulty":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDifficulty)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "end_combat_event":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEndCombatEvent)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "enter_combat_event":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEnterCombatEvent)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_destroy":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityDestroy)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_effect":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityEffect)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_equipment":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityEquipment)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_head_rotation":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityHeadRotation)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_look":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityLook)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_metadata":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityMetadata)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_move_look":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityMoveLook)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_sound_effect":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntitySoundEffect)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_status":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityStatus)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_teleport":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityTeleport)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_update_attributes":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityUpdateAttributes)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "entity_velocity":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityVelocity)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "experience":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketExperience)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "explosion":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketExplosion)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "face_player":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketFacePlayer)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "game_state_change":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketGameStateChange)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "game_test_highlight_pos":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketGameTestHighlightPos)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "held_item_slot":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHeldItemSlot)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "hide_message":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHideMessage)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "hurt_animation":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHurtAnimation)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "initialize_world_border":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketInitializeWorldBorder)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "keep_alive":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketKeepAlive)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "kick_disconnect":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketKickDisconnect)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "login":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketLogin)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "map":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMap)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "map_chunk":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMapChunk)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "move_minecart":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMoveMinecart)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "multi_block_change":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMultiBlockChange)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "nbt_query_response":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketNbtQueryResponse)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "open_book":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenBook)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "open_horse_window":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenHorseWindow)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "open_sign_entity":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenSignEntity)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "open_window":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenWindow)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "ping":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPing)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "ping_response":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPingResponse)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "player_chat":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerChat)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "player_info":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerInfo)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "player_remove":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerRemove)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "player_rotation":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerRotation)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "playerlist_header":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerlistHeader)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "position":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPosition)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "profileless_chat":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketProfilelessChat)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "recipe_book_add":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookAdd)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "recipe_book_remove":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookRemove)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "recipe_book_settings":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookSettings)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "rel_entity_move":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRelEntityMove)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "remove_entity_effect":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRemoveEntityEffect)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "remove_resource_pack":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonRemoveResourcePack)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "reset_score":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketResetScore)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "respawn":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRespawn)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "scoreboard_display_objective":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardDisplayObjective)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "scoreboard_objective":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardObjective)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "scoreboard_score":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardScore)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "select_advancement_tab":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSelectAdvancementTab)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "server_data":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketServerData)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "server_links":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonServerLinks)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_cooldown":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetCooldown)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_cursor_item":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetCursorItem)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_passengers":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetPassengers)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_player_inventory":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetPlayerInventory)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_projectile_power":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetProjectilePower)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_slot":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetSlot)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_ticking_state":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTickingState)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_title_subtitle":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleSubtitle)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_title_text":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleText)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "set_title_time":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleTime)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "show_dialog":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketShowDialog)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "simulation_distance":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSimulationDistance)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "sound_effect":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSoundEffect)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "spawn_entity":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSpawnEntity)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "spawn_position":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSpawnPosition)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "start_configuration":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStartConfiguration)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "statistics":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStatistics)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "step_tick":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStepTick)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "stop_sound":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStopSound)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "store_cookie":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonStoreCookie)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "sync_entity_position":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSyncEntityPosition)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "system_chat":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSystemChat)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "tab_complete":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTabComplete)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "tags":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTags)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "teams":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTeams)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "test_instance_block_status":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTestInstanceBlockStatus)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "tile_entity_data":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTileEntityData)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "tracked_waypoint":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTrackedWaypoint)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "trade_list":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTradeList)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "transfer":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonTransfer)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "unload_chunk":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUnloadChunk)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "update_health":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateHealth)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "update_light":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateLight)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "update_time":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateTime)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "update_view_distance":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateViewDistance)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "update_view_position":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateViewPosition)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "vehicle_move":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketVehicleMove)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "window_items":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWindowItems)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "world_border_center":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderCenter)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "world_border_lerp_size":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderLerpSize)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "world_border_size":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderSize)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "world_border_warning_delay":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderWarningDelay)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "world_border_warning_reach":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderWarningReach)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "world_event":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldEvent)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "world_particles":
+		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldParticles)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketAbilities struct {
+	Flags        int8
+	FlyingSpeed  float32
+	WalkingSpeed float32
+}
+
+func (ret *PlayToClientPacketAbilities) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Flags)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.FlyingSpeed)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.WalkingSpeed)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketAbilities) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Flags)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.FlyingSpeed)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.WalkingSpeed)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketAcknowledgePlayerDigging struct {
+	SequenceId int32
+}
+
+func (ret *PlayToClientPacketAcknowledgePlayerDigging) Decode(r io.Reader) (err error) {
+	ret.SequenceId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketAcknowledgePlayerDigging) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.SequenceId)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketActionBar struct {
+	Text nbt.Anon
+}
+
+func (ret *PlayToClientPacketActionBar) Decode(r io.Reader) (err error) {
+	err = ret.Text.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketActionBar) Encode(w io.Writer) (err error) {
+	err = ret.Text.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketAdvancements struct {
+	Reset              bool
+	AdvancementMapping []struct {
+		Key   string
+		Value struct {
+			ParentId    *string
+			DisplayData *struct {
+				Title       nbt.Anon
+				Description nbt.Anon
+				Icon        Slot
+				FrameType   int32
+				Flags       struct {
+					Unused               uint32
+					Hidden               bool
+					ShowToast            bool
+					HasBackgroundTexture bool
+				}
+				BackgroundTexture any
+				XCord             float32
+				YCord             float32
+			}
+			Requirements      [][]string
+			SendsTelemtryData bool
+		}
+	}
+	Identifiers     []string
+	ProgressMapping []struct {
+		Key   string
+		Value []struct {
+			CriterionIdentifier string
+			CriterionProgress   *int64
+		}
+	}
+	ShowAdvancements bool
+}
+
+func (ret *PlayToClientPacketAdvancements) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Reset)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketAdvancementsAdvancementMapping int32
+	lPlayToClientPacketAdvancementsAdvancementMapping, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.AdvancementMapping = []struct {
+		Key   string
+		Value struct {
+			ParentId    *string
+			DisplayData *struct {
+				Title       nbt.Anon
+				Description nbt.Anon
+				Icon        Slot
+				FrameType   int32
+				Flags       struct {
+					Unused               uint32
+					Hidden               bool
+					ShowToast            bool
+					HasBackgroundTexture bool
+				}
+				BackgroundTexture any
+				XCord             float32
+				YCord             float32
+			}
+			Requirements      [][]string
+			SendsTelemtryData bool
+		}
+	}{}
+	for range lPlayToClientPacketAdvancementsAdvancementMapping {
+		var PlayToClientPacketAdvancementsAdvancementMappingElement struct {
+			Key   string
+			Value struct {
+				ParentId    *string
+				DisplayData *struct {
+					Title       nbt.Anon
+					Description nbt.Anon
+					Icon        Slot
+					FrameType   int32
+					Flags       struct {
+						Unused               uint32
+						Hidden               bool
+						ShowToast            bool
+						HasBackgroundTexture bool
+					}
+					BackgroundTexture any
+					XCord             float32
+					YCord             float32
+				}
+				Requirements      [][]string
+				SendsTelemtryData bool
+			}
+		}
+		PlayToClientPacketAdvancementsAdvancementMappingElement.Key, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresent bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresent)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresent {
+			var PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresentValue string
+			PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketAdvancementsAdvancementMappingElement.Value.ParentId = &PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresentValue
+		}
+		var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresent bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresent)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresent {
+			var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue struct {
+				Title       nbt.Anon
+				Description nbt.Anon
+				Icon        Slot
+				FrameType   int32
+				Flags       struct {
+					Unused               uint32
+					Hidden               bool
+					ShowToast            bool
+					HasBackgroundTexture bool
+				}
+				BackgroundTexture any
+				XCord             float32
+				YCord             float32
+			}
+			err = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Title.Decode(r)
+			if err != nil {
+				return
+			}
+			err = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Description.Decode(r)
+			if err != nil {
+				return
+			}
+			err = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Icon.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.FrameType, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked uint32
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.Unused = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked << 0 >> 3
+			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.Hidden = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked<<29>>31 == 1
+			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.ShowToast = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked<<30>>31 == 1
+			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.HasBackgroundTexture = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked<<31>>31 == 1
+			switch PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.HasBackgroundTexture {
+			case true:
+				var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTexture1Tmp string
+				PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTexture1Tmp, err = proto_base.DecodeString(r)
+				if err != nil {
+					return
+				}
+				PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.BackgroundTexture = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTexture1Tmp
+			default:
+				var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTextureTmp struct {
+				}
+				PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.BackgroundTexture = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTextureTmp
+			}
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.XCord)
+			if err != nil {
+				return
+			}
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.YCord)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketAdvancementsAdvancementMappingElement.Value.DisplayData = &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue
+		}
+		var lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirements int32
+		lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirements, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketAdvancementsAdvancementMappingElement.Value.Requirements = [][]string{}
+		for range lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirements {
+			var PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement []string
+			var lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement int32
+			lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement = []string{}
+			for range lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement {
+				var PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElementElement string
+				PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElementElement, err = proto_base.DecodeString(r)
+				if err != nil {
+					return
+				}
+				PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement = append(PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement, PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElementElement)
+			}
+			PlayToClientPacketAdvancementsAdvancementMappingElement.Value.Requirements = append(PlayToClientPacketAdvancementsAdvancementMappingElement.Value.Requirements, PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement)
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElement.Value.SendsTelemtryData)
+		if err != nil {
+			return
+		}
+		ret.AdvancementMapping = append(ret.AdvancementMapping, PlayToClientPacketAdvancementsAdvancementMappingElement)
+	}
+	var lPlayToClientPacketAdvancementsIdentifiers int32
+	lPlayToClientPacketAdvancementsIdentifiers, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Identifiers = []string{}
+	for range lPlayToClientPacketAdvancementsIdentifiers {
+		var PlayToClientPacketAdvancementsIdentifiersElement string
+		PlayToClientPacketAdvancementsIdentifiersElement, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Identifiers = append(ret.Identifiers, PlayToClientPacketAdvancementsIdentifiersElement)
+	}
+	var lPlayToClientPacketAdvancementsProgressMapping int32
+	lPlayToClientPacketAdvancementsProgressMapping, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ProgressMapping = []struct {
+		Key   string
+		Value []struct {
+			CriterionIdentifier string
+			CriterionProgress   *int64
+		}
+	}{}
+	for range lPlayToClientPacketAdvancementsProgressMapping {
+		var PlayToClientPacketAdvancementsProgressMappingElement struct {
+			Key   string
+			Value []struct {
+				CriterionIdentifier string
+				CriterionProgress   *int64
+			}
+		}
+		PlayToClientPacketAdvancementsProgressMappingElement.Key, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		var lPlayToClientPacketAdvancementsProgressMappingElementValue int32
+		lPlayToClientPacketAdvancementsProgressMappingElementValue, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketAdvancementsProgressMappingElement.Value = []struct {
+			CriterionIdentifier string
+			CriterionProgress   *int64
+		}{}
+		for range lPlayToClientPacketAdvancementsProgressMappingElementValue {
+			var PlayToClientPacketAdvancementsProgressMappingElementValueElement struct {
+				CriterionIdentifier string
+				CriterionProgress   *int64
+			}
+			PlayToClientPacketAdvancementsProgressMappingElementValueElement.CriterionIdentifier, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			var PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresent bool
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresent)
+			if err != nil {
+				return
+			}
+			if PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresent {
+				var PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresentValue int64
+				err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresentValue)
+				if err != nil {
+					return
+				}
+				PlayToClientPacketAdvancementsProgressMappingElementValueElement.CriterionProgress = &PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresentValue
+			}
+			PlayToClientPacketAdvancementsProgressMappingElement.Value = append(PlayToClientPacketAdvancementsProgressMappingElement.Value, PlayToClientPacketAdvancementsProgressMappingElementValueElement)
+		}
+		ret.ProgressMapping = append(ret.ProgressMapping, PlayToClientPacketAdvancementsProgressMappingElement)
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ShowAdvancements)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketAdvancements) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Reset)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.AdvancementMapping)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketAdvancementsAdvancementMapping := range len(ret.AdvancementMapping) {
+		err = proto_base.EncodeString(w, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Key)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.ParentId != nil)
+		if err != nil {
+			return
+		}
+		if ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.ParentId != nil {
+			err = proto_base.EncodeString(w, *ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.ParentId)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData != nil)
+		if err != nil {
+			return
+		}
+		if ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData != nil {
+			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Title.Encode(w)
+			if err != nil {
+				return
+			}
+			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Description.Encode(w)
+			if err != nil {
+				return
+			}
+			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Icon.Encode(w)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).FrameType)
+			if err != nil {
+				return
+			}
+			var PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataFlagsPacked uint32
+			PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataFlagsPacked |= (proto_base.Bool2uint32((*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Flags.HasBackgroundTexture) & 0x1) << 0x0
+			PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataFlagsPacked |= (proto_base.Bool2uint32((*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Flags.ShowToast) & 0x1) << 0x1
+			PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataFlagsPacked |= (proto_base.Bool2uint32((*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Flags.Hidden) & 0x1) << 0x2
+			PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataFlagsPacked |= (uint32((*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Flags.Unused) & 0x1FFFFFFF) << 0x3
+			err = binary.Write(w, binary.BigEndian, PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataFlagsPacked)
+			if err != nil {
+				return
+			}
+			switch (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Flags.HasBackgroundTexture {
+			case true:
+				PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataBackgroundTexture, ok := (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).BackgroundTexture.(string)
+				if !ok {
+					err = proto_base.BadTypeError
+					return
+				}
+				err = proto_base.EncodeString(w, PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataBackgroundTexture)
+				if err != nil {
+					return
+				}
+			default:
+				_, ok := (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).BackgroundTexture.(struct {
+				})
+				if !ok {
+					err = proto_base.BadTypeError
+					return
+				}
+			}
+			err = binary.Write(w, binary.BigEndian, (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).XCord)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).YCord)
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirements := range len(ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements) {
+			err = proto_base.EncodeVarInt(w, int32(len(ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements[iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirements])))
+			if err != nil {
+				return
+			}
+			for iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirementsInner := range len(ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements[iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirements]) {
+				err = proto_base.EncodeString(w, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements[iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirements][iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirementsInner])
+				if err != nil {
+					return
+				}
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.SendsTelemtryData)
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Identifiers)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketAdvancementsIdentifiers := range len(ret.Identifiers) {
+		err = proto_base.EncodeString(w, ret.Identifiers[iPlayToClientPacketAdvancementsIdentifiers])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.ProgressMapping)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketAdvancementsProgressMapping := range len(ret.ProgressMapping) {
+		err = proto_base.EncodeString(w, ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Key)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketAdvancementsProgressMappingInnerValue := range len(ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value) {
+			err = proto_base.EncodeString(w, ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value[iPlayToClientPacketAdvancementsProgressMappingInnerValue].CriterionIdentifier)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value[iPlayToClientPacketAdvancementsProgressMappingInnerValue].CriterionProgress != nil)
+			if err != nil {
+				return
+			}
+			if ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value[iPlayToClientPacketAdvancementsProgressMappingInnerValue].CriterionProgress != nil {
+				err = binary.Write(w, binary.BigEndian, *ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value[iPlayToClientPacketAdvancementsProgressMappingInnerValue].CriterionProgress)
+				if err != nil {
+					return
+				}
+			}
+		}
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ShowAdvancements)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketAnimation struct {
+	EntityId  int32
+	Animation uint8
+}
+
+func (ret *PlayToClientPacketAnimation) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Animation)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketAnimation) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Animation)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketAttachEntity struct {
+	EntityId  int32
+	VehicleId int32
+}
+
+func (ret *PlayToClientPacketAttachEntity) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.VehicleId)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketAttachEntity) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.VehicleId)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketBlockAction struct {
+	Location Position
+	Byte1    uint8
+	Byte2    uint8
+	BlockId  int32
+}
+
+func (ret *PlayToClientPacketBlockAction) Decode(r io.Reader) (err error) {
+	err = ret.Location.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Byte1)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Byte2)
+	if err != nil {
+		return
+	}
+	ret.BlockId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketBlockAction) Encode(w io.Writer) (err error) {
+	err = ret.Location.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Byte1)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Byte2)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.BlockId)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketBlockBreakAnimation struct {
+	EntityId     int32
+	Location     Position
+	DestroyStage int8
+}
+
+func (ret *PlayToClientPacketBlockBreakAnimation) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.Location.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DestroyStage)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketBlockBreakAnimation) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = ret.Location.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DestroyStage)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketBlockChange struct {
+	Location Position
+	Type     int32
+}
+
+func (ret *PlayToClientPacketBlockChange) Decode(r io.Reader) (err error) {
+	err = ret.Location.Decode(r)
+	if err != nil {
+		return
+	}
+	ret.Type, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketBlockChange) Encode(w io.Writer) (err error) {
+	err = ret.Location.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Type)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketBossBar struct {
+	EntityUUID uuid.UUID
+	Action     int32
+	Title      any
+	Health     any
+	Color      any
+	Dividers   any
+	Flags      any
+}
+
+func (ret *PlayToClientPacketBossBar) Decode(r io.Reader) (err error) {
+	_, err = io.ReadFull(r, ret.EntityUUID[:])
+	if err != nil {
+		return
+	}
+	ret.Action, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketBossBarTitle0Tmp nbt.Anon
+		err = PlayToClientPacketBossBarTitle0Tmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Title = PlayToClientPacketBossBarTitle0Tmp
+	case 3:
+		var PlayToClientPacketBossBarTitle3Tmp nbt.Anon
+		err = PlayToClientPacketBossBarTitle3Tmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Title = PlayToClientPacketBossBarTitle3Tmp
+	default:
+		var PlayToClientPacketBossBarTitleTmp struct {
+		}
+		ret.Title = PlayToClientPacketBossBarTitleTmp
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketBossBarHealth0Tmp float32
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketBossBarHealth0Tmp)
+		if err != nil {
+			return
+		}
+		ret.Health = PlayToClientPacketBossBarHealth0Tmp
+	case 2:
+		var PlayToClientPacketBossBarHealth2Tmp float32
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketBossBarHealth2Tmp)
+		if err != nil {
+			return
+		}
+		ret.Health = PlayToClientPacketBossBarHealth2Tmp
+	default:
+		var PlayToClientPacketBossBarHealthTmp struct {
+		}
+		ret.Health = PlayToClientPacketBossBarHealthTmp
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketBossBarColor0Tmp int32
+		PlayToClientPacketBossBarColor0Tmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Color = PlayToClientPacketBossBarColor0Tmp
+	case 4:
+		var PlayToClientPacketBossBarColor4Tmp int32
+		PlayToClientPacketBossBarColor4Tmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Color = PlayToClientPacketBossBarColor4Tmp
+	default:
+		var PlayToClientPacketBossBarColorTmp struct {
+		}
+		ret.Color = PlayToClientPacketBossBarColorTmp
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketBossBarDividers0Tmp int32
+		PlayToClientPacketBossBarDividers0Tmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Dividers = PlayToClientPacketBossBarDividers0Tmp
+	case 4:
+		var PlayToClientPacketBossBarDividers4Tmp int32
+		PlayToClientPacketBossBarDividers4Tmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Dividers = PlayToClientPacketBossBarDividers4Tmp
+	default:
+		var PlayToClientPacketBossBarDividersTmp struct {
+		}
+		ret.Dividers = PlayToClientPacketBossBarDividersTmp
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketBossBarFlags0Tmp uint8
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketBossBarFlags0Tmp)
+		if err != nil {
+			return
+		}
+		ret.Flags = PlayToClientPacketBossBarFlags0Tmp
+	case 5:
+		var PlayToClientPacketBossBarFlags5Tmp uint8
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketBossBarFlags5Tmp)
+		if err != nil {
+			return
+		}
+		ret.Flags = PlayToClientPacketBossBarFlags5Tmp
+	default:
+		var PlayToClientPacketBossBarFlagsTmp struct {
+		}
+		ret.Flags = PlayToClientPacketBossBarFlagsTmp
+	}
+	return
+}
+func (ret *PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
+	_, err = w.Write(ret.EntityUUID[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Action)
+	if err != nil {
+		return
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketBossBarTitle, ok := ret.Title.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketBossBarTitle.Encode(w)
+		if err != nil {
+			return
+		}
+	case 3:
+		PlayToClientPacketBossBarTitle, ok := ret.Title.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketBossBarTitle.Encode(w)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Title.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketBossBarHealth, ok := ret.Health.(float32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarHealth)
+		if err != nil {
+			return
+		}
+	case 2:
+		PlayToClientPacketBossBarHealth, ok := ret.Health.(float32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarHealth)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Health.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketBossBarColor, ok := ret.Color.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketBossBarColor)
+		if err != nil {
+			return
+		}
+	case 4:
+		PlayToClientPacketBossBarColor, ok := ret.Color.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketBossBarColor)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Color.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketBossBarDividers, ok := ret.Dividers.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketBossBarDividers)
+		if err != nil {
+			return
+		}
+	case 4:
+		PlayToClientPacketBossBarDividers, ok := ret.Dividers.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketBossBarDividers)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Dividers.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketBossBarFlags, ok := ret.Flags.(uint8)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarFlags)
+		if err != nil {
+			return
+		}
+	case 5:
+		PlayToClientPacketBossBarFlags, ok := ret.Flags.(uint8)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarFlags)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Flags.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketCamera struct {
+	CameraId int32
+}
+
+func (ret *PlayToClientPacketCamera) Decode(r io.Reader) (err error) {
+	ret.CameraId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCamera) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.CameraId)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketChatSuggestions struct {
+	Action  int32
+	Entries []string
+}
+
+func (ret *PlayToClientPacketChatSuggestions) Decode(r io.Reader) (err error) {
+	ret.Action, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketChatSuggestionsEntries int32
+	lPlayToClientPacketChatSuggestionsEntries, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Entries = []string{}
+	for range lPlayToClientPacketChatSuggestionsEntries {
+		var PlayToClientPacketChatSuggestionsEntriesElement string
+		PlayToClientPacketChatSuggestionsEntriesElement, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Entries = append(ret.Entries, PlayToClientPacketChatSuggestionsEntriesElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketChatSuggestions) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Action)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Entries)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketChatSuggestionsEntries := range len(ret.Entries) {
+		err = proto_base.EncodeString(w, ret.Entries[iPlayToClientPacketChatSuggestionsEntries])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketChunkBatchFinished struct {
+	BatchSize int32
+}
+
+func (ret *PlayToClientPacketChunkBatchFinished) Decode(r io.Reader) (err error) {
+	ret.BatchSize, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketChunkBatchFinished) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.BatchSize)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketChunkBatchStart struct {
+}
+
+func (ret *PlayToClientPacketChunkBatchStart) Decode(r io.Reader) (err error) {
+	return
+}
+func (ret *PlayToClientPacketChunkBatchStart) Encode(w io.Writer) (err error) {
+	return
+}
+
+type PlayToClientPacketChunkBiomes struct {
+	Biomes []struct {
+		Position PackedChunkPos
+		Data     ByteArray
+	}
+}
+
+func (ret *PlayToClientPacketChunkBiomes) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketChunkBiomesBiomes int32
+	lPlayToClientPacketChunkBiomesBiomes, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Biomes = []struct {
+		Position PackedChunkPos
+		Data     ByteArray
+	}{}
+	for range lPlayToClientPacketChunkBiomesBiomes {
+		var PlayToClientPacketChunkBiomesBiomesElement struct {
+			Position PackedChunkPos
+			Data     ByteArray
+		}
+		err = PlayToClientPacketChunkBiomesBiomesElement.Position.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketChunkBiomesBiomesElement.Data.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Biomes = append(ret.Biomes, PlayToClientPacketChunkBiomesBiomesElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketChunkBiomes) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Biomes)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketChunkBiomesBiomes := range len(ret.Biomes) {
+		err = ret.Biomes[iPlayToClientPacketChunkBiomesBiomes].Position.Encode(w)
+		if err != nil {
+			return
+		}
+		err = ret.Biomes[iPlayToClientPacketChunkBiomesBiomes].Data.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketClearTitles struct {
+	Reset bool
+}
+
+func (ret *PlayToClientPacketClearTitles) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Reset)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketClearTitles) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Reset)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCloseWindow struct {
+	WindowId ContainerID
+}
+
+func (ret *PlayToClientPacketCloseWindow) Decode(r io.Reader) (err error) {
+	err = ret.WindowId.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCloseWindow) Encode(w io.Writer) (err error) {
+	err = ret.WindowId.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCollect struct {
+	CollectedEntityId int32
+	CollectorEntityId int32
+	PickupItemCount   int32
+}
+
+func (ret *PlayToClientPacketCollect) Decode(r io.Reader) (err error) {
+	ret.CollectedEntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.CollectorEntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.PickupItemCount, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCollect) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.CollectedEntityId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.CollectorEntityId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.PickupItemCount)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCommonAddResourcePack struct {
+	Uuid          uuid.UUID
+	Url           string
+	Hash          string
+	Forced        bool
+	PromptMessage *nbt.Anon
+}
+
+func (ret *PlayToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+	_, err = io.ReadFull(r, ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	ret.Url, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Hash, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Forced)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketCommonAddResourcePackPromptMessagePresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonAddResourcePackPromptMessagePresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketCommonAddResourcePackPromptMessagePresent {
+		var PlayToClientPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
+		err = PlayToClientPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.PromptMessage = &PlayToClientPacketCommonAddResourcePackPromptMessagePresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
+	_, err = w.Write(ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Url)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Hash)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Forced)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
+	if err != nil {
+		return
+	}
+	if ret.PromptMessage != nil {
+		err = (*ret.PromptMessage).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketCommonClearDialog struct {
+}
+
+func (ret *PlayToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+	return
+}
+func (ret *PlayToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
+	return
+}
+
+type PlayToClientPacketCommonCookieRequest struct {
+	Cookie string
+}
+
+func (ret *PlayToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+	ret.Cookie, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Cookie)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCommonCookieResponse struct {
+	Key   string
+	Value *ByteArray
+}
+
+func (ret *PlayToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketCommonCookieResponseValuePresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonCookieResponseValuePresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketCommonCookieResponseValuePresent {
+		var PlayToClientPacketCommonCookieResponseValuePresentValue ByteArray
+		err = PlayToClientPacketCommonCookieResponseValuePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Value = &PlayToClientPacketCommonCookieResponseValuePresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
+	if err != nil {
+		return
+	}
+	if ret.Value != nil {
+		err = (*ret.Value).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketCommonCustomClickAction struct {
+	Id  string
+	Nbt *nbt.Anon
+}
+
+func (ret *PlayToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+	ret.Id, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketCommonCustomClickActionNbtPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonCustomClickActionNbtPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketCommonCustomClickActionNbtPresent {
+		var PlayToClientPacketCommonCustomClickActionNbtPresentValue nbt.Anon
+		err = PlayToClientPacketCommonCustomClickActionNbtPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Nbt = &PlayToClientPacketCommonCustomClickActionNbtPresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Id)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
+	if err != nil {
+		return
+	}
+	if ret.Nbt != nil {
+		err = (*ret.Nbt).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketCommonCustomReportDetails struct {
+	Details []struct {
+		Key   string
+		Value string
+	}
+}
+
+func (ret *PlayToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketCommonCustomReportDetailsDetails int32
+	lPlayToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Details = []struct {
+		Key   string
+		Value string
+	}{}
+	for range lPlayToClientPacketCommonCustomReportDetailsDetails {
+		var PlayToClientPacketCommonCustomReportDetailsDetailsElement struct {
+			Key   string
+			Value string
+		}
+		PlayToClientPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Details = append(ret.Details, PlayToClientPacketCommonCustomReportDetailsDetailsElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
+		err = proto_base.EncodeString(w, ret.Details[iPlayToClientPacketCommonCustomReportDetailsDetails].Key)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Details[iPlayToClientPacketCommonCustomReportDetailsDetails].Value)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketCommonRemoveResourcePack struct {
+	Uuid *uuid.UUID
+}
+
+func (ret *PlayToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+	var PlayToClientPacketCommonRemoveResourcePackUuidPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonRemoveResourcePackUuidPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketCommonRemoveResourcePackUuidPresent {
+		var PlayToClientPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
+		_, err = io.ReadFull(r, PlayToClientPacketCommonRemoveResourcePackUuidPresentValue[:])
+		if err != nil {
+			return
+		}
+		ret.Uuid = &PlayToClientPacketCommonRemoveResourcePackUuidPresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
+	if err != nil {
+		return
+	}
+	if ret.Uuid != nil {
+		_, err = w.Write((*ret.Uuid)[:])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketCommonSelectKnownPacks struct {
+	Packs []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}
+}
+
+func (ret *PlayToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketCommonSelectKnownPacksPacks int32
+	lPlayToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Packs = []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}{}
+	for range lPlayToClientPacketCommonSelectKnownPacksPacks {
+		var PlayToClientPacketCommonSelectKnownPacksPacksElement struct {
+			Namespace string
+			Id        string
+			Version   string
+		}
+		PlayToClientPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Packs = append(ret.Packs, PlayToClientPacketCommonSelectKnownPacksPacksElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
+		err = proto_base.EncodeString(w, ret.Packs[iPlayToClientPacketCommonSelectKnownPacksPacks].Namespace)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iPlayToClientPacketCommonSelectKnownPacksPacks].Id)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iPlayToClientPacketCommonSelectKnownPacksPacks].Version)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketCommonServerLinks struct {
+	Links []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}
+}
+
+func (ret *PlayToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketCommonServerLinksLinks int32
+	lPlayToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Links = []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}{}
+	for range lPlayToClientPacketCommonServerLinksLinks {
+		var PlayToClientPacketCommonServerLinksLinksElement struct {
+			HasKnownType bool
+			KnownType    any
+			UnknownType  any
+			Link         string
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonServerLinksLinksElement.HasKnownType)
+		if err != nil {
+			return
+		}
+		switch PlayToClientPacketCommonServerLinksLinksElement.HasKnownType {
+		case true:
+			var PlayToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
+			err = PlayToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketCommonServerLinksLinksElement.KnownType = PlayToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp
+		}
+		switch PlayToClientPacketCommonServerLinksLinksElement.HasKnownType {
+		case false:
+			var PlayToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
+			err = PlayToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketCommonServerLinksLinksElement.UnknownType = PlayToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
+		}
+		PlayToClientPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Links = append(ret.Links, PlayToClientPacketCommonServerLinksLinksElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketCommonServerLinksLinks := range len(ret.Links) {
+		err = binary.Write(w, binary.BigEndian, ret.Links[iPlayToClientPacketCommonServerLinksLinks].HasKnownType)
+		if err != nil {
+			return
+		}
+		switch ret.Links[iPlayToClientPacketCommonServerLinksLinks].HasKnownType {
+		case true:
+			PlayToClientPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iPlayToClientPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = PlayToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		switch ret.Links[iPlayToClientPacketCommonServerLinksLinks].HasKnownType {
+		case false:
+			PlayToClientPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iPlayToClientPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = PlayToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeString(w, ret.Links[iPlayToClientPacketCommonServerLinksLinks].Link)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketCommonSettings struct {
+	Locale              string
+	ViewDistance        int8
+	ChatFlags           int32
+	ChatColors          bool
+	SkinParts           uint8
+	MainHand            int32
+	EnableTextFiltering bool
+	EnableServerListing bool
+	ParticleStatus      string
+}
+
+var PlayToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
+
+func (ret *PlayToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+	ret.Locale, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
+	if err != nil {
+		return
+	}
+	ret.MainHand, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketCommonSettingsParticleStatusKey int32
+	PlayToClientPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ParticleStatus, err = proto_base.ErroringIndex(PlayToClientPacketCommonSettingsParticleStatusMap, PlayToClientPacketCommonSettingsParticleStatusKey)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var PlayToClientPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
+
+func (ret *PlayToClientPacketCommonSettings) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Locale)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.MainHand)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var vPlayToClientPacketCommonSettingsParticleStatus int32
+	vPlayToClientPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(PlayToClientPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vPlayToClientPacketCommonSettingsParticleStatus)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCommonStoreCookie struct {
+	Key   string
+	Value ByteArray
+}
+
+func (ret *PlayToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCommonTransfer struct {
+	Host string
+	Port int32
+}
+
+func (ret *PlayToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+	ret.Host, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Port, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCommonTransfer) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Host)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Port)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCraftProgressBar struct {
+	WindowId ContainerID
+	Property int16
+	Value    int16
+}
+
+func (ret *PlayToClientPacketCraftProgressBar) Decode(r io.Reader) (err error) {
+	err = ret.WindowId.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Property)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Value)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCraftProgressBar) Encode(w io.Writer) (err error) {
+	err = ret.WindowId.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Property)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Value)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCraftRecipeResponse struct {
+	WindowId      ContainerID
+	RecipeDisplay PlayToClientRecipeDisplay
+}
+
+func (ret *PlayToClientPacketCraftRecipeResponse) Decode(r io.Reader) (err error) {
+	err = ret.WindowId.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.RecipeDisplay.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCraftRecipeResponse) Encode(w io.Writer) (err error) {
+	err = ret.WindowId.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.RecipeDisplay.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketCustomPayload struct {
+	Channel string
+	Data    proto_base.RestBuffer
+}
+
+func (ret *PlayToClientPacketCustomPayload) Decode(r io.Reader) (err error) {
+	ret.Channel, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = ret.Data.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketCustomPayload) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Channel)
+	if err != nil {
+		return
+	}
+	err = ret.Data.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketDamageEvent struct {
+	EntityId       int32
+	SourceTypeId   int32
+	SourceCauseId  int32
+	SourceDirectId int32
+	SourcePosition *Vec3f64
+}
+
+func (ret *PlayToClientPacketDamageEvent) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SourceTypeId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SourceCauseId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SourceDirectId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketDamageEventSourcePositionPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketDamageEventSourcePositionPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketDamageEventSourcePositionPresent {
+		var PlayToClientPacketDamageEventSourcePositionPresentValue Vec3f64
+		err = PlayToClientPacketDamageEventSourcePositionPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.SourcePosition = &PlayToClientPacketDamageEventSourcePositionPresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketDamageEvent) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.SourceTypeId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.SourceCauseId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.SourceDirectId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.SourcePosition != nil)
+	if err != nil {
+		return
+	}
+	if ret.SourcePosition != nil {
+		err = (*ret.SourcePosition).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketDeathCombatEvent struct {
+	PlayerId int32
+	Message  nbt.Anon
+}
+
+func (ret *PlayToClientPacketDeathCombatEvent) Decode(r io.Reader) (err error) {
+	ret.PlayerId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.Message.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketDeathCombatEvent) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.PlayerId)
+	if err != nil {
+		return
+	}
+	err = ret.Message.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketDebugBlockValue struct {
+	BlockPos Position
+	Update   DebugSubscriptionUpdate
+}
+
+func (ret *PlayToClientPacketDebugBlockValue) Decode(r io.Reader) (err error) {
+	err = ret.BlockPos.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Update.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketDebugBlockValue) Encode(w io.Writer) (err error) {
+	err = ret.BlockPos.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Update.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketDebugChunkValue struct {
+	ChunkPos PackedChunkPos
+	Update   DebugSubscriptionUpdate
+}
+
+func (ret *PlayToClientPacketDebugChunkValue) Decode(r io.Reader) (err error) {
+	err = ret.ChunkPos.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Update.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketDebugChunkValue) Encode(w io.Writer) (err error) {
+	err = ret.ChunkPos.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Update.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketDebugEntityValue struct {
+	EntityId int32
+	Update   DebugSubscriptionUpdate
+}
+
+func (ret *PlayToClientPacketDebugEntityValue) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.Update.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketDebugEntityValue) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = ret.Update.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketDebugEvent struct {
+	Event DebugSubscriptionEvent
+}
+
+func (ret *PlayToClientPacketDebugEvent) Decode(r io.Reader) (err error) {
+	err = ret.Event.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketDebugEvent) Encode(w io.Writer) (err error) {
+	err = ret.Event.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketDebugSample struct {
+	Sample []int64
+	Type   int32
+}
+
+func (ret *PlayToClientPacketDebugSample) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketDebugSampleSample int32
+	lPlayToClientPacketDebugSampleSample, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Sample = []int64{}
+	for range lPlayToClientPacketDebugSampleSample {
+		var PlayToClientPacketDebugSampleSampleElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketDebugSampleSampleElement)
+		if err != nil {
+			return
+		}
+		ret.Sample = append(ret.Sample, PlayToClientPacketDebugSampleSampleElement)
+	}
+	ret.Type, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketDebugSample) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Sample)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketDebugSampleSample := range len(ret.Sample) {
+		err = binary.Write(w, binary.BigEndian, ret.Sample[iPlayToClientPacketDebugSampleSample])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, ret.Type)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketDeclareCommands struct {
+	Nodes     []CommandNode
+	RootIndex int32
+}
+
+func (ret *PlayToClientPacketDeclareCommands) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketDeclareCommandsNodes int32
+	lPlayToClientPacketDeclareCommandsNodes, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Nodes = []CommandNode{}
+	for range lPlayToClientPacketDeclareCommandsNodes {
+		var PlayToClientPacketDeclareCommandsNodesElement CommandNode
+		err = PlayToClientPacketDeclareCommandsNodesElement.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Nodes = append(ret.Nodes, PlayToClientPacketDeclareCommandsNodesElement)
+	}
+	ret.RootIndex, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketDeclareCommands) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Nodes)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketDeclareCommandsNodes := range len(ret.Nodes) {
+		err = ret.Nodes[iPlayToClientPacketDeclareCommandsNodes].Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, ret.RootIndex)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketDeclareRecipes struct {
+	Recipes []struct {
+		Name  string
+		Items []int32
+	}
+	StoneCutterRecipes []struct {
+		Input       IDSet
+		SlotDisplay PlayToClientSlotDisplay
+	}
+}
+
+func (ret *PlayToClientPacketDeclareRecipes) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketDeclareRecipesRecipes int32
+	lPlayToClientPacketDeclareRecipesRecipes, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Recipes = []struct {
+		Name  string
+		Items []int32
+	}{}
+	for range lPlayToClientPacketDeclareRecipesRecipes {
+		var PlayToClientPacketDeclareRecipesRecipesElement struct {
+			Name  string
+			Items []int32
+		}
+		PlayToClientPacketDeclareRecipesRecipesElement.Name, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		var lPlayToClientPacketDeclareRecipesRecipesElementItems int32
+		lPlayToClientPacketDeclareRecipesRecipesElementItems, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketDeclareRecipesRecipesElement.Items = []int32{}
+		for range lPlayToClientPacketDeclareRecipesRecipesElementItems {
+			var PlayToClientPacketDeclareRecipesRecipesElementItemsElement int32
+			PlayToClientPacketDeclareRecipesRecipesElementItemsElement, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketDeclareRecipesRecipesElement.Items = append(PlayToClientPacketDeclareRecipesRecipesElement.Items, PlayToClientPacketDeclareRecipesRecipesElementItemsElement)
+		}
+		ret.Recipes = append(ret.Recipes, PlayToClientPacketDeclareRecipesRecipesElement)
+	}
+	var lPlayToClientPacketDeclareRecipesStoneCutterRecipes int32
+	lPlayToClientPacketDeclareRecipesStoneCutterRecipes, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.StoneCutterRecipes = []struct {
+		Input       IDSet
+		SlotDisplay PlayToClientSlotDisplay
+	}{}
+	for range lPlayToClientPacketDeclareRecipesStoneCutterRecipes {
+		var PlayToClientPacketDeclareRecipesStoneCutterRecipesElement struct {
+			Input       IDSet
+			SlotDisplay PlayToClientSlotDisplay
+		}
+		err = PlayToClientPacketDeclareRecipesStoneCutterRecipesElement.Input.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketDeclareRecipesStoneCutterRecipesElement.SlotDisplay.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.StoneCutterRecipes = append(ret.StoneCutterRecipes, PlayToClientPacketDeclareRecipesStoneCutterRecipesElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketDeclareRecipes) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Recipes)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketDeclareRecipesRecipes := range len(ret.Recipes) {
+		err = proto_base.EncodeString(w, ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Name)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Items)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketDeclareRecipesRecipesInnerItems := range len(ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Items) {
+			err = proto_base.EncodeVarInt(w, ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Items[iPlayToClientPacketDeclareRecipesRecipesInnerItems])
+			if err != nil {
+				return
+			}
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.StoneCutterRecipes)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketDeclareRecipesStoneCutterRecipes := range len(ret.StoneCutterRecipes) {
+		err = ret.StoneCutterRecipes[iPlayToClientPacketDeclareRecipesStoneCutterRecipes].Input.Encode(w)
+		if err != nil {
+			return
+		}
+		err = ret.StoneCutterRecipes[iPlayToClientPacketDeclareRecipesStoneCutterRecipes].SlotDisplay.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketDifficulty struct {
+	Difficulty       string
+	DifficultyLocked bool
+}
+
+var PlayToClientPacketDifficultyDifficultyMap = map[int32]string{0: "peaceful", 1: "easy", 2: "normal", 3: "hard"}
+
+func (ret *PlayToClientPacketDifficulty) Decode(r io.Reader) (err error) {
+	var PlayToClientPacketDifficultyDifficultyKey int32
+	PlayToClientPacketDifficultyDifficultyKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Difficulty, err = proto_base.ErroringIndex(PlayToClientPacketDifficultyDifficultyMap, PlayToClientPacketDifficultyDifficultyKey)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DifficultyLocked)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var PlayToClientPacketDifficultyDifficultyReverseMap = map[string]int32{"peaceful": 0, "easy": 1, "normal": 2, "hard": 3}
+
+func (ret *PlayToClientPacketDifficulty) Encode(w io.Writer) (err error) {
+	var vPlayToClientPacketDifficultyDifficulty int32
+	vPlayToClientPacketDifficultyDifficulty, err = proto_base.ErroringIndex(PlayToClientPacketDifficultyDifficultyReverseMap, ret.Difficulty)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vPlayToClientPacketDifficultyDifficulty)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DifficultyLocked)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEndCombatEvent struct {
+	Duration int32
+}
+
+func (ret *PlayToClientPacketEndCombatEvent) Decode(r io.Reader) (err error) {
+	ret.Duration, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEndCombatEvent) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Duration)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEnterCombatEvent struct {
+}
+
+func (ret *PlayToClientPacketEnterCombatEvent) Decode(r io.Reader) (err error) {
+	return
+}
+func (ret *PlayToClientPacketEnterCombatEvent) Encode(w io.Writer) (err error) {
+	return
+}
+
+type PlayToClientPacketEntityDestroy struct {
+	EntityIds []int32
+}
+
+func (ret *PlayToClientPacketEntityDestroy) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketEntityDestroyEntityIds int32
+	lPlayToClientPacketEntityDestroyEntityIds, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.EntityIds = []int32{}
+	for range lPlayToClientPacketEntityDestroyEntityIds {
+		var PlayToClientPacketEntityDestroyEntityIdsElement int32
+		PlayToClientPacketEntityDestroyEntityIdsElement, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.EntityIds = append(ret.EntityIds, PlayToClientPacketEntityDestroyEntityIdsElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityDestroy) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.EntityIds)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketEntityDestroyEntityIds := range len(ret.EntityIds) {
+		err = proto_base.EncodeVarInt(w, ret.EntityIds[iPlayToClientPacketEntityDestroyEntityIds])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketEntityEffect struct {
+	EntityId  int32
+	EffectId  int32
+	Amplifier int32
+	Duration  int32
+	Flags     uint8
+}
+
+func (ret *PlayToClientPacketEntityEffect) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.EffectId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Amplifier, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Duration, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Flags)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityEffect) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.EffectId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Amplifier)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Duration)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Flags)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEntityEquipment struct {
+	Val proto_base.ToDo
+}
+
+func (ret *PlayToClientPacketEntityEquipment) Decode(r io.Reader) (err error) {
+	err = proto_base.ToDoError
+	return
+}
+func (ret *PlayToClientPacketEntityEquipment) Encode(w io.Writer) (err error) {
+	err = proto_base.ToDoError
+	return
+}
+
+type PlayToClientPacketEntityHeadRotation struct {
+	EntityId int32
+	HeadYaw  int8
+}
+
+func (ret *PlayToClientPacketEntityHeadRotation) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.HeadYaw)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityHeadRotation) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.HeadYaw)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEntityLook struct {
+	EntityId int32
+	Yaw      int8
+	Pitch    int8
+	OnGround bool
+}
+
+func (ret *PlayToClientPacketEntityLook) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityLook) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEntityMetadata struct {
+	EntityId int32
+	Metadata EntityMetadata
+}
+
+func (ret *PlayToClientPacketEntityMetadata) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.Metadata.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityMetadata) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = ret.Metadata.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEntityMoveLook struct {
+	EntityId int32
+	DX       int16
+	DY       int16
+	DZ       int16
+	Yaw      int8
+	Pitch    int8
+	OnGround bool
+}
+
+func (ret *PlayToClientPacketEntityMoveLook) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DX)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DY)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DZ)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityMoveLook) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DX)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DY)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DZ)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEntitySoundEffect struct {
+	Sound         ItemSoundHolder
+	SoundCategory SoundSource
+	EntityId      int32
+	Volume        float32
+	Pitch         float32
+	Seed          int64
+}
+
+func (ret *PlayToClientPacketEntitySoundEffect) Decode(r io.Reader) (err error) {
+	err = ret.Sound.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.SoundCategory.Decode(r)
+	if err != nil {
+		return
+	}
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Volume)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Seed)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntitySoundEffect) Encode(w io.Writer) (err error) {
+	err = ret.Sound.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.SoundCategory.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Volume)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Seed)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEntityStatus struct {
+	EntityId     int32
+	EntityStatus int8
+}
+
+func (ret *PlayToClientPacketEntityStatus) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EntityStatus)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityStatus) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EntityStatus)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEntityTeleport struct {
+	EntityId int32
+	X        float64
+	Y        float64
+	Z        float64
+	Yaw      int8
+	Pitch    int8
+	OnGround bool
+}
+
+func (ret *PlayToClientPacketEntityTeleport) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityTeleport) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketEntityUpdateAttributes struct {
+	EntityId   int32
+	Properties []struct {
+		Key       string
+		Value     float64
+		Modifiers []struct {
+			Uuid      string
+			Amount    float64
+			Operation int8
+		}
+	}
+}
+
+var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap = map[int32]string{0: "generic.armor", 1: "generic.armor_toughness", 10: "player.entity_interaction_range", 11: "generic.fall_damage_multiplier", 12: "generic.flying_speed", 13: "generic.follow_range", 14: "generic.gravity", 15: "generic.jump_strength", 16: "generic.knockback_resistance", 17: "generic.luck", 18: "generic.max_absorption", 19: "generic.max_health", 2: "generic.attack_damage", 20: "generic.movement_speed", 21: "generic.safe_fall_distance", 22: "generic.scale", 23: "zombie.spawn_reinforcements", 24: "generic.step_height", 25: "submerged_mining_speed", 26: "sweeping_damage_ratio", 27: "tempt_range", 28: "water_movement_efficiency", 29: "waypoint_transmit_range", 3: "generic.attack_knockback", 30: "waypoint_receive_range", 4: "generic.attack_speed", 5: "player.block_break_speed", 6: "player.block_interaction_range", 7: "burning_time", 8: "camera_distance", 9: "explosion_knockback_resistance"}
+
+func (ret *PlayToClientPacketEntityUpdateAttributes) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketEntityUpdateAttributesProperties int32
+	lPlayToClientPacketEntityUpdateAttributesProperties, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Properties = []struct {
+		Key       string
+		Value     float64
+		Modifiers []struct {
+			Uuid      string
+			Amount    float64
+			Operation int8
+		}
+	}{}
+	for range lPlayToClientPacketEntityUpdateAttributesProperties {
+		var PlayToClientPacketEntityUpdateAttributesPropertiesElement struct {
+			Key       string
+			Value     float64
+			Modifiers []struct {
+				Uuid      string
+				Amount    float64
+				Operation int8
+			}
+		}
+		var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey int32
+		PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketEntityUpdateAttributesPropertiesElement.Key, err = proto_base.ErroringIndex(PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap, PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketEntityUpdateAttributesPropertiesElement.Value)
+		if err != nil {
+			return
+		}
+		var lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers int32
+		lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketEntityUpdateAttributesPropertiesElement.Modifiers = []struct {
+			Uuid      string
+			Amount    float64
+			Operation int8
+		}{}
+		for range lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers {
+			var PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement struct {
+				Uuid      string
+				Amount    float64
+				Operation int8
+			}
+			PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement.Uuid, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement.Amount)
+			if err != nil {
+				return
+			}
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement.Operation)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketEntityUpdateAttributesPropertiesElement.Modifiers = append(PlayToClientPacketEntityUpdateAttributesPropertiesElement.Modifiers, PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement)
+		}
+		ret.Properties = append(ret.Properties, PlayToClientPacketEntityUpdateAttributesPropertiesElement)
+	}
+	return
+}
+
+var PlayToClientPacketEntityUpdateAttributesPropertiesInnerKeyReverseMap = map[string]int32{"generic.armor": 0, "generic.armor_toughness": 1, "player.entity_interaction_range": 10, "generic.fall_damage_multiplier": 11, "generic.flying_speed": 12, "generic.follow_range": 13, "generic.gravity": 14, "generic.jump_strength": 15, "generic.knockback_resistance": 16, "generic.luck": 17, "generic.max_absorption": 18, "generic.max_health": 19, "generic.attack_damage": 2, "generic.movement_speed": 20, "generic.safe_fall_distance": 21, "generic.scale": 22, "zombie.spawn_reinforcements": 23, "generic.step_height": 24, "submerged_mining_speed": 25, "sweeping_damage_ratio": 26, "tempt_range": 27, "water_movement_efficiency": 28, "waypoint_transmit_range": 29, "generic.attack_knockback": 3, "waypoint_receive_range": 30, "generic.attack_speed": 4, "player.block_break_speed": 5, "player.block_interaction_range": 6, "burning_time": 7, "camera_distance": 8, "explosion_knockback_resistance": 9}
+
+func (ret *PlayToClientPacketEntityUpdateAttributes) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Properties)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketEntityUpdateAttributesProperties := range len(ret.Properties) {
+		var vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey int32
+		vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey, err = proto_base.ErroringIndex(PlayToClientPacketEntityUpdateAttributesPropertiesInnerKeyReverseMap, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Key)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Value)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers := range len(ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers) {
+			err = proto_base.EncodeString(w, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers[iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers].Uuid)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers[iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers].Amount)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers[iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers].Operation)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+type PlayToClientPacketEntityVelocity struct {
+	EntityId int32
+	Velocity proto_base.LpVec3d
+}
+
+func (ret *PlayToClientPacketEntityVelocity) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.Velocity.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketEntityVelocity) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = ret.Velocity.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketExperience struct {
+	ExperienceBar   float32
+	Level           int32
+	TotalExperience int32
+}
+
+func (ret *PlayToClientPacketExperience) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.ExperienceBar)
+	if err != nil {
+		return
+	}
+	ret.Level, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.TotalExperience, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketExperience) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.ExperienceBar)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Level)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.TotalExperience)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketExplosion struct {
+	Center            Vec3f64
+	Radius            float32
+	BlockCount        int32
+	PlayerKnockback   *Vec3f64
+	ExplosionParticle Particle
+	Sound             ItemSoundHolder
+	BlockParticles    []PlayToClientExplosionParticleEntry
+}
+
+func (ret *PlayToClientPacketExplosion) Decode(r io.Reader) (err error) {
+	err = ret.Center.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Radius)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.BlockCount)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketExplosionPlayerKnockbackPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketExplosionPlayerKnockbackPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketExplosionPlayerKnockbackPresent {
+		var PlayToClientPacketExplosionPlayerKnockbackPresentValue Vec3f64
+		err = PlayToClientPacketExplosionPlayerKnockbackPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.PlayerKnockback = &PlayToClientPacketExplosionPlayerKnockbackPresentValue
+	}
+	err = ret.ExplosionParticle.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Sound.Decode(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketExplosionBlockParticles int32
+	lPlayToClientPacketExplosionBlockParticles, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.BlockParticles = []PlayToClientExplosionParticleEntry{}
+	for range lPlayToClientPacketExplosionBlockParticles {
+		var PlayToClientPacketExplosionBlockParticlesElement PlayToClientExplosionParticleEntry
+		err = PlayToClientPacketExplosionBlockParticlesElement.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.BlockParticles = append(ret.BlockParticles, PlayToClientPacketExplosionBlockParticlesElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketExplosion) Encode(w io.Writer) (err error) {
+	err = ret.Center.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Radius)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.BlockCount)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.PlayerKnockback != nil)
+	if err != nil {
+		return
+	}
+	if ret.PlayerKnockback != nil {
+		err = (*ret.PlayerKnockback).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = ret.ExplosionParticle.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Sound.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockParticles)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketExplosionBlockParticles := range len(ret.BlockParticles) {
+		err = ret.BlockParticles[iPlayToClientPacketExplosionBlockParticles].Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketFacePlayer struct {
+	FeetEyes       int32
+	X              float64
+	Y              float64
+	Z              float64
+	IsEntity       bool
+	EntityId       any
+	EntityFeetEyes any
+}
+
+func (ret *PlayToClientPacketFacePlayer) Decode(r io.Reader) (err error) {
+	ret.FeetEyes, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.IsEntity)
+	if err != nil {
+		return
+	}
+	switch ret.IsEntity {
+	case true:
+		var PlayToClientPacketFacePlayerEntityIdTrueTmp int32
+		PlayToClientPacketFacePlayerEntityIdTrueTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.EntityId = PlayToClientPacketFacePlayerEntityIdTrueTmp
+	default:
+		var PlayToClientPacketFacePlayerEntityIdTmp struct {
+		}
+		ret.EntityId = PlayToClientPacketFacePlayerEntityIdTmp
+	}
+	switch ret.IsEntity {
+	case true:
+		var PlayToClientPacketFacePlayerEntityFeetEyesTrueTmp int32
+		PlayToClientPacketFacePlayerEntityFeetEyesTrueTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.EntityFeetEyes = PlayToClientPacketFacePlayerEntityFeetEyesTrueTmp
+	default:
+		var PlayToClientPacketFacePlayerEntityFeetEyesTmp struct {
+		}
+		ret.EntityFeetEyes = PlayToClientPacketFacePlayerEntityFeetEyesTmp
+	}
+	return
+}
+func (ret *PlayToClientPacketFacePlayer) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.FeetEyes)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IsEntity)
+	if err != nil {
+		return
+	}
+	switch ret.IsEntity {
+	case true:
+		PlayToClientPacketFacePlayerEntityId, ok := ret.EntityId.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketFacePlayerEntityId)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.EntityId.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.IsEntity {
+	case true:
+		PlayToClientPacketFacePlayerEntityFeetEyes, ok := ret.EntityFeetEyes.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketFacePlayerEntityFeetEyes)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.EntityFeetEyes.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketGameStateChange struct {
+	Reason   string
+	GameMode float32
+}
+
+var PlayToClientPacketGameStateChangeReasonMap = map[uint8]string{0: "no_respawn_block_available", 1: "start_raining", 10: "guardian_elder_effect", 11: "immediate_respawn", 12: "limited_crafting", 13: "level_chunks_load_start", 2: "stop_raining", 3: "change_game_mode", 4: "win_game", 5: "demo_event", 6: "play_arrow_hit_sound", 7: "rain_level_change", 8: "thunder_level_change", 9: "puffer_fish_sting"}
+
+func (ret *PlayToClientPacketGameStateChange) Decode(r io.Reader) (err error) {
+	var PlayToClientPacketGameStateChangeReasonKey uint8
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketGameStateChangeReasonKey)
+	if err != nil {
+		return
+	}
+	ret.Reason, err = proto_base.ErroringIndex(PlayToClientPacketGameStateChangeReasonMap, PlayToClientPacketGameStateChangeReasonKey)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.GameMode)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var PlayToClientPacketGameStateChangeReasonReverseMap = map[string]uint8{"no_respawn_block_available": 0, "start_raining": 1, "guardian_elder_effect": 10, "immediate_respawn": 11, "limited_crafting": 12, "level_chunks_load_start": 13, "stop_raining": 2, "change_game_mode": 3, "win_game": 4, "demo_event": 5, "play_arrow_hit_sound": 6, "rain_level_change": 7, "thunder_level_change": 8, "puffer_fish_sting": 9}
+
+func (ret *PlayToClientPacketGameStateChange) Encode(w io.Writer) (err error) {
+	var vPlayToClientPacketGameStateChangeReason uint8
+	vPlayToClientPacketGameStateChangeReason, err = proto_base.ErroringIndex(PlayToClientPacketGameStateChangeReasonReverseMap, ret.Reason)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, vPlayToClientPacketGameStateChangeReason)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.GameMode)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketGameTestHighlightPos struct {
+	AbsolutePos Position
+	RelativePos Position
+}
+
+func (ret *PlayToClientPacketGameTestHighlightPos) Decode(r io.Reader) (err error) {
+	err = ret.AbsolutePos.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.RelativePos.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketGameTestHighlightPos) Encode(w io.Writer) (err error) {
+	err = ret.AbsolutePos.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.RelativePos.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketHeldItemSlot struct {
+	Slot int32
+}
+
+func (ret *PlayToClientPacketHeldItemSlot) Decode(r io.Reader) (err error) {
+	ret.Slot, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketHeldItemSlot) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Slot)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketHideMessage struct {
+	Id        int32
+	Signature any
+}
+
+func (ret *PlayToClientPacketHideMessage) Decode(r io.Reader) (err error) {
+	ret.Id, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	switch ret.Id {
+	case 0:
+		var PlayToClientPacketHideMessageSignature0Tmp [256]byte
+		_, err = r.Read(PlayToClientPacketHideMessageSignature0Tmp[:])
+		if err != nil {
+			return
+		}
+		ret.Signature = PlayToClientPacketHideMessageSignature0Tmp
+	default:
+		var PlayToClientPacketHideMessageSignatureTmp struct {
+		}
+		ret.Signature = PlayToClientPacketHideMessageSignatureTmp
+	}
+	return
+}
+func (ret *PlayToClientPacketHideMessage) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Id)
+	if err != nil {
+		return
+	}
+	switch ret.Id {
+	case 0:
+		PlayToClientPacketHideMessageSignature, ok := ret.Signature.([256]byte)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		arr := PlayToClientPacketHideMessageSignature
+		_, err = w.Write(arr[:])
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Signature.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketHurtAnimation struct {
+	EntityId int32
+	Yaw      float32
+}
+
+func (ret *PlayToClientPacketHurtAnimation) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketHurtAnimation) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketInitializeWorldBorder struct {
+	X                      float64
+	Z                      float64
+	OldDiameter            float64
+	NewDiameter            float64
+	Speed                  int32
+	PortalTeleportBoundary int32
+	WarningBlocks          int32
+	WarningTime            int32
+}
+
+func (ret *PlayToClientPacketInitializeWorldBorder) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OldDiameter)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.NewDiameter)
+	if err != nil {
+		return
+	}
+	ret.Speed, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.PortalTeleportBoundary, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.WarningBlocks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.WarningTime, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketInitializeWorldBorder) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OldDiameter)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.NewDiameter)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Speed)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.PortalTeleportBoundary)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.WarningBlocks)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.WarningTime)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketKeepAlive struct {
+	KeepAliveId int64
+}
+
+func (ret *PlayToClientPacketKeepAlive) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.KeepAliveId)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketKeepAlive) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.KeepAliveId)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketKickDisconnect struct {
+	Reason nbt.Anon
+}
+
+func (ret *PlayToClientPacketKickDisconnect) Decode(r io.Reader) (err error) {
+	err = ret.Reason.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketKickDisconnect) Encode(w io.Writer) (err error) {
+	err = ret.Reason.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketLogin struct {
+	EntityId            int32
+	IsHardcore          bool
+	WorldNames          []string
+	MaxPlayers          int32
+	ViewDistance        int32
+	SimulationDistance  int32
+	ReducedDebugInfo    bool
+	EnableRespawnScreen bool
+	DoLimitedCrafting   bool
+	WorldState          PlayToClientSpawnInfo
+	EnforcesSecureChat  bool
+}
+
+func (ret *PlayToClientPacketLogin) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.IsHardcore)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketLoginWorldNames int32
+	lPlayToClientPacketLoginWorldNames, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.WorldNames = []string{}
+	for range lPlayToClientPacketLoginWorldNames {
+		var PlayToClientPacketLoginWorldNamesElement string
+		PlayToClientPacketLoginWorldNamesElement, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.WorldNames = append(ret.WorldNames, PlayToClientPacketLoginWorldNamesElement)
+	}
+	ret.MaxPlayers, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ViewDistance, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SimulationDistance, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ReducedDebugInfo)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableRespawnScreen)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DoLimitedCrafting)
+	if err != nil {
+		return
+	}
+	err = ret.WorldState.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnforcesSecureChat)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketLogin) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IsHardcore)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.WorldNames)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketLoginWorldNames := range len(ret.WorldNames) {
+		err = proto_base.EncodeString(w, ret.WorldNames[iPlayToClientPacketLoginWorldNames])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, ret.MaxPlayers)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.SimulationDistance)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ReducedDebugInfo)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableRespawnScreen)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DoLimitedCrafting)
+	if err != nil {
+		return
+	}
+	err = ret.WorldState.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnforcesSecureChat)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketMap struct {
+	ItemDamage int32
+	Scale      int8
+	Locked     bool
+	Icons      *[]struct {
+		Type        int32
+		X           int8
+		Z           int8
+		Direction   uint8
+		DisplayName *nbt.Anon
+	}
+	Columns uint8
+	Rows    any
+	X       any
+	Y       any
+	Data    any
+}
+
+func (ret *PlayToClientPacketMap) Decode(r io.Reader) (err error) {
+	ret.ItemDamage, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Scale)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Locked)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketMapIconsPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketMapIconsPresent {
+		var PlayToClientPacketMapIconsPresentValue []struct {
+			Type        int32
+			X           int8
+			Z           int8
+			Direction   uint8
+			DisplayName *nbt.Anon
+		}
+		var lPlayToClientPacketMapIcons int32
+		lPlayToClientPacketMapIcons, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketMapIconsPresentValue = []struct {
+			Type        int32
+			X           int8
+			Z           int8
+			Direction   uint8
+			DisplayName *nbt.Anon
+		}{}
+		for range lPlayToClientPacketMapIcons {
+			var PlayToClientPacketMapIconsElement struct {
+				Type        int32
+				X           int8
+				Z           int8
+				Direction   uint8
+				DisplayName *nbt.Anon
+			}
+			PlayToClientPacketMapIconsElement.Type, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsElement.X)
+			if err != nil {
+				return
+			}
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsElement.Z)
+			if err != nil {
+				return
+			}
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsElement.Direction)
+			if err != nil {
+				return
+			}
+			var PlayToClientPacketMapIconsElementDisplayNamePresent bool
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsElementDisplayNamePresent)
+			if err != nil {
+				return
+			}
+			if PlayToClientPacketMapIconsElementDisplayNamePresent {
+				var PlayToClientPacketMapIconsElementDisplayNamePresentValue nbt.Anon
+				err = PlayToClientPacketMapIconsElementDisplayNamePresentValue.Decode(r)
+				if err != nil {
+					return
+				}
+				PlayToClientPacketMapIconsElement.DisplayName = &PlayToClientPacketMapIconsElementDisplayNamePresentValue
+			}
+			PlayToClientPacketMapIconsPresentValue = append(PlayToClientPacketMapIconsPresentValue, PlayToClientPacketMapIconsElement)
+		}
+		ret.Icons = &PlayToClientPacketMapIconsPresentValue
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Columns)
+	if err != nil {
+		return
+	}
+	switch ret.Columns {
+	case 0:
+		var PlayToClientPacketMapRows0Tmp struct {
+		}
+		ret.Rows = PlayToClientPacketMapRows0Tmp
+	default:
+		var PlayToClientPacketMapRowsTmp uint8
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapRowsTmp)
+		if err != nil {
+			return
+		}
+		ret.Rows = PlayToClientPacketMapRowsTmp
+	}
+	switch ret.Columns {
+	case 0:
+		var PlayToClientPacketMapX0Tmp struct {
+		}
+		ret.X = PlayToClientPacketMapX0Tmp
+	default:
+		var PlayToClientPacketMapXTmp uint8
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapXTmp)
+		if err != nil {
+			return
+		}
+		ret.X = PlayToClientPacketMapXTmp
+	}
+	switch ret.Columns {
+	case 0:
+		var PlayToClientPacketMapY0Tmp struct {
+		}
+		ret.Y = PlayToClientPacketMapY0Tmp
+	default:
+		var PlayToClientPacketMapYTmp uint8
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapYTmp)
+		if err != nil {
+			return
+		}
+		ret.Y = PlayToClientPacketMapYTmp
+	}
+	switch ret.Columns {
+	case 0:
+		var PlayToClientPacketMapData0Tmp struct {
+		}
+		ret.Data = PlayToClientPacketMapData0Tmp
+	default:
+		var PlayToClientPacketMapDataTmp []byte
+		var lPlayToClientPacketMapData int32
+		lPlayToClientPacketMapData, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketMapDataTmp, err = io.ReadAll(io.LimitReader(r, int64(lPlayToClientPacketMapData)))
+		if err != nil {
+			return
+		}
+		ret.Data = PlayToClientPacketMapDataTmp
+	}
+	return
+}
+func (ret *PlayToClientPacketMap) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.ItemDamage)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Scale)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Locked)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Icons != nil)
+	if err != nil {
+		return
+	}
+	if ret.Icons != nil {
+		err = proto_base.EncodeVarInt(w, int32(len(*ret.Icons)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketMapIcons := range len(*ret.Icons) {
+			err = proto_base.EncodeVarInt(w, (*ret.Icons)[iPlayToClientPacketMapIcons].Type)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, (*ret.Icons)[iPlayToClientPacketMapIcons].X)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, (*ret.Icons)[iPlayToClientPacketMapIcons].Z)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, (*ret.Icons)[iPlayToClientPacketMapIcons].Direction)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, (*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName != nil)
+			if err != nil {
+				return
+			}
+			if (*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName != nil {
+				err = (*(*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName).Encode(w)
+				if err != nil {
+					return
+				}
+			}
+		}
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Columns)
+	if err != nil {
+		return
+	}
+	switch ret.Columns {
+	case 0:
+		_, ok := ret.Rows.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	default:
+		_, ok := ret.Rows.(uint8)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Rows.(uint8))
+		if err != nil {
+			return
+		}
+	}
+	switch ret.Columns {
+	case 0:
+		_, ok := ret.X.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	default:
+		_, ok := ret.X.(uint8)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.X.(uint8))
+		if err != nil {
+			return
+		}
+	}
+	switch ret.Columns {
+	case 0:
+		_, ok := ret.Y.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	default:
+		_, ok := ret.Y.(uint8)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Y.(uint8))
+		if err != nil {
+			return
+		}
+	}
+	switch ret.Columns {
+	case 0:
+		_, ok := ret.Data.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	default:
+		_, ok := ret.Data.([]byte)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(ret.Data.([]byte))))
+		if err != nil {
+			return
+		}
+		_, err = w.Write(ret.Data.([]byte))
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketMapChunk struct {
+	X          int32
+	Z          int32
+	Heightmaps []struct {
+		Type string
+		Data []int64
+	}
+	ChunkData           ByteArray
+	BlockEntities       []ChunkBlockEntity
+	SkyLightMask        []int64
+	BlockLightMask      []int64
+	EmptySkyLightMask   []int64
+	EmptyBlockLightMask []int64
+	SkyLight            [][]uint8
+	BlockLight          [][]uint8
+}
+
+var PlayToClientPacketMapChunkHeightmapsElementTypeMap = map[int32]string{0: "world_surface_wg", 1: "world_surface", 2: "ocean_floor_wg", 3: "ocean_floor", 4: "motion_blocking", 5: "motion_blocking_no_leaves"}
+
+func (ret *PlayToClientPacketMapChunk) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketMapChunkHeightmaps int32
+	lPlayToClientPacketMapChunkHeightmaps, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Heightmaps = []struct {
+		Type string
+		Data []int64
+	}{}
+	for range lPlayToClientPacketMapChunkHeightmaps {
+		var PlayToClientPacketMapChunkHeightmapsElement struct {
+			Type string
+			Data []int64
+		}
+		var PlayToClientPacketMapChunkHeightmapsElementTypeKey int32
+		PlayToClientPacketMapChunkHeightmapsElementTypeKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketMapChunkHeightmapsElement.Type, err = proto_base.ErroringIndex(PlayToClientPacketMapChunkHeightmapsElementTypeMap, PlayToClientPacketMapChunkHeightmapsElementTypeKey)
+		if err != nil {
+			return
+		}
+		var lPlayToClientPacketMapChunkHeightmapsElementData int32
+		lPlayToClientPacketMapChunkHeightmapsElementData, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketMapChunkHeightmapsElement.Data = []int64{}
+		for range lPlayToClientPacketMapChunkHeightmapsElementData {
+			var PlayToClientPacketMapChunkHeightmapsElementDataElement int64
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkHeightmapsElementDataElement)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketMapChunkHeightmapsElement.Data = append(PlayToClientPacketMapChunkHeightmapsElement.Data, PlayToClientPacketMapChunkHeightmapsElementDataElement)
+		}
+		ret.Heightmaps = append(ret.Heightmaps, PlayToClientPacketMapChunkHeightmapsElement)
+	}
+	err = ret.ChunkData.Decode(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketMapChunkBlockEntities int32
+	lPlayToClientPacketMapChunkBlockEntities, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.BlockEntities = []ChunkBlockEntity{}
+	for range lPlayToClientPacketMapChunkBlockEntities {
+		var PlayToClientPacketMapChunkBlockEntitiesElement ChunkBlockEntity
+		err = PlayToClientPacketMapChunkBlockEntitiesElement.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.BlockEntities = append(ret.BlockEntities, PlayToClientPacketMapChunkBlockEntitiesElement)
+	}
+	var lPlayToClientPacketMapChunkSkyLightMask int32
+	lPlayToClientPacketMapChunkSkyLightMask, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SkyLightMask = []int64{}
+	for range lPlayToClientPacketMapChunkSkyLightMask {
+		var PlayToClientPacketMapChunkSkyLightMaskElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkSkyLightMaskElement)
+		if err != nil {
+			return
+		}
+		ret.SkyLightMask = append(ret.SkyLightMask, PlayToClientPacketMapChunkSkyLightMaskElement)
+	}
+	var lPlayToClientPacketMapChunkBlockLightMask int32
+	lPlayToClientPacketMapChunkBlockLightMask, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.BlockLightMask = []int64{}
+	for range lPlayToClientPacketMapChunkBlockLightMask {
+		var PlayToClientPacketMapChunkBlockLightMaskElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkBlockLightMaskElement)
+		if err != nil {
+			return
+		}
+		ret.BlockLightMask = append(ret.BlockLightMask, PlayToClientPacketMapChunkBlockLightMaskElement)
+	}
+	var lPlayToClientPacketMapChunkEmptySkyLightMask int32
+	lPlayToClientPacketMapChunkEmptySkyLightMask, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.EmptySkyLightMask = []int64{}
+	for range lPlayToClientPacketMapChunkEmptySkyLightMask {
+		var PlayToClientPacketMapChunkEmptySkyLightMaskElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkEmptySkyLightMaskElement)
+		if err != nil {
+			return
+		}
+		ret.EmptySkyLightMask = append(ret.EmptySkyLightMask, PlayToClientPacketMapChunkEmptySkyLightMaskElement)
+	}
+	var lPlayToClientPacketMapChunkEmptyBlockLightMask int32
+	lPlayToClientPacketMapChunkEmptyBlockLightMask, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.EmptyBlockLightMask = []int64{}
+	for range lPlayToClientPacketMapChunkEmptyBlockLightMask {
+		var PlayToClientPacketMapChunkEmptyBlockLightMaskElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkEmptyBlockLightMaskElement)
+		if err != nil {
+			return
+		}
+		ret.EmptyBlockLightMask = append(ret.EmptyBlockLightMask, PlayToClientPacketMapChunkEmptyBlockLightMaskElement)
+	}
+	var lPlayToClientPacketMapChunkSkyLight int32
+	lPlayToClientPacketMapChunkSkyLight, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SkyLight = [][]uint8{}
+	for range lPlayToClientPacketMapChunkSkyLight {
+		var PlayToClientPacketMapChunkSkyLightElement []uint8
+		var lPlayToClientPacketMapChunkSkyLightElement int32
+		lPlayToClientPacketMapChunkSkyLightElement, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketMapChunkSkyLightElement = []uint8{}
+		for range lPlayToClientPacketMapChunkSkyLightElement {
+			var PlayToClientPacketMapChunkSkyLightElementElement uint8
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkSkyLightElementElement)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketMapChunkSkyLightElement = append(PlayToClientPacketMapChunkSkyLightElement, PlayToClientPacketMapChunkSkyLightElementElement)
+		}
+		ret.SkyLight = append(ret.SkyLight, PlayToClientPacketMapChunkSkyLightElement)
+	}
+	var lPlayToClientPacketMapChunkBlockLight int32
+	lPlayToClientPacketMapChunkBlockLight, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.BlockLight = [][]uint8{}
+	for range lPlayToClientPacketMapChunkBlockLight {
+		var PlayToClientPacketMapChunkBlockLightElement []uint8
+		var lPlayToClientPacketMapChunkBlockLightElement int32
+		lPlayToClientPacketMapChunkBlockLightElement, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketMapChunkBlockLightElement = []uint8{}
+		for range lPlayToClientPacketMapChunkBlockLightElement {
+			var PlayToClientPacketMapChunkBlockLightElementElement uint8
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkBlockLightElementElement)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketMapChunkBlockLightElement = append(PlayToClientPacketMapChunkBlockLightElement, PlayToClientPacketMapChunkBlockLightElementElement)
+		}
+		ret.BlockLight = append(ret.BlockLight, PlayToClientPacketMapChunkBlockLightElement)
+	}
+	return
+}
+
+var PlayToClientPacketMapChunkHeightmapsInnerTypeReverseMap = map[string]int32{"world_surface_wg": 0, "world_surface": 1, "ocean_floor_wg": 2, "ocean_floor": 3, "motion_blocking": 4, "motion_blocking_no_leaves": 5}
+
+func (ret *PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Heightmaps)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMapChunkHeightmaps := range len(ret.Heightmaps) {
+		var vPlayToClientPacketMapChunkHeightmapsInnerType int32
+		vPlayToClientPacketMapChunkHeightmapsInnerType, err = proto_base.ErroringIndex(PlayToClientPacketMapChunkHeightmapsInnerTypeReverseMap, ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Type)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vPlayToClientPacketMapChunkHeightmapsInnerType)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Data)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketMapChunkHeightmapsInnerData := range len(ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Data) {
+			err = binary.Write(w, binary.BigEndian, ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Data[iPlayToClientPacketMapChunkHeightmapsInnerData])
+			if err != nil {
+				return
+			}
+		}
+	}
+	err = ret.ChunkData.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockEntities)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMapChunkBlockEntities := range len(ret.BlockEntities) {
+		err = ret.BlockEntities[iPlayToClientPacketMapChunkBlockEntities].Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLightMask)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMapChunkSkyLightMask := range len(ret.SkyLightMask) {
+		err = binary.Write(w, binary.BigEndian, ret.SkyLightMask[iPlayToClientPacketMapChunkSkyLightMask])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLightMask)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMapChunkBlockLightMask := range len(ret.BlockLightMask) {
+		err = binary.Write(w, binary.BigEndian, ret.BlockLightMask[iPlayToClientPacketMapChunkBlockLightMask])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.EmptySkyLightMask)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMapChunkEmptySkyLightMask := range len(ret.EmptySkyLightMask) {
+		err = binary.Write(w, binary.BigEndian, ret.EmptySkyLightMask[iPlayToClientPacketMapChunkEmptySkyLightMask])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.EmptyBlockLightMask)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMapChunkEmptyBlockLightMask := range len(ret.EmptyBlockLightMask) {
+		err = binary.Write(w, binary.BigEndian, ret.EmptyBlockLightMask[iPlayToClientPacketMapChunkEmptyBlockLightMask])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLight)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMapChunkSkyLight := range len(ret.SkyLight) {
+		err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLight[iPlayToClientPacketMapChunkSkyLight])))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketMapChunkSkyLightInner := range len(ret.SkyLight[iPlayToClientPacketMapChunkSkyLight]) {
+			err = binary.Write(w, binary.BigEndian, ret.SkyLight[iPlayToClientPacketMapChunkSkyLight][iPlayToClientPacketMapChunkSkyLightInner])
+			if err != nil {
+				return
+			}
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLight)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMapChunkBlockLight := range len(ret.BlockLight) {
+		err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLight[iPlayToClientPacketMapChunkBlockLight])))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketMapChunkBlockLightInner := range len(ret.BlockLight[iPlayToClientPacketMapChunkBlockLight]) {
+			err = binary.Write(w, binary.BigEndian, ret.BlockLight[iPlayToClientPacketMapChunkBlockLight][iPlayToClientPacketMapChunkBlockLightInner])
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+type PlayToClientPacketMoveMinecart struct {
+	EntityId int32
+	Steps    []struct {
+		Position Vec3f
+		Velocity Vec3f
+		Yaw      float32
+		Pitch    float32
+		Weight   float32
+	}
+}
+
+func (ret *PlayToClientPacketMoveMinecart) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketMoveMinecartSteps int32
+	lPlayToClientPacketMoveMinecartSteps, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Steps = []struct {
+		Position Vec3f
+		Velocity Vec3f
+		Yaw      float32
+		Pitch    float32
+		Weight   float32
+	}{}
+	for range lPlayToClientPacketMoveMinecartSteps {
+		var PlayToClientPacketMoveMinecartStepsElement struct {
+			Position Vec3f
+			Velocity Vec3f
+			Yaw      float32
+			Pitch    float32
+			Weight   float32
+		}
+		err = PlayToClientPacketMoveMinecartStepsElement.Position.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketMoveMinecartStepsElement.Velocity.Decode(r)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMoveMinecartStepsElement.Yaw)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMoveMinecartStepsElement.Pitch)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMoveMinecartStepsElement.Weight)
+		if err != nil {
+			return
+		}
+		ret.Steps = append(ret.Steps, PlayToClientPacketMoveMinecartStepsElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketMoveMinecart) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Steps)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMoveMinecartSteps := range len(ret.Steps) {
+		err = ret.Steps[iPlayToClientPacketMoveMinecartSteps].Position.Encode(w)
+		if err != nil {
+			return
+		}
+		err = ret.Steps[iPlayToClientPacketMoveMinecartSteps].Velocity.Encode(w)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Steps[iPlayToClientPacketMoveMinecartSteps].Yaw)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Steps[iPlayToClientPacketMoveMinecartSteps].Pitch)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Steps[iPlayToClientPacketMoveMinecartSteps].Weight)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketMultiBlockChange struct {
+	ChunkCoordinates struct {
+		X int32
+		Z int32
+		Y int32
+	}
+	Records []int32
+}
+
+func (ret *PlayToClientPacketMultiBlockChange) Decode(r io.Reader) (err error) {
+	var PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked uint64
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked)
+	if err != nil {
+		return
+	}
+	ret.ChunkCoordinates.X = int32(PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked << 0 >> 42)
+	if ret.ChunkCoordinates.X >= 1<<21 {
+		ret.ChunkCoordinates.X -= 1 << 22
+	}
+	ret.ChunkCoordinates.Z = int32(PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked << 22 >> 42)
+	if ret.ChunkCoordinates.Z >= 1<<21 {
+		ret.ChunkCoordinates.Z -= 1 << 22
+	}
+	ret.ChunkCoordinates.Y = int32(PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked << 44 >> 44)
+	if ret.ChunkCoordinates.Y >= 1<<19 {
+		ret.ChunkCoordinates.Y -= 1 << 20
+	}
+	var lPlayToClientPacketMultiBlockChangeRecords int32
+	lPlayToClientPacketMultiBlockChangeRecords, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Records = []int32{}
+	for range lPlayToClientPacketMultiBlockChangeRecords {
+		var PlayToClientPacketMultiBlockChangeRecordsElement int32
+		PlayToClientPacketMultiBlockChangeRecordsElement, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Records = append(ret.Records, PlayToClientPacketMultiBlockChangeRecordsElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketMultiBlockChange) Encode(w io.Writer) (err error) {
+	var PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked uint64
+	PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked |= (uint64(ret.ChunkCoordinates.Y) & 0xFFFFF) << 0x0
+	PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked |= (uint64(ret.ChunkCoordinates.Z) & 0x3FFFFF) << 0x14
+	PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked |= (uint64(ret.ChunkCoordinates.X) & 0x3FFFFF) << 0x2A
+	err = binary.Write(w, binary.BigEndian, PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Records)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketMultiBlockChangeRecords := range len(ret.Records) {
+		err = proto_base.EncodeVarInt(w, ret.Records[iPlayToClientPacketMultiBlockChangeRecords])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketNbtQueryResponse struct {
+	TransactionId int32
+	Nbt           nbt.Anon
+}
+
+func (ret *PlayToClientPacketNbtQueryResponse) Decode(r io.Reader) (err error) {
+	ret.TransactionId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.Nbt.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketNbtQueryResponse) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.TransactionId)
+	if err != nil {
+		return
+	}
+	err = ret.Nbt.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketOpenBook struct {
+	Hand int32
+}
+
+func (ret *PlayToClientPacketOpenBook) Decode(r io.Reader) (err error) {
+	ret.Hand, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketOpenBook) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Hand)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketOpenHorseWindow struct {
+	WindowId ContainerID
+	NbSlots  int32
+	EntityId int32
+}
+
+func (ret *PlayToClientPacketOpenHorseWindow) Decode(r io.Reader) (err error) {
+	err = ret.WindowId.Decode(r)
+	if err != nil {
+		return
+	}
+	ret.NbSlots, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketOpenHorseWindow) Encode(w io.Writer) (err error) {
+	err = ret.WindowId.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.NbSlots)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EntityId)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketOpenSignEntity struct {
+	Location    Position
+	IsFrontText bool
+}
+
+func (ret *PlayToClientPacketOpenSignEntity) Decode(r io.Reader) (err error) {
+	err = ret.Location.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.IsFrontText)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketOpenSignEntity) Encode(w io.Writer) (err error) {
+	err = ret.Location.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IsFrontText)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketOpenWindow struct {
+	WindowId      int32
+	InventoryType int32
+	WindowTitle   nbt.Anon
+}
+
+func (ret *PlayToClientPacketOpenWindow) Decode(r io.Reader) (err error) {
+	ret.WindowId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.InventoryType, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.WindowTitle.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketOpenWindow) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.WindowId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.InventoryType)
+	if err != nil {
+		return
+	}
+	err = ret.WindowTitle.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketPing struct {
+	Id int32
+}
+
+func (ret *PlayToClientPacketPing) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Id)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketPing) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Id)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketPingResponse struct {
+	Id int64
+}
+
+func (ret *PlayToClientPacketPingResponse) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Id)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketPingResponse) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Id)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketPlayerChat struct {
+	GlobalIndex         int32
+	SenderUuid          uuid.UUID
+	Index               int32
+	Signature           *[256]byte
+	PlainMessage        string
+	Timestamp           int64
+	Salt                int64
+	PreviousMessages    PreviousMessages
+	UnsignedChatContent *nbt.Anon
+	FilterType          int32
+	FilterTypeMask      any
+	Type                PlayToClientChatTypesHolder
+	NetworkName         nbt.Anon
+	NetworkTargetName   *nbt.Anon
+}
+
+func (ret *PlayToClientPacketPlayerChat) Decode(r io.Reader) (err error) {
+	ret.GlobalIndex, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	_, err = io.ReadFull(r, ret.SenderUuid[:])
+	if err != nil {
+		return
+	}
+	ret.Index, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketPlayerChatSignaturePresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatSignaturePresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketPlayerChatSignaturePresent {
+		var PlayToClientPacketPlayerChatSignaturePresentValue [256]byte
+		_, err = r.Read(PlayToClientPacketPlayerChatSignaturePresentValue[:])
+		if err != nil {
+			return
+		}
+		ret.Signature = &PlayToClientPacketPlayerChatSignaturePresentValue
+	}
+	ret.PlainMessage, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Timestamp)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Salt)
+	if err != nil {
+		return
+	}
+	err = ret.PreviousMessages.Decode(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketPlayerChatUnsignedChatContentPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatUnsignedChatContentPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketPlayerChatUnsignedChatContentPresent {
+		var PlayToClientPacketPlayerChatUnsignedChatContentPresentValue nbt.Anon
+		err = PlayToClientPacketPlayerChatUnsignedChatContentPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.UnsignedChatContent = &PlayToClientPacketPlayerChatUnsignedChatContentPresentValue
+	}
+	ret.FilterType, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	switch ret.FilterType {
+	case 2:
+		var PlayToClientPacketPlayerChatFilterTypeMask2Tmp []int64
+		var lPlayToClientPacketPlayerChatFilterTypeMask int32
+		lPlayToClientPacketPlayerChatFilterTypeMask, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketPlayerChatFilterTypeMask2Tmp = []int64{}
+		for range lPlayToClientPacketPlayerChatFilterTypeMask {
+			var PlayToClientPacketPlayerChatFilterTypeMaskElement int64
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatFilterTypeMaskElement)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketPlayerChatFilterTypeMask2Tmp = append(PlayToClientPacketPlayerChatFilterTypeMask2Tmp, PlayToClientPacketPlayerChatFilterTypeMaskElement)
+		}
+		ret.FilterTypeMask = PlayToClientPacketPlayerChatFilterTypeMask2Tmp
+	default:
+		var PlayToClientPacketPlayerChatFilterTypeMaskTmp struct {
+		}
+		ret.FilterTypeMask = PlayToClientPacketPlayerChatFilterTypeMaskTmp
+	}
+	err = ret.Type.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.NetworkName.Decode(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketPlayerChatNetworkTargetNamePresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatNetworkTargetNamePresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketPlayerChatNetworkTargetNamePresent {
+		var PlayToClientPacketPlayerChatNetworkTargetNamePresentValue nbt.Anon
+		err = PlayToClientPacketPlayerChatNetworkTargetNamePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.NetworkTargetName = &PlayToClientPacketPlayerChatNetworkTargetNamePresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.GlobalIndex)
+	if err != nil {
+		return
+	}
+	_, err = w.Write(ret.SenderUuid[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Index)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Signature != nil)
+	if err != nil {
+		return
+	}
+	if ret.Signature != nil {
+		arr := *ret.Signature
+		_, err = w.Write(arr[:])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeString(w, ret.PlainMessage)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Timestamp)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Salt)
+	if err != nil {
+		return
+	}
+	err = ret.PreviousMessages.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.UnsignedChatContent != nil)
+	if err != nil {
+		return
+	}
+	if ret.UnsignedChatContent != nil {
+		err = (*ret.UnsignedChatContent).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, ret.FilterType)
+	if err != nil {
+		return
+	}
+	switch ret.FilterType {
+	case 2:
+		PlayToClientPacketPlayerChatFilterTypeMask, ok := ret.FilterTypeMask.([]int64)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientPacketPlayerChatFilterTypeMask)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketPlayerChatFilterTypeMask := range len(PlayToClientPacketPlayerChatFilterTypeMask) {
+			err = binary.Write(w, binary.BigEndian, PlayToClientPacketPlayerChatFilterTypeMask[iPlayToClientPacketPlayerChatFilterTypeMask])
+			if err != nil {
+				return
+			}
+		}
+	default:
+		_, ok := ret.FilterTypeMask.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	err = ret.Type.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.NetworkName.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.NetworkTargetName != nil)
+	if err != nil {
+		return
+	}
+	if ret.NetworkTargetName != nil {
+		err = (*ret.NetworkTargetName).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketPlayerInfo struct {
+	Action uint8
+	Data   []struct {
+		Uuid         uuid.UUID
+		Player       any
+		ChatSession  any
+		Gamemode     any
+		Listed       any
+		Latency      any
+		DisplayName  any
+		ListPriority any
+		ShowHat      any
+	}
+}
+
+func (ret *PlayToClientPacketPlayerInfo) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Action)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketPlayerInfoData int32
+	lPlayToClientPacketPlayerInfoData, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Data = []struct {
+		Uuid         uuid.UUID
+		Player       any
+		ChatSession  any
+		Gamemode     any
+		Listed       any
+		Latency      any
+		DisplayName  any
+		ListPriority any
+		ShowHat      any
+	}{}
+	for range lPlayToClientPacketPlayerInfoData {
+		var PlayToClientPacketPlayerInfoDataElement struct {
+			Uuid         uuid.UUID
+			Player       any
+			ChatSession  any
+			Gamemode     any
+			Listed       any
+			Latency      any
+			DisplayName  any
+			ListPriority any
+			ShowHat      any
+		}
+		_, err = io.ReadFull(r, PlayToClientPacketPlayerInfoDataElement.Uuid[:])
+		if err != nil {
+			return
+		}
+		switch ret.Action&0x1 != 0 {
+		case true:
+			var PlayToClientPacketPlayerInfoDataElementPlayerTrueTmp GameProfileNameProp
+			err = PlayToClientPacketPlayerInfoDataElementPlayerTrueTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketPlayerInfoDataElement.Player = PlayToClientPacketPlayerInfoDataElementPlayerTrueTmp
+		default:
+			var PlayToClientPacketPlayerInfoDataElementPlayerTmp struct {
+			}
+			PlayToClientPacketPlayerInfoDataElement.Player = PlayToClientPacketPlayerInfoDataElementPlayerTmp
+		}
+		switch ret.Action&0x2 != 0 {
+		case true:
+			var PlayToClientPacketPlayerInfoDataElementChatSessionTrueTmp ChatSession
+			err = PlayToClientPacketPlayerInfoDataElementChatSessionTrueTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketPlayerInfoDataElement.ChatSession = PlayToClientPacketPlayerInfoDataElementChatSessionTrueTmp
+		default:
+			var PlayToClientPacketPlayerInfoDataElementChatSessionTmp struct {
+			}
+			PlayToClientPacketPlayerInfoDataElement.ChatSession = PlayToClientPacketPlayerInfoDataElementChatSessionTmp
+		}
+		switch ret.Action&0x4 != 0 {
+		case true:
+			var PlayToClientPacketPlayerInfoDataElementGamemodeTrueTmp int32
+			PlayToClientPacketPlayerInfoDataElementGamemodeTrueTmp, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketPlayerInfoDataElement.Gamemode = PlayToClientPacketPlayerInfoDataElementGamemodeTrueTmp
+		default:
+			var PlayToClientPacketPlayerInfoDataElementGamemodeTmp struct {
+			}
+			PlayToClientPacketPlayerInfoDataElement.Gamemode = PlayToClientPacketPlayerInfoDataElementGamemodeTmp
+		}
+		switch ret.Action&0x8 != 0 {
+		case true:
+			var PlayToClientPacketPlayerInfoDataElementListedTrueTmp int32
+			PlayToClientPacketPlayerInfoDataElementListedTrueTmp, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketPlayerInfoDataElement.Listed = PlayToClientPacketPlayerInfoDataElementListedTrueTmp
+		default:
+			var PlayToClientPacketPlayerInfoDataElementListedTmp struct {
+			}
+			PlayToClientPacketPlayerInfoDataElement.Listed = PlayToClientPacketPlayerInfoDataElementListedTmp
+		}
+		switch ret.Action&0x10 != 0 {
+		case true:
+			var PlayToClientPacketPlayerInfoDataElementLatencyTrueTmp int32
+			PlayToClientPacketPlayerInfoDataElementLatencyTrueTmp, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketPlayerInfoDataElement.Latency = PlayToClientPacketPlayerInfoDataElementLatencyTrueTmp
+		default:
+			var PlayToClientPacketPlayerInfoDataElementLatencyTmp struct {
+			}
+			PlayToClientPacketPlayerInfoDataElement.Latency = PlayToClientPacketPlayerInfoDataElementLatencyTmp
+		}
+		switch ret.Action&0x20 != 0 {
+		case true:
+			var PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp *nbt.Anon
+			var PlayToClientPacketPlayerInfoDataElementDisplayNamePresent bool
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerInfoDataElementDisplayNamePresent)
+			if err != nil {
+				return
+			}
+			if PlayToClientPacketPlayerInfoDataElementDisplayNamePresent {
+				var PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue nbt.Anon
+				err = PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue.Decode(r)
+				if err != nil {
+					return
+				}
+				PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp = &PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue
+			}
+			PlayToClientPacketPlayerInfoDataElement.DisplayName = PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp
+		default:
+			var PlayToClientPacketPlayerInfoDataElementDisplayNameTmp struct {
+			}
+			PlayToClientPacketPlayerInfoDataElement.DisplayName = PlayToClientPacketPlayerInfoDataElementDisplayNameTmp
+		}
+		switch ret.Action&0x80 != 0 {
+		case true:
+			var PlayToClientPacketPlayerInfoDataElementListPriorityTrueTmp int32
+			PlayToClientPacketPlayerInfoDataElementListPriorityTrueTmp, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketPlayerInfoDataElement.ListPriority = PlayToClientPacketPlayerInfoDataElementListPriorityTrueTmp
+		default:
+			var PlayToClientPacketPlayerInfoDataElementListPriorityTmp struct {
+			}
+			PlayToClientPacketPlayerInfoDataElement.ListPriority = PlayToClientPacketPlayerInfoDataElementListPriorityTmp
+		}
+		switch ret.Action&0x40 != 0 {
+		case true:
+			var PlayToClientPacketPlayerInfoDataElementShowHatTrueTmp bool
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerInfoDataElementShowHatTrueTmp)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketPlayerInfoDataElement.ShowHat = PlayToClientPacketPlayerInfoDataElementShowHatTrueTmp
+		default:
+			var PlayToClientPacketPlayerInfoDataElementShowHatTmp struct {
+			}
+			PlayToClientPacketPlayerInfoDataElement.ShowHat = PlayToClientPacketPlayerInfoDataElementShowHatTmp
+		}
+		ret.Data = append(ret.Data, PlayToClientPacketPlayerInfoDataElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Action)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Data)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketPlayerInfoData := range len(ret.Data) {
+		_, err = w.Write(ret.Data[iPlayToClientPacketPlayerInfoData].Uuid[:])
+		if err != nil {
+			return
+		}
+		switch ret.Action&0x1 != 0 {
+		case true:
+			PlayToClientPacketPlayerInfoDataInnerPlayer, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Player.(GameProfileNameProp)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = PlayToClientPacketPlayerInfoDataInnerPlayer.Encode(w)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Player.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+		switch ret.Action&0x2 != 0 {
+		case true:
+			PlayToClientPacketPlayerInfoDataInnerChatSession, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(ChatSession)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = PlayToClientPacketPlayerInfoDataInnerChatSession.Encode(w)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+		switch ret.Action&0x4 != 0 {
+		case true:
+			PlayToClientPacketPlayerInfoDataInnerGamemode, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(int32)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = proto_base.EncodeVarInt(w, PlayToClientPacketPlayerInfoDataInnerGamemode)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+		switch ret.Action&0x8 != 0 {
+		case true:
+			PlayToClientPacketPlayerInfoDataInnerListed, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(int32)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = proto_base.EncodeVarInt(w, PlayToClientPacketPlayerInfoDataInnerListed)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+		switch ret.Action&0x10 != 0 {
+		case true:
+			PlayToClientPacketPlayerInfoDataInnerLatency, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(int32)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = proto_base.EncodeVarInt(w, PlayToClientPacketPlayerInfoDataInnerLatency)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+		switch ret.Action&0x20 != 0 {
+		case true:
+			PlayToClientPacketPlayerInfoDataInnerDisplayName, ok := ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(*nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, PlayToClientPacketPlayerInfoDataInnerDisplayName != nil)
+			if err != nil {
+				return
+			}
+			if PlayToClientPacketPlayerInfoDataInnerDisplayName != nil {
+				err = (*PlayToClientPacketPlayerInfoDataInnerDisplayName).Encode(w)
+				if err != nil {
+					return
+				}
+			}
+		default:
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+		switch ret.Action&0x80 != 0 {
+		case true:
+			PlayToClientPacketPlayerInfoDataInnerListPriority, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(int32)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = proto_base.EncodeVarInt(w, PlayToClientPacketPlayerInfoDataInnerListPriority)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+		switch ret.Action&0x40 != 0 {
+		case true:
+			PlayToClientPacketPlayerInfoDataInnerShowHat, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(bool)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, PlayToClientPacketPlayerInfoDataInnerShowHat)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+	}
+	return
+}
+
+type PlayToClientPacketPlayerRemove struct {
+	Players []uuid.UUID
+}
+
+func (ret *PlayToClientPacketPlayerRemove) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketPlayerRemovePlayers int32
+	lPlayToClientPacketPlayerRemovePlayers, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Players = []uuid.UUID{}
+	for range lPlayToClientPacketPlayerRemovePlayers {
+		var PlayToClientPacketPlayerRemovePlayersElement uuid.UUID
+		_, err = io.ReadFull(r, PlayToClientPacketPlayerRemovePlayersElement[:])
+		if err != nil {
+			return
+		}
+		ret.Players = append(ret.Players, PlayToClientPacketPlayerRemovePlayersElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketPlayerRemove) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Players)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketPlayerRemovePlayers := range len(ret.Players) {
+		_, err = w.Write(ret.Players[iPlayToClientPacketPlayerRemovePlayers][:])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketPlayerRotation struct {
+	Yaw           float32
+	RelativeYaw   bool
+	Pitch         float32
+	RelativePitch bool
+}
+
+func (ret *PlayToClientPacketPlayerRotation) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.RelativeYaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.RelativePitch)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketPlayerRotation) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.RelativeYaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.RelativePitch)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketPlayerlistHeader struct {
+	Header nbt.Anon
+	Footer nbt.Anon
+}
+
+func (ret *PlayToClientPacketPlayerlistHeader) Decode(r io.Reader) (err error) {
+	err = ret.Header.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Footer.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketPlayerlistHeader) Encode(w io.Writer) (err error) {
+	err = ret.Header.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Footer.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketPosition struct {
+	TeleportId int32
+	X          float64
+	Y          float64
+	Z          float64
+	Dx         float64
+	Dy         float64
+	Dz         float64
+	Yaw        float32
+	Pitch      float32
+	Flags      PlayToClientPositionUpdateRelatives
+}
+
+func (ret *PlayToClientPacketPosition) Decode(r io.Reader) (err error) {
+	ret.TeleportId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Dx)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Dy)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Dz)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = ret.Flags.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketPosition) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.TeleportId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Dx)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Dy)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Dz)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = ret.Flags.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketProfilelessChat struct {
+	Message nbt.Anon
+	Type    PlayToClientChatTypesHolder
+	Name    nbt.Anon
+	Target  *nbt.Anon
+}
+
+func (ret *PlayToClientPacketProfilelessChat) Decode(r io.Reader) (err error) {
+	err = ret.Message.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Type.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Name.Decode(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketProfilelessChatTargetPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketProfilelessChatTargetPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketProfilelessChatTargetPresent {
+		var PlayToClientPacketProfilelessChatTargetPresentValue nbt.Anon
+		err = PlayToClientPacketProfilelessChatTargetPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Target = &PlayToClientPacketProfilelessChatTargetPresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketProfilelessChat) Encode(w io.Writer) (err error) {
+	err = ret.Message.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Type.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Name.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Target != nil)
+	if err != nil {
+		return
+	}
+	if ret.Target != nil {
+		err = (*ret.Target).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketRecipeBookAdd struct {
+	Entries []struct {
+		Recipe struct {
+			DisplayId            int32
+			Display              PlayToClientRecipeDisplay
+			Group                Optvarint
+			Category             string
+			CraftingRequirements *[]IDSet
+		}
+		Flags uint8
+	}
+	Replace bool
+}
+
+var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap = map[int32]string{0: "crafting_building_blocks", 1: "crafting_redstone", 10: "stonecutter", 11: "smithing", 12: "campfire", 2: "crafting_equipment", 3: "crafting_misc", 4: "furnace_food", 5: "furnace_blocks", 6: "furnace_misc", 7: "blast_furnace_blocks", 8: "blast_furnace_misc", 9: "smoker_food"}
+
+func (ret *PlayToClientPacketRecipeBookAdd) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketRecipeBookAddEntries int32
+	lPlayToClientPacketRecipeBookAddEntries, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Entries = []struct {
+		Recipe struct {
+			DisplayId            int32
+			Display              PlayToClientRecipeDisplay
+			Group                Optvarint
+			Category             string
+			CraftingRequirements *[]IDSet
+		}
+		Flags uint8
+	}{}
+	for range lPlayToClientPacketRecipeBookAddEntries {
+		var PlayToClientPacketRecipeBookAddEntriesElement struct {
+			Recipe struct {
+				DisplayId            int32
+				Display              PlayToClientRecipeDisplay
+				Group                Optvarint
+				Category             string
+				CraftingRequirements *[]IDSet
+			}
+			Flags uint8
+		}
+		PlayToClientPacketRecipeBookAddEntriesElement.Recipe.DisplayId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketRecipeBookAddEntriesElement.Recipe.Display.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketRecipeBookAddEntriesElement.Recipe.Group.Decode(r)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey int32
+		PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketRecipeBookAddEntriesElement.Recipe.Category, err = proto_base.ErroringIndex(PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap, PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresent bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresent)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresent {
+			var PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue []IDSet
+			var lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements int32
+			lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue = []IDSet{}
+			for range lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements {
+				var PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsElement IDSet
+				err = PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsElement.Decode(r)
+				if err != nil {
+					return
+				}
+				PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue = append(PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue, PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsElement)
+			}
+			PlayToClientPacketRecipeBookAddEntriesElement.Recipe.CraftingRequirements = &PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketRecipeBookAddEntriesElement.Flags)
+		if err != nil {
+			return
+		}
+		ret.Entries = append(ret.Entries, PlayToClientPacketRecipeBookAddEntriesElement)
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Replace)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var PlayToClientPacketRecipeBookAddEntriesInnerRecipeCategoryReverseMap = map[string]int32{"crafting_building_blocks": 0, "crafting_redstone": 1, "stonecutter": 10, "smithing": 11, "campfire": 12, "crafting_equipment": 2, "crafting_misc": 3, "furnace_food": 4, "furnace_blocks": 5, "furnace_misc": 6, "blast_furnace_blocks": 7, "blast_furnace_misc": 8, "smoker_food": 9}
+
+func (ret *PlayToClientPacketRecipeBookAdd) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Entries)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketRecipeBookAddEntries := range len(ret.Entries) {
+		err = proto_base.EncodeVarInt(w, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.DisplayId)
+		if err != nil {
+			return
+		}
+		err = ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Display.Encode(w)
+		if err != nil {
+			return
+		}
+		err = ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Group.Encode(w)
+		if err != nil {
+			return
+		}
+		var vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory int32
+		vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory, err = proto_base.ErroringIndex(PlayToClientPacketRecipeBookAddEntriesInnerRecipeCategoryReverseMap, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Category)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements != nil)
+		if err != nil {
+			return
+		}
+		if ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements != nil {
+			err = proto_base.EncodeVarInt(w, int32(len(*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements)))
+			if err != nil {
+				return
+			}
+			for iPlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirements := range len(*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements) {
+				err = (*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements)[iPlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirements].Encode(w)
+				if err != nil {
+					return
+				}
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Flags)
+		if err != nil {
+			return
+		}
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Replace)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketRecipeBookRemove struct {
+	RecipeIds []int32
+}
+
+func (ret *PlayToClientPacketRecipeBookRemove) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketRecipeBookRemoveRecipeIds int32
+	lPlayToClientPacketRecipeBookRemoveRecipeIds, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.RecipeIds = []int32{}
+	for range lPlayToClientPacketRecipeBookRemoveRecipeIds {
+		var PlayToClientPacketRecipeBookRemoveRecipeIdsElement int32
+		PlayToClientPacketRecipeBookRemoveRecipeIdsElement, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.RecipeIds = append(ret.RecipeIds, PlayToClientPacketRecipeBookRemoveRecipeIdsElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketRecipeBookRemove) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.RecipeIds)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketRecipeBookRemoveRecipeIds := range len(ret.RecipeIds) {
+		err = proto_base.EncodeVarInt(w, ret.RecipeIds[iPlayToClientPacketRecipeBookRemoveRecipeIds])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketRecipeBookSettings struct {
+	Crafting PlayToClientRecipeBookSetting
+	Furnace  PlayToClientRecipeBookSetting
+	Blast    PlayToClientRecipeBookSetting
+	Smoker   PlayToClientRecipeBookSetting
+}
+
+func (ret *PlayToClientPacketRecipeBookSettings) Decode(r io.Reader) (err error) {
+	err = ret.Crafting.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Furnace.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Blast.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.Smoker.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketRecipeBookSettings) Encode(w io.Writer) (err error) {
+	err = ret.Crafting.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Furnace.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Blast.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.Smoker.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketRelEntityMove struct {
+	EntityId int32
+	DX       int16
+	DY       int16
+	DZ       int16
+	OnGround bool
+}
+
+func (ret *PlayToClientPacketRelEntityMove) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DX)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DY)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.DZ)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketRelEntityMove) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DX)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DY)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DZ)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketRemoveEntityEffect struct {
+	EntityId int32
+	EffectId int32
+}
+
+func (ret *PlayToClientPacketRemoveEntityEffect) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.EffectId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketRemoveEntityEffect) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.EffectId)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketResetScore struct {
+	EntityName    string
+	ObjectiveName *string
+}
+
+func (ret *PlayToClientPacketResetScore) Decode(r io.Reader) (err error) {
+	ret.EntityName, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketResetScoreObjectiveNamePresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketResetScoreObjectiveNamePresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketResetScoreObjectiveNamePresent {
+		var PlayToClientPacketResetScoreObjectiveNamePresentValue string
+		PlayToClientPacketResetScoreObjectiveNamePresentValue, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.ObjectiveName = &PlayToClientPacketResetScoreObjectiveNamePresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketResetScore) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.EntityName)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ObjectiveName != nil)
+	if err != nil {
+		return
+	}
+	if ret.ObjectiveName != nil {
+		err = proto_base.EncodeString(w, *ret.ObjectiveName)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketRespawn struct {
+	WorldState   PlayToClientSpawnInfo
+	CopyMetadata uint8
+}
+
+func (ret *PlayToClientPacketRespawn) Decode(r io.Reader) (err error) {
+	err = ret.WorldState.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.CopyMetadata)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketRespawn) Encode(w io.Writer) (err error) {
+	err = ret.WorldState.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.CopyMetadata)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketScoreboardDisplayObjective struct {
+	Position int32
+	Name     string
+}
+
+func (ret *PlayToClientPacketScoreboardDisplayObjective) Decode(r io.Reader) (err error) {
+	ret.Position, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Name, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketScoreboardDisplayObjective) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Position)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Name)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketScoreboardObjective struct {
+	Name         string
+	Action       int8
+	DisplayText  any
+	Type         any
+	NumberFormat any
+	Styling      any
+}
+
+func (ret *PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (err error) {
+	ret.Name, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Action)
+	if err != nil {
+		return
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketScoreboardObjectiveDisplayText0Tmp nbt.Anon
+		err = PlayToClientPacketScoreboardObjectiveDisplayText0Tmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.DisplayText = PlayToClientPacketScoreboardObjectiveDisplayText0Tmp
+	case 2:
+		var PlayToClientPacketScoreboardObjectiveDisplayText2Tmp nbt.Anon
+		err = PlayToClientPacketScoreboardObjectiveDisplayText2Tmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.DisplayText = PlayToClientPacketScoreboardObjectiveDisplayText2Tmp
+	default:
+		var PlayToClientPacketScoreboardObjectiveDisplayTextTmp struct {
+		}
+		ret.DisplayText = PlayToClientPacketScoreboardObjectiveDisplayTextTmp
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketScoreboardObjectiveType0Tmp int32
+		PlayToClientPacketScoreboardObjectiveType0Tmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Type = PlayToClientPacketScoreboardObjectiveType0Tmp
+	case 2:
+		var PlayToClientPacketScoreboardObjectiveType2Tmp int32
+		PlayToClientPacketScoreboardObjectiveType2Tmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Type = PlayToClientPacketScoreboardObjectiveType2Tmp
+	default:
+		var PlayToClientPacketScoreboardObjectiveTypeTmp struct {
+		}
+		ret.Type = PlayToClientPacketScoreboardObjectiveTypeTmp
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp *int32
+		var PlayToClientPacketScoreboardObjectiveNumberFormatPresent bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormatPresent)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketScoreboardObjectiveNumberFormatPresent {
+			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue int32
+			PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp = &PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue
+		}
+		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp
+	case 2:
+		var PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp *int32
+		var PlayToClientPacketScoreboardObjectiveNumberFormatPresent bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormatPresent)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketScoreboardObjectiveNumberFormatPresent {
+			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue int32
+			PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp = &PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue
+		}
+		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp
+	default:
+		var PlayToClientPacketScoreboardObjectiveNumberFormatTmp struct {
+		}
+		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormatTmp
+	}
+	switch ret.Action {
+	case 0:
+		var PlayToClientPacketScoreboardObjectiveStyling0Tmp any
+		switch ret.NumberFormat {
+		case 1:
+			var PlayToClientPacketScoreboardObjectiveStyling1Tmp nbt.Anon
+			err = PlayToClientPacketScoreboardObjectiveStyling1Tmp.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling1Tmp
+		case 2:
+			var PlayToClientPacketScoreboardObjectiveStyling2Tmp nbt.Anon
+			err = PlayToClientPacketScoreboardObjectiveStyling2Tmp.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling2Tmp
+		default:
+			var PlayToClientPacketScoreboardObjectiveStylingTmp struct {
+			}
+			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStylingTmp
+		}
+		ret.Styling = PlayToClientPacketScoreboardObjectiveStyling0Tmp
+	case 2:
+		var PlayToClientPacketScoreboardObjectiveStyling2Tmp any
+		switch ret.NumberFormat {
+		case 1:
+			var PlayToClientPacketScoreboardObjectiveStyling1Tmp nbt.Anon
+			err = PlayToClientPacketScoreboardObjectiveStyling1Tmp.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling1Tmp
+		case 2:
+			var PlayToClientPacketScoreboardObjectiveStyling2Tmp nbt.Anon
+			err = PlayToClientPacketScoreboardObjectiveStyling2Tmp.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling2Tmp
+		default:
+			var PlayToClientPacketScoreboardObjectiveStylingTmp struct {
+			}
+			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStylingTmp
+		}
+		ret.Styling = PlayToClientPacketScoreboardObjectiveStyling2Tmp
+	default:
+		var PlayToClientPacketScoreboardObjectiveStylingTmp struct {
+		}
+		ret.Styling = PlayToClientPacketScoreboardObjectiveStylingTmp
+	}
+	return
+}
+func (ret *PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Name)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Action)
+	if err != nil {
+		return
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketScoreboardObjectiveDisplayText, ok := ret.DisplayText.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketScoreboardObjectiveDisplayText.Encode(w)
+		if err != nil {
+			return
+		}
+	case 2:
+		PlayToClientPacketScoreboardObjectiveDisplayText, ok := ret.DisplayText.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketScoreboardObjectiveDisplayText.Encode(w)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.DisplayText.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketScoreboardObjectiveType, ok := ret.Type.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketScoreboardObjectiveType)
+		if err != nil {
+			return
+		}
+	case 2:
+		PlayToClientPacketScoreboardObjectiveType, ok := ret.Type.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketScoreboardObjectiveType)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Type.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketScoreboardObjectiveNumberFormat, ok := ret.NumberFormat.(*int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketScoreboardObjectiveNumberFormat != nil)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketScoreboardObjectiveNumberFormat != nil {
+			err = proto_base.EncodeVarInt(w, *PlayToClientPacketScoreboardObjectiveNumberFormat)
+			if err != nil {
+				return
+			}
+		}
+	case 2:
+		PlayToClientPacketScoreboardObjectiveNumberFormat, ok := ret.NumberFormat.(*int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketScoreboardObjectiveNumberFormat != nil)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketScoreboardObjectiveNumberFormat != nil {
+			err = proto_base.EncodeVarInt(w, *PlayToClientPacketScoreboardObjectiveNumberFormat)
+			if err != nil {
+				return
+			}
+		}
+	default:
+		_, ok := ret.NumberFormat.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Action {
+	case 0:
+		PlayToClientPacketScoreboardObjectiveStyling, ok := ret.Styling.(any)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		switch ret.NumberFormat {
+		case 1:
+			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
+			if err != nil {
+				return
+			}
+		case 2:
+			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := PlayToClientPacketScoreboardObjectiveStyling.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+	case 2:
+		PlayToClientPacketScoreboardObjectiveStyling, ok := ret.Styling.(any)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		switch ret.NumberFormat {
+		case 1:
+			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
+			if err != nil {
+				return
+			}
+		case 2:
+			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
+			if err != nil {
+				return
+			}
+		default:
+			_, ok := PlayToClientPacketScoreboardObjectiveStyling.(struct {
+			})
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+		}
+	default:
+		_, ok := ret.Styling.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketScoreboardScore struct {
+	ItemName     string
+	ScoreName    string
+	Value        int32
+	DisplayName  *nbt.Anon
+	NumberFormat *int32
+	Styling      any
+}
+
+func (ret *PlayToClientPacketScoreboardScore) Decode(r io.Reader) (err error) {
+	err = proto_base.ToDoError
+	return
+}
+func (ret *PlayToClientPacketScoreboardScore) Encode(w io.Writer) (err error) {
+	err = proto_base.ToDoError
+	return
+}
+
+type PlayToClientPacketSelectAdvancementTab struct {
+	Id *string
+}
+
+func (ret *PlayToClientPacketSelectAdvancementTab) Decode(r io.Reader) (err error) {
+	var PlayToClientPacketSelectAdvancementTabIdPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketSelectAdvancementTabIdPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketSelectAdvancementTabIdPresent {
+		var PlayToClientPacketSelectAdvancementTabIdPresentValue string
+		PlayToClientPacketSelectAdvancementTabIdPresentValue, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Id = &PlayToClientPacketSelectAdvancementTabIdPresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketSelectAdvancementTab) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Id != nil)
+	if err != nil {
+		return
+	}
+	if ret.Id != nil {
+		err = proto_base.EncodeString(w, *ret.Id)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketServerData struct {
+	Motd      nbt.Anon
+	IconBytes *ByteArray
+}
+
+func (ret *PlayToClientPacketServerData) Decode(r io.Reader) (err error) {
+	err = ret.Motd.Decode(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketServerDataIconBytesPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketServerDataIconBytesPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketServerDataIconBytesPresent {
+		var PlayToClientPacketServerDataIconBytesPresentValue ByteArray
+		err = PlayToClientPacketServerDataIconBytesPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.IconBytes = &PlayToClientPacketServerDataIconBytesPresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketServerData) Encode(w io.Writer) (err error) {
+	err = ret.Motd.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IconBytes != nil)
+	if err != nil {
+		return
+	}
+	if ret.IconBytes != nil {
+		err = (*ret.IconBytes).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketSetCooldown struct {
+	CooldownGroup string
+	CooldownTicks int32
+}
+
+func (ret *PlayToClientPacketSetCooldown) Decode(r io.Reader) (err error) {
+	ret.CooldownGroup, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.CooldownTicks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetCooldown) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.CooldownGroup)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.CooldownTicks)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSetCursorItem struct {
+	Contents Slot
+}
+
+func (ret *PlayToClientPacketSetCursorItem) Decode(r io.Reader) (err error) {
+	err = ret.Contents.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetCursorItem) Encode(w io.Writer) (err error) {
+	err = ret.Contents.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSetPassengers struct {
+	EntityId   int32
+	Passengers []int32
+}
+
+func (ret *PlayToClientPacketSetPassengers) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketSetPassengersPassengers int32
+	lPlayToClientPacketSetPassengersPassengers, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Passengers = []int32{}
+	for range lPlayToClientPacketSetPassengersPassengers {
+		var PlayToClientPacketSetPassengersPassengersElement int32
+		PlayToClientPacketSetPassengersPassengersElement, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Passengers = append(ret.Passengers, PlayToClientPacketSetPassengersPassengersElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketSetPassengers) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Passengers)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketSetPassengersPassengers := range len(ret.Passengers) {
+		err = proto_base.EncodeVarInt(w, ret.Passengers[iPlayToClientPacketSetPassengersPassengers])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketSetPlayerInventory struct {
+	SlotId   int32
+	Contents Slot
+}
+
+func (ret *PlayToClientPacketSetPlayerInventory) Decode(r io.Reader) (err error) {
+	ret.SlotId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.Contents.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetPlayerInventory) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.SlotId)
+	if err != nil {
+		return
+	}
+	err = ret.Contents.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSetProjectilePower struct {
+	Id                int32
+	AccelerationPower float64
+}
+
+func (ret *PlayToClientPacketSetProjectilePower) Decode(r io.Reader) (err error) {
+	ret.Id, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.AccelerationPower)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetProjectilePower) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Id)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.AccelerationPower)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSetSlot struct {
+	WindowId ContainerID
+	StateId  int32
+	Slot     int16
+	Item     Slot
+}
+
+func (ret *PlayToClientPacketSetSlot) Decode(r io.Reader) (err error) {
+	err = ret.WindowId.Decode(r)
+	if err != nil {
+		return
+	}
+	ret.StateId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Slot)
+	if err != nil {
+		return
+	}
+	err = ret.Item.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetSlot) Encode(w io.Writer) (err error) {
+	err = ret.WindowId.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.StateId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Slot)
+	if err != nil {
+		return
+	}
+	err = ret.Item.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSetTickingState struct {
+	TickRate float32
+	IsFrozen bool
+}
+
+func (ret *PlayToClientPacketSetTickingState) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.TickRate)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.IsFrozen)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetTickingState) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.TickRate)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IsFrozen)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSetTitleSubtitle struct {
+	Text nbt.Anon
+}
+
+func (ret *PlayToClientPacketSetTitleSubtitle) Decode(r io.Reader) (err error) {
+	err = ret.Text.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetTitleSubtitle) Encode(w io.Writer) (err error) {
+	err = ret.Text.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSetTitleText struct {
+	Text nbt.Anon
+}
+
+func (ret *PlayToClientPacketSetTitleText) Decode(r io.Reader) (err error) {
+	err = ret.Text.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetTitleText) Encode(w io.Writer) (err error) {
+	err = ret.Text.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSetTitleTime struct {
+	FadeIn  int32
+	Stay    int32
+	FadeOut int32
+}
+
+func (ret *PlayToClientPacketSetTitleTime) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.FadeIn)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Stay)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.FadeOut)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSetTitleTime) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.FadeIn)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Stay)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.FadeOut)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketShowDialog struct {
+	Dialog any
+}
+
+func (ret *PlayToClientPacketShowDialog) Decode(r io.Reader) (err error) {
+	var PlayToClientPacketShowDialogDialogId int32
+	PlayToClientPacketShowDialogDialogId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketShowDialogDialogId != 0 {
+		ret.Dialog = PlayToClientPacketShowDialogDialogId
+	} else {
+		var PlayToClientPacketShowDialogDialogResult nbt.Anon
+		err = PlayToClientPacketShowDialogDialogResult.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Dialog = PlayToClientPacketShowDialogDialogResult
+	}
+	return
+}
+func (ret *PlayToClientPacketShowDialog) Encode(w io.Writer) (err error) {
+	switch PlayToClientPacketShowDialogDialogKnownType := ret.Dialog.(type) {
+	case int32:
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketShowDialogDialogKnownType)
+		if err != nil {
+			return
+		}
+	case nbt.Anon:
+		err = proto_base.EncodeVarInt(w, 0)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketShowDialogDialogKnownType.Encode(w)
+		if err != nil {
+			return
+		}
+	default:
+		err = proto_base.BadTypeError
+	}
+	return
+}
+
+type PlayToClientPacketSimulationDistance struct {
+	Distance int32
+}
+
+func (ret *PlayToClientPacketSimulationDistance) Decode(r io.Reader) (err error) {
+	ret.Distance, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSimulationDistance) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Distance)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSoundEffect struct {
+	Sound         ItemSoundHolder
+	SoundCategory SoundSource
+	X             int32
+	Y             int32
+	Z             int32
+	Volume        float32
+	Pitch         float32
+	Seed          int64
+}
+
+func (ret *PlayToClientPacketSoundEffect) Decode(r io.Reader) (err error) {
+	err = ret.Sound.Decode(r)
+	if err != nil {
+		return
+	}
+	err = ret.SoundCategory.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Volume)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Seed)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSoundEffect) Encode(w io.Writer) (err error) {
+	err = ret.Sound.Encode(w)
+	if err != nil {
+		return
+	}
+	err = ret.SoundCategory.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Volume)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Seed)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSpawnEntity struct {
+	EntityId   int32
+	ObjectUUID uuid.UUID
+	Type       int32
+	X          float64
+	Y          float64
+	Z          float64
+	Velocity   proto_base.LpVec3d
+	Pitch      int8
+	Yaw        int8
+	HeadPitch  int8
+	ObjectData int32
+}
+
+func (ret *PlayToClientPacketSpawnEntity) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	_, err = io.ReadFull(r, ret.ObjectUUID[:])
+	if err != nil {
+		return
+	}
+	ret.Type, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = ret.Velocity.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.HeadPitch)
+	if err != nil {
+		return
+	}
+	ret.ObjectData, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSpawnEntity) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	_, err = w.Write(ret.ObjectUUID[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Type)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = ret.Velocity.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.HeadPitch)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ObjectData)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSpawnPosition struct {
+	Val RespawnData
+}
+
+func (ret *PlayToClientPacketSpawnPosition) Decode(r io.Reader) (err error) {
+	err = ret.Val.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSpawnPosition) Encode(w io.Writer) (err error) {
+	err = ret.Val.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketStartConfiguration struct {
+}
+
+func (ret *PlayToClientPacketStartConfiguration) Decode(r io.Reader) (err error) {
+	return
+}
+func (ret *PlayToClientPacketStartConfiguration) Encode(w io.Writer) (err error) {
+	return
+}
+
+type PlayToClientPacketStatistics struct {
+	Entries []struct {
+		CategoryId  int32
+		StatisticId int32
+		Value       int32
+	}
+}
+
+func (ret *PlayToClientPacketStatistics) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketStatisticsEntries int32
+	lPlayToClientPacketStatisticsEntries, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Entries = []struct {
+		CategoryId  int32
+		StatisticId int32
+		Value       int32
+	}{}
+	for range lPlayToClientPacketStatisticsEntries {
+		var PlayToClientPacketStatisticsEntriesElement struct {
+			CategoryId  int32
+			StatisticId int32
+			Value       int32
+		}
+		PlayToClientPacketStatisticsEntriesElement.CategoryId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketStatisticsEntriesElement.StatisticId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketStatisticsEntriesElement.Value, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Entries = append(ret.Entries, PlayToClientPacketStatisticsEntriesElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketStatistics) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Entries)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketStatisticsEntries := range len(ret.Entries) {
+		err = proto_base.EncodeVarInt(w, ret.Entries[iPlayToClientPacketStatisticsEntries].CategoryId)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, ret.Entries[iPlayToClientPacketStatisticsEntries].StatisticId)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, ret.Entries[iPlayToClientPacketStatisticsEntries].Value)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketStepTick struct {
+	TickSteps int32
+}
+
+func (ret *PlayToClientPacketStepTick) Decode(r io.Reader) (err error) {
+	ret.TickSteps, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketStepTick) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.TickSteps)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketStopSound struct {
+	Flags  int8
+	Source any
+	Sound  any
+}
+
+func (ret *PlayToClientPacketStopSound) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Flags)
+	if err != nil {
+		return
+	}
+	switch ret.Flags {
+	case 1:
+		var PlayToClientPacketStopSoundSource1Tmp int32
+		PlayToClientPacketStopSoundSource1Tmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Source = PlayToClientPacketStopSoundSource1Tmp
+	case 3:
+		var PlayToClientPacketStopSoundSource3Tmp int32
+		PlayToClientPacketStopSoundSource3Tmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Source = PlayToClientPacketStopSoundSource3Tmp
+	default:
+		var PlayToClientPacketStopSoundSourceTmp struct {
+		}
+		ret.Source = PlayToClientPacketStopSoundSourceTmp
+	}
+	switch ret.Flags {
+	case 2:
+		var PlayToClientPacketStopSoundSound2Tmp string
+		PlayToClientPacketStopSoundSound2Tmp, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Sound = PlayToClientPacketStopSoundSound2Tmp
+	case 3:
+		var PlayToClientPacketStopSoundSound3Tmp string
+		PlayToClientPacketStopSoundSound3Tmp, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Sound = PlayToClientPacketStopSoundSound3Tmp
+	default:
+		var PlayToClientPacketStopSoundSoundTmp struct {
+		}
+		ret.Sound = PlayToClientPacketStopSoundSoundTmp
+	}
+	return
+}
+func (ret *PlayToClientPacketStopSound) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Flags)
+	if err != nil {
+		return
+	}
+	switch ret.Flags {
+	case 1:
+		PlayToClientPacketStopSoundSource, ok := ret.Source.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketStopSoundSource)
+		if err != nil {
+			return
+		}
+	case 3:
+		PlayToClientPacketStopSoundSource, ok := ret.Source.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketStopSoundSource)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Source.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Flags {
+	case 2:
+		PlayToClientPacketStopSoundSound, ok := ret.Sound.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, PlayToClientPacketStopSoundSound)
+		if err != nil {
+			return
+		}
+	case 3:
+		PlayToClientPacketStopSoundSound, ok := ret.Sound.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, PlayToClientPacketStopSoundSound)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Sound.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketSyncEntityPosition struct {
+	EntityId int32
+	X        float64
+	Y        float64
+	Z        float64
+	Dx       float64
+	Dy       float64
+	Dz       float64
+	Yaw      float32
+	Pitch    float32
+	OnGround bool
+}
+
+func (ret *PlayToClientPacketSyncEntityPosition) Decode(r io.Reader) (err error) {
+	ret.EntityId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Dx)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Dy)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Dz)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSyncEntityPosition) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.EntityId)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Dx)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Dy)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Dz)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OnGround)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketSystemChat struct {
+	Content     nbt.Anon
+	IsActionBar bool
+}
+
+func (ret *PlayToClientPacketSystemChat) Decode(r io.Reader) (err error) {
+	err = ret.Content.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.IsActionBar)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketSystemChat) Encode(w io.Writer) (err error) {
+	err = ret.Content.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IsActionBar)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketTabComplete struct {
+	TransactionId int32
+	Start         int32
+	Length        int32
+	Matches       []struct {
+		Match   string
+		Tooltip *nbt.Anon
+	}
+}
+
+func (ret *PlayToClientPacketTabComplete) Decode(r io.Reader) (err error) {
+	ret.TransactionId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Start, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Length, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketTabCompleteMatches int32
+	lPlayToClientPacketTabCompleteMatches, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Matches = []struct {
+		Match   string
+		Tooltip *nbt.Anon
+	}{}
+	for range lPlayToClientPacketTabCompleteMatches {
+		var PlayToClientPacketTabCompleteMatchesElement struct {
+			Match   string
+			Tooltip *nbt.Anon
+		}
+		PlayToClientPacketTabCompleteMatchesElement.Match, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketTabCompleteMatchesElementTooltipPresent bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTabCompleteMatchesElementTooltipPresent)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketTabCompleteMatchesElementTooltipPresent {
+			var PlayToClientPacketTabCompleteMatchesElementTooltipPresentValue nbt.Anon
+			err = PlayToClientPacketTabCompleteMatchesElementTooltipPresentValue.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketTabCompleteMatchesElement.Tooltip = &PlayToClientPacketTabCompleteMatchesElementTooltipPresentValue
+		}
+		ret.Matches = append(ret.Matches, PlayToClientPacketTabCompleteMatchesElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketTabComplete) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.TransactionId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Start)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Length)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Matches)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketTabCompleteMatches := range len(ret.Matches) {
+		err = proto_base.EncodeString(w, ret.Matches[iPlayToClientPacketTabCompleteMatches].Match)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip != nil)
+		if err != nil {
+			return
+		}
+		if ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip != nil {
+			err = (*ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip).Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+type PlayToClientPacketTags struct {
+	Tags []struct {
+		TagType string
+		Tags    Tags
+	}
+}
+
+func (ret *PlayToClientPacketTags) Decode(r io.Reader) (err error) {
+	var lPlayToClientPacketTagsTags int32
+	lPlayToClientPacketTagsTags, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Tags = []struct {
+		TagType string
+		Tags    Tags
+	}{}
+	for range lPlayToClientPacketTagsTags {
+		var PlayToClientPacketTagsTagsElement struct {
+			TagType string
+			Tags    Tags
+		}
+		PlayToClientPacketTagsTagsElement.TagType, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTagsTagsElement.Tags.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Tags = append(ret.Tags, PlayToClientPacketTagsTagsElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketTags) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Tags)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketTagsTags := range len(ret.Tags) {
+		err = proto_base.EncodeString(w, ret.Tags[iPlayToClientPacketTagsTags].TagType)
+		if err != nil {
+			return
+		}
+		err = ret.Tags[iPlayToClientPacketTagsTags].Tags.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketTeams struct {
+	Team    string
+	Mode    string
+	Anon    any
+	Players any
+}
+
+var PlayToClientPacketTeamsModeMap = map[int8]string{0: "add", 1: "remove", 2: "change", 3: "join", 4: "leave"}
+var PlayToClientPacketTeamsAnonNameTagVisibilityMap = map[int32]string{0: "always", 1: "never", 2: "hide_for_other_teams", 3: "hide_for_own_team"}
+var PlayToClientPacketTeamsAnonCollisionRuleMap = map[int32]string{0: "always", 1: "never", 2: "push_other_teams", 3: "push_own_team"}
+
+func (ret *PlayToClientPacketTeams) Decode(r io.Reader) (err error) {
+	ret.Team, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketTeamsModeKey int8
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTeamsModeKey)
+	if err != nil {
+		return
+	}
+	ret.Mode, err = proto_base.ErroringIndex(PlayToClientPacketTeamsModeMap, PlayToClientPacketTeamsModeKey)
+	if err != nil {
+		return
+	}
+	switch ret.Mode {
+	case "add":
+		var PlayToClientPacketTeamsAnonAddTmp struct {
+			Name              nbt.Anon
+			Flags             uint8
+			NameTagVisibility string
+			CollisionRule     string
+			Formatting        int32
+			Prefix            nbt.Anon
+			Suffix            nbt.Anon
+		}
+		err = PlayToClientPacketTeamsAnonAddTmp.Name.Decode(r)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTeamsAnonAddTmp.Flags)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketTeamsAnonNameTagVisibilityKey int32
+		PlayToClientPacketTeamsAnonNameTagVisibilityKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsAnonAddTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketTeamsAnonCollisionRuleKey int32
+		PlayToClientPacketTeamsAnonCollisionRuleKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsAnonAddTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsAnonAddTmp.Formatting, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTeamsAnonAddTmp.Prefix.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTeamsAnonAddTmp.Suffix.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Anon = PlayToClientPacketTeamsAnonAddTmp
+	case "change":
+		var PlayToClientPacketTeamsAnonChangeTmp struct {
+			Name              nbt.Anon
+			Flags             uint8
+			NameTagVisibility string
+			CollisionRule     string
+			Formatting        int32
+			Prefix            nbt.Anon
+			Suffix            nbt.Anon
+		}
+		err = PlayToClientPacketTeamsAnonChangeTmp.Name.Decode(r)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTeamsAnonChangeTmp.Flags)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketTeamsAnonNameTagVisibilityKey int32
+		PlayToClientPacketTeamsAnonNameTagVisibilityKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsAnonChangeTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketTeamsAnonCollisionRuleKey int32
+		PlayToClientPacketTeamsAnonCollisionRuleKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsAnonChangeTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsAnonChangeTmp.Formatting, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTeamsAnonChangeTmp.Prefix.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTeamsAnonChangeTmp.Suffix.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Anon = PlayToClientPacketTeamsAnonChangeTmp
+	default:
+		var PlayToClientPacketTeamsAnonTmp struct {
+		}
+		ret.Anon = PlayToClientPacketTeamsAnonTmp
+	}
+	switch ret.Mode {
+	case "add":
+		var PlayToClientPacketTeamsPlayersAddTmp []string
+		var lPlayToClientPacketTeamsPlayers int32
+		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsPlayersAddTmp = []string{}
+		for range lPlayToClientPacketTeamsPlayers {
+			var PlayToClientPacketTeamsPlayersElement string
+			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketTeamsPlayersAddTmp = append(PlayToClientPacketTeamsPlayersAddTmp, PlayToClientPacketTeamsPlayersElement)
+		}
+		ret.Players = PlayToClientPacketTeamsPlayersAddTmp
+	case "join":
+		var PlayToClientPacketTeamsPlayersJoinTmp []string
+		var lPlayToClientPacketTeamsPlayers int32
+		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsPlayersJoinTmp = []string{}
+		for range lPlayToClientPacketTeamsPlayers {
+			var PlayToClientPacketTeamsPlayersElement string
+			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketTeamsPlayersJoinTmp = append(PlayToClientPacketTeamsPlayersJoinTmp, PlayToClientPacketTeamsPlayersElement)
+		}
+		ret.Players = PlayToClientPacketTeamsPlayersJoinTmp
+	case "leave":
+		var PlayToClientPacketTeamsPlayersLeaveTmp []string
+		var lPlayToClientPacketTeamsPlayers int32
+		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTeamsPlayersLeaveTmp = []string{}
+		for range lPlayToClientPacketTeamsPlayers {
+			var PlayToClientPacketTeamsPlayersElement string
+			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketTeamsPlayersLeaveTmp = append(PlayToClientPacketTeamsPlayersLeaveTmp, PlayToClientPacketTeamsPlayersElement)
+		}
+		ret.Players = PlayToClientPacketTeamsPlayersLeaveTmp
+	default:
+		var PlayToClientPacketTeamsPlayersTmp struct {
+		}
+		ret.Players = PlayToClientPacketTeamsPlayersTmp
+	}
+	return
+}
+
+var PlayToClientPacketTeamsModeReverseMap = map[string]int8{"add": 0, "remove": 1, "change": 2, "join": 3, "leave": 4}
+var PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap = map[string]int32{"always": 0, "never": 1, "hide_for_other_teams": 2, "hide_for_own_team": 3}
+var PlayToClientPacketTeamsAnonCollisionRuleReverseMap = map[string]int32{"always": 0, "never": 1, "push_other_teams": 2, "push_own_team": 3}
+
+func (ret *PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Team)
+	if err != nil {
+		return
+	}
+	var vPlayToClientPacketTeamsMode int8
+	vPlayToClientPacketTeamsMode, err = proto_base.ErroringIndex(PlayToClientPacketTeamsModeReverseMap, ret.Mode)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, vPlayToClientPacketTeamsMode)
+	if err != nil {
+		return
+	}
+	switch ret.Mode {
+	case "add":
+		PlayToClientPacketTeamsAnon, ok := ret.Anon.(struct {
+			Name              nbt.Anon
+			Flags             uint8
+			NameTagVisibility string
+			CollisionRule     string
+			Formatting        int32
+			Prefix            nbt.Anon
+			Suffix            nbt.Anon
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketTeamsAnon.Name.Encode(w)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketTeamsAnon.Flags)
+		if err != nil {
+			return
+		}
+		var vPlayToClientPacketTeamsAnonNameTagVisibility int32
+		vPlayToClientPacketTeamsAnonNameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap, PlayToClientPacketTeamsAnon.NameTagVisibility)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vPlayToClientPacketTeamsAnonNameTagVisibility)
+		if err != nil {
+			return
+		}
+		var vPlayToClientPacketTeamsAnonCollisionRule int32
+		vPlayToClientPacketTeamsAnonCollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleReverseMap, PlayToClientPacketTeamsAnon.CollisionRule)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vPlayToClientPacketTeamsAnonCollisionRule)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketTeamsAnon.Formatting)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTeamsAnon.Prefix.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTeamsAnon.Suffix.Encode(w)
+		if err != nil {
+			return
+		}
+	case "change":
+		PlayToClientPacketTeamsAnon, ok := ret.Anon.(struct {
+			Name              nbt.Anon
+			Flags             uint8
+			NameTagVisibility string
+			CollisionRule     string
+			Formatting        int32
+			Prefix            nbt.Anon
+			Suffix            nbt.Anon
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketTeamsAnon.Name.Encode(w)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketTeamsAnon.Flags)
+		if err != nil {
+			return
+		}
+		var vPlayToClientPacketTeamsAnonNameTagVisibility int32
+		vPlayToClientPacketTeamsAnonNameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap, PlayToClientPacketTeamsAnon.NameTagVisibility)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vPlayToClientPacketTeamsAnonNameTagVisibility)
+		if err != nil {
+			return
+		}
+		var vPlayToClientPacketTeamsAnonCollisionRule int32
+		vPlayToClientPacketTeamsAnonCollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleReverseMap, PlayToClientPacketTeamsAnon.CollisionRule)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vPlayToClientPacketTeamsAnonCollisionRule)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketTeamsAnon.Formatting)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTeamsAnon.Prefix.Encode(w)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTeamsAnon.Suffix.Encode(w)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Anon.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	switch ret.Mode {
+	case "add":
+		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientPacketTeamsPlayers)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
+			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
+			if err != nil {
+				return
+			}
+		}
+	case "join":
+		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientPacketTeamsPlayers)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
+			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
+			if err != nil {
+				return
+			}
+		}
+	case "leave":
+		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientPacketTeamsPlayers)))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
+			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
+			if err != nil {
+				return
+			}
+		}
+	default:
+		_, ok := ret.Players.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketTestInstanceBlockStatus struct {
+	Status nbt.Anon
+	Size   *Vec3i
+}
+
+func (ret *PlayToClientPacketTestInstanceBlockStatus) Decode(r io.Reader) (err error) {
+	err = ret.Status.Decode(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketTestInstanceBlockStatusSizePresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTestInstanceBlockStatusSizePresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketTestInstanceBlockStatusSizePresent {
+		var PlayToClientPacketTestInstanceBlockStatusSizePresentValue Vec3i
+		err = PlayToClientPacketTestInstanceBlockStatusSizePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Size = &PlayToClientPacketTestInstanceBlockStatusSizePresentValue
+	}
+	return
+}
+func (ret *PlayToClientPacketTestInstanceBlockStatus) Encode(w io.Writer) (err error) {
+	err = ret.Status.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Size != nil)
+	if err != nil {
+		return
+	}
+	if ret.Size != nil {
+		err = (*ret.Size).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketTileEntityData struct {
+	Location Position
+	Action   int32
+	NbtData  nbt.Anon
+}
+
+func (ret *PlayToClientPacketTileEntityData) Decode(r io.Reader) (err error) {
+	err = ret.Location.Decode(r)
+	if err != nil {
+		return
+	}
+	ret.Action, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = ret.NbtData.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketTileEntityData) Encode(w io.Writer) (err error) {
+	err = ret.Location.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Action)
+	if err != nil {
+		return
+	}
+	err = ret.NbtData.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketTrackedWaypoint struct {
+	Operation string
+	Waypoint  struct {
+		HasUUID bool
+		Anon    any
+		Icon    struct {
+			Style string
+			Color *struct {
+				Red   uint8
+				Green uint8
+				Blue  uint8
+			}
+		}
+		Type string
+		Data any
+	}
+}
+
+var PlayToClientPacketTrackedWaypointOperationMap = map[int32]string{0: "track", 1: "untrack", 2: "update"}
+var PlayToClientPacketTrackedWaypointWaypointTypeMap = map[int32]string{0: "empty", 1: "vec3i", 2: "chunk", 3: "azimuth"}
+
+func (ret *PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (err error) {
+	var PlayToClientPacketTrackedWaypointOperationKey int32
+	PlayToClientPacketTrackedWaypointOperationKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Operation, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointOperationMap, PlayToClientPacketTrackedWaypointOperationKey)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Waypoint.HasUUID)
+	if err != nil {
+		return
+	}
+	switch ret.Waypoint.HasUUID {
+	case false:
+		var PlayToClientPacketTrackedWaypointWaypointAnonFalseTmp struct {
+			Id string
+		}
+		PlayToClientPacketTrackedWaypointWaypointAnonFalseTmp.Id, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Waypoint.Anon = PlayToClientPacketTrackedWaypointWaypointAnonFalseTmp
+	case true:
+		var PlayToClientPacketTrackedWaypointWaypointAnonTrueTmp struct {
+			Uuid uuid.UUID
+		}
+		_, err = io.ReadFull(r, PlayToClientPacketTrackedWaypointWaypointAnonTrueTmp.Uuid[:])
+		if err != nil {
+			return
+		}
+		ret.Waypoint.Anon = PlayToClientPacketTrackedWaypointWaypointAnonTrueTmp
+	}
+	ret.Waypoint.Icon.Style, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketTrackedWaypointWaypointIconColorPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointIconColorPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketTrackedWaypointWaypointIconColorPresent {
+		var PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue struct {
+			Red   uint8
+			Green uint8
+			Blue  uint8
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue.Red)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue.Green)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue.Blue)
+		if err != nil {
+			return
+		}
+		ret.Waypoint.Icon.Color = &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue
+	}
+	var PlayToClientPacketTrackedWaypointWaypointTypeKey int32
+	PlayToClientPacketTrackedWaypointWaypointTypeKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Waypoint.Type, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointWaypointTypeMap, PlayToClientPacketTrackedWaypointWaypointTypeKey)
+	if err != nil {
+		return
+	}
+	switch ret.Waypoint.Type {
+	case "azimuth":
+		var PlayToClientPacketTrackedWaypointWaypointDataAzimuthTmp float32
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointDataAzimuthTmp)
+		if err != nil {
+			return
+		}
+		ret.Waypoint.Data = PlayToClientPacketTrackedWaypointWaypointDataAzimuthTmp
+	case "chunk":
+		var PlayToClientPacketTrackedWaypointWaypointDataChunkTmp struct {
+			ChunkX int32
+			ChunkZ int32
+		}
+		PlayToClientPacketTrackedWaypointWaypointDataChunkTmp.ChunkX, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTrackedWaypointWaypointDataChunkTmp.ChunkZ, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Waypoint.Data = PlayToClientPacketTrackedWaypointWaypointDataChunkTmp
+	case "vec3i":
+		var PlayToClientPacketTrackedWaypointWaypointDataVec3iTmp Vec3i
+		err = PlayToClientPacketTrackedWaypointWaypointDataVec3iTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Waypoint.Data = PlayToClientPacketTrackedWaypointWaypointDataVec3iTmp
+	}
+	return
+}
+
+var PlayToClientPacketTrackedWaypointOperationReverseMap = map[string]int32{"track": 0, "untrack": 1, "update": 2}
+var PlayToClientPacketTrackedWaypointWaypointTypeReverseMap = map[string]int32{"empty": 0, "vec3i": 1, "chunk": 2, "azimuth": 3}
+
+func (ret *PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
+	var vPlayToClientPacketTrackedWaypointOperation int32
+	vPlayToClientPacketTrackedWaypointOperation, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointOperationReverseMap, ret.Operation)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vPlayToClientPacketTrackedWaypointOperation)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Waypoint.HasUUID)
+	if err != nil {
+		return
+	}
+	switch ret.Waypoint.HasUUID {
+	case false:
+		PlayToClientPacketTrackedWaypointWaypointAnon, ok := ret.Waypoint.Anon.(struct {
+			Id string
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, PlayToClientPacketTrackedWaypointWaypointAnon.Id)
+		if err != nil {
+			return
+		}
+	case true:
+		PlayToClientPacketTrackedWaypointWaypointAnon, ok := ret.Waypoint.Anon.(struct {
+			Uuid uuid.UUID
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		_, err = w.Write(PlayToClientPacketTrackedWaypointWaypointAnon.Uuid[:])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeString(w, ret.Waypoint.Icon.Style)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Waypoint.Icon.Color != nil)
+	if err != nil {
+		return
+	}
+	if ret.Waypoint.Icon.Color != nil {
+		err = binary.Write(w, binary.BigEndian, (*ret.Waypoint.Icon.Color).Red)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, (*ret.Waypoint.Icon.Color).Green)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, (*ret.Waypoint.Icon.Color).Blue)
+		if err != nil {
+			return
+		}
+	}
+	var vPlayToClientPacketTrackedWaypointWaypointType int32
+	vPlayToClientPacketTrackedWaypointWaypointType, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointWaypointTypeReverseMap, ret.Waypoint.Type)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vPlayToClientPacketTrackedWaypointWaypointType)
+	if err != nil {
+		return
+	}
+	switch ret.Waypoint.Type {
+	case "azimuth":
+		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(float32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, PlayToClientPacketTrackedWaypointWaypointData)
+		if err != nil {
+			return
+		}
+	case "chunk":
+		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(struct {
+			ChunkX int32
+			ChunkZ int32
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketTrackedWaypointWaypointData.ChunkX)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, PlayToClientPacketTrackedWaypointWaypointData.ChunkZ)
+		if err != nil {
+			return
+		}
+	case "vec3i":
+		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(Vec3i)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = PlayToClientPacketTrackedWaypointWaypointData.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type PlayToClientPacketTradeList struct {
+	WindowId ContainerID
+	Trades   []struct {
+		InputItem1 struct {
+			ItemId     int32
+			ItemCount  int32
+			Components ExactComponentMatcher
+		}
+		OutputItem Slot
+		InputItem2 *struct {
+			ItemId     int32
+			ItemCount  int32
+			Components ExactComponentMatcher
+		}
+		TradeDisabled      bool
+		NbTradeUses        int32
+		MaximumNbTradeUses int32
+		Xp                 int32
+		SpecialPrice       int32
+		PriceMultiplier    float32
+		Demand             int32
+	}
+	VillagerLevel     int32
+	Experience        int32
+	IsRegularVillager bool
+	CanRestock        bool
+}
+
+func (ret *PlayToClientPacketTradeList) Decode(r io.Reader) (err error) {
+	err = ret.WindowId.Decode(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketTradeListTrades int32
+	lPlayToClientPacketTradeListTrades, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Trades = []struct {
+		InputItem1 struct {
+			ItemId     int32
+			ItemCount  int32
+			Components ExactComponentMatcher
+		}
+		OutputItem Slot
+		InputItem2 *struct {
+			ItemId     int32
+			ItemCount  int32
+			Components ExactComponentMatcher
+		}
+		TradeDisabled      bool
+		NbTradeUses        int32
+		MaximumNbTradeUses int32
+		Xp                 int32
+		SpecialPrice       int32
+		PriceMultiplier    float32
+		Demand             int32
+	}{}
+	for range lPlayToClientPacketTradeListTrades {
+		var PlayToClientPacketTradeListTradesElement struct {
+			InputItem1 struct {
+				ItemId     int32
+				ItemCount  int32
+				Components ExactComponentMatcher
+			}
+			OutputItem Slot
+			InputItem2 *struct {
+				ItemId     int32
+				ItemCount  int32
+				Components ExactComponentMatcher
+			}
+			TradeDisabled      bool
+			NbTradeUses        int32
+			MaximumNbTradeUses int32
+			Xp                 int32
+			SpecialPrice       int32
+			PriceMultiplier    float32
+			Demand             int32
+		}
+		PlayToClientPacketTradeListTradesElement.InputItem1.ItemId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketTradeListTradesElement.InputItem1.ItemCount, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTradeListTradesElement.InputItem1.Components.Decode(r)
+		if err != nil {
+			return
+		}
+		err = PlayToClientPacketTradeListTradesElement.OutputItem.Decode(r)
+		if err != nil {
+			return
+		}
+		var PlayToClientPacketTradeListTradesElementInputItem2Present bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElementInputItem2Present)
+		if err != nil {
+			return
+		}
+		if PlayToClientPacketTradeListTradesElementInputItem2Present {
+			var PlayToClientPacketTradeListTradesElementInputItem2PresentValue struct {
+				ItemId     int32
+				ItemCount  int32
+				Components ExactComponentMatcher
+			}
+			PlayToClientPacketTradeListTradesElementInputItem2PresentValue.ItemId, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketTradeListTradesElementInputItem2PresentValue.ItemCount, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			err = PlayToClientPacketTradeListTradesElementInputItem2PresentValue.Components.Decode(r)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketTradeListTradesElement.InputItem2 = &PlayToClientPacketTradeListTradesElementInputItem2PresentValue
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.TradeDisabled)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.NbTradeUses)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.MaximumNbTradeUses)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.Xp)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.SpecialPrice)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.PriceMultiplier)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.Demand)
+		if err != nil {
+			return
+		}
+		ret.Trades = append(ret.Trades, PlayToClientPacketTradeListTradesElement)
+	}
+	ret.VillagerLevel, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Experience, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.IsRegularVillager)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.CanRestock)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketTradeList) Encode(w io.Writer) (err error) {
+	err = ret.WindowId.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Trades)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketTradeListTrades := range len(ret.Trades) {
+		err = proto_base.EncodeVarInt(w, ret.Trades[iPlayToClientPacketTradeListTrades].InputItem1.ItemId)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, ret.Trades[iPlayToClientPacketTradeListTrades].InputItem1.ItemCount)
+		if err != nil {
+			return
+		}
+		err = ret.Trades[iPlayToClientPacketTradeListTrades].InputItem1.Components.Encode(w)
+		if err != nil {
+			return
+		}
+		err = ret.Trades[iPlayToClientPacketTradeListTrades].OutputItem.Encode(w)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2 != nil)
+		if err != nil {
+			return
+		}
+		if ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2 != nil {
+			err = proto_base.EncodeVarInt(w, (*ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2).ItemId)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, (*ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2).ItemCount)
+			if err != nil {
+				return
+			}
+			err = (*ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2).Components.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].TradeDisabled)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].NbTradeUses)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].MaximumNbTradeUses)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].Xp)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].SpecialPrice)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].PriceMultiplier)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].Demand)
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, ret.VillagerLevel)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Experience)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.IsRegularVillager)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.CanRestock)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketUnloadChunk struct {
+	ChunkZ int32
+	ChunkX int32
+}
+
+func (ret *PlayToClientPacketUnloadChunk) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.ChunkZ)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ChunkX)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketUnloadChunk) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.ChunkZ)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ChunkX)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketUpdateHealth struct {
+	Health         float32
+	Food           int32
+	FoodSaturation float32
+}
+
+func (ret *PlayToClientPacketUpdateHealth) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Health)
+	if err != nil {
+		return
+	}
+	ret.Food, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.FoodSaturation)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketUpdateHealth) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Health)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Food)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.FoodSaturation)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketUpdateLight struct {
+	ChunkX              int32
+	ChunkZ              int32
+	SkyLightMask        []int64
+	BlockLightMask      []int64
+	EmptySkyLightMask   []int64
+	EmptyBlockLightMask []int64
+	SkyLight            [][]uint8
+	BlockLight          [][]uint8
+}
+
+func (ret *PlayToClientPacketUpdateLight) Decode(r io.Reader) (err error) {
+	ret.ChunkX, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ChunkZ, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketUpdateLightSkyLightMask int32
+	lPlayToClientPacketUpdateLightSkyLightMask, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SkyLightMask = []int64{}
+	for range lPlayToClientPacketUpdateLightSkyLightMask {
+		var PlayToClientPacketUpdateLightSkyLightMaskElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightSkyLightMaskElement)
+		if err != nil {
+			return
+		}
+		ret.SkyLightMask = append(ret.SkyLightMask, PlayToClientPacketUpdateLightSkyLightMaskElement)
+	}
+	var lPlayToClientPacketUpdateLightBlockLightMask int32
+	lPlayToClientPacketUpdateLightBlockLightMask, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.BlockLightMask = []int64{}
+	for range lPlayToClientPacketUpdateLightBlockLightMask {
+		var PlayToClientPacketUpdateLightBlockLightMaskElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightBlockLightMaskElement)
+		if err != nil {
+			return
+		}
+		ret.BlockLightMask = append(ret.BlockLightMask, PlayToClientPacketUpdateLightBlockLightMaskElement)
+	}
+	var lPlayToClientPacketUpdateLightEmptySkyLightMask int32
+	lPlayToClientPacketUpdateLightEmptySkyLightMask, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.EmptySkyLightMask = []int64{}
+	for range lPlayToClientPacketUpdateLightEmptySkyLightMask {
+		var PlayToClientPacketUpdateLightEmptySkyLightMaskElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightEmptySkyLightMaskElement)
+		if err != nil {
+			return
+		}
+		ret.EmptySkyLightMask = append(ret.EmptySkyLightMask, PlayToClientPacketUpdateLightEmptySkyLightMaskElement)
+	}
+	var lPlayToClientPacketUpdateLightEmptyBlockLightMask int32
+	lPlayToClientPacketUpdateLightEmptyBlockLightMask, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.EmptyBlockLightMask = []int64{}
+	for range lPlayToClientPacketUpdateLightEmptyBlockLightMask {
+		var PlayToClientPacketUpdateLightEmptyBlockLightMaskElement int64
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightEmptyBlockLightMaskElement)
+		if err != nil {
+			return
+		}
+		ret.EmptyBlockLightMask = append(ret.EmptyBlockLightMask, PlayToClientPacketUpdateLightEmptyBlockLightMaskElement)
+	}
+	var lPlayToClientPacketUpdateLightSkyLight int32
+	lPlayToClientPacketUpdateLightSkyLight, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.SkyLight = [][]uint8{}
+	for range lPlayToClientPacketUpdateLightSkyLight {
+		var PlayToClientPacketUpdateLightSkyLightElement []uint8
+		var lPlayToClientPacketUpdateLightSkyLightElement int32
+		lPlayToClientPacketUpdateLightSkyLightElement, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketUpdateLightSkyLightElement = []uint8{}
+		for range lPlayToClientPacketUpdateLightSkyLightElement {
+			var PlayToClientPacketUpdateLightSkyLightElementElement uint8
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightSkyLightElementElement)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketUpdateLightSkyLightElement = append(PlayToClientPacketUpdateLightSkyLightElement, PlayToClientPacketUpdateLightSkyLightElementElement)
+		}
+		ret.SkyLight = append(ret.SkyLight, PlayToClientPacketUpdateLightSkyLightElement)
+	}
+	var lPlayToClientPacketUpdateLightBlockLight int32
+	lPlayToClientPacketUpdateLightBlockLight, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.BlockLight = [][]uint8{}
+	for range lPlayToClientPacketUpdateLightBlockLight {
+		var PlayToClientPacketUpdateLightBlockLightElement []uint8
+		var lPlayToClientPacketUpdateLightBlockLightElement int32
+		lPlayToClientPacketUpdateLightBlockLightElement, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		PlayToClientPacketUpdateLightBlockLightElement = []uint8{}
+		for range lPlayToClientPacketUpdateLightBlockLightElement {
+			var PlayToClientPacketUpdateLightBlockLightElementElement uint8
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightBlockLightElementElement)
+			if err != nil {
+				return
+			}
+			PlayToClientPacketUpdateLightBlockLightElement = append(PlayToClientPacketUpdateLightBlockLightElement, PlayToClientPacketUpdateLightBlockLightElementElement)
+		}
+		ret.BlockLight = append(ret.BlockLight, PlayToClientPacketUpdateLightBlockLightElement)
+	}
+	return
+}
+func (ret *PlayToClientPacketUpdateLight) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.ChunkX)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ChunkZ)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLightMask)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketUpdateLightSkyLightMask := range len(ret.SkyLightMask) {
+		err = binary.Write(w, binary.BigEndian, ret.SkyLightMask[iPlayToClientPacketUpdateLightSkyLightMask])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLightMask)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketUpdateLightBlockLightMask := range len(ret.BlockLightMask) {
+		err = binary.Write(w, binary.BigEndian, ret.BlockLightMask[iPlayToClientPacketUpdateLightBlockLightMask])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.EmptySkyLightMask)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketUpdateLightEmptySkyLightMask := range len(ret.EmptySkyLightMask) {
+		err = binary.Write(w, binary.BigEndian, ret.EmptySkyLightMask[iPlayToClientPacketUpdateLightEmptySkyLightMask])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.EmptyBlockLightMask)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketUpdateLightEmptyBlockLightMask := range len(ret.EmptyBlockLightMask) {
+		err = binary.Write(w, binary.BigEndian, ret.EmptyBlockLightMask[iPlayToClientPacketUpdateLightEmptyBlockLightMask])
+		if err != nil {
+			return
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLight)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketUpdateLightSkyLight := range len(ret.SkyLight) {
+		err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLight[iPlayToClientPacketUpdateLightSkyLight])))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketUpdateLightSkyLightInner := range len(ret.SkyLight[iPlayToClientPacketUpdateLightSkyLight]) {
+			err = binary.Write(w, binary.BigEndian, ret.SkyLight[iPlayToClientPacketUpdateLightSkyLight][iPlayToClientPacketUpdateLightSkyLightInner])
+			if err != nil {
+				return
+			}
+		}
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLight)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketUpdateLightBlockLight := range len(ret.BlockLight) {
+		err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLight[iPlayToClientPacketUpdateLightBlockLight])))
+		if err != nil {
+			return
+		}
+		for iPlayToClientPacketUpdateLightBlockLightInner := range len(ret.BlockLight[iPlayToClientPacketUpdateLightBlockLight]) {
+			err = binary.Write(w, binary.BigEndian, ret.BlockLight[iPlayToClientPacketUpdateLightBlockLight][iPlayToClientPacketUpdateLightBlockLightInner])
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
+type PlayToClientPacketUpdateTime struct {
+	Age         int64
+	Time        int64
+	TickDayTime bool
+}
+
+func (ret *PlayToClientPacketUpdateTime) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Age)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Time)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.TickDayTime)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketUpdateTime) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Age)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Time)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.TickDayTime)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketUpdateViewDistance struct {
+	ViewDistance int32
+}
+
+func (ret *PlayToClientPacketUpdateViewDistance) Decode(r io.Reader) (err error) {
+	ret.ViewDistance, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketUpdateViewDistance) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketUpdateViewPosition struct {
+	ChunkX int32
+	ChunkZ int32
+}
+
+func (ret *PlayToClientPacketUpdateViewPosition) Decode(r io.Reader) (err error) {
+	ret.ChunkX, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ChunkZ, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketUpdateViewPosition) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.ChunkX)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ChunkZ)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketVehicleMove struct {
+	X     float64
+	Y     float64
+	Z     float64
+	Yaw   float32
+	Pitch float32
+}
+
+func (ret *PlayToClientPacketVehicleMove) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketVehicleMove) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Yaw)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Pitch)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketWindowItems struct {
+	WindowId    ContainerID
+	StateId     int32
+	Items       []Slot
+	CarriedItem Slot
+}
+
+func (ret *PlayToClientPacketWindowItems) Decode(r io.Reader) (err error) {
+	err = ret.WindowId.Decode(r)
+	if err != nil {
+		return
+	}
+	ret.StateId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var lPlayToClientPacketWindowItemsItems int32
+	lPlayToClientPacketWindowItemsItems, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Items = []Slot{}
+	for range lPlayToClientPacketWindowItemsItems {
+		var PlayToClientPacketWindowItemsItemsElement Slot
+		err = PlayToClientPacketWindowItemsItemsElement.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Items = append(ret.Items, PlayToClientPacketWindowItemsItemsElement)
+	}
+	err = ret.CarriedItem.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketWindowItems) Encode(w io.Writer) (err error) {
+	err = ret.WindowId.Encode(w)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.StateId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Items)))
+	if err != nil {
+		return
+	}
+	for iPlayToClientPacketWindowItemsItems := range len(ret.Items) {
+		err = ret.Items[iPlayToClientPacketWindowItemsItems].Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = ret.CarriedItem.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketWorldBorderCenter struct {
+	X float64
+	Z float64
+}
+
+func (ret *PlayToClientPacketWorldBorderCenter) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketWorldBorderCenter) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketWorldBorderLerpSize struct {
+	OldDiameter float64
+	NewDiameter float64
+	Speed       int32
+}
+
+func (ret *PlayToClientPacketWorldBorderLerpSize) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.OldDiameter)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.NewDiameter)
+	if err != nil {
+		return
+	}
+	ret.Speed, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketWorldBorderLerpSize) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.OldDiameter)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.NewDiameter)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Speed)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketWorldBorderSize struct {
+	Diameter float64
+}
+
+func (ret *PlayToClientPacketWorldBorderSize) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.Diameter)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketWorldBorderSize) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Diameter)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketWorldBorderWarningDelay struct {
+	WarningTime int32
+}
+
+func (ret *PlayToClientPacketWorldBorderWarningDelay) Decode(r io.Reader) (err error) {
+	ret.WarningTime, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketWorldBorderWarningDelay) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.WarningTime)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketWorldBorderWarningReach struct {
+	WarningBlocks int32
+}
+
+func (ret *PlayToClientPacketWorldBorderWarningReach) Decode(r io.Reader) (err error) {
+	ret.WarningBlocks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketWorldBorderWarningReach) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.WarningBlocks)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketWorldEvent struct {
+	EffectId int32
+	Location Position
+	Data     int32
+	Global   bool
+}
+
+func (ret *PlayToClientPacketWorldEvent) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.EffectId)
+	if err != nil {
+		return
+	}
+	err = ret.Location.Decode(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Data)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Global)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketWorldEvent) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.EffectId)
+	if err != nil {
+		return
+	}
+	err = ret.Location.Encode(w)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Data)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Global)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type PlayToClientPacketWorldParticles struct {
+	LongDistance   bool
+	AlwaysShow     bool
+	X              float64
+	Y              float64
+	Z              float64
+	OffsetX        float32
+	OffsetY        float32
+	OffsetZ        float32
+	VelocityOffset float32
+	Amount         int32
+	Particle       Particle
+}
+
+func (ret *PlayToClientPacketWorldParticles) Decode(r io.Reader) (err error) {
+	err = binary.Read(r, binary.BigEndian, &ret.LongDistance)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.AlwaysShow)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OffsetX)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OffsetY)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.OffsetZ)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.VelocityOffset)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Amount)
+	if err != nil {
+		return
+	}
+	err = ret.Particle.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *PlayToClientPacketWorldParticles) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.LongDistance)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.AlwaysShow)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.X)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Y)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Z)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OffsetX)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OffsetY)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.OffsetZ)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.VelocityOffset)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Amount)
+	if err != nil {
+		return
+	}
+	err = ret.Particle.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToClientPacket struct {
+	Name   string
+	Params any
+}
+
+var HandshakingToClientPacketNameMap = map[int32]string{}
+
+func (ret *HandshakingToClientPacket) Decode(r io.Reader) (err error) {
+	var HandshakingToClientPacketNameKey int32
+	HandshakingToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Name, err = proto_base.ErroringIndex(HandshakingToClientPacketNameMap, HandshakingToClientPacketNameKey)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var HandshakingToClientPacketNameReverseMap = map[string]int32{}
+
+func (ret *HandshakingToClientPacket) Encode(w io.Writer) (err error) {
+	var vHandshakingToClientPacketName int32
+	vHandshakingToClientPacketName, err = proto_base.ErroringIndex(HandshakingToClientPacketNameReverseMap, ret.Name)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vHandshakingToClientPacketName)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonAddResourcePack struct {
+	Uuid          uuid.UUID
+	Url           string
+	Hash          string
+	Forced        bool
+	PromptMessage *nbt.Anon
+}
+
+func (ret *HandshakingToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+	_, err = io.ReadFull(r, ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	ret.Url, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Hash, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Forced)
+	if err != nil {
+		return
+	}
+	var HandshakingToClientPacketCommonAddResourcePackPromptMessagePresent bool
+	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonAddResourcePackPromptMessagePresent)
+	if err != nil {
+		return
+	}
+	if HandshakingToClientPacketCommonAddResourcePackPromptMessagePresent {
+		var HandshakingToClientPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
+		err = HandshakingToClientPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.PromptMessage = &HandshakingToClientPacketCommonAddResourcePackPromptMessagePresentValue
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
+	_, err = w.Write(ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Url)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Hash)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Forced)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
+	if err != nil {
+		return
+	}
+	if ret.PromptMessage != nil {
+		err = (*ret.PromptMessage).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonClearDialog struct {
+}
+
+func (ret *HandshakingToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+	return
+}
+func (ret *HandshakingToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
+	return
+}
+
+type HandshakingToClientPacketCommonCookieRequest struct {
+	Cookie string
+}
+
+func (ret *HandshakingToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+	ret.Cookie, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Cookie)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonCookieResponse struct {
+	Key   string
+	Value *ByteArray
+}
+
+func (ret *HandshakingToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var HandshakingToClientPacketCommonCookieResponseValuePresent bool
+	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonCookieResponseValuePresent)
+	if err != nil {
+		return
+	}
+	if HandshakingToClientPacketCommonCookieResponseValuePresent {
+		var HandshakingToClientPacketCommonCookieResponseValuePresentValue ByteArray
+		err = HandshakingToClientPacketCommonCookieResponseValuePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Value = &HandshakingToClientPacketCommonCookieResponseValuePresentValue
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
+	if err != nil {
+		return
+	}
+	if ret.Value != nil {
+		err = (*ret.Value).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonCustomClickAction struct {
+	Id  string
+	Nbt *nbt.Anon
+}
+
+func (ret *HandshakingToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+	ret.Id, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var HandshakingToClientPacketCommonCustomClickActionNbtPresent bool
+	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonCustomClickActionNbtPresent)
+	if err != nil {
+		return
+	}
+	if HandshakingToClientPacketCommonCustomClickActionNbtPresent {
+		var HandshakingToClientPacketCommonCustomClickActionNbtPresentValue nbt.Anon
+		err = HandshakingToClientPacketCommonCustomClickActionNbtPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Nbt = &HandshakingToClientPacketCommonCustomClickActionNbtPresentValue
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Id)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
+	if err != nil {
+		return
+	}
+	if ret.Nbt != nil {
+		err = (*ret.Nbt).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonCustomReportDetails struct {
+	Details []struct {
+		Key   string
+		Value string
+	}
+}
+
+func (ret *HandshakingToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+	var lHandshakingToClientPacketCommonCustomReportDetailsDetails int32
+	lHandshakingToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Details = []struct {
+		Key   string
+		Value string
+	}{}
+	for range lHandshakingToClientPacketCommonCustomReportDetailsDetails {
+		var HandshakingToClientPacketCommonCustomReportDetailsDetailsElement struct {
+			Key   string
+			Value string
+		}
+		HandshakingToClientPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		HandshakingToClientPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Details = append(ret.Details, HandshakingToClientPacketCommonCustomReportDetailsDetailsElement)
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
+	if err != nil {
+		return
+	}
+	for iHandshakingToClientPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
+		err = proto_base.EncodeString(w, ret.Details[iHandshakingToClientPacketCommonCustomReportDetailsDetails].Key)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Details[iHandshakingToClientPacketCommonCustomReportDetailsDetails].Value)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonRemoveResourcePack struct {
+	Uuid *uuid.UUID
+}
+
+func (ret *HandshakingToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+	var HandshakingToClientPacketCommonRemoveResourcePackUuidPresent bool
+	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonRemoveResourcePackUuidPresent)
+	if err != nil {
+		return
+	}
+	if HandshakingToClientPacketCommonRemoveResourcePackUuidPresent {
+		var HandshakingToClientPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
+		_, err = io.ReadFull(r, HandshakingToClientPacketCommonRemoveResourcePackUuidPresentValue[:])
+		if err != nil {
+			return
+		}
+		ret.Uuid = &HandshakingToClientPacketCommonRemoveResourcePackUuidPresentValue
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
+	if err != nil {
+		return
+	}
+	if ret.Uuid != nil {
+		_, err = w.Write((*ret.Uuid)[:])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonSelectKnownPacks struct {
+	Packs []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}
+}
+
+func (ret *HandshakingToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+	var lHandshakingToClientPacketCommonSelectKnownPacksPacks int32
+	lHandshakingToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Packs = []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}{}
+	for range lHandshakingToClientPacketCommonSelectKnownPacksPacks {
+		var HandshakingToClientPacketCommonSelectKnownPacksPacksElement struct {
+			Namespace string
+			Id        string
+			Version   string
+		}
+		HandshakingToClientPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		HandshakingToClientPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		HandshakingToClientPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Packs = append(ret.Packs, HandshakingToClientPacketCommonSelectKnownPacksPacksElement)
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
+	if err != nil {
+		return
+	}
+	for iHandshakingToClientPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
+		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToClientPacketCommonSelectKnownPacksPacks].Namespace)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToClientPacketCommonSelectKnownPacksPacks].Id)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToClientPacketCommonSelectKnownPacksPacks].Version)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonServerLinks struct {
+	Links []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}
+}
+
+func (ret *HandshakingToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+	var lHandshakingToClientPacketCommonServerLinksLinks int32
+	lHandshakingToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Links = []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}{}
+	for range lHandshakingToClientPacketCommonServerLinksLinks {
+		var HandshakingToClientPacketCommonServerLinksLinksElement struct {
+			HasKnownType bool
+			KnownType    any
+			UnknownType  any
+			Link         string
+		}
+		err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonServerLinksLinksElement.HasKnownType)
+		if err != nil {
+			return
+		}
+		switch HandshakingToClientPacketCommonServerLinksLinksElement.HasKnownType {
+		case true:
+			var HandshakingToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
+			err = HandshakingToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			HandshakingToClientPacketCommonServerLinksLinksElement.KnownType = HandshakingToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp
+		}
+		switch HandshakingToClientPacketCommonServerLinksLinksElement.HasKnownType {
+		case false:
+			var HandshakingToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
+			err = HandshakingToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			HandshakingToClientPacketCommonServerLinksLinksElement.UnknownType = HandshakingToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
+		}
+		HandshakingToClientPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Links = append(ret.Links, HandshakingToClientPacketCommonServerLinksLinksElement)
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
+	if err != nil {
+		return
+	}
+	for iHandshakingToClientPacketCommonServerLinksLinks := range len(ret.Links) {
+		err = binary.Write(w, binary.BigEndian, ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].HasKnownType)
+		if err != nil {
+			return
+		}
+		switch ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].HasKnownType {
+		case true:
+			HandshakingToClientPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = HandshakingToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		switch ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].HasKnownType {
+		case false:
+			HandshakingToClientPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = HandshakingToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeString(w, ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].Link)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonSettings struct {
+	Locale              string
+	ViewDistance        int8
+	ChatFlags           int32
+	ChatColors          bool
+	SkinParts           uint8
+	MainHand            int32
+	EnableTextFiltering bool
+	EnableServerListing bool
+	ParticleStatus      string
+}
+
+var HandshakingToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
+
+func (ret *HandshakingToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+	ret.Locale, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
+	if err != nil {
+		return
+	}
+	ret.MainHand, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var HandshakingToClientPacketCommonSettingsParticleStatusKey int32
+	HandshakingToClientPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ParticleStatus, err = proto_base.ErroringIndex(HandshakingToClientPacketCommonSettingsParticleStatusMap, HandshakingToClientPacketCommonSettingsParticleStatusKey)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var HandshakingToClientPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
+
+func (ret *HandshakingToClientPacketCommonSettings) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Locale)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.MainHand)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var vHandshakingToClientPacketCommonSettingsParticleStatus int32
+	vHandshakingToClientPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(HandshakingToClientPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vHandshakingToClientPacketCommonSettingsParticleStatus)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonStoreCookie struct {
+	Key   string
+	Value ByteArray
+}
+
+func (ret *HandshakingToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type HandshakingToClientPacketCommonTransfer struct {
+	Host string
+	Port int32
+}
+
+func (ret *HandshakingToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+	ret.Host, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Port, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *HandshakingToClientPacketCommonTransfer) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Host)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Port)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacket struct {
+	Name   string
+	Params any
+}
+
+var LoginToClientPacketNameMap = map[int32]string{0x00: "disconnect", 0x01: "encryption_begin", 0x02: "success", 0x03: "compress", 0x04: "login_plugin_request", 0x05: "cookie_request"}
+
+func (ret *LoginToClientPacket) Decode(r io.Reader) (err error) {
+	var LoginToClientPacketNameKey int32
+	LoginToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Name, err = proto_base.ErroringIndex(LoginToClientPacketNameMap, LoginToClientPacketNameKey)
+	if err != nil {
+		return
+	}
+	switch ret.Name {
+	case "compress":
+		var LoginToClientPacketParamsCompressTmp LoginToClientPacketCompress
+		err = LoginToClientPacketParamsCompressTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = LoginToClientPacketParamsCompressTmp
+	case "cookie_request":
+		var LoginToClientPacketParamsCookieRequestTmp LoginToClientPacketCommonCookieRequest
+		err = LoginToClientPacketParamsCookieRequestTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = LoginToClientPacketParamsCookieRequestTmp
+	case "disconnect":
+		var LoginToClientPacketParamsDisconnectTmp LoginToClientPacketDisconnect
+		err = LoginToClientPacketParamsDisconnectTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = LoginToClientPacketParamsDisconnectTmp
+	case "encryption_begin":
+		var LoginToClientPacketParamsEncryptionBeginTmp LoginToClientPacketEncryptionBegin
+		err = LoginToClientPacketParamsEncryptionBeginTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = LoginToClientPacketParamsEncryptionBeginTmp
+	case "login_plugin_request":
+		var LoginToClientPacketParamsLoginPluginRequestTmp LoginToClientPacketLoginPluginRequest
+		err = LoginToClientPacketParamsLoginPluginRequestTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = LoginToClientPacketParamsLoginPluginRequestTmp
+	case "success":
+		var LoginToClientPacketParamsSuccessTmp LoginToClientPacketSuccess
+		err = LoginToClientPacketParamsSuccessTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Params = LoginToClientPacketParamsSuccessTmp
+	}
+	return
+}
+
+var LoginToClientPacketNameReverseMap = map[string]int32{"disconnect": 0x00, "encryption_begin": 0x01, "success": 0x02, "compress": 0x03, "login_plugin_request": 0x04, "cookie_request": 0x05}
+
+func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
+	var vLoginToClientPacketName int32
+	vLoginToClientPacketName, err = proto_base.ErroringIndex(LoginToClientPacketNameReverseMap, ret.Name)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vLoginToClientPacketName)
+	if err != nil {
+		return
+	}
+	switch ret.Name {
+	case "compress":
+		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketCompress)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = LoginToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "cookie_request":
+		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketCommonCookieRequest)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = LoginToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "disconnect":
+		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketDisconnect)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = LoginToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "encryption_begin":
+		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketEncryptionBegin)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = LoginToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "login_plugin_request":
+		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketLoginPluginRequest)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = LoginToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	case "success":
+		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketSuccess)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = LoginToClientPacketParams.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type LoginToClientPacketCommonAddResourcePack struct {
+	Uuid          uuid.UUID
+	Url           string
+	Hash          string
+	Forced        bool
+	PromptMessage *nbt.Anon
+}
+
+func (ret *LoginToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+	_, err = io.ReadFull(r, ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	ret.Url, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Hash, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.Forced)
+	if err != nil {
+		return
+	}
+	var LoginToClientPacketCommonAddResourcePackPromptMessagePresent bool
+	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonAddResourcePackPromptMessagePresent)
+	if err != nil {
+		return
+	}
+	if LoginToClientPacketCommonAddResourcePackPromptMessagePresent {
+		var LoginToClientPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
+		err = LoginToClientPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.PromptMessage = &LoginToClientPacketCommonAddResourcePackPromptMessagePresentValue
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
+	_, err = w.Write(ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Url)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Hash)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Forced)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
+	if err != nil {
+		return
+	}
+	if ret.PromptMessage != nil {
+		err = (*ret.PromptMessage).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type LoginToClientPacketCommonClearDialog struct {
+}
+
+func (ret *LoginToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+	return
+}
+func (ret *LoginToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
+	return
+}
+
+type LoginToClientPacketCommonCookieRequest struct {
+	Cookie string
+}
+
+func (ret *LoginToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+	ret.Cookie, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Cookie)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacketCommonCookieResponse struct {
+	Key   string
+	Value *ByteArray
+}
+
+func (ret *LoginToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var LoginToClientPacketCommonCookieResponseValuePresent bool
+	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonCookieResponseValuePresent)
+	if err != nil {
+		return
+	}
+	if LoginToClientPacketCommonCookieResponseValuePresent {
+		var LoginToClientPacketCommonCookieResponseValuePresentValue ByteArray
+		err = LoginToClientPacketCommonCookieResponseValuePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Value = &LoginToClientPacketCommonCookieResponseValuePresentValue
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
+	if err != nil {
+		return
+	}
+	if ret.Value != nil {
+		err = (*ret.Value).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type LoginToClientPacketCommonCustomClickAction struct {
+	Id  string
+	Nbt *nbt.Anon
+}
+
+func (ret *LoginToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+	ret.Id, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var LoginToClientPacketCommonCustomClickActionNbtPresent bool
+	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonCustomClickActionNbtPresent)
+	if err != nil {
+		return
+	}
+	if LoginToClientPacketCommonCustomClickActionNbtPresent {
+		var LoginToClientPacketCommonCustomClickActionNbtPresentValue nbt.Anon
+		err = LoginToClientPacketCommonCustomClickActionNbtPresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Nbt = &LoginToClientPacketCommonCustomClickActionNbtPresentValue
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Id)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
+	if err != nil {
+		return
+	}
+	if ret.Nbt != nil {
+		err = (*ret.Nbt).Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type LoginToClientPacketCommonCustomReportDetails struct {
+	Details []struct {
+		Key   string
+		Value string
+	}
+}
+
+func (ret *LoginToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+	var lLoginToClientPacketCommonCustomReportDetailsDetails int32
+	lLoginToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Details = []struct {
+		Key   string
+		Value string
+	}{}
+	for range lLoginToClientPacketCommonCustomReportDetailsDetails {
+		var LoginToClientPacketCommonCustomReportDetailsDetailsElement struct {
+			Key   string
+			Value string
+		}
+		LoginToClientPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		LoginToClientPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Details = append(ret.Details, LoginToClientPacketCommonCustomReportDetailsDetailsElement)
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
+	if err != nil {
+		return
+	}
+	for iLoginToClientPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
+		err = proto_base.EncodeString(w, ret.Details[iLoginToClientPacketCommonCustomReportDetailsDetails].Key)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Details[iLoginToClientPacketCommonCustomReportDetailsDetails].Value)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type LoginToClientPacketCommonRemoveResourcePack struct {
+	Uuid *uuid.UUID
+}
+
+func (ret *LoginToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+	var LoginToClientPacketCommonRemoveResourcePackUuidPresent bool
+	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonRemoveResourcePackUuidPresent)
+	if err != nil {
+		return
+	}
+	if LoginToClientPacketCommonRemoveResourcePackUuidPresent {
+		var LoginToClientPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
+		_, err = io.ReadFull(r, LoginToClientPacketCommonRemoveResourcePackUuidPresentValue[:])
+		if err != nil {
+			return
+		}
+		ret.Uuid = &LoginToClientPacketCommonRemoveResourcePackUuidPresentValue
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
+	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
+	if err != nil {
+		return
+	}
+	if ret.Uuid != nil {
+		_, err = w.Write((*ret.Uuid)[:])
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type LoginToClientPacketCommonSelectKnownPacks struct {
+	Packs []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}
+}
+
+func (ret *LoginToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+	var lLoginToClientPacketCommonSelectKnownPacksPacks int32
+	lLoginToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Packs = []struct {
+		Namespace string
+		Id        string
+		Version   string
+	}{}
+	for range lLoginToClientPacketCommonSelectKnownPacksPacks {
+		var LoginToClientPacketCommonSelectKnownPacksPacksElement struct {
+			Namespace string
+			Id        string
+			Version   string
+		}
+		LoginToClientPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		LoginToClientPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		LoginToClientPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Packs = append(ret.Packs, LoginToClientPacketCommonSelectKnownPacksPacksElement)
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
+	if err != nil {
+		return
+	}
+	for iLoginToClientPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
+		err = proto_base.EncodeString(w, ret.Packs[iLoginToClientPacketCommonSelectKnownPacksPacks].Namespace)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iLoginToClientPacketCommonSelectKnownPacksPacks].Id)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Packs[iLoginToClientPacketCommonSelectKnownPacksPacks].Version)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type LoginToClientPacketCommonServerLinks struct {
+	Links []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}
+}
+
+func (ret *LoginToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+	var lLoginToClientPacketCommonServerLinksLinks int32
+	lLoginToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Links = []struct {
+		HasKnownType bool
+		KnownType    any
+		UnknownType  any
+		Link         string
+	}{}
+	for range lLoginToClientPacketCommonServerLinksLinks {
+		var LoginToClientPacketCommonServerLinksLinksElement struct {
+			HasKnownType bool
+			KnownType    any
+			UnknownType  any
+			Link         string
+		}
+		err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonServerLinksLinksElement.HasKnownType)
+		if err != nil {
+			return
+		}
+		switch LoginToClientPacketCommonServerLinksLinksElement.HasKnownType {
+		case true:
+			var LoginToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
+			err = LoginToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			LoginToClientPacketCommonServerLinksLinksElement.KnownType = LoginToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp
+		}
+		switch LoginToClientPacketCommonServerLinksLinksElement.HasKnownType {
+		case false:
+			var LoginToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
+			err = LoginToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
+			if err != nil {
+				return
+			}
+			LoginToClientPacketCommonServerLinksLinksElement.UnknownType = LoginToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
+		}
+		LoginToClientPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Links = append(ret.Links, LoginToClientPacketCommonServerLinksLinksElement)
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
+	if err != nil {
+		return
+	}
+	for iLoginToClientPacketCommonServerLinksLinks := range len(ret.Links) {
+		err = binary.Write(w, binary.BigEndian, ret.Links[iLoginToClientPacketCommonServerLinksLinks].HasKnownType)
+		if err != nil {
+			return
+		}
+		switch ret.Links[iLoginToClientPacketCommonServerLinksLinks].HasKnownType {
+		case true:
+			LoginToClientPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iLoginToClientPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = LoginToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		switch ret.Links[iLoginToClientPacketCommonServerLinksLinks].HasKnownType {
+		case false:
+			LoginToClientPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iLoginToClientPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = LoginToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeString(w, ret.Links[iLoginToClientPacketCommonServerLinksLinks].Link)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+type LoginToClientPacketCommonSettings struct {
+	Locale              string
+	ViewDistance        int8
+	ChatFlags           int32
+	ChatColors          bool
+	SkinParts           uint8
+	MainHand            int32
+	EnableTextFiltering bool
+	EnableServerListing bool
+	ParticleStatus      string
+}
+
+var LoginToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
+
+func (ret *LoginToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+	ret.Locale, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
+	if err != nil {
+		return
+	}
+	ret.MainHand, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var LoginToClientPacketCommonSettingsParticleStatusKey int32
+	LoginToClientPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.ParticleStatus, err = proto_base.ErroringIndex(LoginToClientPacketCommonSettingsParticleStatusMap, LoginToClientPacketCommonSettingsParticleStatusKey)
+	if err != nil {
+		return
+	}
+	return
+}
+
+var LoginToClientPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
+
+func (ret *LoginToClientPacketCommonSettings) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Locale)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.MainHand)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
+	if err != nil {
+		return
+	}
+	var vLoginToClientPacketCommonSettingsParticleStatus int32
+	vLoginToClientPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(LoginToClientPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, vLoginToClientPacketCommonSettingsParticleStatus)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacketCommonStoreCookie struct {
+	Key   string
+	Value ByteArray
+}
+
+func (ret *LoginToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+	ret.Key, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Key)
+	if err != nil {
+		return
+	}
+	err = ret.Value.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacketCommonTransfer struct {
+	Host string
+	Port int32
+}
+
+func (ret *LoginToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+	ret.Host, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Port, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *LoginToClientPacketCommonTransfer) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Host)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Port)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacketCompress struct {
+	Threshold int32
+}
+
+func (ret *LoginToClientPacketCompress) Decode(r io.Reader) (err error) {
+	ret.Threshold, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *LoginToClientPacketCompress) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.Threshold)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacketDisconnect struct {
+	Reason string
+}
+
+func (ret *LoginToClientPacketDisconnect) Decode(r io.Reader) (err error) {
+	ret.Reason, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *LoginToClientPacketDisconnect) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.Reason)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacketEncryptionBegin struct {
+	ServerId           string
+	PublicKey          []byte
+	VerifyToken        []byte
+	ShouldAuthenticate bool
+}
+
+func (ret *LoginToClientPacketEncryptionBegin) Decode(r io.Reader) (err error) {
+	ret.ServerId, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var lLoginToClientPacketEncryptionBeginPublicKey int32
+	lLoginToClientPacketEncryptionBeginPublicKey, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.PublicKey, err = io.ReadAll(io.LimitReader(r, int64(lLoginToClientPacketEncryptionBeginPublicKey)))
+	if err != nil {
+		return
+	}
+	var lLoginToClientPacketEncryptionBeginVerifyToken int32
+	lLoginToClientPacketEncryptionBeginVerifyToken, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.VerifyToken, err = io.ReadAll(io.LimitReader(r, int64(lLoginToClientPacketEncryptionBeginVerifyToken)))
+	if err != nil {
+		return
+	}
+	err = binary.Read(r, binary.BigEndian, &ret.ShouldAuthenticate)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *LoginToClientPacketEncryptionBegin) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeString(w, ret.ServerId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.PublicKey)))
+	if err != nil {
+		return
+	}
+	_, err = w.Write(ret.PublicKey)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.VerifyToken)))
+	if err != nil {
+		return
+	}
+	_, err = w.Write(ret.VerifyToken)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.ShouldAuthenticate)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacketLoginPluginRequest struct {
+	MessageId int32
+	Channel   string
+	Data      proto_base.RestBuffer
+}
+
+func (ret *LoginToClientPacketLoginPluginRequest) Decode(r io.Reader) (err error) {
+	ret.MessageId, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Channel, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	err = ret.Data.Decode(r)
+	if err != nil {
+		return
+	}
+	return
+}
+func (ret *LoginToClientPacketLoginPluginRequest) Encode(w io.Writer) (err error) {
+	err = proto_base.EncodeVarInt(w, ret.MessageId)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Channel)
+	if err != nil {
+		return
+	}
+	err = ret.Data.Encode(w)
+	if err != nil {
+		return
+	}
+	return
+}
+
+type LoginToClientPacketSuccess struct {
+	Uuid       uuid.UUID
+	Username   string
+	Properties []struct {
+		Name      string
+		Value     string
+		Signature *string
+	}
+}
+
+func (ret *LoginToClientPacketSuccess) Decode(r io.Reader) (err error) {
+	_, err = io.ReadFull(r, ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	ret.Username, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	var lLoginToClientPacketSuccessProperties int32
+	lLoginToClientPacketSuccessProperties, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	ret.Properties = []struct {
+		Name      string
+		Value     string
+		Signature *string
+	}{}
+	for range lLoginToClientPacketSuccessProperties {
+		var LoginToClientPacketSuccessPropertiesElement struct {
+			Name      string
+			Value     string
+			Signature *string
+		}
+		LoginToClientPacketSuccessPropertiesElement.Name, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		LoginToClientPacketSuccessPropertiesElement.Value, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		var LoginToClientPacketSuccessPropertiesElementSignaturePresent bool
+		err = binary.Read(r, binary.BigEndian, &LoginToClientPacketSuccessPropertiesElementSignaturePresent)
+		if err != nil {
+			return
+		}
+		if LoginToClientPacketSuccessPropertiesElementSignaturePresent {
+			var LoginToClientPacketSuccessPropertiesElementSignaturePresentValue string
+			LoginToClientPacketSuccessPropertiesElementSignaturePresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			LoginToClientPacketSuccessPropertiesElement.Signature = &LoginToClientPacketSuccessPropertiesElementSignaturePresentValue
+		}
+		ret.Properties = append(ret.Properties, LoginToClientPacketSuccessPropertiesElement)
+	}
+	return
+}
+func (ret *LoginToClientPacketSuccess) Encode(w io.Writer) (err error) {
+	_, err = w.Write(ret.Uuid[:])
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.Username)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, int32(len(ret.Properties)))
+	if err != nil {
+		return
+	}
+	for iLoginToClientPacketSuccessProperties := range len(ret.Properties) {
+		err = proto_base.EncodeString(w, ret.Properties[iLoginToClientPacketSuccessProperties].Name)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeString(w, ret.Properties[iLoginToClientPacketSuccessProperties].Value)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, ret.Properties[iLoginToClientPacketSuccessProperties].Signature != nil)
+		if err != nil {
+			return
+		}
+		if ret.Properties[iLoginToClientPacketSuccessProperties].Signature != nil {
+			err = proto_base.EncodeString(w, *ret.Properties[iLoginToClientPacketSuccessProperties].Signature)
+			if err != nil {
+				return
+			}
+		}
 	}
 	return
 }
@@ -8209,14842 +23685,6 @@ func (ret *PlayToServerPacketWindowClick) Encode(w io.Writer) (err error) {
 	return
 }
 
-type HandshakingToServerPacket struct {
-	Name   string
-	Params any
-}
-
-var HandshakingToServerPacketNameMap = map[int32]string{0x00: "set_protocol", 0xfe: "legacy_server_list_ping"}
-
-func (ret *HandshakingToServerPacket) Decode(r io.Reader) (err error) {
-	var HandshakingToServerPacketNameKey int32
-	HandshakingToServerPacketNameKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Name, err = proto_base.ErroringIndex(HandshakingToServerPacketNameMap, HandshakingToServerPacketNameKey)
-	if err != nil {
-		return
-	}
-	switch ret.Name {
-	case "legacy_server_list_ping":
-		var HandshakingToServerPacketParamsLegacyServerListPingTmp HandshakingToServerPacketLegacyServerListPing
-		err = HandshakingToServerPacketParamsLegacyServerListPingTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = HandshakingToServerPacketParamsLegacyServerListPingTmp
-	case "set_protocol":
-		var HandshakingToServerPacketParamsSetProtocolTmp HandshakingToServerPacketSetProtocol
-		err = HandshakingToServerPacketParamsSetProtocolTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = HandshakingToServerPacketParamsSetProtocolTmp
-	}
-	return
-}
-
-var HandshakingToServerPacketNameReverseMap = map[string]int32{"set_protocol": 0x00, "legacy_server_list_ping": 0xfe}
-
-func (ret *HandshakingToServerPacket) Encode(w io.Writer) (err error) {
-	var vHandshakingToServerPacketName int32
-	vHandshakingToServerPacketName, err = proto_base.ErroringIndex(HandshakingToServerPacketNameReverseMap, ret.Name)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vHandshakingToServerPacketName)
-	if err != nil {
-		return
-	}
-	switch ret.Name {
-	case "legacy_server_list_ping":
-		HandshakingToServerPacketParams, ok := ret.Params.(HandshakingToServerPacketLegacyServerListPing)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = HandshakingToServerPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_protocol":
-		HandshakingToServerPacketParams, ok := ret.Params.(HandshakingToServerPacketSetProtocol)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = HandshakingToServerPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonAddResourcePack struct {
-	Uuid          uuid.UUID
-	Url           string
-	Hash          string
-	Forced        bool
-	PromptMessage *nbt.Anon
-}
-
-func (ret *HandshakingToServerPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
-	_, err = io.ReadFull(r, ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	ret.Url, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Hash, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Forced)
-	if err != nil {
-		return
-	}
-	var HandshakingToServerPacketCommonAddResourcePackPromptMessagePresent bool
-	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonAddResourcePackPromptMessagePresent)
-	if err != nil {
-		return
-	}
-	if HandshakingToServerPacketCommonAddResourcePackPromptMessagePresent {
-		var HandshakingToServerPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
-		err = HandshakingToServerPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.PromptMessage = &HandshakingToServerPacketCommonAddResourcePackPromptMessagePresentValue
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
-	_, err = w.Write(ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Url)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Hash)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Forced)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
-	if err != nil {
-		return
-	}
-	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonClearDialog struct {
-}
-
-func (ret *HandshakingToServerPacketCommonClearDialog) Decode(r io.Reader) (err error) {
-	return
-}
-func (ret *HandshakingToServerPacketCommonClearDialog) Encode(w io.Writer) (err error) {
-	return
-}
-
-type HandshakingToServerPacketCommonCookieRequest struct {
-	Cookie string
-}
-
-func (ret *HandshakingToServerPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
-	ret.Cookie, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Cookie)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonCookieResponse struct {
-	Key   string
-	Value *ByteArray
-}
-
-func (ret *HandshakingToServerPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var HandshakingToServerPacketCommonCookieResponseValuePresent bool
-	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonCookieResponseValuePresent)
-	if err != nil {
-		return
-	}
-	if HandshakingToServerPacketCommonCookieResponseValuePresent {
-		var HandshakingToServerPacketCommonCookieResponseValuePresentValue ByteArray
-		err = HandshakingToServerPacketCommonCookieResponseValuePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Value = &HandshakingToServerPacketCommonCookieResponseValuePresentValue
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
-	if err != nil {
-		return
-	}
-	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonCustomClickAction struct {
-	Id  string
-	Nbt *nbt.Anon
-}
-
-func (ret *HandshakingToServerPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
-	ret.Id, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var HandshakingToServerPacketCommonCustomClickActionNbtPresent bool
-	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonCustomClickActionNbtPresent)
-	if err != nil {
-		return
-	}
-	if HandshakingToServerPacketCommonCustomClickActionNbtPresent {
-		var HandshakingToServerPacketCommonCustomClickActionNbtPresentValue nbt.Anon
-		err = HandshakingToServerPacketCommonCustomClickActionNbtPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Nbt = &HandshakingToServerPacketCommonCustomClickActionNbtPresentValue
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Id)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
-	if err != nil {
-		return
-	}
-	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonCustomReportDetails struct {
-	Details []struct {
-		Key   string
-		Value string
-	}
-}
-
-func (ret *HandshakingToServerPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
-	var lHandshakingToServerPacketCommonCustomReportDetailsDetails int32
-	lHandshakingToServerPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Details = []struct {
-		Key   string
-		Value string
-	}{}
-	for range lHandshakingToServerPacketCommonCustomReportDetailsDetails {
-		var HandshakingToServerPacketCommonCustomReportDetailsDetailsElement struct {
-			Key   string
-			Value string
-		}
-		HandshakingToServerPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		HandshakingToServerPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Details = append(ret.Details, HandshakingToServerPacketCommonCustomReportDetailsDetailsElement)
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
-	if err != nil {
-		return
-	}
-	for iHandshakingToServerPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
-		err = proto_base.EncodeString(w, ret.Details[iHandshakingToServerPacketCommonCustomReportDetailsDetails].Key)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Details[iHandshakingToServerPacketCommonCustomReportDetailsDetails].Value)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonRemoveResourcePack struct {
-	Uuid *uuid.UUID
-}
-
-func (ret *HandshakingToServerPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
-	var HandshakingToServerPacketCommonRemoveResourcePackUuidPresent bool
-	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonRemoveResourcePackUuidPresent)
-	if err != nil {
-		return
-	}
-	if HandshakingToServerPacketCommonRemoveResourcePackUuidPresent {
-		var HandshakingToServerPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
-		_, err = io.ReadFull(r, HandshakingToServerPacketCommonRemoveResourcePackUuidPresentValue[:])
-		if err != nil {
-			return
-		}
-		ret.Uuid = &HandshakingToServerPacketCommonRemoveResourcePackUuidPresentValue
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
-	if err != nil {
-		return
-	}
-	if ret.Uuid != nil {
-		_, err = w.Write((*ret.Uuid)[:])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonSelectKnownPacks struct {
-	Packs []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}
-}
-
-func (ret *HandshakingToServerPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
-	var lHandshakingToServerPacketCommonSelectKnownPacksPacks int32
-	lHandshakingToServerPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Packs = []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}{}
-	for range lHandshakingToServerPacketCommonSelectKnownPacksPacks {
-		var HandshakingToServerPacketCommonSelectKnownPacksPacksElement struct {
-			Namespace string
-			Id        string
-			Version   string
-		}
-		HandshakingToServerPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		HandshakingToServerPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		HandshakingToServerPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Packs = append(ret.Packs, HandshakingToServerPacketCommonSelectKnownPacksPacksElement)
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
-	if err != nil {
-		return
-	}
-	for iHandshakingToServerPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
-		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToServerPacketCommonSelectKnownPacksPacks].Namespace)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToServerPacketCommonSelectKnownPacksPacks].Id)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToServerPacketCommonSelectKnownPacksPacks].Version)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonServerLinks struct {
-	Links []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}
-}
-
-func (ret *HandshakingToServerPacketCommonServerLinks) Decode(r io.Reader) (err error) {
-	var lHandshakingToServerPacketCommonServerLinksLinks int32
-	lHandshakingToServerPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Links = []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}{}
-	for range lHandshakingToServerPacketCommonServerLinksLinks {
-		var HandshakingToServerPacketCommonServerLinksLinksElement struct {
-			HasKnownType bool
-			KnownType    any
-			UnknownType  any
-			Link         string
-		}
-		err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonServerLinksLinksElement.HasKnownType)
-		if err != nil {
-			return
-		}
-		switch HandshakingToServerPacketCommonServerLinksLinksElement.HasKnownType {
-		case true:
-			var HandshakingToServerPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
-			err = HandshakingToServerPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			HandshakingToServerPacketCommonServerLinksLinksElement.KnownType = HandshakingToServerPacketCommonServerLinksLinksElementKnownTypeTrueTmp
-		}
-		switch HandshakingToServerPacketCommonServerLinksLinksElement.HasKnownType {
-		case false:
-			var HandshakingToServerPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
-			err = HandshakingToServerPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			HandshakingToServerPacketCommonServerLinksLinksElement.UnknownType = HandshakingToServerPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
-		}
-		HandshakingToServerPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Links = append(ret.Links, HandshakingToServerPacketCommonServerLinksLinksElement)
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonServerLinks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
-	if err != nil {
-		return
-	}
-	for iHandshakingToServerPacketCommonServerLinksLinks := range len(ret.Links) {
-		err = binary.Write(w, binary.BigEndian, ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].HasKnownType)
-		if err != nil {
-			return
-		}
-		switch ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].HasKnownType {
-		case true:
-			HandshakingToServerPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = HandshakingToServerPacketCommonServerLinksLinksInnerKnownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		switch ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].HasKnownType {
-		case false:
-			HandshakingToServerPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = HandshakingToServerPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		err = proto_base.EncodeString(w, ret.Links[iHandshakingToServerPacketCommonServerLinksLinks].Link)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonSettings struct {
-	Locale              string
-	ViewDistance        int8
-	ChatFlags           int32
-	ChatColors          bool
-	SkinParts           uint8
-	MainHand            int32
-	EnableTextFiltering bool
-	EnableServerListing bool
-	ParticleStatus      string
-}
-
-var HandshakingToServerPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
-
-func (ret *HandshakingToServerPacketCommonSettings) Decode(r io.Reader) (err error) {
-	ret.Locale, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
-	if err != nil {
-		return
-	}
-	ret.MainHand, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var HandshakingToServerPacketCommonSettingsParticleStatusKey int32
-	HandshakingToServerPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ParticleStatus, err = proto_base.ErroringIndex(HandshakingToServerPacketCommonSettingsParticleStatusMap, HandshakingToServerPacketCommonSettingsParticleStatusKey)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var HandshakingToServerPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
-
-func (ret *HandshakingToServerPacketCommonSettings) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Locale)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.MainHand)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var vHandshakingToServerPacketCommonSettingsParticleStatus int32
-	vHandshakingToServerPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(HandshakingToServerPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vHandshakingToServerPacketCommonSettingsParticleStatus)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonStoreCookie struct {
-	Key   string
-	Value ByteArray
-}
-
-func (ret *HandshakingToServerPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToServerPacketCommonTransfer struct {
-	Host string
-	Port int32
-}
-
-func (ret *HandshakingToServerPacketCommonTransfer) Decode(r io.Reader) (err error) {
-	ret.Host, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Port, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *HandshakingToServerPacketCommonTransfer) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Host)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Port)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToServerPacketLegacyServerListPing struct {
-	Payload uint8
-}
-
-func (ret *HandshakingToServerPacketLegacyServerListPing) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Payload)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *HandshakingToServerPacketLegacyServerListPing) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Payload)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToServerPacketSetProtocol struct {
-	ProtocolVersion int32
-	ServerHost      string
-	ServerPort      uint16
-	NextState       int32
-}
-
-func (ret *HandshakingToServerPacketSetProtocol) Decode(r io.Reader) (err error) {
-	ret.ProtocolVersion, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ServerHost, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ServerPort)
-	if err != nil {
-		return
-	}
-	ret.NextState, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *HandshakingToServerPacketSetProtocol) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.ProtocolVersion)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.ServerHost)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ServerPort)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.NextState)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type StatusToClientPacket struct {
-	Name   string
-	Params any
-}
-
-var StatusToClientPacketNameMap = map[int32]string{0x00: "server_info", 0x01: "ping"}
-
-func (ret *StatusToClientPacket) Decode(r io.Reader) (err error) {
-	var StatusToClientPacketNameKey int32
-	StatusToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Name, err = proto_base.ErroringIndex(StatusToClientPacketNameMap, StatusToClientPacketNameKey)
-	if err != nil {
-		return
-	}
-	switch ret.Name {
-	case "ping":
-		var StatusToClientPacketParamsPingTmp StatusToClientPacketPing
-		err = StatusToClientPacketParamsPingTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = StatusToClientPacketParamsPingTmp
-	case "server_info":
-		var StatusToClientPacketParamsServerInfoTmp StatusToClientPacketServerInfo
-		err = StatusToClientPacketParamsServerInfoTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = StatusToClientPacketParamsServerInfoTmp
-	}
-	return
-}
-
-var StatusToClientPacketNameReverseMap = map[string]int32{"server_info": 0x00, "ping": 0x01}
-
-func (ret *StatusToClientPacket) Encode(w io.Writer) (err error) {
-	var vStatusToClientPacketName int32
-	vStatusToClientPacketName, err = proto_base.ErroringIndex(StatusToClientPacketNameReverseMap, ret.Name)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vStatusToClientPacketName)
-	if err != nil {
-		return
-	}
-	switch ret.Name {
-	case "ping":
-		StatusToClientPacketParams, ok := ret.Params.(StatusToClientPacketPing)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = StatusToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "server_info":
-		StatusToClientPacketParams, ok := ret.Params.(StatusToClientPacketServerInfo)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = StatusToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type StatusToClientPacketCommonAddResourcePack struct {
-	Uuid          uuid.UUID
-	Url           string
-	Hash          string
-	Forced        bool
-	PromptMessage *nbt.Anon
-}
-
-func (ret *StatusToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
-	_, err = io.ReadFull(r, ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	ret.Url, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Hash, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Forced)
-	if err != nil {
-		return
-	}
-	var StatusToClientPacketCommonAddResourcePackPromptMessagePresent bool
-	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonAddResourcePackPromptMessagePresent)
-	if err != nil {
-		return
-	}
-	if StatusToClientPacketCommonAddResourcePackPromptMessagePresent {
-		var StatusToClientPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
-		err = StatusToClientPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.PromptMessage = &StatusToClientPacketCommonAddResourcePackPromptMessagePresentValue
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
-	_, err = w.Write(ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Url)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Hash)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Forced)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
-	if err != nil {
-		return
-	}
-	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type StatusToClientPacketCommonClearDialog struct {
-}
-
-func (ret *StatusToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
-	return
-}
-func (ret *StatusToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
-	return
-}
-
-type StatusToClientPacketCommonCookieRequest struct {
-	Cookie string
-}
-
-func (ret *StatusToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
-	ret.Cookie, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Cookie)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type StatusToClientPacketCommonCookieResponse struct {
-	Key   string
-	Value *ByteArray
-}
-
-func (ret *StatusToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var StatusToClientPacketCommonCookieResponseValuePresent bool
-	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonCookieResponseValuePresent)
-	if err != nil {
-		return
-	}
-	if StatusToClientPacketCommonCookieResponseValuePresent {
-		var StatusToClientPacketCommonCookieResponseValuePresentValue ByteArray
-		err = StatusToClientPacketCommonCookieResponseValuePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Value = &StatusToClientPacketCommonCookieResponseValuePresentValue
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
-	if err != nil {
-		return
-	}
-	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type StatusToClientPacketCommonCustomClickAction struct {
-	Id  string
-	Nbt *nbt.Anon
-}
-
-func (ret *StatusToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
-	ret.Id, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var StatusToClientPacketCommonCustomClickActionNbtPresent bool
-	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonCustomClickActionNbtPresent)
-	if err != nil {
-		return
-	}
-	if StatusToClientPacketCommonCustomClickActionNbtPresent {
-		var StatusToClientPacketCommonCustomClickActionNbtPresentValue nbt.Anon
-		err = StatusToClientPacketCommonCustomClickActionNbtPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Nbt = &StatusToClientPacketCommonCustomClickActionNbtPresentValue
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Id)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
-	if err != nil {
-		return
-	}
-	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type StatusToClientPacketCommonCustomReportDetails struct {
-	Details []struct {
-		Key   string
-		Value string
-	}
-}
-
-func (ret *StatusToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
-	var lStatusToClientPacketCommonCustomReportDetailsDetails int32
-	lStatusToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Details = []struct {
-		Key   string
-		Value string
-	}{}
-	for range lStatusToClientPacketCommonCustomReportDetailsDetails {
-		var StatusToClientPacketCommonCustomReportDetailsDetailsElement struct {
-			Key   string
-			Value string
-		}
-		StatusToClientPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		StatusToClientPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Details = append(ret.Details, StatusToClientPacketCommonCustomReportDetailsDetailsElement)
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
-	if err != nil {
-		return
-	}
-	for iStatusToClientPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
-		err = proto_base.EncodeString(w, ret.Details[iStatusToClientPacketCommonCustomReportDetailsDetails].Key)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Details[iStatusToClientPacketCommonCustomReportDetailsDetails].Value)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type StatusToClientPacketCommonRemoveResourcePack struct {
-	Uuid *uuid.UUID
-}
-
-func (ret *StatusToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
-	var StatusToClientPacketCommonRemoveResourcePackUuidPresent bool
-	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonRemoveResourcePackUuidPresent)
-	if err != nil {
-		return
-	}
-	if StatusToClientPacketCommonRemoveResourcePackUuidPresent {
-		var StatusToClientPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
-		_, err = io.ReadFull(r, StatusToClientPacketCommonRemoveResourcePackUuidPresentValue[:])
-		if err != nil {
-			return
-		}
-		ret.Uuid = &StatusToClientPacketCommonRemoveResourcePackUuidPresentValue
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
-	if err != nil {
-		return
-	}
-	if ret.Uuid != nil {
-		_, err = w.Write((*ret.Uuid)[:])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type StatusToClientPacketCommonSelectKnownPacks struct {
-	Packs []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}
-}
-
-func (ret *StatusToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
-	var lStatusToClientPacketCommonSelectKnownPacksPacks int32
-	lStatusToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Packs = []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}{}
-	for range lStatusToClientPacketCommonSelectKnownPacksPacks {
-		var StatusToClientPacketCommonSelectKnownPacksPacksElement struct {
-			Namespace string
-			Id        string
-			Version   string
-		}
-		StatusToClientPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		StatusToClientPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		StatusToClientPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Packs = append(ret.Packs, StatusToClientPacketCommonSelectKnownPacksPacksElement)
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
-	if err != nil {
-		return
-	}
-	for iStatusToClientPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
-		err = proto_base.EncodeString(w, ret.Packs[iStatusToClientPacketCommonSelectKnownPacksPacks].Namespace)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iStatusToClientPacketCommonSelectKnownPacksPacks].Id)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iStatusToClientPacketCommonSelectKnownPacksPacks].Version)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type StatusToClientPacketCommonServerLinks struct {
-	Links []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}
-}
-
-func (ret *StatusToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
-	var lStatusToClientPacketCommonServerLinksLinks int32
-	lStatusToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Links = []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}{}
-	for range lStatusToClientPacketCommonServerLinksLinks {
-		var StatusToClientPacketCommonServerLinksLinksElement struct {
-			HasKnownType bool
-			KnownType    any
-			UnknownType  any
-			Link         string
-		}
-		err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonServerLinksLinksElement.HasKnownType)
-		if err != nil {
-			return
-		}
-		switch StatusToClientPacketCommonServerLinksLinksElement.HasKnownType {
-		case true:
-			var StatusToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
-			err = StatusToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			StatusToClientPacketCommonServerLinksLinksElement.KnownType = StatusToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp
-		}
-		switch StatusToClientPacketCommonServerLinksLinksElement.HasKnownType {
-		case false:
-			var StatusToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
-			err = StatusToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			StatusToClientPacketCommonServerLinksLinksElement.UnknownType = StatusToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
-		}
-		StatusToClientPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Links = append(ret.Links, StatusToClientPacketCommonServerLinksLinksElement)
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
-	if err != nil {
-		return
-	}
-	for iStatusToClientPacketCommonServerLinksLinks := range len(ret.Links) {
-		err = binary.Write(w, binary.BigEndian, ret.Links[iStatusToClientPacketCommonServerLinksLinks].HasKnownType)
-		if err != nil {
-			return
-		}
-		switch ret.Links[iStatusToClientPacketCommonServerLinksLinks].HasKnownType {
-		case true:
-			StatusToClientPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iStatusToClientPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = StatusToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		switch ret.Links[iStatusToClientPacketCommonServerLinksLinks].HasKnownType {
-		case false:
-			StatusToClientPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iStatusToClientPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = StatusToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		err = proto_base.EncodeString(w, ret.Links[iStatusToClientPacketCommonServerLinksLinks].Link)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type StatusToClientPacketCommonSettings struct {
-	Locale              string
-	ViewDistance        int8
-	ChatFlags           int32
-	ChatColors          bool
-	SkinParts           uint8
-	MainHand            int32
-	EnableTextFiltering bool
-	EnableServerListing bool
-	ParticleStatus      string
-}
-
-var StatusToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
-
-func (ret *StatusToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
-	ret.Locale, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
-	if err != nil {
-		return
-	}
-	ret.MainHand, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var StatusToClientPacketCommonSettingsParticleStatusKey int32
-	StatusToClientPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ParticleStatus, err = proto_base.ErroringIndex(StatusToClientPacketCommonSettingsParticleStatusMap, StatusToClientPacketCommonSettingsParticleStatusKey)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var StatusToClientPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
-
-func (ret *StatusToClientPacketCommonSettings) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Locale)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.MainHand)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var vStatusToClientPacketCommonSettingsParticleStatus int32
-	vStatusToClientPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(StatusToClientPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vStatusToClientPacketCommonSettingsParticleStatus)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type StatusToClientPacketCommonStoreCookie struct {
-	Key   string
-	Value ByteArray
-}
-
-func (ret *StatusToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type StatusToClientPacketCommonTransfer struct {
-	Host string
-	Port int32
-}
-
-func (ret *StatusToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
-	ret.Host, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Port, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *StatusToClientPacketCommonTransfer) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Host)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Port)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type StatusToClientPacketPing struct {
-	Time int64
-}
-
-func (ret *StatusToClientPacketPing) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Time)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *StatusToClientPacketPing) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Time)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type StatusToClientPacketServerInfo struct {
-	Response string
-}
-
-func (ret *StatusToClientPacketServerInfo) Decode(r io.Reader) (err error) {
-	ret.Response, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *StatusToClientPacketServerInfo) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Response)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacket struct {
-	Name   string
-	Params any
-}
-
-var LoginToClientPacketNameMap = map[int32]string{0x00: "disconnect", 0x01: "encryption_begin", 0x02: "success", 0x03: "compress", 0x04: "login_plugin_request", 0x05: "cookie_request"}
-
-func (ret *LoginToClientPacket) Decode(r io.Reader) (err error) {
-	var LoginToClientPacketNameKey int32
-	LoginToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Name, err = proto_base.ErroringIndex(LoginToClientPacketNameMap, LoginToClientPacketNameKey)
-	if err != nil {
-		return
-	}
-	switch ret.Name {
-	case "compress":
-		var LoginToClientPacketParamsCompressTmp LoginToClientPacketCompress
-		err = LoginToClientPacketParamsCompressTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = LoginToClientPacketParamsCompressTmp
-	case "cookie_request":
-		var LoginToClientPacketParamsCookieRequestTmp LoginToClientPacketCommonCookieRequest
-		err = LoginToClientPacketParamsCookieRequestTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = LoginToClientPacketParamsCookieRequestTmp
-	case "disconnect":
-		var LoginToClientPacketParamsDisconnectTmp LoginToClientPacketDisconnect
-		err = LoginToClientPacketParamsDisconnectTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = LoginToClientPacketParamsDisconnectTmp
-	case "encryption_begin":
-		var LoginToClientPacketParamsEncryptionBeginTmp LoginToClientPacketEncryptionBegin
-		err = LoginToClientPacketParamsEncryptionBeginTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = LoginToClientPacketParamsEncryptionBeginTmp
-	case "login_plugin_request":
-		var LoginToClientPacketParamsLoginPluginRequestTmp LoginToClientPacketLoginPluginRequest
-		err = LoginToClientPacketParamsLoginPluginRequestTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = LoginToClientPacketParamsLoginPluginRequestTmp
-	case "success":
-		var LoginToClientPacketParamsSuccessTmp LoginToClientPacketSuccess
-		err = LoginToClientPacketParamsSuccessTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = LoginToClientPacketParamsSuccessTmp
-	}
-	return
-}
-
-var LoginToClientPacketNameReverseMap = map[string]int32{"disconnect": 0x00, "encryption_begin": 0x01, "success": 0x02, "compress": 0x03, "login_plugin_request": 0x04, "cookie_request": 0x05}
-
-func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
-	var vLoginToClientPacketName int32
-	vLoginToClientPacketName, err = proto_base.ErroringIndex(LoginToClientPacketNameReverseMap, ret.Name)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vLoginToClientPacketName)
-	if err != nil {
-		return
-	}
-	switch ret.Name {
-	case "compress":
-		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketCompress)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = LoginToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "cookie_request":
-		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketCommonCookieRequest)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = LoginToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "disconnect":
-		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketDisconnect)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = LoginToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "encryption_begin":
-		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketEncryptionBegin)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = LoginToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "login_plugin_request":
-		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketLoginPluginRequest)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = LoginToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "success":
-		LoginToClientPacketParams, ok := ret.Params.(LoginToClientPacketSuccess)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = LoginToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type LoginToClientPacketCommonAddResourcePack struct {
-	Uuid          uuid.UUID
-	Url           string
-	Hash          string
-	Forced        bool
-	PromptMessage *nbt.Anon
-}
-
-func (ret *LoginToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
-	_, err = io.ReadFull(r, ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	ret.Url, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Hash, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Forced)
-	if err != nil {
-		return
-	}
-	var LoginToClientPacketCommonAddResourcePackPromptMessagePresent bool
-	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonAddResourcePackPromptMessagePresent)
-	if err != nil {
-		return
-	}
-	if LoginToClientPacketCommonAddResourcePackPromptMessagePresent {
-		var LoginToClientPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
-		err = LoginToClientPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.PromptMessage = &LoginToClientPacketCommonAddResourcePackPromptMessagePresentValue
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
-	_, err = w.Write(ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Url)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Hash)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Forced)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
-	if err != nil {
-		return
-	}
-	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type LoginToClientPacketCommonClearDialog struct {
-}
-
-func (ret *LoginToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
-	return
-}
-func (ret *LoginToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
-	return
-}
-
-type LoginToClientPacketCommonCookieRequest struct {
-	Cookie string
-}
-
-func (ret *LoginToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
-	ret.Cookie, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Cookie)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacketCommonCookieResponse struct {
-	Key   string
-	Value *ByteArray
-}
-
-func (ret *LoginToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var LoginToClientPacketCommonCookieResponseValuePresent bool
-	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonCookieResponseValuePresent)
-	if err != nil {
-		return
-	}
-	if LoginToClientPacketCommonCookieResponseValuePresent {
-		var LoginToClientPacketCommonCookieResponseValuePresentValue ByteArray
-		err = LoginToClientPacketCommonCookieResponseValuePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Value = &LoginToClientPacketCommonCookieResponseValuePresentValue
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
-	if err != nil {
-		return
-	}
-	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type LoginToClientPacketCommonCustomClickAction struct {
-	Id  string
-	Nbt *nbt.Anon
-}
-
-func (ret *LoginToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
-	ret.Id, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var LoginToClientPacketCommonCustomClickActionNbtPresent bool
-	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonCustomClickActionNbtPresent)
-	if err != nil {
-		return
-	}
-	if LoginToClientPacketCommonCustomClickActionNbtPresent {
-		var LoginToClientPacketCommonCustomClickActionNbtPresentValue nbt.Anon
-		err = LoginToClientPacketCommonCustomClickActionNbtPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Nbt = &LoginToClientPacketCommonCustomClickActionNbtPresentValue
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Id)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
-	if err != nil {
-		return
-	}
-	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type LoginToClientPacketCommonCustomReportDetails struct {
-	Details []struct {
-		Key   string
-		Value string
-	}
-}
-
-func (ret *LoginToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
-	var lLoginToClientPacketCommonCustomReportDetailsDetails int32
-	lLoginToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Details = []struct {
-		Key   string
-		Value string
-	}{}
-	for range lLoginToClientPacketCommonCustomReportDetailsDetails {
-		var LoginToClientPacketCommonCustomReportDetailsDetailsElement struct {
-			Key   string
-			Value string
-		}
-		LoginToClientPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		LoginToClientPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Details = append(ret.Details, LoginToClientPacketCommonCustomReportDetailsDetailsElement)
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
-	if err != nil {
-		return
-	}
-	for iLoginToClientPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
-		err = proto_base.EncodeString(w, ret.Details[iLoginToClientPacketCommonCustomReportDetailsDetails].Key)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Details[iLoginToClientPacketCommonCustomReportDetailsDetails].Value)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type LoginToClientPacketCommonRemoveResourcePack struct {
-	Uuid *uuid.UUID
-}
-
-func (ret *LoginToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
-	var LoginToClientPacketCommonRemoveResourcePackUuidPresent bool
-	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonRemoveResourcePackUuidPresent)
-	if err != nil {
-		return
-	}
-	if LoginToClientPacketCommonRemoveResourcePackUuidPresent {
-		var LoginToClientPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
-		_, err = io.ReadFull(r, LoginToClientPacketCommonRemoveResourcePackUuidPresentValue[:])
-		if err != nil {
-			return
-		}
-		ret.Uuid = &LoginToClientPacketCommonRemoveResourcePackUuidPresentValue
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
-	if err != nil {
-		return
-	}
-	if ret.Uuid != nil {
-		_, err = w.Write((*ret.Uuid)[:])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type LoginToClientPacketCommonSelectKnownPacks struct {
-	Packs []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}
-}
-
-func (ret *LoginToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
-	var lLoginToClientPacketCommonSelectKnownPacksPacks int32
-	lLoginToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Packs = []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}{}
-	for range lLoginToClientPacketCommonSelectKnownPacksPacks {
-		var LoginToClientPacketCommonSelectKnownPacksPacksElement struct {
-			Namespace string
-			Id        string
-			Version   string
-		}
-		LoginToClientPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		LoginToClientPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		LoginToClientPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Packs = append(ret.Packs, LoginToClientPacketCommonSelectKnownPacksPacksElement)
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
-	if err != nil {
-		return
-	}
-	for iLoginToClientPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
-		err = proto_base.EncodeString(w, ret.Packs[iLoginToClientPacketCommonSelectKnownPacksPacks].Namespace)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iLoginToClientPacketCommonSelectKnownPacksPacks].Id)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iLoginToClientPacketCommonSelectKnownPacksPacks].Version)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type LoginToClientPacketCommonServerLinks struct {
-	Links []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}
-}
-
-func (ret *LoginToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
-	var lLoginToClientPacketCommonServerLinksLinks int32
-	lLoginToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Links = []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}{}
-	for range lLoginToClientPacketCommonServerLinksLinks {
-		var LoginToClientPacketCommonServerLinksLinksElement struct {
-			HasKnownType bool
-			KnownType    any
-			UnknownType  any
-			Link         string
-		}
-		err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonServerLinksLinksElement.HasKnownType)
-		if err != nil {
-			return
-		}
-		switch LoginToClientPacketCommonServerLinksLinksElement.HasKnownType {
-		case true:
-			var LoginToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
-			err = LoginToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			LoginToClientPacketCommonServerLinksLinksElement.KnownType = LoginToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp
-		}
-		switch LoginToClientPacketCommonServerLinksLinksElement.HasKnownType {
-		case false:
-			var LoginToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
-			err = LoginToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			LoginToClientPacketCommonServerLinksLinksElement.UnknownType = LoginToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
-		}
-		LoginToClientPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Links = append(ret.Links, LoginToClientPacketCommonServerLinksLinksElement)
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
-	if err != nil {
-		return
-	}
-	for iLoginToClientPacketCommonServerLinksLinks := range len(ret.Links) {
-		err = binary.Write(w, binary.BigEndian, ret.Links[iLoginToClientPacketCommonServerLinksLinks].HasKnownType)
-		if err != nil {
-			return
-		}
-		switch ret.Links[iLoginToClientPacketCommonServerLinksLinks].HasKnownType {
-		case true:
-			LoginToClientPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iLoginToClientPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = LoginToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		switch ret.Links[iLoginToClientPacketCommonServerLinksLinks].HasKnownType {
-		case false:
-			LoginToClientPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iLoginToClientPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = LoginToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		err = proto_base.EncodeString(w, ret.Links[iLoginToClientPacketCommonServerLinksLinks].Link)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type LoginToClientPacketCommonSettings struct {
-	Locale              string
-	ViewDistance        int8
-	ChatFlags           int32
-	ChatColors          bool
-	SkinParts           uint8
-	MainHand            int32
-	EnableTextFiltering bool
-	EnableServerListing bool
-	ParticleStatus      string
-}
-
-var LoginToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
-
-func (ret *LoginToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
-	ret.Locale, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
-	if err != nil {
-		return
-	}
-	ret.MainHand, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var LoginToClientPacketCommonSettingsParticleStatusKey int32
-	LoginToClientPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ParticleStatus, err = proto_base.ErroringIndex(LoginToClientPacketCommonSettingsParticleStatusMap, LoginToClientPacketCommonSettingsParticleStatusKey)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var LoginToClientPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
-
-func (ret *LoginToClientPacketCommonSettings) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Locale)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.MainHand)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var vLoginToClientPacketCommonSettingsParticleStatus int32
-	vLoginToClientPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(LoginToClientPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vLoginToClientPacketCommonSettingsParticleStatus)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacketCommonStoreCookie struct {
-	Key   string
-	Value ByteArray
-}
-
-func (ret *LoginToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacketCommonTransfer struct {
-	Host string
-	Port int32
-}
-
-func (ret *LoginToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
-	ret.Host, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Port, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *LoginToClientPacketCommonTransfer) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Host)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Port)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacketCompress struct {
-	Threshold int32
-}
-
-func (ret *LoginToClientPacketCompress) Decode(r io.Reader) (err error) {
-	ret.Threshold, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *LoginToClientPacketCompress) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Threshold)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacketDisconnect struct {
-	Reason string
-}
-
-func (ret *LoginToClientPacketDisconnect) Decode(r io.Reader) (err error) {
-	ret.Reason, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *LoginToClientPacketDisconnect) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Reason)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacketEncryptionBegin struct {
-	ServerId           string
-	PublicKey          []byte
-	VerifyToken        []byte
-	ShouldAuthenticate bool
-}
-
-func (ret *LoginToClientPacketEncryptionBegin) Decode(r io.Reader) (err error) {
-	ret.ServerId, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var lLoginToClientPacketEncryptionBeginPublicKey int32
-	lLoginToClientPacketEncryptionBeginPublicKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.PublicKey, err = io.ReadAll(io.LimitReader(r, int64(lLoginToClientPacketEncryptionBeginPublicKey)))
-	if err != nil {
-		return
-	}
-	var lLoginToClientPacketEncryptionBeginVerifyToken int32
-	lLoginToClientPacketEncryptionBeginVerifyToken, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.VerifyToken, err = io.ReadAll(io.LimitReader(r, int64(lLoginToClientPacketEncryptionBeginVerifyToken)))
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ShouldAuthenticate)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *LoginToClientPacketEncryptionBegin) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.ServerId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.PublicKey)))
-	if err != nil {
-		return
-	}
-	_, err = w.Write(ret.PublicKey)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.VerifyToken)))
-	if err != nil {
-		return
-	}
-	_, err = w.Write(ret.VerifyToken)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ShouldAuthenticate)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacketLoginPluginRequest struct {
-	MessageId int32
-	Channel   string
-	Data      proto_base.RestBuffer
-}
-
-func (ret *LoginToClientPacketLoginPluginRequest) Decode(r io.Reader) (err error) {
-	ret.MessageId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Channel, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = ret.Data.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *LoginToClientPacketLoginPluginRequest) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.MessageId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Channel)
-	if err != nil {
-		return
-	}
-	err = ret.Data.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type LoginToClientPacketSuccess struct {
-	Uuid       uuid.UUID
-	Username   string
-	Properties []struct {
-		Name      string
-		Value     string
-		Signature *string
-	}
-}
-
-func (ret *LoginToClientPacketSuccess) Decode(r io.Reader) (err error) {
-	_, err = io.ReadFull(r, ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	ret.Username, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var lLoginToClientPacketSuccessProperties int32
-	lLoginToClientPacketSuccessProperties, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Properties = []struct {
-		Name      string
-		Value     string
-		Signature *string
-	}{}
-	for range lLoginToClientPacketSuccessProperties {
-		var LoginToClientPacketSuccessPropertiesElement struct {
-			Name      string
-			Value     string
-			Signature *string
-		}
-		LoginToClientPacketSuccessPropertiesElement.Name, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		LoginToClientPacketSuccessPropertiesElement.Value, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		var LoginToClientPacketSuccessPropertiesElementSignaturePresent bool
-		err = binary.Read(r, binary.BigEndian, &LoginToClientPacketSuccessPropertiesElementSignaturePresent)
-		if err != nil {
-			return
-		}
-		if LoginToClientPacketSuccessPropertiesElementSignaturePresent {
-			var LoginToClientPacketSuccessPropertiesElementSignaturePresentValue string
-			LoginToClientPacketSuccessPropertiesElementSignaturePresentValue, err = proto_base.DecodeString(r)
-			if err != nil {
-				return
-			}
-			LoginToClientPacketSuccessPropertiesElement.Signature = &LoginToClientPacketSuccessPropertiesElementSignaturePresentValue
-		}
-		ret.Properties = append(ret.Properties, LoginToClientPacketSuccessPropertiesElement)
-	}
-	return
-}
-func (ret *LoginToClientPacketSuccess) Encode(w io.Writer) (err error) {
-	_, err = w.Write(ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Username)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Properties)))
-	if err != nil {
-		return
-	}
-	for iLoginToClientPacketSuccessProperties := range len(ret.Properties) {
-		err = proto_base.EncodeString(w, ret.Properties[iLoginToClientPacketSuccessProperties].Name)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Properties[iLoginToClientPacketSuccessProperties].Value)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Properties[iLoginToClientPacketSuccessProperties].Signature != nil)
-		if err != nil {
-			return
-		}
-		if ret.Properties[iLoginToClientPacketSuccessProperties].Signature != nil {
-			err = proto_base.EncodeString(w, *ret.Properties[iLoginToClientPacketSuccessProperties].Signature)
-			if err != nil {
-				return
-			}
-		}
-	}
-	return
-}
-
-type PlayToClientChatType struct {
-	TranslationKey string
-	Parameters     []PlayToClientChatTypeParameterType
-	Style          nbt.Anon
-}
-
-func (ret *PlayToClientChatType) Decode(r io.Reader) (err error) {
-	ret.TranslationKey, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientChatTypeParameters int32
-	lPlayToClientChatTypeParameters, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Parameters = []PlayToClientChatTypeParameterType{}
-	for range lPlayToClientChatTypeParameters {
-		var PlayToClientChatTypeParametersElement PlayToClientChatTypeParameterType
-		err = PlayToClientChatTypeParametersElement.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Parameters = append(ret.Parameters, PlayToClientChatTypeParametersElement)
-	}
-	err = ret.Style.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientChatType) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.TranslationKey)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Parameters)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientChatTypeParameters := range len(ret.Parameters) {
-		err = ret.Parameters[iPlayToClientChatTypeParameters].Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	err = ret.Style.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientChatTypeParameterType struct {
-	Val string
-}
-
-var PlayToClientChatTypeParameterTypeMap = map[int32]string{0: "content", 1: "sender", 2: "target"}
-
-func (ret *PlayToClientChatTypeParameterType) Decode(r io.Reader) (err error) {
-	var PlayToClientChatTypeParameterTypeKey int32
-	PlayToClientChatTypeParameterTypeKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Val, err = proto_base.ErroringIndex(PlayToClientChatTypeParameterTypeMap, PlayToClientChatTypeParameterTypeKey)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var PlayToClientChatTypeParameterTypeReverseMap = map[string]int32{"content": 0, "sender": 1, "target": 2}
-
-func (ret *PlayToClientChatTypeParameterType) Encode(w io.Writer) (err error) {
-	var vPlayToClientChatTypeParameterType int32
-	vPlayToClientChatTypeParameterType, err = proto_base.ErroringIndex(PlayToClientChatTypeParameterTypeReverseMap, ret.Val)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vPlayToClientChatTypeParameterType)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientChatTypes struct {
-	Chat      PlayToClientChatType
-	Narration PlayToClientChatType
-}
-
-func (ret *PlayToClientChatTypes) Decode(r io.Reader) (err error) {
-	err = ret.Chat.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Narration.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientChatTypes) Encode(w io.Writer) (err error) {
-	err = ret.Chat.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Narration.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientChatTypesHolder struct {
-	Val any
-}
-
-func (ret *PlayToClientChatTypesHolder) Decode(r io.Reader) (err error) {
-	var PlayToClientChatTypesHolderId int32
-	PlayToClientChatTypesHolderId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	if PlayToClientChatTypesHolderId != 0 {
-		ret.Val = PlayToClientChatTypesHolderId
-	} else {
-		var PlayToClientChatTypesHolderResult PlayToClientChatTypes
-		err = PlayToClientChatTypesHolderResult.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Val = PlayToClientChatTypesHolderResult
-	}
-	return
-}
-func (ret *PlayToClientChatTypesHolder) Encode(w io.Writer) (err error) {
-	switch PlayToClientChatTypesHolderKnownType := ret.Val.(type) {
-	case int32:
-		err = proto_base.EncodeVarInt(w, PlayToClientChatTypesHolderKnownType)
-		if err != nil {
-			return
-		}
-	case PlayToClientChatTypes:
-		err = proto_base.EncodeVarInt(w, 0)
-		if err != nil {
-			return
-		}
-		err = PlayToClientChatTypesHolderKnownType.Encode(w)
-		if err != nil {
-			return
-		}
-	default:
-		err = proto_base.BadTypeError
-	}
-	return
-}
-
-type PlayToClientExplosionParticleEntry struct {
-	Data   PlayToClientExplosionParticleInfo
-	Weight int32
-}
-
-func (ret *PlayToClientExplosionParticleEntry) Decode(r io.Reader) (err error) {
-	err = ret.Data.Decode(r)
-	if err != nil {
-		return
-	}
-	ret.Weight, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientExplosionParticleEntry) Encode(w io.Writer) (err error) {
-	err = ret.Data.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Weight)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientExplosionParticleInfo struct {
-	Particle Particle
-	Scaling  float32
-	Speed    float32
-}
-
-func (ret *PlayToClientExplosionParticleInfo) Decode(r io.Reader) (err error) {
-	err = ret.Particle.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Scaling)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Speed)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientExplosionParticleInfo) Encode(w io.Writer) (err error) {
-	err = ret.Particle.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Scaling)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Speed)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPositionUpdateRelatives struct {
-	Val uint32
-}
-
-func (ret *PlayToClientPositionUpdateRelatives) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Val)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPositionUpdateRelatives) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Val)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientRecipeBookSetting struct {
-	Open      bool
-	Filtering bool
-}
-
-func (ret *PlayToClientRecipeBookSetting) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Open)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Filtering)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientRecipeBookSetting) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Open)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Filtering)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientRecipeDisplay struct {
-	Type string
-	Data any
-}
-
-var PlayToClientRecipeDisplayTypeMap = map[int32]string{0: "crafting_shapeless", 1: "crafting_shaped", 2: "furnace", 3: "stonecutter", 4: "smithing"}
-
-func (ret *PlayToClientRecipeDisplay) Decode(r io.Reader) (err error) {
-	var PlayToClientRecipeDisplayTypeKey int32
-	PlayToClientRecipeDisplayTypeKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Type, err = proto_base.ErroringIndex(PlayToClientRecipeDisplayTypeMap, PlayToClientRecipeDisplayTypeKey)
-	if err != nil {
-		return
-	}
-	switch ret.Type {
-	case "crafting_shaped":
-		var PlayToClientRecipeDisplayDataCraftingShapedTmp struct {
-			Width           int32
-			Height          int32
-			Ingredients     []PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-		}
-		PlayToClientRecipeDisplayDataCraftingShapedTmp.Width, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientRecipeDisplayDataCraftingShapedTmp.Height, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		var lPlayToClientRecipeDisplayDataIngredients int32
-		lPlayToClientRecipeDisplayDataIngredients, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients = []PlayToClientSlotDisplay{}
-		for range lPlayToClientRecipeDisplayDataIngredients {
-			var PlayToClientRecipeDisplayDataIngredientsElement PlayToClientSlotDisplay
-			err = PlayToClientRecipeDisplayDataIngredientsElement.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients = append(PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients, PlayToClientRecipeDisplayDataIngredientsElement)
-		}
-		err = PlayToClientRecipeDisplayDataCraftingShapedTmp.Result.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataCraftingShapedTmp.CraftingStation.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientRecipeDisplayDataCraftingShapedTmp
-	case "crafting_shapeless":
-		var PlayToClientRecipeDisplayDataCraftingShapelessTmp struct {
-			Ingredients     []PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-		}
-		var lPlayToClientRecipeDisplayDataIngredients int32
-		lPlayToClientRecipeDisplayDataIngredients, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients = []PlayToClientSlotDisplay{}
-		for range lPlayToClientRecipeDisplayDataIngredients {
-			var PlayToClientRecipeDisplayDataIngredientsElement PlayToClientSlotDisplay
-			err = PlayToClientRecipeDisplayDataIngredientsElement.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients = append(PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients, PlayToClientRecipeDisplayDataIngredientsElement)
-		}
-		err = PlayToClientRecipeDisplayDataCraftingShapelessTmp.Result.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataCraftingShapelessTmp.CraftingStation.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientRecipeDisplayDataCraftingShapelessTmp
-	case "furnace":
-		var PlayToClientRecipeDisplayDataFurnaceTmp struct {
-			Ingredient      PlayToClientSlotDisplay
-			Fuel            PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-			Duration        int32
-			Experience      float32
-		}
-		err = PlayToClientRecipeDisplayDataFurnaceTmp.Ingredient.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataFurnaceTmp.Fuel.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataFurnaceTmp.Result.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataFurnaceTmp.CraftingStation.Decode(r)
-		if err != nil {
-			return
-		}
-		PlayToClientRecipeDisplayDataFurnaceTmp.Duration, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientRecipeDisplayDataFurnaceTmp.Experience)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientRecipeDisplayDataFurnaceTmp
-	case "smithing":
-		var PlayToClientRecipeDisplayDataSmithingTmp struct {
-			Template        PlayToClientSlotDisplay
-			Base            PlayToClientSlotDisplay
-			Addition        PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-		}
-		err = PlayToClientRecipeDisplayDataSmithingTmp.Template.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataSmithingTmp.Base.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataSmithingTmp.Addition.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataSmithingTmp.Result.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataSmithingTmp.CraftingStation.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientRecipeDisplayDataSmithingTmp
-	case "stonecutter":
-		var PlayToClientRecipeDisplayDataStonecutterTmp struct {
-			Ingredient      PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-		}
-		err = PlayToClientRecipeDisplayDataStonecutterTmp.Ingredient.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataStonecutterTmp.Result.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayDataStonecutterTmp.CraftingStation.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientRecipeDisplayDataStonecutterTmp
-	}
-	return
-}
-
-var PlayToClientRecipeDisplayTypeReverseMap = map[string]int32{"crafting_shapeless": 0, "crafting_shaped": 1, "furnace": 2, "stonecutter": 3, "smithing": 4}
-
-func (ret *PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
-	var vPlayToClientRecipeDisplayType int32
-	vPlayToClientRecipeDisplayType, err = proto_base.ErroringIndex(PlayToClientRecipeDisplayTypeReverseMap, ret.Type)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vPlayToClientRecipeDisplayType)
-	if err != nil {
-		return
-	}
-	switch ret.Type {
-	case "crafting_shaped":
-		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
-			Width           int32
-			Height          int32
-			Ingredients     []PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientRecipeDisplayData.Width)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientRecipeDisplayData.Height)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientRecipeDisplayData.Ingredients)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientRecipeDisplayDataIngredients := range len(PlayToClientRecipeDisplayData.Ingredients) {
-			err = PlayToClientRecipeDisplayData.Ingredients[iPlayToClientRecipeDisplayDataIngredients].Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
-		if err != nil {
-			return
-		}
-	case "crafting_shapeless":
-		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
-			Ingredients     []PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientRecipeDisplayData.Ingredients)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientRecipeDisplayDataIngredients := range len(PlayToClientRecipeDisplayData.Ingredients) {
-			err = PlayToClientRecipeDisplayData.Ingredients[iPlayToClientRecipeDisplayDataIngredients].Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
-		if err != nil {
-			return
-		}
-	case "furnace":
-		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
-			Ingredient      PlayToClientSlotDisplay
-			Fuel            PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-			Duration        int32
-			Experience      float32
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Ingredient.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Fuel.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientRecipeDisplayData.Duration)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientRecipeDisplayData.Experience)
-		if err != nil {
-			return
-		}
-	case "smithing":
-		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
-			Template        PlayToClientSlotDisplay
-			Base            PlayToClientSlotDisplay
-			Addition        PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Template.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Base.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Addition.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
-		if err != nil {
-			return
-		}
-	case "stonecutter":
-		PlayToClientRecipeDisplayData, ok := ret.Data.(struct {
-			Ingredient      PlayToClientSlotDisplay
-			Result          PlayToClientSlotDisplay
-			CraftingStation PlayToClientSlotDisplay
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Ingredient.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientSlotDisplay struct {
-	Type string
-	Data any
-}
-
-var PlayToClientSlotDisplayTypeMap = map[int32]string{0: "empty", 1: "any_fuel", 2: "item", 3: "item_stack", 4: "tag", 5: "smithing_trim", 6: "with_remainder", 7: "composite"}
-
-func (ret *PlayToClientSlotDisplay) Decode(r io.Reader) (err error) {
-	var PlayToClientSlotDisplayTypeKey int32
-	PlayToClientSlotDisplayTypeKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Type, err = proto_base.ErroringIndex(PlayToClientSlotDisplayTypeMap, PlayToClientSlotDisplayTypeKey)
-	if err != nil {
-		return
-	}
-	switch ret.Type {
-	case "any_fuel":
-		var PlayToClientSlotDisplayDataAnyFuelTmp struct {
-		}
-		ret.Data = PlayToClientSlotDisplayDataAnyFuelTmp
-	case "composite":
-		var PlayToClientSlotDisplayDataCompositeTmp []PlayToClientSlotDisplay
-		var lPlayToClientSlotDisplayData int32
-		lPlayToClientSlotDisplayData, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientSlotDisplayDataCompositeTmp = []PlayToClientSlotDisplay{}
-		for range lPlayToClientSlotDisplayData {
-			var PlayToClientSlotDisplayDataElement PlayToClientSlotDisplay
-			err = PlayToClientSlotDisplayDataElement.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientSlotDisplayDataCompositeTmp = append(PlayToClientSlotDisplayDataCompositeTmp, PlayToClientSlotDisplayDataElement)
-		}
-		ret.Data = PlayToClientSlotDisplayDataCompositeTmp
-	case "empty":
-		var PlayToClientSlotDisplayDataEmptyTmp struct {
-		}
-		ret.Data = PlayToClientSlotDisplayDataEmptyTmp
-	case "item":
-		var PlayToClientSlotDisplayDataItemTmp int32
-		PlayToClientSlotDisplayDataItemTmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientSlotDisplayDataItemTmp
-	case "item_stack":
-		var PlayToClientSlotDisplayDataItemStackTmp Slot
-		err = PlayToClientSlotDisplayDataItemStackTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientSlotDisplayDataItemStackTmp
-	case "smithing_trim":
-		var PlayToClientSlotDisplayDataSmithingTrimTmp struct {
-			Base     PlayToClientSlotDisplay
-			Material PlayToClientSlotDisplay
-			Pattern  any
-		}
-		err = PlayToClientSlotDisplayDataSmithingTrimTmp.Base.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientSlotDisplayDataSmithingTrimTmp.Material.Decode(r)
-		if err != nil {
-			return
-		}
-		var PlayToClientSlotDisplayDataPatternId int32
-		PlayToClientSlotDisplayDataPatternId, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		if PlayToClientSlotDisplayDataPatternId != 0 {
-			PlayToClientSlotDisplayDataSmithingTrimTmp.Pattern = PlayToClientSlotDisplayDataPatternId
-		} else {
-			var PlayToClientSlotDisplayDataPatternResult ArmorTrimPattern
-			err = PlayToClientSlotDisplayDataPatternResult.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientSlotDisplayDataSmithingTrimTmp.Pattern = PlayToClientSlotDisplayDataPatternResult
-		}
-		ret.Data = PlayToClientSlotDisplayDataSmithingTrimTmp
-	case "tag":
-		var PlayToClientSlotDisplayDataTagTmp string
-		PlayToClientSlotDisplayDataTagTmp, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientSlotDisplayDataTagTmp
-	case "with_remainder":
-		var PlayToClientSlotDisplayDataWithRemainderTmp struct {
-			Input     PlayToClientSlotDisplay
-			Remainder PlayToClientSlotDisplay
-		}
-		err = PlayToClientSlotDisplayDataWithRemainderTmp.Input.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientSlotDisplayDataWithRemainderTmp.Remainder.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientSlotDisplayDataWithRemainderTmp
-	}
-	return
-}
-
-var PlayToClientSlotDisplayTypeReverseMap = map[string]int32{"empty": 0, "any_fuel": 1, "item": 2, "item_stack": 3, "tag": 4, "smithing_trim": 5, "with_remainder": 6, "composite": 7}
-
-func (ret *PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
-	var vPlayToClientSlotDisplayType int32
-	vPlayToClientSlotDisplayType, err = proto_base.ErroringIndex(PlayToClientSlotDisplayTypeReverseMap, ret.Type)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vPlayToClientSlotDisplayType)
-	if err != nil {
-		return
-	}
-	switch ret.Type {
-	case "any_fuel":
-		_, ok := ret.Data.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	case "composite":
-		PlayToClientSlotDisplayData, ok := ret.Data.([]PlayToClientSlotDisplay)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientSlotDisplayData)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientSlotDisplayData := range len(PlayToClientSlotDisplayData) {
-			err = PlayToClientSlotDisplayData[iPlayToClientSlotDisplayData].Encode(w)
-			if err != nil {
-				return
-			}
-		}
-	case "empty":
-		_, ok := ret.Data.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	case "item":
-		PlayToClientSlotDisplayData, ok := ret.Data.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientSlotDisplayData)
-		if err != nil {
-			return
-		}
-	case "item_stack":
-		PlayToClientSlotDisplayData, ok := ret.Data.(Slot)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientSlotDisplayData.Encode(w)
-		if err != nil {
-			return
-		}
-	case "smithing_trim":
-		PlayToClientSlotDisplayData, ok := ret.Data.(struct {
-			Base     PlayToClientSlotDisplay
-			Material PlayToClientSlotDisplay
-			Pattern  any
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientSlotDisplayData.Base.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientSlotDisplayData.Material.Encode(w)
-		if err != nil {
-			return
-		}
-		switch PlayToClientSlotDisplayDataPatternKnownType := PlayToClientSlotDisplayData.Pattern.(type) {
-		case int32:
-			err = proto_base.EncodeVarInt(w, PlayToClientSlotDisplayDataPatternKnownType)
-			if err != nil {
-				return
-			}
-		case ArmorTrimPattern:
-			err = proto_base.EncodeVarInt(w, 0)
-			if err != nil {
-				return
-			}
-			err = PlayToClientSlotDisplayDataPatternKnownType.Encode(w)
-			if err != nil {
-				return
-			}
-		default:
-			err = proto_base.BadTypeError
-		}
-	case "tag":
-		PlayToClientSlotDisplayData, ok := ret.Data.(string)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeString(w, PlayToClientSlotDisplayData)
-		if err != nil {
-			return
-		}
-	case "with_remainder":
-		PlayToClientSlotDisplayData, ok := ret.Data.(struct {
-			Input     PlayToClientSlotDisplay
-			Remainder PlayToClientSlotDisplay
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientSlotDisplayData.Input.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientSlotDisplayData.Remainder.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientSpawnInfo struct {
-	Dimension        int32
-	Name             string
-	HashedSeed       int64
-	Gamemode         string
-	PreviousGamemode uint8
-	IsDebug          bool
-	IsFlat           bool
-	Death            *GlobalPos
-	PortalCooldown   int32
-	SeaLevel         int32
-}
-
-var PlayToClientSpawnInfoGamemodeMap = map[int8]string{0: "survival", 1: "creative", 2: "adventure", 3: "spectator"}
-
-func (ret *PlayToClientSpawnInfo) Decode(r io.Reader) (err error) {
-	ret.Dimension, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Name, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.HashedSeed)
-	if err != nil {
-		return
-	}
-	var PlayToClientSpawnInfoGamemodeKey int8
-	err = binary.Read(r, binary.BigEndian, &PlayToClientSpawnInfoGamemodeKey)
-	if err != nil {
-		return
-	}
-	ret.Gamemode, err = proto_base.ErroringIndex(PlayToClientSpawnInfoGamemodeMap, PlayToClientSpawnInfoGamemodeKey)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.PreviousGamemode)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.IsDebug)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.IsFlat)
-	if err != nil {
-		return
-	}
-	var PlayToClientSpawnInfoDeathPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientSpawnInfoDeathPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientSpawnInfoDeathPresent {
-		var PlayToClientSpawnInfoDeathPresentValue GlobalPos
-		err = PlayToClientSpawnInfoDeathPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Death = &PlayToClientSpawnInfoDeathPresentValue
-	}
-	ret.PortalCooldown, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SeaLevel, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var PlayToClientSpawnInfoGamemodeReverseMap = map[string]int8{"survival": 0, "creative": 1, "adventure": 2, "spectator": 3}
-
-func (ret *PlayToClientSpawnInfo) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Dimension)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Name)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.HashedSeed)
-	if err != nil {
-		return
-	}
-	var vPlayToClientSpawnInfoGamemode int8
-	vPlayToClientSpawnInfoGamemode, err = proto_base.ErroringIndex(PlayToClientSpawnInfoGamemodeReverseMap, ret.Gamemode)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, vPlayToClientSpawnInfoGamemode)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.PreviousGamemode)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IsDebug)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IsFlat)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Death != nil)
-	if err != nil {
-		return
-	}
-	if ret.Death != nil {
-		err = (*ret.Death).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, ret.PortalCooldown)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.SeaLevel)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacket struct {
-	Name   string
-	Params any
-}
-
-var PlayToClientPacketNameMap = map[int32]string{0x00: "bundle_delimiter", 0x01: "spawn_entity", 0x02: "animation", 0x03: "statistics", 0x04: "acknowledge_player_digging", 0x05: "block_break_animation", 0x06: "tile_entity_data", 0x07: "block_action", 0x08: "block_change", 0x09: "boss_bar", 0x0a: "difficulty", 0x0b: "chunk_batch_finished", 0x0c: "chunk_batch_start", 0x0d: "chunk_biomes", 0x0e: "clear_titles", 0x0f: "tab_complete", 0x10: "declare_commands", 0x11: "close_window", 0x12: "window_items", 0x13: "craft_progress_bar", 0x14: "set_slot", 0x15: "cookie_request", 0x16: "set_cooldown", 0x17: "chat_suggestions", 0x18: "custom_payload", 0x19: "damage_event", 0x1a: "debug_block_value", 0x1b: "debug_chunk_value", 0x1c: "debug_entity_value", 0x1d: "debug_event", 0x1e: "debug_sample", 0x1f: "hide_message", 0x20: "kick_disconnect", 0x21: "profileless_chat", 0x22: "entity_status", 0x23: "sync_entity_position", 0x24: "explosion", 0x25: "unload_chunk", 0x26: "game_state_change", 0x27: "game_test_highlight_pos", 0x28: "open_horse_window", 0x29: "hurt_animation", 0x2a: "initialize_world_border", 0x2b: "keep_alive", 0x2c: "map_chunk", 0x2d: "world_event", 0x2e: "world_particles", 0x2f: "update_light", 0x30: "login", 0x31: "map", 0x32: "trade_list", 0x33: "rel_entity_move", 0x34: "entity_move_look", 0x35: "move_minecart", 0x36: "entity_look", 0x37: "vehicle_move", 0x38: "open_book", 0x39: "open_window", 0x3a: "open_sign_entity", 0x3b: "ping", 0x3c: "ping_response", 0x3d: "craft_recipe_response", 0x3e: "abilities", 0x3f: "player_chat", 0x40: "end_combat_event", 0x41: "enter_combat_event", 0x42: "death_combat_event", 0x43: "player_remove", 0x44: "player_info", 0x45: "face_player", 0x46: "position", 0x47: "player_rotation", 0x48: "recipe_book_add", 0x49: "recipe_book_remove", 0x4a: "recipe_book_settings", 0x4b: "entity_destroy", 0x4c: "remove_entity_effect", 0x4d: "reset_score", 0x4e: "remove_resource_pack", 0x4f: "add_resource_pack", 0x50: "respawn", 0x51: "entity_head_rotation", 0x52: "multi_block_change", 0x53: "select_advancement_tab", 0x54: "server_data", 0x55: "action_bar", 0x56: "world_border_center", 0x57: "world_border_lerp_size", 0x58: "world_border_size", 0x59: "world_border_warning_delay", 0x5a: "world_border_warning_reach", 0x5b: "camera", 0x5c: "update_view_position", 0x5d: "update_view_distance", 0x5e: "set_cursor_item", 0x5f: "spawn_position", 0x60: "scoreboard_display_objective", 0x61: "entity_metadata", 0x62: "attach_entity", 0x63: "entity_velocity", 0x64: "entity_equipment", 0x65: "experience", 0x66: "update_health", 0x67: "held_item_slot", 0x68: "scoreboard_objective", 0x69: "set_passengers", 0x6a: "set_player_inventory", 0x6b: "teams", 0x6c: "scoreboard_score", 0x6d: "simulation_distance", 0x6e: "set_title_subtitle", 0x6f: "update_time", 0x70: "set_title_text", 0x71: "set_title_time", 0x72: "entity_sound_effect", 0x73: "sound_effect", 0x74: "start_configuration", 0x75: "stop_sound", 0x76: "store_cookie", 0x77: "system_chat", 0x78: "playerlist_header", 0x79: "nbt_query_response", 0x7a: "collect", 0x7b: "entity_teleport", 0x7c: "test_instance_block_status", 0x7d: "set_ticking_state", 0x7e: "step_tick", 0x7f: "transfer", 0x80: "advancements", 0x81: "entity_update_attributes", 0x82: "entity_effect", 0x83: "declare_recipes", 0x84: "tags", 0x85: "set_projectile_power", 0x86: "custom_report_details", 0x87: "server_links", 0x88: "tracked_waypoint", 0x89: "clear_dialog", 0x8a: "show_dialog"}
-
-func (ret *PlayToClientPacket) Decode(r io.Reader) (err error) {
-	var PlayToClientPacketNameKey int32
-	PlayToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Name, err = proto_base.ErroringIndex(PlayToClientPacketNameMap, PlayToClientPacketNameKey)
-	if err != nil {
-		return
-	}
-	switch ret.Name {
-	case "abilities":
-		var PlayToClientPacketParamsAbilitiesTmp PlayToClientPacketAbilities
-		err = PlayToClientPacketParamsAbilitiesTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsAbilitiesTmp
-	case "acknowledge_player_digging":
-		var PlayToClientPacketParamsAcknowledgePlayerDiggingTmp PlayToClientPacketAcknowledgePlayerDigging
-		err = PlayToClientPacketParamsAcknowledgePlayerDiggingTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsAcknowledgePlayerDiggingTmp
-	case "action_bar":
-		var PlayToClientPacketParamsActionBarTmp PlayToClientPacketActionBar
-		err = PlayToClientPacketParamsActionBarTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsActionBarTmp
-	case "add_resource_pack":
-		var PlayToClientPacketParamsAddResourcePackTmp PlayToClientPacketCommonAddResourcePack
-		err = PlayToClientPacketParamsAddResourcePackTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsAddResourcePackTmp
-	case "advancements":
-		var PlayToClientPacketParamsAdvancementsTmp PlayToClientPacketAdvancements
-		err = PlayToClientPacketParamsAdvancementsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsAdvancementsTmp
-	case "animation":
-		var PlayToClientPacketParamsAnimationTmp PlayToClientPacketAnimation
-		err = PlayToClientPacketParamsAnimationTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsAnimationTmp
-	case "attach_entity":
-		var PlayToClientPacketParamsAttachEntityTmp PlayToClientPacketAttachEntity
-		err = PlayToClientPacketParamsAttachEntityTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsAttachEntityTmp
-	case "block_action":
-		var PlayToClientPacketParamsBlockActionTmp PlayToClientPacketBlockAction
-		err = PlayToClientPacketParamsBlockActionTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsBlockActionTmp
-	case "block_break_animation":
-		var PlayToClientPacketParamsBlockBreakAnimationTmp PlayToClientPacketBlockBreakAnimation
-		err = PlayToClientPacketParamsBlockBreakAnimationTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsBlockBreakAnimationTmp
-	case "block_change":
-		var PlayToClientPacketParamsBlockChangeTmp PlayToClientPacketBlockChange
-		err = PlayToClientPacketParamsBlockChangeTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsBlockChangeTmp
-	case "boss_bar":
-		var PlayToClientPacketParamsBossBarTmp PlayToClientPacketBossBar
-		err = PlayToClientPacketParamsBossBarTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsBossBarTmp
-	case "bundle_delimiter":
-		var PlayToClientPacketParamsBundleDelimiterTmp struct {
-		}
-		ret.Params = PlayToClientPacketParamsBundleDelimiterTmp
-	case "camera":
-		var PlayToClientPacketParamsCameraTmp PlayToClientPacketCamera
-		err = PlayToClientPacketParamsCameraTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsCameraTmp
-	case "chat_suggestions":
-		var PlayToClientPacketParamsChatSuggestionsTmp PlayToClientPacketChatSuggestions
-		err = PlayToClientPacketParamsChatSuggestionsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsChatSuggestionsTmp
-	case "chunk_batch_finished":
-		var PlayToClientPacketParamsChunkBatchFinishedTmp PlayToClientPacketChunkBatchFinished
-		err = PlayToClientPacketParamsChunkBatchFinishedTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsChunkBatchFinishedTmp
-	case "chunk_batch_start":
-		var PlayToClientPacketParamsChunkBatchStartTmp PlayToClientPacketChunkBatchStart
-		err = PlayToClientPacketParamsChunkBatchStartTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsChunkBatchStartTmp
-	case "chunk_biomes":
-		var PlayToClientPacketParamsChunkBiomesTmp PlayToClientPacketChunkBiomes
-		err = PlayToClientPacketParamsChunkBiomesTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsChunkBiomesTmp
-	case "clear_dialog":
-		var PlayToClientPacketParamsClearDialogTmp PlayToClientPacketCommonClearDialog
-		err = PlayToClientPacketParamsClearDialogTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsClearDialogTmp
-	case "clear_titles":
-		var PlayToClientPacketParamsClearTitlesTmp PlayToClientPacketClearTitles
-		err = PlayToClientPacketParamsClearTitlesTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsClearTitlesTmp
-	case "close_window":
-		var PlayToClientPacketParamsCloseWindowTmp PlayToClientPacketCloseWindow
-		err = PlayToClientPacketParamsCloseWindowTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsCloseWindowTmp
-	case "collect":
-		var PlayToClientPacketParamsCollectTmp PlayToClientPacketCollect
-		err = PlayToClientPacketParamsCollectTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsCollectTmp
-	case "cookie_request":
-		var PlayToClientPacketParamsCookieRequestTmp PlayToClientPacketCommonCookieRequest
-		err = PlayToClientPacketParamsCookieRequestTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsCookieRequestTmp
-	case "craft_progress_bar":
-		var PlayToClientPacketParamsCraftProgressBarTmp PlayToClientPacketCraftProgressBar
-		err = PlayToClientPacketParamsCraftProgressBarTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsCraftProgressBarTmp
-	case "craft_recipe_response":
-		var PlayToClientPacketParamsCraftRecipeResponseTmp PlayToClientPacketCraftRecipeResponse
-		err = PlayToClientPacketParamsCraftRecipeResponseTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsCraftRecipeResponseTmp
-	case "custom_payload":
-		var PlayToClientPacketParamsCustomPayloadTmp PlayToClientPacketCustomPayload
-		err = PlayToClientPacketParamsCustomPayloadTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsCustomPayloadTmp
-	case "custom_report_details":
-		var PlayToClientPacketParamsCustomReportDetailsTmp PlayToClientPacketCommonCustomReportDetails
-		err = PlayToClientPacketParamsCustomReportDetailsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsCustomReportDetailsTmp
-	case "damage_event":
-		var PlayToClientPacketParamsDamageEventTmp PlayToClientPacketDamageEvent
-		err = PlayToClientPacketParamsDamageEventTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDamageEventTmp
-	case "death_combat_event":
-		var PlayToClientPacketParamsDeathCombatEventTmp PlayToClientPacketDeathCombatEvent
-		err = PlayToClientPacketParamsDeathCombatEventTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDeathCombatEventTmp
-	case "debug_block_value":
-		var PlayToClientPacketParamsDebugBlockValueTmp PlayToClientPacketDebugBlockValue
-		err = PlayToClientPacketParamsDebugBlockValueTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDebugBlockValueTmp
-	case "debug_chunk_value":
-		var PlayToClientPacketParamsDebugChunkValueTmp PlayToClientPacketDebugChunkValue
-		err = PlayToClientPacketParamsDebugChunkValueTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDebugChunkValueTmp
-	case "debug_entity_value":
-		var PlayToClientPacketParamsDebugEntityValueTmp PlayToClientPacketDebugEntityValue
-		err = PlayToClientPacketParamsDebugEntityValueTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDebugEntityValueTmp
-	case "debug_event":
-		var PlayToClientPacketParamsDebugEventTmp PlayToClientPacketDebugEvent
-		err = PlayToClientPacketParamsDebugEventTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDebugEventTmp
-	case "debug_sample":
-		var PlayToClientPacketParamsDebugSampleTmp PlayToClientPacketDebugSample
-		err = PlayToClientPacketParamsDebugSampleTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDebugSampleTmp
-	case "declare_commands":
-		var PlayToClientPacketParamsDeclareCommandsTmp PlayToClientPacketDeclareCommands
-		err = PlayToClientPacketParamsDeclareCommandsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDeclareCommandsTmp
-	case "declare_recipes":
-		var PlayToClientPacketParamsDeclareRecipesTmp PlayToClientPacketDeclareRecipes
-		err = PlayToClientPacketParamsDeclareRecipesTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDeclareRecipesTmp
-	case "difficulty":
-		var PlayToClientPacketParamsDifficultyTmp PlayToClientPacketDifficulty
-		err = PlayToClientPacketParamsDifficultyTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsDifficultyTmp
-	case "end_combat_event":
-		var PlayToClientPacketParamsEndCombatEventTmp PlayToClientPacketEndCombatEvent
-		err = PlayToClientPacketParamsEndCombatEventTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEndCombatEventTmp
-	case "enter_combat_event":
-		var PlayToClientPacketParamsEnterCombatEventTmp PlayToClientPacketEnterCombatEvent
-		err = PlayToClientPacketParamsEnterCombatEventTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEnterCombatEventTmp
-	case "entity_destroy":
-		var PlayToClientPacketParamsEntityDestroyTmp PlayToClientPacketEntityDestroy
-		err = PlayToClientPacketParamsEntityDestroyTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityDestroyTmp
-	case "entity_effect":
-		var PlayToClientPacketParamsEntityEffectTmp PlayToClientPacketEntityEffect
-		err = PlayToClientPacketParamsEntityEffectTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityEffectTmp
-	case "entity_equipment":
-		var PlayToClientPacketParamsEntityEquipmentTmp PlayToClientPacketEntityEquipment
-		err = PlayToClientPacketParamsEntityEquipmentTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityEquipmentTmp
-	case "entity_head_rotation":
-		var PlayToClientPacketParamsEntityHeadRotationTmp PlayToClientPacketEntityHeadRotation
-		err = PlayToClientPacketParamsEntityHeadRotationTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityHeadRotationTmp
-	case "entity_look":
-		var PlayToClientPacketParamsEntityLookTmp PlayToClientPacketEntityLook
-		err = PlayToClientPacketParamsEntityLookTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityLookTmp
-	case "entity_metadata":
-		var PlayToClientPacketParamsEntityMetadataTmp PlayToClientPacketEntityMetadata
-		err = PlayToClientPacketParamsEntityMetadataTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityMetadataTmp
-	case "entity_move_look":
-		var PlayToClientPacketParamsEntityMoveLookTmp PlayToClientPacketEntityMoveLook
-		err = PlayToClientPacketParamsEntityMoveLookTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityMoveLookTmp
-	case "entity_sound_effect":
-		var PlayToClientPacketParamsEntitySoundEffectTmp PlayToClientPacketEntitySoundEffect
-		err = PlayToClientPacketParamsEntitySoundEffectTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntitySoundEffectTmp
-	case "entity_status":
-		var PlayToClientPacketParamsEntityStatusTmp PlayToClientPacketEntityStatus
-		err = PlayToClientPacketParamsEntityStatusTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityStatusTmp
-	case "entity_teleport":
-		var PlayToClientPacketParamsEntityTeleportTmp PlayToClientPacketEntityTeleport
-		err = PlayToClientPacketParamsEntityTeleportTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityTeleportTmp
-	case "entity_update_attributes":
-		var PlayToClientPacketParamsEntityUpdateAttributesTmp PlayToClientPacketEntityUpdateAttributes
-		err = PlayToClientPacketParamsEntityUpdateAttributesTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityUpdateAttributesTmp
-	case "entity_velocity":
-		var PlayToClientPacketParamsEntityVelocityTmp PlayToClientPacketEntityVelocity
-		err = PlayToClientPacketParamsEntityVelocityTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsEntityVelocityTmp
-	case "experience":
-		var PlayToClientPacketParamsExperienceTmp PlayToClientPacketExperience
-		err = PlayToClientPacketParamsExperienceTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsExperienceTmp
-	case "explosion":
-		var PlayToClientPacketParamsExplosionTmp PlayToClientPacketExplosion
-		err = PlayToClientPacketParamsExplosionTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsExplosionTmp
-	case "face_player":
-		var PlayToClientPacketParamsFacePlayerTmp PlayToClientPacketFacePlayer
-		err = PlayToClientPacketParamsFacePlayerTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsFacePlayerTmp
-	case "game_state_change":
-		var PlayToClientPacketParamsGameStateChangeTmp PlayToClientPacketGameStateChange
-		err = PlayToClientPacketParamsGameStateChangeTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsGameStateChangeTmp
-	case "game_test_highlight_pos":
-		var PlayToClientPacketParamsGameTestHighlightPosTmp PlayToClientPacketGameTestHighlightPos
-		err = PlayToClientPacketParamsGameTestHighlightPosTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsGameTestHighlightPosTmp
-	case "held_item_slot":
-		var PlayToClientPacketParamsHeldItemSlotTmp PlayToClientPacketHeldItemSlot
-		err = PlayToClientPacketParamsHeldItemSlotTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsHeldItemSlotTmp
-	case "hide_message":
-		var PlayToClientPacketParamsHideMessageTmp PlayToClientPacketHideMessage
-		err = PlayToClientPacketParamsHideMessageTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsHideMessageTmp
-	case "hurt_animation":
-		var PlayToClientPacketParamsHurtAnimationTmp PlayToClientPacketHurtAnimation
-		err = PlayToClientPacketParamsHurtAnimationTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsHurtAnimationTmp
-	case "initialize_world_border":
-		var PlayToClientPacketParamsInitializeWorldBorderTmp PlayToClientPacketInitializeWorldBorder
-		err = PlayToClientPacketParamsInitializeWorldBorderTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsInitializeWorldBorderTmp
-	case "keep_alive":
-		var PlayToClientPacketParamsKeepAliveTmp PlayToClientPacketKeepAlive
-		err = PlayToClientPacketParamsKeepAliveTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsKeepAliveTmp
-	case "kick_disconnect":
-		var PlayToClientPacketParamsKickDisconnectTmp PlayToClientPacketKickDisconnect
-		err = PlayToClientPacketParamsKickDisconnectTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsKickDisconnectTmp
-	case "login":
-		var PlayToClientPacketParamsLoginTmp PlayToClientPacketLogin
-		err = PlayToClientPacketParamsLoginTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsLoginTmp
-	case "map":
-		var PlayToClientPacketParamsMapTmp PlayToClientPacketMap
-		err = PlayToClientPacketParamsMapTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsMapTmp
-	case "map_chunk":
-		var PlayToClientPacketParamsMapChunkTmp PlayToClientPacketMapChunk
-		err = PlayToClientPacketParamsMapChunkTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsMapChunkTmp
-	case "move_minecart":
-		var PlayToClientPacketParamsMoveMinecartTmp PlayToClientPacketMoveMinecart
-		err = PlayToClientPacketParamsMoveMinecartTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsMoveMinecartTmp
-	case "multi_block_change":
-		var PlayToClientPacketParamsMultiBlockChangeTmp PlayToClientPacketMultiBlockChange
-		err = PlayToClientPacketParamsMultiBlockChangeTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsMultiBlockChangeTmp
-	case "nbt_query_response":
-		var PlayToClientPacketParamsNbtQueryResponseTmp PlayToClientPacketNbtQueryResponse
-		err = PlayToClientPacketParamsNbtQueryResponseTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsNbtQueryResponseTmp
-	case "open_book":
-		var PlayToClientPacketParamsOpenBookTmp PlayToClientPacketOpenBook
-		err = PlayToClientPacketParamsOpenBookTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsOpenBookTmp
-	case "open_horse_window":
-		var PlayToClientPacketParamsOpenHorseWindowTmp PlayToClientPacketOpenHorseWindow
-		err = PlayToClientPacketParamsOpenHorseWindowTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsOpenHorseWindowTmp
-	case "open_sign_entity":
-		var PlayToClientPacketParamsOpenSignEntityTmp PlayToClientPacketOpenSignEntity
-		err = PlayToClientPacketParamsOpenSignEntityTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsOpenSignEntityTmp
-	case "open_window":
-		var PlayToClientPacketParamsOpenWindowTmp PlayToClientPacketOpenWindow
-		err = PlayToClientPacketParamsOpenWindowTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsOpenWindowTmp
-	case "ping":
-		var PlayToClientPacketParamsPingTmp PlayToClientPacketPing
-		err = PlayToClientPacketParamsPingTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsPingTmp
-	case "ping_response":
-		var PlayToClientPacketParamsPingResponseTmp PlayToClientPacketPingResponse
-		err = PlayToClientPacketParamsPingResponseTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsPingResponseTmp
-	case "player_chat":
-		var PlayToClientPacketParamsPlayerChatTmp PlayToClientPacketPlayerChat
-		err = PlayToClientPacketParamsPlayerChatTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsPlayerChatTmp
-	case "player_info":
-		var PlayToClientPacketParamsPlayerInfoTmp PlayToClientPacketPlayerInfo
-		err = PlayToClientPacketParamsPlayerInfoTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsPlayerInfoTmp
-	case "player_remove":
-		var PlayToClientPacketParamsPlayerRemoveTmp PlayToClientPacketPlayerRemove
-		err = PlayToClientPacketParamsPlayerRemoveTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsPlayerRemoveTmp
-	case "player_rotation":
-		var PlayToClientPacketParamsPlayerRotationTmp PlayToClientPacketPlayerRotation
-		err = PlayToClientPacketParamsPlayerRotationTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsPlayerRotationTmp
-	case "playerlist_header":
-		var PlayToClientPacketParamsPlayerlistHeaderTmp PlayToClientPacketPlayerlistHeader
-		err = PlayToClientPacketParamsPlayerlistHeaderTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsPlayerlistHeaderTmp
-	case "position":
-		var PlayToClientPacketParamsPositionTmp PlayToClientPacketPosition
-		err = PlayToClientPacketParamsPositionTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsPositionTmp
-	case "profileless_chat":
-		var PlayToClientPacketParamsProfilelessChatTmp PlayToClientPacketProfilelessChat
-		err = PlayToClientPacketParamsProfilelessChatTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsProfilelessChatTmp
-	case "recipe_book_add":
-		var PlayToClientPacketParamsRecipeBookAddTmp PlayToClientPacketRecipeBookAdd
-		err = PlayToClientPacketParamsRecipeBookAddTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsRecipeBookAddTmp
-	case "recipe_book_remove":
-		var PlayToClientPacketParamsRecipeBookRemoveTmp PlayToClientPacketRecipeBookRemove
-		err = PlayToClientPacketParamsRecipeBookRemoveTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsRecipeBookRemoveTmp
-	case "recipe_book_settings":
-		var PlayToClientPacketParamsRecipeBookSettingsTmp PlayToClientPacketRecipeBookSettings
-		err = PlayToClientPacketParamsRecipeBookSettingsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsRecipeBookSettingsTmp
-	case "rel_entity_move":
-		var PlayToClientPacketParamsRelEntityMoveTmp PlayToClientPacketRelEntityMove
-		err = PlayToClientPacketParamsRelEntityMoveTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsRelEntityMoveTmp
-	case "remove_entity_effect":
-		var PlayToClientPacketParamsRemoveEntityEffectTmp PlayToClientPacketRemoveEntityEffect
-		err = PlayToClientPacketParamsRemoveEntityEffectTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsRemoveEntityEffectTmp
-	case "remove_resource_pack":
-		var PlayToClientPacketParamsRemoveResourcePackTmp PlayToClientPacketCommonRemoveResourcePack
-		err = PlayToClientPacketParamsRemoveResourcePackTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsRemoveResourcePackTmp
-	case "reset_score":
-		var PlayToClientPacketParamsResetScoreTmp PlayToClientPacketResetScore
-		err = PlayToClientPacketParamsResetScoreTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsResetScoreTmp
-	case "respawn":
-		var PlayToClientPacketParamsRespawnTmp PlayToClientPacketRespawn
-		err = PlayToClientPacketParamsRespawnTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsRespawnTmp
-	case "scoreboard_display_objective":
-		var PlayToClientPacketParamsScoreboardDisplayObjectiveTmp PlayToClientPacketScoreboardDisplayObjective
-		err = PlayToClientPacketParamsScoreboardDisplayObjectiveTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsScoreboardDisplayObjectiveTmp
-	case "scoreboard_objective":
-		var PlayToClientPacketParamsScoreboardObjectiveTmp PlayToClientPacketScoreboardObjective
-		err = PlayToClientPacketParamsScoreboardObjectiveTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsScoreboardObjectiveTmp
-	case "scoreboard_score":
-		var PlayToClientPacketParamsScoreboardScoreTmp PlayToClientPacketScoreboardScore
-		err = PlayToClientPacketParamsScoreboardScoreTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsScoreboardScoreTmp
-	case "select_advancement_tab":
-		var PlayToClientPacketParamsSelectAdvancementTabTmp PlayToClientPacketSelectAdvancementTab
-		err = PlayToClientPacketParamsSelectAdvancementTabTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSelectAdvancementTabTmp
-	case "server_data":
-		var PlayToClientPacketParamsServerDataTmp PlayToClientPacketServerData
-		err = PlayToClientPacketParamsServerDataTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsServerDataTmp
-	case "server_links":
-		var PlayToClientPacketParamsServerLinksTmp PlayToClientPacketCommonServerLinks
-		err = PlayToClientPacketParamsServerLinksTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsServerLinksTmp
-	case "set_cooldown":
-		var PlayToClientPacketParamsSetCooldownTmp PlayToClientPacketSetCooldown
-		err = PlayToClientPacketParamsSetCooldownTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetCooldownTmp
-	case "set_cursor_item":
-		var PlayToClientPacketParamsSetCursorItemTmp PlayToClientPacketSetCursorItem
-		err = PlayToClientPacketParamsSetCursorItemTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetCursorItemTmp
-	case "set_passengers":
-		var PlayToClientPacketParamsSetPassengersTmp PlayToClientPacketSetPassengers
-		err = PlayToClientPacketParamsSetPassengersTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetPassengersTmp
-	case "set_player_inventory":
-		var PlayToClientPacketParamsSetPlayerInventoryTmp PlayToClientPacketSetPlayerInventory
-		err = PlayToClientPacketParamsSetPlayerInventoryTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetPlayerInventoryTmp
-	case "set_projectile_power":
-		var PlayToClientPacketParamsSetProjectilePowerTmp PlayToClientPacketSetProjectilePower
-		err = PlayToClientPacketParamsSetProjectilePowerTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetProjectilePowerTmp
-	case "set_slot":
-		var PlayToClientPacketParamsSetSlotTmp PlayToClientPacketSetSlot
-		err = PlayToClientPacketParamsSetSlotTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetSlotTmp
-	case "set_ticking_state":
-		var PlayToClientPacketParamsSetTickingStateTmp PlayToClientPacketSetTickingState
-		err = PlayToClientPacketParamsSetTickingStateTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetTickingStateTmp
-	case "set_title_subtitle":
-		var PlayToClientPacketParamsSetTitleSubtitleTmp PlayToClientPacketSetTitleSubtitle
-		err = PlayToClientPacketParamsSetTitleSubtitleTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetTitleSubtitleTmp
-	case "set_title_text":
-		var PlayToClientPacketParamsSetTitleTextTmp PlayToClientPacketSetTitleText
-		err = PlayToClientPacketParamsSetTitleTextTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetTitleTextTmp
-	case "set_title_time":
-		var PlayToClientPacketParamsSetTitleTimeTmp PlayToClientPacketSetTitleTime
-		err = PlayToClientPacketParamsSetTitleTimeTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSetTitleTimeTmp
-	case "show_dialog":
-		var PlayToClientPacketParamsShowDialogTmp PlayToClientPacketShowDialog
-		err = PlayToClientPacketParamsShowDialogTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsShowDialogTmp
-	case "simulation_distance":
-		var PlayToClientPacketParamsSimulationDistanceTmp PlayToClientPacketSimulationDistance
-		err = PlayToClientPacketParamsSimulationDistanceTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSimulationDistanceTmp
-	case "sound_effect":
-		var PlayToClientPacketParamsSoundEffectTmp PlayToClientPacketSoundEffect
-		err = PlayToClientPacketParamsSoundEffectTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSoundEffectTmp
-	case "spawn_entity":
-		var PlayToClientPacketParamsSpawnEntityTmp PlayToClientPacketSpawnEntity
-		err = PlayToClientPacketParamsSpawnEntityTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSpawnEntityTmp
-	case "spawn_position":
-		var PlayToClientPacketParamsSpawnPositionTmp PlayToClientPacketSpawnPosition
-		err = PlayToClientPacketParamsSpawnPositionTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSpawnPositionTmp
-	case "start_configuration":
-		var PlayToClientPacketParamsStartConfigurationTmp PlayToClientPacketStartConfiguration
-		err = PlayToClientPacketParamsStartConfigurationTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsStartConfigurationTmp
-	case "statistics":
-		var PlayToClientPacketParamsStatisticsTmp PlayToClientPacketStatistics
-		err = PlayToClientPacketParamsStatisticsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsStatisticsTmp
-	case "step_tick":
-		var PlayToClientPacketParamsStepTickTmp PlayToClientPacketStepTick
-		err = PlayToClientPacketParamsStepTickTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsStepTickTmp
-	case "stop_sound":
-		var PlayToClientPacketParamsStopSoundTmp PlayToClientPacketStopSound
-		err = PlayToClientPacketParamsStopSoundTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsStopSoundTmp
-	case "store_cookie":
-		var PlayToClientPacketParamsStoreCookieTmp PlayToClientPacketCommonStoreCookie
-		err = PlayToClientPacketParamsStoreCookieTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsStoreCookieTmp
-	case "sync_entity_position":
-		var PlayToClientPacketParamsSyncEntityPositionTmp PlayToClientPacketSyncEntityPosition
-		err = PlayToClientPacketParamsSyncEntityPositionTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSyncEntityPositionTmp
-	case "system_chat":
-		var PlayToClientPacketParamsSystemChatTmp PlayToClientPacketSystemChat
-		err = PlayToClientPacketParamsSystemChatTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsSystemChatTmp
-	case "tab_complete":
-		var PlayToClientPacketParamsTabCompleteTmp PlayToClientPacketTabComplete
-		err = PlayToClientPacketParamsTabCompleteTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsTabCompleteTmp
-	case "tags":
-		var PlayToClientPacketParamsTagsTmp PlayToClientPacketTags
-		err = PlayToClientPacketParamsTagsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsTagsTmp
-	case "teams":
-		var PlayToClientPacketParamsTeamsTmp PlayToClientPacketTeams
-		err = PlayToClientPacketParamsTeamsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsTeamsTmp
-	case "test_instance_block_status":
-		var PlayToClientPacketParamsTestInstanceBlockStatusTmp PlayToClientPacketTestInstanceBlockStatus
-		err = PlayToClientPacketParamsTestInstanceBlockStatusTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsTestInstanceBlockStatusTmp
-	case "tile_entity_data":
-		var PlayToClientPacketParamsTileEntityDataTmp PlayToClientPacketTileEntityData
-		err = PlayToClientPacketParamsTileEntityDataTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsTileEntityDataTmp
-	case "tracked_waypoint":
-		var PlayToClientPacketParamsTrackedWaypointTmp PlayToClientPacketTrackedWaypoint
-		err = PlayToClientPacketParamsTrackedWaypointTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsTrackedWaypointTmp
-	case "trade_list":
-		var PlayToClientPacketParamsTradeListTmp PlayToClientPacketTradeList
-		err = PlayToClientPacketParamsTradeListTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsTradeListTmp
-	case "transfer":
-		var PlayToClientPacketParamsTransferTmp PlayToClientPacketCommonTransfer
-		err = PlayToClientPacketParamsTransferTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsTransferTmp
-	case "unload_chunk":
-		var PlayToClientPacketParamsUnloadChunkTmp PlayToClientPacketUnloadChunk
-		err = PlayToClientPacketParamsUnloadChunkTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsUnloadChunkTmp
-	case "update_health":
-		var PlayToClientPacketParamsUpdateHealthTmp PlayToClientPacketUpdateHealth
-		err = PlayToClientPacketParamsUpdateHealthTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsUpdateHealthTmp
-	case "update_light":
-		var PlayToClientPacketParamsUpdateLightTmp PlayToClientPacketUpdateLight
-		err = PlayToClientPacketParamsUpdateLightTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsUpdateLightTmp
-	case "update_time":
-		var PlayToClientPacketParamsUpdateTimeTmp PlayToClientPacketUpdateTime
-		err = PlayToClientPacketParamsUpdateTimeTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsUpdateTimeTmp
-	case "update_view_distance":
-		var PlayToClientPacketParamsUpdateViewDistanceTmp PlayToClientPacketUpdateViewDistance
-		err = PlayToClientPacketParamsUpdateViewDistanceTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsUpdateViewDistanceTmp
-	case "update_view_position":
-		var PlayToClientPacketParamsUpdateViewPositionTmp PlayToClientPacketUpdateViewPosition
-		err = PlayToClientPacketParamsUpdateViewPositionTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsUpdateViewPositionTmp
-	case "vehicle_move":
-		var PlayToClientPacketParamsVehicleMoveTmp PlayToClientPacketVehicleMove
-		err = PlayToClientPacketParamsVehicleMoveTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsVehicleMoveTmp
-	case "window_items":
-		var PlayToClientPacketParamsWindowItemsTmp PlayToClientPacketWindowItems
-		err = PlayToClientPacketParamsWindowItemsTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsWindowItemsTmp
-	case "world_border_center":
-		var PlayToClientPacketParamsWorldBorderCenterTmp PlayToClientPacketWorldBorderCenter
-		err = PlayToClientPacketParamsWorldBorderCenterTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsWorldBorderCenterTmp
-	case "world_border_lerp_size":
-		var PlayToClientPacketParamsWorldBorderLerpSizeTmp PlayToClientPacketWorldBorderLerpSize
-		err = PlayToClientPacketParamsWorldBorderLerpSizeTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsWorldBorderLerpSizeTmp
-	case "world_border_size":
-		var PlayToClientPacketParamsWorldBorderSizeTmp PlayToClientPacketWorldBorderSize
-		err = PlayToClientPacketParamsWorldBorderSizeTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsWorldBorderSizeTmp
-	case "world_border_warning_delay":
-		var PlayToClientPacketParamsWorldBorderWarningDelayTmp PlayToClientPacketWorldBorderWarningDelay
-		err = PlayToClientPacketParamsWorldBorderWarningDelayTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsWorldBorderWarningDelayTmp
-	case "world_border_warning_reach":
-		var PlayToClientPacketParamsWorldBorderWarningReachTmp PlayToClientPacketWorldBorderWarningReach
-		err = PlayToClientPacketParamsWorldBorderWarningReachTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsWorldBorderWarningReachTmp
-	case "world_event":
-		var PlayToClientPacketParamsWorldEventTmp PlayToClientPacketWorldEvent
-		err = PlayToClientPacketParamsWorldEventTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsWorldEventTmp
-	case "world_particles":
-		var PlayToClientPacketParamsWorldParticlesTmp PlayToClientPacketWorldParticles
-		err = PlayToClientPacketParamsWorldParticlesTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Params = PlayToClientPacketParamsWorldParticlesTmp
-	}
-	return
-}
-
-var PlayToClientPacketNameReverseMap = map[string]int32{"bundle_delimiter": 0x00, "spawn_entity": 0x01, "animation": 0x02, "statistics": 0x03, "acknowledge_player_digging": 0x04, "block_break_animation": 0x05, "tile_entity_data": 0x06, "block_action": 0x07, "block_change": 0x08, "boss_bar": 0x09, "difficulty": 0x0a, "chunk_batch_finished": 0x0b, "chunk_batch_start": 0x0c, "chunk_biomes": 0x0d, "clear_titles": 0x0e, "tab_complete": 0x0f, "declare_commands": 0x10, "close_window": 0x11, "window_items": 0x12, "craft_progress_bar": 0x13, "set_slot": 0x14, "cookie_request": 0x15, "set_cooldown": 0x16, "chat_suggestions": 0x17, "custom_payload": 0x18, "damage_event": 0x19, "debug_block_value": 0x1a, "debug_chunk_value": 0x1b, "debug_entity_value": 0x1c, "debug_event": 0x1d, "debug_sample": 0x1e, "hide_message": 0x1f, "kick_disconnect": 0x20, "profileless_chat": 0x21, "entity_status": 0x22, "sync_entity_position": 0x23, "explosion": 0x24, "unload_chunk": 0x25, "game_state_change": 0x26, "game_test_highlight_pos": 0x27, "open_horse_window": 0x28, "hurt_animation": 0x29, "initialize_world_border": 0x2a, "keep_alive": 0x2b, "map_chunk": 0x2c, "world_event": 0x2d, "world_particles": 0x2e, "update_light": 0x2f, "login": 0x30, "map": 0x31, "trade_list": 0x32, "rel_entity_move": 0x33, "entity_move_look": 0x34, "move_minecart": 0x35, "entity_look": 0x36, "vehicle_move": 0x37, "open_book": 0x38, "open_window": 0x39, "open_sign_entity": 0x3a, "ping": 0x3b, "ping_response": 0x3c, "craft_recipe_response": 0x3d, "abilities": 0x3e, "player_chat": 0x3f, "end_combat_event": 0x40, "enter_combat_event": 0x41, "death_combat_event": 0x42, "player_remove": 0x43, "player_info": 0x44, "face_player": 0x45, "position": 0x46, "player_rotation": 0x47, "recipe_book_add": 0x48, "recipe_book_remove": 0x49, "recipe_book_settings": 0x4a, "entity_destroy": 0x4b, "remove_entity_effect": 0x4c, "reset_score": 0x4d, "remove_resource_pack": 0x4e, "add_resource_pack": 0x4f, "respawn": 0x50, "entity_head_rotation": 0x51, "multi_block_change": 0x52, "select_advancement_tab": 0x53, "server_data": 0x54, "action_bar": 0x55, "world_border_center": 0x56, "world_border_lerp_size": 0x57, "world_border_size": 0x58, "world_border_warning_delay": 0x59, "world_border_warning_reach": 0x5a, "camera": 0x5b, "update_view_position": 0x5c, "update_view_distance": 0x5d, "set_cursor_item": 0x5e, "spawn_position": 0x5f, "scoreboard_display_objective": 0x60, "entity_metadata": 0x61, "attach_entity": 0x62, "entity_velocity": 0x63, "entity_equipment": 0x64, "experience": 0x65, "update_health": 0x66, "held_item_slot": 0x67, "scoreboard_objective": 0x68, "set_passengers": 0x69, "set_player_inventory": 0x6a, "teams": 0x6b, "scoreboard_score": 0x6c, "simulation_distance": 0x6d, "set_title_subtitle": 0x6e, "update_time": 0x6f, "set_title_text": 0x70, "set_title_time": 0x71, "entity_sound_effect": 0x72, "sound_effect": 0x73, "start_configuration": 0x74, "stop_sound": 0x75, "store_cookie": 0x76, "system_chat": 0x77, "playerlist_header": 0x78, "nbt_query_response": 0x79, "collect": 0x7a, "entity_teleport": 0x7b, "test_instance_block_status": 0x7c, "set_ticking_state": 0x7d, "step_tick": 0x7e, "transfer": 0x7f, "advancements": 0x80, "entity_update_attributes": 0x81, "entity_effect": 0x82, "declare_recipes": 0x83, "tags": 0x84, "set_projectile_power": 0x85, "custom_report_details": 0x86, "server_links": 0x87, "tracked_waypoint": 0x88, "clear_dialog": 0x89, "show_dialog": 0x8a}
-
-func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
-	var vPlayToClientPacketName int32
-	vPlayToClientPacketName, err = proto_base.ErroringIndex(PlayToClientPacketNameReverseMap, ret.Name)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vPlayToClientPacketName)
-	if err != nil {
-		return
-	}
-	switch ret.Name {
-	case "abilities":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAbilities)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "acknowledge_player_digging":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAcknowledgePlayerDigging)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "action_bar":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketActionBar)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "add_resource_pack":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonAddResourcePack)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "advancements":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAdvancements)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "animation":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAnimation)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "attach_entity":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketAttachEntity)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "block_action":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockAction)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "block_break_animation":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockBreakAnimation)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "block_change":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBlockChange)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "boss_bar":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketBossBar)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "bundle_delimiter":
-		_, ok := ret.Params.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	case "camera":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCamera)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "chat_suggestions":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChatSuggestions)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "chunk_batch_finished":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBatchFinished)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "chunk_batch_start":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBatchStart)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "chunk_biomes":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketChunkBiomes)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "clear_dialog":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonClearDialog)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "clear_titles":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketClearTitles)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "close_window":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCloseWindow)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "collect":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCollect)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "cookie_request":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonCookieRequest)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "craft_progress_bar":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCraftProgressBar)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "craft_recipe_response":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCraftRecipeResponse)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "custom_payload":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCustomPayload)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "custom_report_details":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonCustomReportDetails)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "damage_event":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDamageEvent)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "death_combat_event":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeathCombatEvent)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "debug_block_value":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugBlockValue)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "debug_chunk_value":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugChunkValue)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "debug_entity_value":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugEntityValue)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "debug_event":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugEvent)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "debug_sample":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDebugSample)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "declare_commands":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeclareCommands)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "declare_recipes":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDeclareRecipes)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "difficulty":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketDifficulty)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "end_combat_event":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEndCombatEvent)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "enter_combat_event":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEnterCombatEvent)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_destroy":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityDestroy)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_effect":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityEffect)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_equipment":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityEquipment)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_head_rotation":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityHeadRotation)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_look":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityLook)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_metadata":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityMetadata)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_move_look":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityMoveLook)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_sound_effect":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntitySoundEffect)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_status":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityStatus)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_teleport":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityTeleport)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_update_attributes":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityUpdateAttributes)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "entity_velocity":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketEntityVelocity)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "experience":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketExperience)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "explosion":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketExplosion)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "face_player":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketFacePlayer)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "game_state_change":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketGameStateChange)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "game_test_highlight_pos":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketGameTestHighlightPos)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "held_item_slot":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHeldItemSlot)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "hide_message":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHideMessage)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "hurt_animation":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketHurtAnimation)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "initialize_world_border":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketInitializeWorldBorder)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "keep_alive":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketKeepAlive)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "kick_disconnect":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketKickDisconnect)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "login":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketLogin)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "map":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMap)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "map_chunk":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMapChunk)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "move_minecart":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMoveMinecart)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "multi_block_change":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketMultiBlockChange)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "nbt_query_response":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketNbtQueryResponse)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "open_book":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenBook)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "open_horse_window":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenHorseWindow)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "open_sign_entity":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenSignEntity)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "open_window":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketOpenWindow)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "ping":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPing)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "ping_response":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPingResponse)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "player_chat":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerChat)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "player_info":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerInfo)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "player_remove":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerRemove)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "player_rotation":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerRotation)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "playerlist_header":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPlayerlistHeader)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "position":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketPosition)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "profileless_chat":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketProfilelessChat)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "recipe_book_add":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookAdd)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "recipe_book_remove":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookRemove)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "recipe_book_settings":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRecipeBookSettings)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "rel_entity_move":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRelEntityMove)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "remove_entity_effect":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRemoveEntityEffect)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "remove_resource_pack":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonRemoveResourcePack)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "reset_score":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketResetScore)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "respawn":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketRespawn)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "scoreboard_display_objective":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardDisplayObjective)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "scoreboard_objective":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardObjective)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "scoreboard_score":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketScoreboardScore)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "select_advancement_tab":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSelectAdvancementTab)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "server_data":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketServerData)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "server_links":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonServerLinks)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_cooldown":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetCooldown)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_cursor_item":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetCursorItem)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_passengers":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetPassengers)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_player_inventory":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetPlayerInventory)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_projectile_power":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetProjectilePower)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_slot":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetSlot)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_ticking_state":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTickingState)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_title_subtitle":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleSubtitle)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_title_text":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleText)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "set_title_time":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSetTitleTime)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "show_dialog":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketShowDialog)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "simulation_distance":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSimulationDistance)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "sound_effect":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSoundEffect)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "spawn_entity":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSpawnEntity)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "spawn_position":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSpawnPosition)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "start_configuration":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStartConfiguration)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "statistics":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStatistics)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "step_tick":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStepTick)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "stop_sound":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketStopSound)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "store_cookie":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonStoreCookie)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "sync_entity_position":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSyncEntityPosition)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "system_chat":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketSystemChat)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "tab_complete":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTabComplete)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "tags":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTags)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "teams":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTeams)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "test_instance_block_status":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTestInstanceBlockStatus)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "tile_entity_data":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTileEntityData)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "tracked_waypoint":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTrackedWaypoint)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "trade_list":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketTradeList)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "transfer":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketCommonTransfer)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "unload_chunk":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUnloadChunk)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "update_health":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateHealth)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "update_light":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateLight)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "update_time":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateTime)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "update_view_distance":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateViewDistance)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "update_view_position":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketUpdateViewPosition)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "vehicle_move":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketVehicleMove)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "window_items":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWindowItems)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "world_border_center":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderCenter)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "world_border_lerp_size":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderLerpSize)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "world_border_size":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderSize)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "world_border_warning_delay":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderWarningDelay)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "world_border_warning_reach":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldBorderWarningReach)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "world_event":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldEvent)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	case "world_particles":
-		PlayToClientPacketParams, ok := ret.Params.(PlayToClientPacketWorldParticles)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketParams.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketAbilities struct {
-	Flags        int8
-	FlyingSpeed  float32
-	WalkingSpeed float32
-}
-
-func (ret *PlayToClientPacketAbilities) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Flags)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.FlyingSpeed)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.WalkingSpeed)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketAbilities) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Flags)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.FlyingSpeed)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.WalkingSpeed)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketAcknowledgePlayerDigging struct {
-	SequenceId int32
-}
-
-func (ret *PlayToClientPacketAcknowledgePlayerDigging) Decode(r io.Reader) (err error) {
-	ret.SequenceId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketAcknowledgePlayerDigging) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.SequenceId)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketActionBar struct {
-	Text nbt.Anon
-}
-
-func (ret *PlayToClientPacketActionBar) Decode(r io.Reader) (err error) {
-	err = ret.Text.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketActionBar) Encode(w io.Writer) (err error) {
-	err = ret.Text.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketAdvancements struct {
-	Reset              bool
-	AdvancementMapping []struct {
-		Key   string
-		Value struct {
-			ParentId    *string
-			DisplayData *struct {
-				Title       nbt.Anon
-				Description nbt.Anon
-				Icon        Slot
-				FrameType   int32
-				Flags       struct {
-					Unused               uint32
-					Hidden               bool
-					ShowToast            bool
-					HasBackgroundTexture bool
-				}
-				BackgroundTexture any
-				XCord             float32
-				YCord             float32
-			}
-			Requirements      [][]string
-			SendsTelemtryData bool
-		}
-	}
-	Identifiers     []string
-	ProgressMapping []struct {
-		Key   string
-		Value []struct {
-			CriterionIdentifier string
-			CriterionProgress   *int64
-		}
-	}
-	ShowAdvancements bool
-}
-
-func (ret *PlayToClientPacketAdvancements) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Reset)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketAdvancementsAdvancementMapping int32
-	lPlayToClientPacketAdvancementsAdvancementMapping, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.AdvancementMapping = []struct {
-		Key   string
-		Value struct {
-			ParentId    *string
-			DisplayData *struct {
-				Title       nbt.Anon
-				Description nbt.Anon
-				Icon        Slot
-				FrameType   int32
-				Flags       struct {
-					Unused               uint32
-					Hidden               bool
-					ShowToast            bool
-					HasBackgroundTexture bool
-				}
-				BackgroundTexture any
-				XCord             float32
-				YCord             float32
-			}
-			Requirements      [][]string
-			SendsTelemtryData bool
-		}
-	}{}
-	for range lPlayToClientPacketAdvancementsAdvancementMapping {
-		var PlayToClientPacketAdvancementsAdvancementMappingElement struct {
-			Key   string
-			Value struct {
-				ParentId    *string
-				DisplayData *struct {
-					Title       nbt.Anon
-					Description nbt.Anon
-					Icon        Slot
-					FrameType   int32
-					Flags       struct {
-						Unused               uint32
-						Hidden               bool
-						ShowToast            bool
-						HasBackgroundTexture bool
-					}
-					BackgroundTexture any
-					XCord             float32
-					YCord             float32
-				}
-				Requirements      [][]string
-				SendsTelemtryData bool
-			}
-		}
-		PlayToClientPacketAdvancementsAdvancementMappingElement.Key, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresent bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresent)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresent {
-			var PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresentValue string
-			PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresentValue, err = proto_base.DecodeString(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketAdvancementsAdvancementMappingElement.Value.ParentId = &PlayToClientPacketAdvancementsAdvancementMappingElementValueParentIdPresentValue
-		}
-		var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresent bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresent)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresent {
-			var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue struct {
-				Title       nbt.Anon
-				Description nbt.Anon
-				Icon        Slot
-				FrameType   int32
-				Flags       struct {
-					Unused               uint32
-					Hidden               bool
-					ShowToast            bool
-					HasBackgroundTexture bool
-				}
-				BackgroundTexture any
-				XCord             float32
-				YCord             float32
-			}
-			err = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Title.Decode(r)
-			if err != nil {
-				return
-			}
-			err = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Description.Decode(r)
-			if err != nil {
-				return
-			}
-			err = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Icon.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.FrameType, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked uint32
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.Unused = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked << 0 >> 3
-			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.Hidden = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked<<29>>31 == 1
-			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.ShowToast = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked<<30>>31 == 1
-			PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.HasBackgroundTexture = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataFlagsPacked<<31>>31 == 1
-			switch PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.Flags.HasBackgroundTexture {
-			case true:
-				var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTexture1Tmp string
-				PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTexture1Tmp, err = proto_base.DecodeString(r)
-				if err != nil {
-					return
-				}
-				PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.BackgroundTexture = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTexture1Tmp
-			default:
-				var PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTextureTmp struct {
-				}
-				PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.BackgroundTexture = PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataBackgroundTextureTmp
-			}
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.XCord)
-			if err != nil {
-				return
-			}
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue.YCord)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketAdvancementsAdvancementMappingElement.Value.DisplayData = &PlayToClientPacketAdvancementsAdvancementMappingElementValueDisplayDataPresentValue
-		}
-		var lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirements int32
-		lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirements, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketAdvancementsAdvancementMappingElement.Value.Requirements = [][]string{}
-		for range lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirements {
-			var PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement []string
-			var lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement int32
-			lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement = []string{}
-			for range lPlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement {
-				var PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElementElement string
-				PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElementElement, err = proto_base.DecodeString(r)
-				if err != nil {
-					return
-				}
-				PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement = append(PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement, PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElementElement)
-			}
-			PlayToClientPacketAdvancementsAdvancementMappingElement.Value.Requirements = append(PlayToClientPacketAdvancementsAdvancementMappingElement.Value.Requirements, PlayToClientPacketAdvancementsAdvancementMappingElementValueRequirementsElement)
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsAdvancementMappingElement.Value.SendsTelemtryData)
-		if err != nil {
-			return
-		}
-		ret.AdvancementMapping = append(ret.AdvancementMapping, PlayToClientPacketAdvancementsAdvancementMappingElement)
-	}
-	var lPlayToClientPacketAdvancementsIdentifiers int32
-	lPlayToClientPacketAdvancementsIdentifiers, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Identifiers = []string{}
-	for range lPlayToClientPacketAdvancementsIdentifiers {
-		var PlayToClientPacketAdvancementsIdentifiersElement string
-		PlayToClientPacketAdvancementsIdentifiersElement, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Identifiers = append(ret.Identifiers, PlayToClientPacketAdvancementsIdentifiersElement)
-	}
-	var lPlayToClientPacketAdvancementsProgressMapping int32
-	lPlayToClientPacketAdvancementsProgressMapping, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ProgressMapping = []struct {
-		Key   string
-		Value []struct {
-			CriterionIdentifier string
-			CriterionProgress   *int64
-		}
-	}{}
-	for range lPlayToClientPacketAdvancementsProgressMapping {
-		var PlayToClientPacketAdvancementsProgressMappingElement struct {
-			Key   string
-			Value []struct {
-				CriterionIdentifier string
-				CriterionProgress   *int64
-			}
-		}
-		PlayToClientPacketAdvancementsProgressMappingElement.Key, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		var lPlayToClientPacketAdvancementsProgressMappingElementValue int32
-		lPlayToClientPacketAdvancementsProgressMappingElementValue, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketAdvancementsProgressMappingElement.Value = []struct {
-			CriterionIdentifier string
-			CriterionProgress   *int64
-		}{}
-		for range lPlayToClientPacketAdvancementsProgressMappingElementValue {
-			var PlayToClientPacketAdvancementsProgressMappingElementValueElement struct {
-				CriterionIdentifier string
-				CriterionProgress   *int64
-			}
-			PlayToClientPacketAdvancementsProgressMappingElementValueElement.CriterionIdentifier, err = proto_base.DecodeString(r)
-			if err != nil {
-				return
-			}
-			var PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresent bool
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresent)
-			if err != nil {
-				return
-			}
-			if PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresent {
-				var PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresentValue int64
-				err = binary.Read(r, binary.BigEndian, &PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresentValue)
-				if err != nil {
-					return
-				}
-				PlayToClientPacketAdvancementsProgressMappingElementValueElement.CriterionProgress = &PlayToClientPacketAdvancementsProgressMappingElementValueElementCriterionProgressPresentValue
-			}
-			PlayToClientPacketAdvancementsProgressMappingElement.Value = append(PlayToClientPacketAdvancementsProgressMappingElement.Value, PlayToClientPacketAdvancementsProgressMappingElementValueElement)
-		}
-		ret.ProgressMapping = append(ret.ProgressMapping, PlayToClientPacketAdvancementsProgressMappingElement)
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ShowAdvancements)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketAdvancements) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Reset)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.AdvancementMapping)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketAdvancementsAdvancementMapping := range len(ret.AdvancementMapping) {
-		err = proto_base.EncodeString(w, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Key)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.ParentId != nil)
-		if err != nil {
-			return
-		}
-		if ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.ParentId != nil {
-			err = proto_base.EncodeString(w, *ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.ParentId)
-			if err != nil {
-				return
-			}
-		}
-		err = binary.Write(w, binary.BigEndian, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData != nil)
-		if err != nil {
-			return
-		}
-		if ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData != nil {
-			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Title.Encode(w)
-			if err != nil {
-				return
-			}
-			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Description.Encode(w)
-			if err != nil {
-				return
-			}
-			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Icon.Encode(w)
-			if err != nil {
-				return
-			}
-			err = proto_base.EncodeVarInt(w, (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).FrameType)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Flags)
-			if err != nil {
-				return
-			}
-			switch (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Flags.HasBackgroundTexture {
-			case true:
-				PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataBackgroundTexture, ok := (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).BackgroundTexture.(string)
-				if !ok {
-					err = proto_base.BadTypeError
-					return
-				}
-				err = proto_base.EncodeString(w, PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataBackgroundTexture)
-				if err != nil {
-					return
-				}
-			default:
-				_, ok := (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).BackgroundTexture.(struct {
-				})
-				if !ok {
-					err = proto_base.BadTypeError
-					return
-				}
-			}
-			err = binary.Write(w, binary.BigEndian, (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).XCord)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).YCord)
-			if err != nil {
-				return
-			}
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirements := range len(ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements) {
-			err = proto_base.EncodeVarInt(w, int32(len(ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements[iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirements])))
-			if err != nil {
-				return
-			}
-			for iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirementsInner := range len(ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements[iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirements]) {
-				err = proto_base.EncodeString(w, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.Requirements[iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirements][iPlayToClientPacketAdvancementsAdvancementMappingInnerValueRequirementsInner])
-				if err != nil {
-					return
-				}
-			}
-		}
-		err = binary.Write(w, binary.BigEndian, ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.SendsTelemtryData)
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Identifiers)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketAdvancementsIdentifiers := range len(ret.Identifiers) {
-		err = proto_base.EncodeString(w, ret.Identifiers[iPlayToClientPacketAdvancementsIdentifiers])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.ProgressMapping)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketAdvancementsProgressMapping := range len(ret.ProgressMapping) {
-		err = proto_base.EncodeString(w, ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Key)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketAdvancementsProgressMappingInnerValue := range len(ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value) {
-			err = proto_base.EncodeString(w, ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value[iPlayToClientPacketAdvancementsProgressMappingInnerValue].CriterionIdentifier)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value[iPlayToClientPacketAdvancementsProgressMappingInnerValue].CriterionProgress != nil)
-			if err != nil {
-				return
-			}
-			if ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value[iPlayToClientPacketAdvancementsProgressMappingInnerValue].CriterionProgress != nil {
-				err = binary.Write(w, binary.BigEndian, *ret.ProgressMapping[iPlayToClientPacketAdvancementsProgressMapping].Value[iPlayToClientPacketAdvancementsProgressMappingInnerValue].CriterionProgress)
-				if err != nil {
-					return
-				}
-			}
-		}
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ShowAdvancements)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketAnimation struct {
-	EntityId  int32
-	Animation uint8
-}
-
-func (ret *PlayToClientPacketAnimation) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Animation)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketAnimation) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Animation)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketAttachEntity struct {
-	EntityId  int32
-	VehicleId int32
-}
-
-func (ret *PlayToClientPacketAttachEntity) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.VehicleId)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketAttachEntity) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.VehicleId)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketBlockAction struct {
-	Location Position
-	Byte1    uint8
-	Byte2    uint8
-	BlockId  int32
-}
-
-func (ret *PlayToClientPacketBlockAction) Decode(r io.Reader) (err error) {
-	err = ret.Location.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Byte1)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Byte2)
-	if err != nil {
-		return
-	}
-	ret.BlockId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketBlockAction) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Byte1)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Byte2)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.BlockId)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketBlockBreakAnimation struct {
-	EntityId     int32
-	Location     Position
-	DestroyStage int8
-}
-
-func (ret *PlayToClientPacketBlockBreakAnimation) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.Location.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DestroyStage)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketBlockBreakAnimation) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = ret.Location.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DestroyStage)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketBlockChange struct {
-	Location Position
-	Type     int32
-}
-
-func (ret *PlayToClientPacketBlockChange) Decode(r io.Reader) (err error) {
-	err = ret.Location.Decode(r)
-	if err != nil {
-		return
-	}
-	ret.Type, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketBlockChange) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Type)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketBossBar struct {
-	EntityUUID uuid.UUID
-	Action     int32
-	Title      any
-	Health     any
-	Color      any
-	Dividers   any
-	Flags      any
-}
-
-func (ret *PlayToClientPacketBossBar) Decode(r io.Reader) (err error) {
-	_, err = io.ReadFull(r, ret.EntityUUID[:])
-	if err != nil {
-		return
-	}
-	ret.Action, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketBossBarTitle0Tmp nbt.Anon
-		err = PlayToClientPacketBossBarTitle0Tmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Title = PlayToClientPacketBossBarTitle0Tmp
-	case 3:
-		var PlayToClientPacketBossBarTitle3Tmp nbt.Anon
-		err = PlayToClientPacketBossBarTitle3Tmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Title = PlayToClientPacketBossBarTitle3Tmp
-	default:
-		var PlayToClientPacketBossBarTitleTmp struct {
-		}
-		ret.Title = PlayToClientPacketBossBarTitleTmp
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketBossBarHealth0Tmp float32
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketBossBarHealth0Tmp)
-		if err != nil {
-			return
-		}
-		ret.Health = PlayToClientPacketBossBarHealth0Tmp
-	case 2:
-		var PlayToClientPacketBossBarHealth2Tmp float32
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketBossBarHealth2Tmp)
-		if err != nil {
-			return
-		}
-		ret.Health = PlayToClientPacketBossBarHealth2Tmp
-	default:
-		var PlayToClientPacketBossBarHealthTmp struct {
-		}
-		ret.Health = PlayToClientPacketBossBarHealthTmp
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketBossBarColor0Tmp int32
-		PlayToClientPacketBossBarColor0Tmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Color = PlayToClientPacketBossBarColor0Tmp
-	case 4:
-		var PlayToClientPacketBossBarColor4Tmp int32
-		PlayToClientPacketBossBarColor4Tmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Color = PlayToClientPacketBossBarColor4Tmp
-	default:
-		var PlayToClientPacketBossBarColorTmp struct {
-		}
-		ret.Color = PlayToClientPacketBossBarColorTmp
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketBossBarDividers0Tmp int32
-		PlayToClientPacketBossBarDividers0Tmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Dividers = PlayToClientPacketBossBarDividers0Tmp
-	case 4:
-		var PlayToClientPacketBossBarDividers4Tmp int32
-		PlayToClientPacketBossBarDividers4Tmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Dividers = PlayToClientPacketBossBarDividers4Tmp
-	default:
-		var PlayToClientPacketBossBarDividersTmp struct {
-		}
-		ret.Dividers = PlayToClientPacketBossBarDividersTmp
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketBossBarFlags0Tmp uint8
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketBossBarFlags0Tmp)
-		if err != nil {
-			return
-		}
-		ret.Flags = PlayToClientPacketBossBarFlags0Tmp
-	case 5:
-		var PlayToClientPacketBossBarFlags5Tmp uint8
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketBossBarFlags5Tmp)
-		if err != nil {
-			return
-		}
-		ret.Flags = PlayToClientPacketBossBarFlags5Tmp
-	default:
-		var PlayToClientPacketBossBarFlagsTmp struct {
-		}
-		ret.Flags = PlayToClientPacketBossBarFlagsTmp
-	}
-	return
-}
-func (ret *PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
-	_, err = w.Write(ret.EntityUUID[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Action)
-	if err != nil {
-		return
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketBossBarTitle, ok := ret.Title.(nbt.Anon)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketBossBarTitle.Encode(w)
-		if err != nil {
-			return
-		}
-	case 3:
-		PlayToClientPacketBossBarTitle, ok := ret.Title.(nbt.Anon)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketBossBarTitle.Encode(w)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Title.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketBossBarHealth, ok := ret.Health.(float32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarHealth)
-		if err != nil {
-			return
-		}
-	case 2:
-		PlayToClientPacketBossBarHealth, ok := ret.Health.(float32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarHealth)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Health.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketBossBarColor, ok := ret.Color.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketBossBarColor)
-		if err != nil {
-			return
-		}
-	case 4:
-		PlayToClientPacketBossBarColor, ok := ret.Color.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketBossBarColor)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Color.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketBossBarDividers, ok := ret.Dividers.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketBossBarDividers)
-		if err != nil {
-			return
-		}
-	case 4:
-		PlayToClientPacketBossBarDividers, ok := ret.Dividers.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketBossBarDividers)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Dividers.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketBossBarFlags, ok := ret.Flags.(uint8)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarFlags)
-		if err != nil {
-			return
-		}
-	case 5:
-		PlayToClientPacketBossBarFlags, ok := ret.Flags.(uint8)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketBossBarFlags)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Flags.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketCamera struct {
-	CameraId int32
-}
-
-func (ret *PlayToClientPacketCamera) Decode(r io.Reader) (err error) {
-	ret.CameraId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCamera) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.CameraId)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketChatSuggestions struct {
-	Action  int32
-	Entries []string
-}
-
-func (ret *PlayToClientPacketChatSuggestions) Decode(r io.Reader) (err error) {
-	ret.Action, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketChatSuggestionsEntries int32
-	lPlayToClientPacketChatSuggestionsEntries, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Entries = []string{}
-	for range lPlayToClientPacketChatSuggestionsEntries {
-		var PlayToClientPacketChatSuggestionsEntriesElement string
-		PlayToClientPacketChatSuggestionsEntriesElement, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Entries = append(ret.Entries, PlayToClientPacketChatSuggestionsEntriesElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketChatSuggestions) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Action)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Entries)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketChatSuggestionsEntries := range len(ret.Entries) {
-		err = proto_base.EncodeString(w, ret.Entries[iPlayToClientPacketChatSuggestionsEntries])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketChunkBatchFinished struct {
-	BatchSize int32
-}
-
-func (ret *PlayToClientPacketChunkBatchFinished) Decode(r io.Reader) (err error) {
-	ret.BatchSize, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketChunkBatchFinished) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.BatchSize)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketChunkBatchStart struct {
-}
-
-func (ret *PlayToClientPacketChunkBatchStart) Decode(r io.Reader) (err error) {
-	return
-}
-func (ret *PlayToClientPacketChunkBatchStart) Encode(w io.Writer) (err error) {
-	return
-}
-
-type PlayToClientPacketChunkBiomes struct {
-	Biomes []struct {
-		Position PackedChunkPos
-		Data     ByteArray
-	}
-}
-
-func (ret *PlayToClientPacketChunkBiomes) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketChunkBiomesBiomes int32
-	lPlayToClientPacketChunkBiomesBiomes, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Biomes = []struct {
-		Position PackedChunkPos
-		Data     ByteArray
-	}{}
-	for range lPlayToClientPacketChunkBiomesBiomes {
-		var PlayToClientPacketChunkBiomesBiomesElement struct {
-			Position PackedChunkPos
-			Data     ByteArray
-		}
-		err = PlayToClientPacketChunkBiomesBiomesElement.Position.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketChunkBiomesBiomesElement.Data.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Biomes = append(ret.Biomes, PlayToClientPacketChunkBiomesBiomesElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketChunkBiomes) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Biomes)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketChunkBiomesBiomes := range len(ret.Biomes) {
-		err = ret.Biomes[iPlayToClientPacketChunkBiomesBiomes].Position.Encode(w)
-		if err != nil {
-			return
-		}
-		err = ret.Biomes[iPlayToClientPacketChunkBiomesBiomes].Data.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketClearTitles struct {
-	Reset bool
-}
-
-func (ret *PlayToClientPacketClearTitles) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Reset)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketClearTitles) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Reset)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCloseWindow struct {
-	WindowId ContainerID
-}
-
-func (ret *PlayToClientPacketCloseWindow) Decode(r io.Reader) (err error) {
-	err = ret.WindowId.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCloseWindow) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCollect struct {
-	CollectedEntityId int32
-	CollectorEntityId int32
-	PickupItemCount   int32
-}
-
-func (ret *PlayToClientPacketCollect) Decode(r io.Reader) (err error) {
-	ret.CollectedEntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.CollectorEntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.PickupItemCount, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCollect) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.CollectedEntityId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.CollectorEntityId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.PickupItemCount)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCommonAddResourcePack struct {
-	Uuid          uuid.UUID
-	Url           string
-	Hash          string
-	Forced        bool
-	PromptMessage *nbt.Anon
-}
-
-func (ret *PlayToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
-	_, err = io.ReadFull(r, ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	ret.Url, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Hash, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Forced)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketCommonAddResourcePackPromptMessagePresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonAddResourcePackPromptMessagePresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketCommonAddResourcePackPromptMessagePresent {
-		var PlayToClientPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
-		err = PlayToClientPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.PromptMessage = &PlayToClientPacketCommonAddResourcePackPromptMessagePresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
-	_, err = w.Write(ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Url)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Hash)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Forced)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
-	if err != nil {
-		return
-	}
-	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketCommonClearDialog struct {
-}
-
-func (ret *PlayToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
-	return
-}
-func (ret *PlayToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
-	return
-}
-
-type PlayToClientPacketCommonCookieRequest struct {
-	Cookie string
-}
-
-func (ret *PlayToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
-	ret.Cookie, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Cookie)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCommonCookieResponse struct {
-	Key   string
-	Value *ByteArray
-}
-
-func (ret *PlayToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketCommonCookieResponseValuePresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonCookieResponseValuePresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketCommonCookieResponseValuePresent {
-		var PlayToClientPacketCommonCookieResponseValuePresentValue ByteArray
-		err = PlayToClientPacketCommonCookieResponseValuePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Value = &PlayToClientPacketCommonCookieResponseValuePresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
-	if err != nil {
-		return
-	}
-	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketCommonCustomClickAction struct {
-	Id  string
-	Nbt *nbt.Anon
-}
-
-func (ret *PlayToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
-	ret.Id, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketCommonCustomClickActionNbtPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonCustomClickActionNbtPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketCommonCustomClickActionNbtPresent {
-		var PlayToClientPacketCommonCustomClickActionNbtPresentValue nbt.Anon
-		err = PlayToClientPacketCommonCustomClickActionNbtPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Nbt = &PlayToClientPacketCommonCustomClickActionNbtPresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Id)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
-	if err != nil {
-		return
-	}
-	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketCommonCustomReportDetails struct {
-	Details []struct {
-		Key   string
-		Value string
-	}
-}
-
-func (ret *PlayToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketCommonCustomReportDetailsDetails int32
-	lPlayToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Details = []struct {
-		Key   string
-		Value string
-	}{}
-	for range lPlayToClientPacketCommonCustomReportDetailsDetails {
-		var PlayToClientPacketCommonCustomReportDetailsDetailsElement struct {
-			Key   string
-			Value string
-		}
-		PlayToClientPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Details = append(ret.Details, PlayToClientPacketCommonCustomReportDetailsDetailsElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
-		err = proto_base.EncodeString(w, ret.Details[iPlayToClientPacketCommonCustomReportDetailsDetails].Key)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Details[iPlayToClientPacketCommonCustomReportDetailsDetails].Value)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketCommonRemoveResourcePack struct {
-	Uuid *uuid.UUID
-}
-
-func (ret *PlayToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
-	var PlayToClientPacketCommonRemoveResourcePackUuidPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonRemoveResourcePackUuidPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketCommonRemoveResourcePackUuidPresent {
-		var PlayToClientPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
-		_, err = io.ReadFull(r, PlayToClientPacketCommonRemoveResourcePackUuidPresentValue[:])
-		if err != nil {
-			return
-		}
-		ret.Uuid = &PlayToClientPacketCommonRemoveResourcePackUuidPresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
-	if err != nil {
-		return
-	}
-	if ret.Uuid != nil {
-		_, err = w.Write((*ret.Uuid)[:])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketCommonSelectKnownPacks struct {
-	Packs []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}
-}
-
-func (ret *PlayToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketCommonSelectKnownPacksPacks int32
-	lPlayToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Packs = []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}{}
-	for range lPlayToClientPacketCommonSelectKnownPacksPacks {
-		var PlayToClientPacketCommonSelectKnownPacksPacksElement struct {
-			Namespace string
-			Id        string
-			Version   string
-		}
-		PlayToClientPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Packs = append(ret.Packs, PlayToClientPacketCommonSelectKnownPacksPacksElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
-		err = proto_base.EncodeString(w, ret.Packs[iPlayToClientPacketCommonSelectKnownPacksPacks].Namespace)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iPlayToClientPacketCommonSelectKnownPacksPacks].Id)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iPlayToClientPacketCommonSelectKnownPacksPacks].Version)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketCommonServerLinks struct {
-	Links []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}
-}
-
-func (ret *PlayToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketCommonServerLinksLinks int32
-	lPlayToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Links = []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}{}
-	for range lPlayToClientPacketCommonServerLinksLinks {
-		var PlayToClientPacketCommonServerLinksLinksElement struct {
-			HasKnownType bool
-			KnownType    any
-			UnknownType  any
-			Link         string
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonServerLinksLinksElement.HasKnownType)
-		if err != nil {
-			return
-		}
-		switch PlayToClientPacketCommonServerLinksLinksElement.HasKnownType {
-		case true:
-			var PlayToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
-			err = PlayToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketCommonServerLinksLinksElement.KnownType = PlayToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp
-		}
-		switch PlayToClientPacketCommonServerLinksLinksElement.HasKnownType {
-		case false:
-			var PlayToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
-			err = PlayToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketCommonServerLinksLinksElement.UnknownType = PlayToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
-		}
-		PlayToClientPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Links = append(ret.Links, PlayToClientPacketCommonServerLinksLinksElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketCommonServerLinksLinks := range len(ret.Links) {
-		err = binary.Write(w, binary.BigEndian, ret.Links[iPlayToClientPacketCommonServerLinksLinks].HasKnownType)
-		if err != nil {
-			return
-		}
-		switch ret.Links[iPlayToClientPacketCommonServerLinksLinks].HasKnownType {
-		case true:
-			PlayToClientPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iPlayToClientPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = PlayToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		switch ret.Links[iPlayToClientPacketCommonServerLinksLinks].HasKnownType {
-		case false:
-			PlayToClientPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iPlayToClientPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = PlayToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		err = proto_base.EncodeString(w, ret.Links[iPlayToClientPacketCommonServerLinksLinks].Link)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketCommonSettings struct {
-	Locale              string
-	ViewDistance        int8
-	ChatFlags           int32
-	ChatColors          bool
-	SkinParts           uint8
-	MainHand            int32
-	EnableTextFiltering bool
-	EnableServerListing bool
-	ParticleStatus      string
-}
-
-var PlayToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
-
-func (ret *PlayToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
-	ret.Locale, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
-	if err != nil {
-		return
-	}
-	ret.MainHand, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketCommonSettingsParticleStatusKey int32
-	PlayToClientPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ParticleStatus, err = proto_base.ErroringIndex(PlayToClientPacketCommonSettingsParticleStatusMap, PlayToClientPacketCommonSettingsParticleStatusKey)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var PlayToClientPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
-
-func (ret *PlayToClientPacketCommonSettings) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Locale)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.MainHand)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var vPlayToClientPacketCommonSettingsParticleStatus int32
-	vPlayToClientPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(PlayToClientPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vPlayToClientPacketCommonSettingsParticleStatus)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCommonStoreCookie struct {
-	Key   string
-	Value ByteArray
-}
-
-func (ret *PlayToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCommonTransfer struct {
-	Host string
-	Port int32
-}
-
-func (ret *PlayToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
-	ret.Host, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Port, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCommonTransfer) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Host)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Port)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCraftProgressBar struct {
-	WindowId ContainerID
-	Property int16
-	Value    int16
-}
-
-func (ret *PlayToClientPacketCraftProgressBar) Decode(r io.Reader) (err error) {
-	err = ret.WindowId.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Property)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Value)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCraftProgressBar) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Property)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Value)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCraftRecipeResponse struct {
-	WindowId      ContainerID
-	RecipeDisplay PlayToClientRecipeDisplay
-}
-
-func (ret *PlayToClientPacketCraftRecipeResponse) Decode(r io.Reader) (err error) {
-	err = ret.WindowId.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.RecipeDisplay.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCraftRecipeResponse) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.RecipeDisplay.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketCustomPayload struct {
-	Channel string
-	Data    proto_base.RestBuffer
-}
-
-func (ret *PlayToClientPacketCustomPayload) Decode(r io.Reader) (err error) {
-	ret.Channel, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = ret.Data.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketCustomPayload) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Channel)
-	if err != nil {
-		return
-	}
-	err = ret.Data.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketDamageEvent struct {
-	EntityId       int32
-	SourceTypeId   int32
-	SourceCauseId  int32
-	SourceDirectId int32
-	SourcePosition *Vec3f64
-}
-
-func (ret *PlayToClientPacketDamageEvent) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SourceTypeId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SourceCauseId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SourceDirectId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketDamageEventSourcePositionPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketDamageEventSourcePositionPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketDamageEventSourcePositionPresent {
-		var PlayToClientPacketDamageEventSourcePositionPresentValue Vec3f64
-		err = PlayToClientPacketDamageEventSourcePositionPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.SourcePosition = &PlayToClientPacketDamageEventSourcePositionPresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketDamageEvent) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.SourceTypeId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.SourceCauseId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.SourceDirectId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.SourcePosition != nil)
-	if err != nil {
-		return
-	}
-	if ret.SourcePosition != nil {
-		err = (*ret.SourcePosition).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketDeathCombatEvent struct {
-	PlayerId int32
-	Message  nbt.Anon
-}
-
-func (ret *PlayToClientPacketDeathCombatEvent) Decode(r io.Reader) (err error) {
-	ret.PlayerId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.Message.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketDeathCombatEvent) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.PlayerId)
-	if err != nil {
-		return
-	}
-	err = ret.Message.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketDebugBlockValue struct {
-	BlockPos Position
-	Update   DebugSubscriptionUpdate
-}
-
-func (ret *PlayToClientPacketDebugBlockValue) Decode(r io.Reader) (err error) {
-	err = ret.BlockPos.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Update.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketDebugBlockValue) Encode(w io.Writer) (err error) {
-	err = ret.BlockPos.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Update.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketDebugChunkValue struct {
-	ChunkPos PackedChunkPos
-	Update   DebugSubscriptionUpdate
-}
-
-func (ret *PlayToClientPacketDebugChunkValue) Decode(r io.Reader) (err error) {
-	err = ret.ChunkPos.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Update.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketDebugChunkValue) Encode(w io.Writer) (err error) {
-	err = ret.ChunkPos.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Update.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketDebugEntityValue struct {
-	EntityId int32
-	Update   DebugSubscriptionUpdate
-}
-
-func (ret *PlayToClientPacketDebugEntityValue) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.Update.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketDebugEntityValue) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = ret.Update.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketDebugEvent struct {
-	Event DebugSubscriptionEvent
-}
-
-func (ret *PlayToClientPacketDebugEvent) Decode(r io.Reader) (err error) {
-	err = ret.Event.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketDebugEvent) Encode(w io.Writer) (err error) {
-	err = ret.Event.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketDebugSample struct {
-	Sample []int64
-	Type   int32
-}
-
-func (ret *PlayToClientPacketDebugSample) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketDebugSampleSample int32
-	lPlayToClientPacketDebugSampleSample, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Sample = []int64{}
-	for range lPlayToClientPacketDebugSampleSample {
-		var PlayToClientPacketDebugSampleSampleElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketDebugSampleSampleElement)
-		if err != nil {
-			return
-		}
-		ret.Sample = append(ret.Sample, PlayToClientPacketDebugSampleSampleElement)
-	}
-	ret.Type, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketDebugSample) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Sample)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketDebugSampleSample := range len(ret.Sample) {
-		err = binary.Write(w, binary.BigEndian, ret.Sample[iPlayToClientPacketDebugSampleSample])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, ret.Type)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketDeclareCommands struct {
-	Nodes     []CommandNode
-	RootIndex int32
-}
-
-func (ret *PlayToClientPacketDeclareCommands) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketDeclareCommandsNodes int32
-	lPlayToClientPacketDeclareCommandsNodes, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Nodes = []CommandNode{}
-	for range lPlayToClientPacketDeclareCommandsNodes {
-		var PlayToClientPacketDeclareCommandsNodesElement CommandNode
-		err = PlayToClientPacketDeclareCommandsNodesElement.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Nodes = append(ret.Nodes, PlayToClientPacketDeclareCommandsNodesElement)
-	}
-	ret.RootIndex, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketDeclareCommands) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Nodes)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketDeclareCommandsNodes := range len(ret.Nodes) {
-		err = ret.Nodes[iPlayToClientPacketDeclareCommandsNodes].Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, ret.RootIndex)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketDeclareRecipes struct {
-	Recipes []struct {
-		Name  string
-		Items []int32
-	}
-	StoneCutterRecipes []struct {
-		Input       IDSet
-		SlotDisplay PlayToClientSlotDisplay
-	}
-}
-
-func (ret *PlayToClientPacketDeclareRecipes) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketDeclareRecipesRecipes int32
-	lPlayToClientPacketDeclareRecipesRecipes, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Recipes = []struct {
-		Name  string
-		Items []int32
-	}{}
-	for range lPlayToClientPacketDeclareRecipesRecipes {
-		var PlayToClientPacketDeclareRecipesRecipesElement struct {
-			Name  string
-			Items []int32
-		}
-		PlayToClientPacketDeclareRecipesRecipesElement.Name, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		var lPlayToClientPacketDeclareRecipesRecipesElementItems int32
-		lPlayToClientPacketDeclareRecipesRecipesElementItems, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketDeclareRecipesRecipesElement.Items = []int32{}
-		for range lPlayToClientPacketDeclareRecipesRecipesElementItems {
-			var PlayToClientPacketDeclareRecipesRecipesElementItemsElement int32
-			PlayToClientPacketDeclareRecipesRecipesElementItemsElement, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketDeclareRecipesRecipesElement.Items = append(PlayToClientPacketDeclareRecipesRecipesElement.Items, PlayToClientPacketDeclareRecipesRecipesElementItemsElement)
-		}
-		ret.Recipes = append(ret.Recipes, PlayToClientPacketDeclareRecipesRecipesElement)
-	}
-	var lPlayToClientPacketDeclareRecipesStoneCutterRecipes int32
-	lPlayToClientPacketDeclareRecipesStoneCutterRecipes, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.StoneCutterRecipes = []struct {
-		Input       IDSet
-		SlotDisplay PlayToClientSlotDisplay
-	}{}
-	for range lPlayToClientPacketDeclareRecipesStoneCutterRecipes {
-		var PlayToClientPacketDeclareRecipesStoneCutterRecipesElement struct {
-			Input       IDSet
-			SlotDisplay PlayToClientSlotDisplay
-		}
-		err = PlayToClientPacketDeclareRecipesStoneCutterRecipesElement.Input.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketDeclareRecipesStoneCutterRecipesElement.SlotDisplay.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.StoneCutterRecipes = append(ret.StoneCutterRecipes, PlayToClientPacketDeclareRecipesStoneCutterRecipesElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketDeclareRecipes) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Recipes)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketDeclareRecipesRecipes := range len(ret.Recipes) {
-		err = proto_base.EncodeString(w, ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Name)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Items)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketDeclareRecipesRecipesInnerItems := range len(ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Items) {
-			err = proto_base.EncodeVarInt(w, ret.Recipes[iPlayToClientPacketDeclareRecipesRecipes].Items[iPlayToClientPacketDeclareRecipesRecipesInnerItems])
-			if err != nil {
-				return
-			}
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.StoneCutterRecipes)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketDeclareRecipesStoneCutterRecipes := range len(ret.StoneCutterRecipes) {
-		err = ret.StoneCutterRecipes[iPlayToClientPacketDeclareRecipesStoneCutterRecipes].Input.Encode(w)
-		if err != nil {
-			return
-		}
-		err = ret.StoneCutterRecipes[iPlayToClientPacketDeclareRecipesStoneCutterRecipes].SlotDisplay.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketDifficulty struct {
-	Difficulty       string
-	DifficultyLocked bool
-}
-
-var PlayToClientPacketDifficultyDifficultyMap = map[int32]string{0: "peaceful", 1: "easy", 2: "normal", 3: "hard"}
-
-func (ret *PlayToClientPacketDifficulty) Decode(r io.Reader) (err error) {
-	var PlayToClientPacketDifficultyDifficultyKey int32
-	PlayToClientPacketDifficultyDifficultyKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Difficulty, err = proto_base.ErroringIndex(PlayToClientPacketDifficultyDifficultyMap, PlayToClientPacketDifficultyDifficultyKey)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DifficultyLocked)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var PlayToClientPacketDifficultyDifficultyReverseMap = map[string]int32{"peaceful": 0, "easy": 1, "normal": 2, "hard": 3}
-
-func (ret *PlayToClientPacketDifficulty) Encode(w io.Writer) (err error) {
-	var vPlayToClientPacketDifficultyDifficulty int32
-	vPlayToClientPacketDifficultyDifficulty, err = proto_base.ErroringIndex(PlayToClientPacketDifficultyDifficultyReverseMap, ret.Difficulty)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vPlayToClientPacketDifficultyDifficulty)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DifficultyLocked)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEndCombatEvent struct {
-	Duration int32
-}
-
-func (ret *PlayToClientPacketEndCombatEvent) Decode(r io.Reader) (err error) {
-	ret.Duration, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEndCombatEvent) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Duration)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEnterCombatEvent struct {
-}
-
-func (ret *PlayToClientPacketEnterCombatEvent) Decode(r io.Reader) (err error) {
-	return
-}
-func (ret *PlayToClientPacketEnterCombatEvent) Encode(w io.Writer) (err error) {
-	return
-}
-
-type PlayToClientPacketEntityDestroy struct {
-	EntityIds []int32
-}
-
-func (ret *PlayToClientPacketEntityDestroy) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketEntityDestroyEntityIds int32
-	lPlayToClientPacketEntityDestroyEntityIds, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.EntityIds = []int32{}
-	for range lPlayToClientPacketEntityDestroyEntityIds {
-		var PlayToClientPacketEntityDestroyEntityIdsElement int32
-		PlayToClientPacketEntityDestroyEntityIdsElement, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.EntityIds = append(ret.EntityIds, PlayToClientPacketEntityDestroyEntityIdsElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityDestroy) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.EntityIds)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketEntityDestroyEntityIds := range len(ret.EntityIds) {
-		err = proto_base.EncodeVarInt(w, ret.EntityIds[iPlayToClientPacketEntityDestroyEntityIds])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketEntityEffect struct {
-	EntityId  int32
-	EffectId  int32
-	Amplifier int32
-	Duration  int32
-	Flags     uint8
-}
-
-func (ret *PlayToClientPacketEntityEffect) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.EffectId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Amplifier, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Duration, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Flags)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityEffect) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.EffectId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Amplifier)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Duration)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Flags)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEntityEquipment struct {
-	Val proto_base.ToDo
-}
-
-func (ret *PlayToClientPacketEntityEquipment) Decode(r io.Reader) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-func (ret *PlayToClientPacketEntityEquipment) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-
-type PlayToClientPacketEntityHeadRotation struct {
-	EntityId int32
-	HeadYaw  int8
-}
-
-func (ret *PlayToClientPacketEntityHeadRotation) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.HeadYaw)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityHeadRotation) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.HeadYaw)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEntityLook struct {
-	EntityId int32
-	Yaw      int8
-	Pitch    int8
-	OnGround bool
-}
-
-func (ret *PlayToClientPacketEntityLook) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityLook) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEntityMetadata struct {
-	EntityId int32
-	Metadata EntityMetadata
-}
-
-func (ret *PlayToClientPacketEntityMetadata) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.Metadata.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityMetadata) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = ret.Metadata.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEntityMoveLook struct {
-	EntityId int32
-	DX       int16
-	DY       int16
-	DZ       int16
-	Yaw      int8
-	Pitch    int8
-	OnGround bool
-}
-
-func (ret *PlayToClientPacketEntityMoveLook) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DX)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DY)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DZ)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityMoveLook) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DX)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DY)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DZ)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEntitySoundEffect struct {
-	Sound         ItemSoundHolder
-	SoundCategory SoundSource
-	EntityId      int32
-	Volume        float32
-	Pitch         float32
-	Seed          int64
-}
-
-func (ret *PlayToClientPacketEntitySoundEffect) Decode(r io.Reader) (err error) {
-	err = ret.Sound.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.SoundCategory.Decode(r)
-	if err != nil {
-		return
-	}
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Volume)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Seed)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntitySoundEffect) Encode(w io.Writer) (err error) {
-	err = ret.Sound.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.SoundCategory.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Volume)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Seed)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEntityStatus struct {
-	EntityId     int32
-	EntityStatus int8
-}
-
-func (ret *PlayToClientPacketEntityStatus) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EntityStatus)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityStatus) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EntityStatus)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEntityTeleport struct {
-	EntityId int32
-	X        float64
-	Y        float64
-	Z        float64
-	Yaw      int8
-	Pitch    int8
-	OnGround bool
-}
-
-func (ret *PlayToClientPacketEntityTeleport) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityTeleport) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketEntityUpdateAttributes struct {
-	EntityId   int32
-	Properties []struct {
-		Key       string
-		Value     float64
-		Modifiers []struct {
-			Uuid      string
-			Amount    float64
-			Operation int8
-		}
-	}
-}
-
-var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap = map[int32]string{0: "generic.armor", 1: "generic.armor_toughness", 10: "player.entity_interaction_range", 11: "generic.fall_damage_multiplier", 12: "generic.flying_speed", 13: "generic.follow_range", 14: "generic.gravity", 15: "generic.jump_strength", 16: "generic.knockback_resistance", 17: "generic.luck", 18: "generic.max_absorption", 19: "generic.max_health", 2: "generic.attack_damage", 20: "generic.movement_speed", 21: "generic.safe_fall_distance", 22: "generic.scale", 23: "zombie.spawn_reinforcements", 24: "generic.step_height", 25: "submerged_mining_speed", 26: "sweeping_damage_ratio", 27: "tempt_range", 28: "water_movement_efficiency", 29: "waypoint_transmit_range", 3: "generic.attack_knockback", 30: "waypoint_receive_range", 4: "generic.attack_speed", 5: "player.block_break_speed", 6: "player.block_interaction_range", 7: "burning_time", 8: "camera_distance", 9: "explosion_knockback_resistance"}
-
-func (ret *PlayToClientPacketEntityUpdateAttributes) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketEntityUpdateAttributesProperties int32
-	lPlayToClientPacketEntityUpdateAttributesProperties, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Properties = []struct {
-		Key       string
-		Value     float64
-		Modifiers []struct {
-			Uuid      string
-			Amount    float64
-			Operation int8
-		}
-	}{}
-	for range lPlayToClientPacketEntityUpdateAttributesProperties {
-		var PlayToClientPacketEntityUpdateAttributesPropertiesElement struct {
-			Key       string
-			Value     float64
-			Modifiers []struct {
-				Uuid      string
-				Amount    float64
-				Operation int8
-			}
-		}
-		var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey int32
-		PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketEntityUpdateAttributesPropertiesElement.Key, err = proto_base.ErroringIndex(PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap, PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyKey)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketEntityUpdateAttributesPropertiesElement.Value)
-		if err != nil {
-			return
-		}
-		var lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers int32
-		lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketEntityUpdateAttributesPropertiesElement.Modifiers = []struct {
-			Uuid      string
-			Amount    float64
-			Operation int8
-		}{}
-		for range lPlayToClientPacketEntityUpdateAttributesPropertiesElementModifiers {
-			var PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement struct {
-				Uuid      string
-				Amount    float64
-				Operation int8
-			}
-			PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement.Uuid, err = proto_base.DecodeString(r)
-			if err != nil {
-				return
-			}
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement.Amount)
-			if err != nil {
-				return
-			}
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement.Operation)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketEntityUpdateAttributesPropertiesElement.Modifiers = append(PlayToClientPacketEntityUpdateAttributesPropertiesElement.Modifiers, PlayToClientPacketEntityUpdateAttributesPropertiesElementModifiersElement)
-		}
-		ret.Properties = append(ret.Properties, PlayToClientPacketEntityUpdateAttributesPropertiesElement)
-	}
-	return
-}
-
-var PlayToClientPacketEntityUpdateAttributesPropertiesInnerKeyReverseMap = map[string]int32{"generic.armor": 0, "generic.armor_toughness": 1, "player.entity_interaction_range": 10, "generic.fall_damage_multiplier": 11, "generic.flying_speed": 12, "generic.follow_range": 13, "generic.gravity": 14, "generic.jump_strength": 15, "generic.knockback_resistance": 16, "generic.luck": 17, "generic.max_absorption": 18, "generic.max_health": 19, "generic.attack_damage": 2, "generic.movement_speed": 20, "generic.safe_fall_distance": 21, "generic.scale": 22, "zombie.spawn_reinforcements": 23, "generic.step_height": 24, "submerged_mining_speed": 25, "sweeping_damage_ratio": 26, "tempt_range": 27, "water_movement_efficiency": 28, "waypoint_transmit_range": 29, "generic.attack_knockback": 3, "waypoint_receive_range": 30, "generic.attack_speed": 4, "player.block_break_speed": 5, "player.block_interaction_range": 6, "burning_time": 7, "camera_distance": 8, "explosion_knockback_resistance": 9}
-
-func (ret *PlayToClientPacketEntityUpdateAttributes) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Properties)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketEntityUpdateAttributesProperties := range len(ret.Properties) {
-		var vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey int32
-		vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey, err = proto_base.ErroringIndex(PlayToClientPacketEntityUpdateAttributesPropertiesInnerKeyReverseMap, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Key)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, vPlayToClientPacketEntityUpdateAttributesPropertiesInnerKey)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Value)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers := range len(ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers) {
-			err = proto_base.EncodeString(w, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers[iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers].Uuid)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers[iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers].Amount)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, ret.Properties[iPlayToClientPacketEntityUpdateAttributesProperties].Modifiers[iPlayToClientPacketEntityUpdateAttributesPropertiesInnerModifiers].Operation)
-			if err != nil {
-				return
-			}
-		}
-	}
-	return
-}
-
-type PlayToClientPacketEntityVelocity struct {
-	EntityId int32
-	Velocity proto_base.LpVec3d
-}
-
-func (ret *PlayToClientPacketEntityVelocity) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.Velocity.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketEntityVelocity) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = ret.Velocity.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketExperience struct {
-	ExperienceBar   float32
-	Level           int32
-	TotalExperience int32
-}
-
-func (ret *PlayToClientPacketExperience) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.ExperienceBar)
-	if err != nil {
-		return
-	}
-	ret.Level, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.TotalExperience, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketExperience) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.ExperienceBar)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Level)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.TotalExperience)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketExplosion struct {
-	Center            Vec3f64
-	Radius            float32
-	BlockCount        int32
-	PlayerKnockback   *Vec3f64
-	ExplosionParticle Particle
-	Sound             ItemSoundHolder
-	BlockParticles    []PlayToClientExplosionParticleEntry
-}
-
-func (ret *PlayToClientPacketExplosion) Decode(r io.Reader) (err error) {
-	err = ret.Center.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Radius)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.BlockCount)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketExplosionPlayerKnockbackPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketExplosionPlayerKnockbackPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketExplosionPlayerKnockbackPresent {
-		var PlayToClientPacketExplosionPlayerKnockbackPresentValue Vec3f64
-		err = PlayToClientPacketExplosionPlayerKnockbackPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.PlayerKnockback = &PlayToClientPacketExplosionPlayerKnockbackPresentValue
-	}
-	err = ret.ExplosionParticle.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Sound.Decode(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketExplosionBlockParticles int32
-	lPlayToClientPacketExplosionBlockParticles, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.BlockParticles = []PlayToClientExplosionParticleEntry{}
-	for range lPlayToClientPacketExplosionBlockParticles {
-		var PlayToClientPacketExplosionBlockParticlesElement PlayToClientExplosionParticleEntry
-		err = PlayToClientPacketExplosionBlockParticlesElement.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.BlockParticles = append(ret.BlockParticles, PlayToClientPacketExplosionBlockParticlesElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketExplosion) Encode(w io.Writer) (err error) {
-	err = ret.Center.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Radius)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.BlockCount)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.PlayerKnockback != nil)
-	if err != nil {
-		return
-	}
-	if ret.PlayerKnockback != nil {
-		err = (*ret.PlayerKnockback).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	err = ret.ExplosionParticle.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Sound.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockParticles)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketExplosionBlockParticles := range len(ret.BlockParticles) {
-		err = ret.BlockParticles[iPlayToClientPacketExplosionBlockParticles].Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketFacePlayer struct {
-	FeetEyes       int32
-	X              float64
-	Y              float64
-	Z              float64
-	IsEntity       bool
-	EntityId       any
-	EntityFeetEyes any
-}
-
-func (ret *PlayToClientPacketFacePlayer) Decode(r io.Reader) (err error) {
-	ret.FeetEyes, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.IsEntity)
-	if err != nil {
-		return
-	}
-	switch ret.IsEntity {
-	case true:
-		var PlayToClientPacketFacePlayerEntityIdTrueTmp int32
-		PlayToClientPacketFacePlayerEntityIdTrueTmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.EntityId = PlayToClientPacketFacePlayerEntityIdTrueTmp
-	default:
-		var PlayToClientPacketFacePlayerEntityIdTmp struct {
-		}
-		ret.EntityId = PlayToClientPacketFacePlayerEntityIdTmp
-	}
-	switch ret.IsEntity {
-	case true:
-		var PlayToClientPacketFacePlayerEntityFeetEyesTrueTmp int32
-		PlayToClientPacketFacePlayerEntityFeetEyesTrueTmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.EntityFeetEyes = PlayToClientPacketFacePlayerEntityFeetEyesTrueTmp
-	default:
-		var PlayToClientPacketFacePlayerEntityFeetEyesTmp struct {
-		}
-		ret.EntityFeetEyes = PlayToClientPacketFacePlayerEntityFeetEyesTmp
-	}
-	return
-}
-func (ret *PlayToClientPacketFacePlayer) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.FeetEyes)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IsEntity)
-	if err != nil {
-		return
-	}
-	switch ret.IsEntity {
-	case true:
-		PlayToClientPacketFacePlayerEntityId, ok := ret.EntityId.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketFacePlayerEntityId)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.EntityId.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.IsEntity {
-	case true:
-		PlayToClientPacketFacePlayerEntityFeetEyes, ok := ret.EntityFeetEyes.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketFacePlayerEntityFeetEyes)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.EntityFeetEyes.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketGameStateChange struct {
-	Reason   string
-	GameMode float32
-}
-
-var PlayToClientPacketGameStateChangeReasonMap = map[uint8]string{0: "no_respawn_block_available", 1: "start_raining", 10: "guardian_elder_effect", 11: "immediate_respawn", 12: "limited_crafting", 13: "level_chunks_load_start", 2: "stop_raining", 3: "change_game_mode", 4: "win_game", 5: "demo_event", 6: "play_arrow_hit_sound", 7: "rain_level_change", 8: "thunder_level_change", 9: "puffer_fish_sting"}
-
-func (ret *PlayToClientPacketGameStateChange) Decode(r io.Reader) (err error) {
-	var PlayToClientPacketGameStateChangeReasonKey uint8
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketGameStateChangeReasonKey)
-	if err != nil {
-		return
-	}
-	ret.Reason, err = proto_base.ErroringIndex(PlayToClientPacketGameStateChangeReasonMap, PlayToClientPacketGameStateChangeReasonKey)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.GameMode)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var PlayToClientPacketGameStateChangeReasonReverseMap = map[string]uint8{"no_respawn_block_available": 0, "start_raining": 1, "guardian_elder_effect": 10, "immediate_respawn": 11, "limited_crafting": 12, "level_chunks_load_start": 13, "stop_raining": 2, "change_game_mode": 3, "win_game": 4, "demo_event": 5, "play_arrow_hit_sound": 6, "rain_level_change": 7, "thunder_level_change": 8, "puffer_fish_sting": 9}
-
-func (ret *PlayToClientPacketGameStateChange) Encode(w io.Writer) (err error) {
-	var vPlayToClientPacketGameStateChangeReason uint8
-	vPlayToClientPacketGameStateChangeReason, err = proto_base.ErroringIndex(PlayToClientPacketGameStateChangeReasonReverseMap, ret.Reason)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, vPlayToClientPacketGameStateChangeReason)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.GameMode)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketGameTestHighlightPos struct {
-	AbsolutePos Position
-	RelativePos Position
-}
-
-func (ret *PlayToClientPacketGameTestHighlightPos) Decode(r io.Reader) (err error) {
-	err = ret.AbsolutePos.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.RelativePos.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketGameTestHighlightPos) Encode(w io.Writer) (err error) {
-	err = ret.AbsolutePos.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.RelativePos.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketHeldItemSlot struct {
-	Slot int32
-}
-
-func (ret *PlayToClientPacketHeldItemSlot) Decode(r io.Reader) (err error) {
-	ret.Slot, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketHeldItemSlot) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Slot)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketHideMessage struct {
-	Id        int32
-	Signature any
-}
-
-func (ret *PlayToClientPacketHideMessage) Decode(r io.Reader) (err error) {
-	ret.Id, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	switch ret.Id {
-	case 0:
-		var PlayToClientPacketHideMessageSignature0Tmp [256]byte
-		_, err = r.Read(PlayToClientPacketHideMessageSignature0Tmp[:])
-		if err != nil {
-			return
-		}
-		ret.Signature = PlayToClientPacketHideMessageSignature0Tmp
-	default:
-		var PlayToClientPacketHideMessageSignatureTmp struct {
-		}
-		ret.Signature = PlayToClientPacketHideMessageSignatureTmp
-	}
-	return
-}
-func (ret *PlayToClientPacketHideMessage) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Id)
-	if err != nil {
-		return
-	}
-	switch ret.Id {
-	case 0:
-		PlayToClientPacketHideMessageSignature, ok := ret.Signature.([256]byte)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		arr := PlayToClientPacketHideMessageSignature
-		_, err = w.Write(arr[:])
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Signature.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketHurtAnimation struct {
-	EntityId int32
-	Yaw      float32
-}
-
-func (ret *PlayToClientPacketHurtAnimation) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketHurtAnimation) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketInitializeWorldBorder struct {
-	X                      float64
-	Z                      float64
-	OldDiameter            float64
-	NewDiameter            float64
-	Speed                  int32
-	PortalTeleportBoundary int32
-	WarningBlocks          int32
-	WarningTime            int32
-}
-
-func (ret *PlayToClientPacketInitializeWorldBorder) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OldDiameter)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.NewDiameter)
-	if err != nil {
-		return
-	}
-	ret.Speed, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.PortalTeleportBoundary, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.WarningBlocks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.WarningTime, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketInitializeWorldBorder) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OldDiameter)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.NewDiameter)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Speed)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.PortalTeleportBoundary)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.WarningBlocks)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.WarningTime)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketKeepAlive struct {
-	KeepAliveId int64
-}
-
-func (ret *PlayToClientPacketKeepAlive) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.KeepAliveId)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketKeepAlive) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.KeepAliveId)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketKickDisconnect struct {
-	Reason nbt.Anon
-}
-
-func (ret *PlayToClientPacketKickDisconnect) Decode(r io.Reader) (err error) {
-	err = ret.Reason.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketKickDisconnect) Encode(w io.Writer) (err error) {
-	err = ret.Reason.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketLogin struct {
-	EntityId            int32
-	IsHardcore          bool
-	WorldNames          []string
-	MaxPlayers          int32
-	ViewDistance        int32
-	SimulationDistance  int32
-	ReducedDebugInfo    bool
-	EnableRespawnScreen bool
-	DoLimitedCrafting   bool
-	WorldState          PlayToClientSpawnInfo
-	EnforcesSecureChat  bool
-}
-
-func (ret *PlayToClientPacketLogin) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.IsHardcore)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketLoginWorldNames int32
-	lPlayToClientPacketLoginWorldNames, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.WorldNames = []string{}
-	for range lPlayToClientPacketLoginWorldNames {
-		var PlayToClientPacketLoginWorldNamesElement string
-		PlayToClientPacketLoginWorldNamesElement, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.WorldNames = append(ret.WorldNames, PlayToClientPacketLoginWorldNamesElement)
-	}
-	ret.MaxPlayers, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ViewDistance, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SimulationDistance, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ReducedDebugInfo)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableRespawnScreen)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DoLimitedCrafting)
-	if err != nil {
-		return
-	}
-	err = ret.WorldState.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnforcesSecureChat)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketLogin) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IsHardcore)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.WorldNames)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketLoginWorldNames := range len(ret.WorldNames) {
-		err = proto_base.EncodeString(w, ret.WorldNames[iPlayToClientPacketLoginWorldNames])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, ret.MaxPlayers)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.SimulationDistance)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ReducedDebugInfo)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableRespawnScreen)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DoLimitedCrafting)
-	if err != nil {
-		return
-	}
-	err = ret.WorldState.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnforcesSecureChat)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketMap struct {
-	ItemDamage int32
-	Scale      int8
-	Locked     bool
-	Icons      *[]struct {
-		Type        int32
-		X           int8
-		Z           int8
-		Direction   uint8
-		DisplayName *nbt.Anon
-	}
-	Columns uint8
-	Rows    any
-	X       any
-	Y       any
-	Data    any
-}
-
-func (ret *PlayToClientPacketMap) Decode(r io.Reader) (err error) {
-	ret.ItemDamage, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Scale)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Locked)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketMapIconsPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketMapIconsPresent {
-		var PlayToClientPacketMapIconsPresentValue []struct {
-			Type        int32
-			X           int8
-			Z           int8
-			Direction   uint8
-			DisplayName *nbt.Anon
-		}
-		var lPlayToClientPacketMapIcons int32
-		lPlayToClientPacketMapIcons, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketMapIconsPresentValue = []struct {
-			Type        int32
-			X           int8
-			Z           int8
-			Direction   uint8
-			DisplayName *nbt.Anon
-		}{}
-		for range lPlayToClientPacketMapIcons {
-			var PlayToClientPacketMapIconsElement struct {
-				Type        int32
-				X           int8
-				Z           int8
-				Direction   uint8
-				DisplayName *nbt.Anon
-			}
-			PlayToClientPacketMapIconsElement.Type, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsElement.X)
-			if err != nil {
-				return
-			}
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsElement.Z)
-			if err != nil {
-				return
-			}
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsElement.Direction)
-			if err != nil {
-				return
-			}
-			var PlayToClientPacketMapIconsElementDisplayNamePresent bool
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapIconsElementDisplayNamePresent)
-			if err != nil {
-				return
-			}
-			if PlayToClientPacketMapIconsElementDisplayNamePresent {
-				var PlayToClientPacketMapIconsElementDisplayNamePresentValue nbt.Anon
-				err = PlayToClientPacketMapIconsElementDisplayNamePresentValue.Decode(r)
-				if err != nil {
-					return
-				}
-				PlayToClientPacketMapIconsElement.DisplayName = &PlayToClientPacketMapIconsElementDisplayNamePresentValue
-			}
-			PlayToClientPacketMapIconsPresentValue = append(PlayToClientPacketMapIconsPresentValue, PlayToClientPacketMapIconsElement)
-		}
-		ret.Icons = &PlayToClientPacketMapIconsPresentValue
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Columns)
-	if err != nil {
-		return
-	}
-	switch ret.Columns {
-	case 0:
-		var PlayToClientPacketMapRows0Tmp struct {
-		}
-		ret.Rows = PlayToClientPacketMapRows0Tmp
-	default:
-		var PlayToClientPacketMapRowsTmp uint8
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapRowsTmp)
-		if err != nil {
-			return
-		}
-		ret.Rows = PlayToClientPacketMapRowsTmp
-	}
-	switch ret.Columns {
-	case 0:
-		var PlayToClientPacketMapX0Tmp struct {
-		}
-		ret.X = PlayToClientPacketMapX0Tmp
-	default:
-		var PlayToClientPacketMapXTmp uint8
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapXTmp)
-		if err != nil {
-			return
-		}
-		ret.X = PlayToClientPacketMapXTmp
-	}
-	switch ret.Columns {
-	case 0:
-		var PlayToClientPacketMapY0Tmp struct {
-		}
-		ret.Y = PlayToClientPacketMapY0Tmp
-	default:
-		var PlayToClientPacketMapYTmp uint8
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapYTmp)
-		if err != nil {
-			return
-		}
-		ret.Y = PlayToClientPacketMapYTmp
-	}
-	switch ret.Columns {
-	case 0:
-		var PlayToClientPacketMapData0Tmp struct {
-		}
-		ret.Data = PlayToClientPacketMapData0Tmp
-	default:
-		var PlayToClientPacketMapDataTmp []byte
-		var lPlayToClientPacketMapData int32
-		lPlayToClientPacketMapData, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketMapDataTmp, err = io.ReadAll(io.LimitReader(r, int64(lPlayToClientPacketMapData)))
-		if err != nil {
-			return
-		}
-		ret.Data = PlayToClientPacketMapDataTmp
-	}
-	return
-}
-func (ret *PlayToClientPacketMap) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.ItemDamage)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Scale)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Locked)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Icons != nil)
-	if err != nil {
-		return
-	}
-	if ret.Icons != nil {
-		err = proto_base.EncodeVarInt(w, int32(len(*ret.Icons)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketMapIcons := range len(*ret.Icons) {
-			err = proto_base.EncodeVarInt(w, (*ret.Icons)[iPlayToClientPacketMapIcons].Type)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, (*ret.Icons)[iPlayToClientPacketMapIcons].X)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, (*ret.Icons)[iPlayToClientPacketMapIcons].Z)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, (*ret.Icons)[iPlayToClientPacketMapIcons].Direction)
-			if err != nil {
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, (*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName != nil)
-			if err != nil {
-				return
-			}
-			if (*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName != nil {
-				err = (*(*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName).Encode(w)
-				if err != nil {
-					return
-				}
-			}
-		}
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Columns)
-	if err != nil {
-		return
-	}
-	switch ret.Columns {
-	case 0:
-		_, ok := ret.Rows.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	default:
-		_, ok := ret.Rows.(uint8)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Rows.(uint8))
-		if err != nil {
-			return
-		}
-	}
-	switch ret.Columns {
-	case 0:
-		_, ok := ret.X.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	default:
-		_, ok := ret.X.(uint8)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.X.(uint8))
-		if err != nil {
-			return
-		}
-	}
-	switch ret.Columns {
-	case 0:
-		_, ok := ret.Y.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	default:
-		_, ok := ret.Y.(uint8)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Y.(uint8))
-		if err != nil {
-			return
-		}
-	}
-	switch ret.Columns {
-	case 0:
-		_, ok := ret.Data.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	default:
-		_, ok := ret.Data.([]byte)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(ret.Data.([]byte))))
-		if err != nil {
-			return
-		}
-		_, err = w.Write(ret.Data.([]byte))
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketMapChunk struct {
-	X          int32
-	Z          int32
-	Heightmaps []struct {
-		Type string
-		Data []int64
-	}
-	ChunkData           ByteArray
-	BlockEntities       []ChunkBlockEntity
-	SkyLightMask        []int64
-	BlockLightMask      []int64
-	EmptySkyLightMask   []int64
-	EmptyBlockLightMask []int64
-	SkyLight            [][]uint8
-	BlockLight          [][]uint8
-}
-
-var PlayToClientPacketMapChunkHeightmapsElementTypeMap = map[int32]string{0: "world_surface_wg", 1: "world_surface", 2: "ocean_floor_wg", 3: "ocean_floor", 4: "motion_blocking", 5: "motion_blocking_no_leaves"}
-
-func (ret *PlayToClientPacketMapChunk) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketMapChunkHeightmaps int32
-	lPlayToClientPacketMapChunkHeightmaps, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Heightmaps = []struct {
-		Type string
-		Data []int64
-	}{}
-	for range lPlayToClientPacketMapChunkHeightmaps {
-		var PlayToClientPacketMapChunkHeightmapsElement struct {
-			Type string
-			Data []int64
-		}
-		var PlayToClientPacketMapChunkHeightmapsElementTypeKey int32
-		PlayToClientPacketMapChunkHeightmapsElementTypeKey, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketMapChunkHeightmapsElement.Type, err = proto_base.ErroringIndex(PlayToClientPacketMapChunkHeightmapsElementTypeMap, PlayToClientPacketMapChunkHeightmapsElementTypeKey)
-		if err != nil {
-			return
-		}
-		var lPlayToClientPacketMapChunkHeightmapsElementData int32
-		lPlayToClientPacketMapChunkHeightmapsElementData, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketMapChunkHeightmapsElement.Data = []int64{}
-		for range lPlayToClientPacketMapChunkHeightmapsElementData {
-			var PlayToClientPacketMapChunkHeightmapsElementDataElement int64
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkHeightmapsElementDataElement)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketMapChunkHeightmapsElement.Data = append(PlayToClientPacketMapChunkHeightmapsElement.Data, PlayToClientPacketMapChunkHeightmapsElementDataElement)
-		}
-		ret.Heightmaps = append(ret.Heightmaps, PlayToClientPacketMapChunkHeightmapsElement)
-	}
-	err = ret.ChunkData.Decode(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketMapChunkBlockEntities int32
-	lPlayToClientPacketMapChunkBlockEntities, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.BlockEntities = []ChunkBlockEntity{}
-	for range lPlayToClientPacketMapChunkBlockEntities {
-		var PlayToClientPacketMapChunkBlockEntitiesElement ChunkBlockEntity
-		err = PlayToClientPacketMapChunkBlockEntitiesElement.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.BlockEntities = append(ret.BlockEntities, PlayToClientPacketMapChunkBlockEntitiesElement)
-	}
-	var lPlayToClientPacketMapChunkSkyLightMask int32
-	lPlayToClientPacketMapChunkSkyLightMask, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SkyLightMask = []int64{}
-	for range lPlayToClientPacketMapChunkSkyLightMask {
-		var PlayToClientPacketMapChunkSkyLightMaskElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkSkyLightMaskElement)
-		if err != nil {
-			return
-		}
-		ret.SkyLightMask = append(ret.SkyLightMask, PlayToClientPacketMapChunkSkyLightMaskElement)
-	}
-	var lPlayToClientPacketMapChunkBlockLightMask int32
-	lPlayToClientPacketMapChunkBlockLightMask, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.BlockLightMask = []int64{}
-	for range lPlayToClientPacketMapChunkBlockLightMask {
-		var PlayToClientPacketMapChunkBlockLightMaskElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkBlockLightMaskElement)
-		if err != nil {
-			return
-		}
-		ret.BlockLightMask = append(ret.BlockLightMask, PlayToClientPacketMapChunkBlockLightMaskElement)
-	}
-	var lPlayToClientPacketMapChunkEmptySkyLightMask int32
-	lPlayToClientPacketMapChunkEmptySkyLightMask, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.EmptySkyLightMask = []int64{}
-	for range lPlayToClientPacketMapChunkEmptySkyLightMask {
-		var PlayToClientPacketMapChunkEmptySkyLightMaskElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkEmptySkyLightMaskElement)
-		if err != nil {
-			return
-		}
-		ret.EmptySkyLightMask = append(ret.EmptySkyLightMask, PlayToClientPacketMapChunkEmptySkyLightMaskElement)
-	}
-	var lPlayToClientPacketMapChunkEmptyBlockLightMask int32
-	lPlayToClientPacketMapChunkEmptyBlockLightMask, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.EmptyBlockLightMask = []int64{}
-	for range lPlayToClientPacketMapChunkEmptyBlockLightMask {
-		var PlayToClientPacketMapChunkEmptyBlockLightMaskElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkEmptyBlockLightMaskElement)
-		if err != nil {
-			return
-		}
-		ret.EmptyBlockLightMask = append(ret.EmptyBlockLightMask, PlayToClientPacketMapChunkEmptyBlockLightMaskElement)
-	}
-	var lPlayToClientPacketMapChunkSkyLight int32
-	lPlayToClientPacketMapChunkSkyLight, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SkyLight = [][]uint8{}
-	for range lPlayToClientPacketMapChunkSkyLight {
-		var PlayToClientPacketMapChunkSkyLightElement []uint8
-		var lPlayToClientPacketMapChunkSkyLightElement int32
-		lPlayToClientPacketMapChunkSkyLightElement, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketMapChunkSkyLightElement = []uint8{}
-		for range lPlayToClientPacketMapChunkSkyLightElement {
-			var PlayToClientPacketMapChunkSkyLightElementElement uint8
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkSkyLightElementElement)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketMapChunkSkyLightElement = append(PlayToClientPacketMapChunkSkyLightElement, PlayToClientPacketMapChunkSkyLightElementElement)
-		}
-		ret.SkyLight = append(ret.SkyLight, PlayToClientPacketMapChunkSkyLightElement)
-	}
-	var lPlayToClientPacketMapChunkBlockLight int32
-	lPlayToClientPacketMapChunkBlockLight, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.BlockLight = [][]uint8{}
-	for range lPlayToClientPacketMapChunkBlockLight {
-		var PlayToClientPacketMapChunkBlockLightElement []uint8
-		var lPlayToClientPacketMapChunkBlockLightElement int32
-		lPlayToClientPacketMapChunkBlockLightElement, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketMapChunkBlockLightElement = []uint8{}
-		for range lPlayToClientPacketMapChunkBlockLightElement {
-			var PlayToClientPacketMapChunkBlockLightElementElement uint8
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMapChunkBlockLightElementElement)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketMapChunkBlockLightElement = append(PlayToClientPacketMapChunkBlockLightElement, PlayToClientPacketMapChunkBlockLightElementElement)
-		}
-		ret.BlockLight = append(ret.BlockLight, PlayToClientPacketMapChunkBlockLightElement)
-	}
-	return
-}
-
-var PlayToClientPacketMapChunkHeightmapsInnerTypeReverseMap = map[string]int32{"world_surface_wg": 0, "world_surface": 1, "ocean_floor_wg": 2, "ocean_floor": 3, "motion_blocking": 4, "motion_blocking_no_leaves": 5}
-
-func (ret *PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Heightmaps)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMapChunkHeightmaps := range len(ret.Heightmaps) {
-		var vPlayToClientPacketMapChunkHeightmapsInnerType int32
-		vPlayToClientPacketMapChunkHeightmapsInnerType, err = proto_base.ErroringIndex(PlayToClientPacketMapChunkHeightmapsInnerTypeReverseMap, ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Type)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, vPlayToClientPacketMapChunkHeightmapsInnerType)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Data)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketMapChunkHeightmapsInnerData := range len(ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Data) {
-			err = binary.Write(w, binary.BigEndian, ret.Heightmaps[iPlayToClientPacketMapChunkHeightmaps].Data[iPlayToClientPacketMapChunkHeightmapsInnerData])
-			if err != nil {
-				return
-			}
-		}
-	}
-	err = ret.ChunkData.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockEntities)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMapChunkBlockEntities := range len(ret.BlockEntities) {
-		err = ret.BlockEntities[iPlayToClientPacketMapChunkBlockEntities].Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLightMask)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMapChunkSkyLightMask := range len(ret.SkyLightMask) {
-		err = binary.Write(w, binary.BigEndian, ret.SkyLightMask[iPlayToClientPacketMapChunkSkyLightMask])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLightMask)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMapChunkBlockLightMask := range len(ret.BlockLightMask) {
-		err = binary.Write(w, binary.BigEndian, ret.BlockLightMask[iPlayToClientPacketMapChunkBlockLightMask])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.EmptySkyLightMask)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMapChunkEmptySkyLightMask := range len(ret.EmptySkyLightMask) {
-		err = binary.Write(w, binary.BigEndian, ret.EmptySkyLightMask[iPlayToClientPacketMapChunkEmptySkyLightMask])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.EmptyBlockLightMask)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMapChunkEmptyBlockLightMask := range len(ret.EmptyBlockLightMask) {
-		err = binary.Write(w, binary.BigEndian, ret.EmptyBlockLightMask[iPlayToClientPacketMapChunkEmptyBlockLightMask])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLight)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMapChunkSkyLight := range len(ret.SkyLight) {
-		err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLight[iPlayToClientPacketMapChunkSkyLight])))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketMapChunkSkyLightInner := range len(ret.SkyLight[iPlayToClientPacketMapChunkSkyLight]) {
-			err = binary.Write(w, binary.BigEndian, ret.SkyLight[iPlayToClientPacketMapChunkSkyLight][iPlayToClientPacketMapChunkSkyLightInner])
-			if err != nil {
-				return
-			}
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLight)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMapChunkBlockLight := range len(ret.BlockLight) {
-		err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLight[iPlayToClientPacketMapChunkBlockLight])))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketMapChunkBlockLightInner := range len(ret.BlockLight[iPlayToClientPacketMapChunkBlockLight]) {
-			err = binary.Write(w, binary.BigEndian, ret.BlockLight[iPlayToClientPacketMapChunkBlockLight][iPlayToClientPacketMapChunkBlockLightInner])
-			if err != nil {
-				return
-			}
-		}
-	}
-	return
-}
-
-type PlayToClientPacketMoveMinecart struct {
-	EntityId int32
-	Steps    []struct {
-		Position Vec3f
-		Velocity Vec3f
-		Yaw      float32
-		Pitch    float32
-		Weight   float32
-	}
-}
-
-func (ret *PlayToClientPacketMoveMinecart) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketMoveMinecartSteps int32
-	lPlayToClientPacketMoveMinecartSteps, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Steps = []struct {
-		Position Vec3f
-		Velocity Vec3f
-		Yaw      float32
-		Pitch    float32
-		Weight   float32
-	}{}
-	for range lPlayToClientPacketMoveMinecartSteps {
-		var PlayToClientPacketMoveMinecartStepsElement struct {
-			Position Vec3f
-			Velocity Vec3f
-			Yaw      float32
-			Pitch    float32
-			Weight   float32
-		}
-		err = PlayToClientPacketMoveMinecartStepsElement.Position.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketMoveMinecartStepsElement.Velocity.Decode(r)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMoveMinecartStepsElement.Yaw)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMoveMinecartStepsElement.Pitch)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMoveMinecartStepsElement.Weight)
-		if err != nil {
-			return
-		}
-		ret.Steps = append(ret.Steps, PlayToClientPacketMoveMinecartStepsElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketMoveMinecart) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Steps)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMoveMinecartSteps := range len(ret.Steps) {
-		err = ret.Steps[iPlayToClientPacketMoveMinecartSteps].Position.Encode(w)
-		if err != nil {
-			return
-		}
-		err = ret.Steps[iPlayToClientPacketMoveMinecartSteps].Velocity.Encode(w)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Steps[iPlayToClientPacketMoveMinecartSteps].Yaw)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Steps[iPlayToClientPacketMoveMinecartSteps].Pitch)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Steps[iPlayToClientPacketMoveMinecartSteps].Weight)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketMultiBlockChange struct {
-	ChunkCoordinates struct {
-		X int32
-		Z int32
-		Y int32
-	}
-	Records []int32
-}
-
-func (ret *PlayToClientPacketMultiBlockChange) Decode(r io.Reader) (err error) {
-	var PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked uint64
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked)
-	if err != nil {
-		return
-	}
-	ret.ChunkCoordinates.X = int32(PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked << 0 >> 42)
-	if ret.ChunkCoordinates.X >= 1<<21 {
-		ret.ChunkCoordinates.X -= 1 << 22
-	}
-	ret.ChunkCoordinates.Z = int32(PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked << 22 >> 42)
-	if ret.ChunkCoordinates.Z >= 1<<21 {
-		ret.ChunkCoordinates.Z -= 1 << 22
-	}
-	ret.ChunkCoordinates.Y = int32(PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked << 44 >> 44)
-	if ret.ChunkCoordinates.Y >= 1<<19 {
-		ret.ChunkCoordinates.Y -= 1 << 20
-	}
-	var lPlayToClientPacketMultiBlockChangeRecords int32
-	lPlayToClientPacketMultiBlockChangeRecords, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Records = []int32{}
-	for range lPlayToClientPacketMultiBlockChangeRecords {
-		var PlayToClientPacketMultiBlockChangeRecordsElement int32
-		PlayToClientPacketMultiBlockChangeRecordsElement, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Records = append(ret.Records, PlayToClientPacketMultiBlockChangeRecordsElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketMultiBlockChange) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.ChunkCoordinates)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Records)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketMultiBlockChangeRecords := range len(ret.Records) {
-		err = proto_base.EncodeVarInt(w, ret.Records[iPlayToClientPacketMultiBlockChangeRecords])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketNbtQueryResponse struct {
-	TransactionId int32
-	Nbt           nbt.Anon
-}
-
-func (ret *PlayToClientPacketNbtQueryResponse) Decode(r io.Reader) (err error) {
-	ret.TransactionId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.Nbt.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketNbtQueryResponse) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.TransactionId)
-	if err != nil {
-		return
-	}
-	err = ret.Nbt.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketOpenBook struct {
-	Hand int32
-}
-
-func (ret *PlayToClientPacketOpenBook) Decode(r io.Reader) (err error) {
-	ret.Hand, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketOpenBook) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Hand)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketOpenHorseWindow struct {
-	WindowId ContainerID
-	NbSlots  int32
-	EntityId int32
-}
-
-func (ret *PlayToClientPacketOpenHorseWindow) Decode(r io.Reader) (err error) {
-	err = ret.WindowId.Decode(r)
-	if err != nil {
-		return
-	}
-	ret.NbSlots, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketOpenHorseWindow) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.NbSlots)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EntityId)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketOpenSignEntity struct {
-	Location    Position
-	IsFrontText bool
-}
-
-func (ret *PlayToClientPacketOpenSignEntity) Decode(r io.Reader) (err error) {
-	err = ret.Location.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.IsFrontText)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketOpenSignEntity) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IsFrontText)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketOpenWindow struct {
-	WindowId      int32
-	InventoryType int32
-	WindowTitle   nbt.Anon
-}
-
-func (ret *PlayToClientPacketOpenWindow) Decode(r io.Reader) (err error) {
-	ret.WindowId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.InventoryType, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.WindowTitle.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketOpenWindow) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.WindowId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.InventoryType)
-	if err != nil {
-		return
-	}
-	err = ret.WindowTitle.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketPing struct {
-	Id int32
-}
-
-func (ret *PlayToClientPacketPing) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Id)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketPing) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Id)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketPingResponse struct {
-	Id int64
-}
-
-func (ret *PlayToClientPacketPingResponse) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Id)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketPingResponse) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Id)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketPlayerChat struct {
-	GlobalIndex         int32
-	SenderUuid          uuid.UUID
-	Index               int32
-	Signature           *[256]byte
-	PlainMessage        string
-	Timestamp           int64
-	Salt                int64
-	PreviousMessages    PreviousMessages
-	UnsignedChatContent *nbt.Anon
-	FilterType          int32
-	FilterTypeMask      any
-	Type                PlayToClientChatTypesHolder
-	NetworkName         nbt.Anon
-	NetworkTargetName   *nbt.Anon
-}
-
-func (ret *PlayToClientPacketPlayerChat) Decode(r io.Reader) (err error) {
-	ret.GlobalIndex, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	_, err = io.ReadFull(r, ret.SenderUuid[:])
-	if err != nil {
-		return
-	}
-	ret.Index, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketPlayerChatSignaturePresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatSignaturePresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketPlayerChatSignaturePresent {
-		var PlayToClientPacketPlayerChatSignaturePresentValue [256]byte
-		_, err = r.Read(PlayToClientPacketPlayerChatSignaturePresentValue[:])
-		if err != nil {
-			return
-		}
-		ret.Signature = &PlayToClientPacketPlayerChatSignaturePresentValue
-	}
-	ret.PlainMessage, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Timestamp)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Salt)
-	if err != nil {
-		return
-	}
-	err = ret.PreviousMessages.Decode(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketPlayerChatUnsignedChatContentPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatUnsignedChatContentPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketPlayerChatUnsignedChatContentPresent {
-		var PlayToClientPacketPlayerChatUnsignedChatContentPresentValue nbt.Anon
-		err = PlayToClientPacketPlayerChatUnsignedChatContentPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.UnsignedChatContent = &PlayToClientPacketPlayerChatUnsignedChatContentPresentValue
-	}
-	ret.FilterType, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	switch ret.FilterType {
-	case 2:
-		var PlayToClientPacketPlayerChatFilterTypeMask2Tmp []int64
-		var lPlayToClientPacketPlayerChatFilterTypeMask int32
-		lPlayToClientPacketPlayerChatFilterTypeMask, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketPlayerChatFilterTypeMask2Tmp = []int64{}
-		for range lPlayToClientPacketPlayerChatFilterTypeMask {
-			var PlayToClientPacketPlayerChatFilterTypeMaskElement int64
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatFilterTypeMaskElement)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketPlayerChatFilterTypeMask2Tmp = append(PlayToClientPacketPlayerChatFilterTypeMask2Tmp, PlayToClientPacketPlayerChatFilterTypeMaskElement)
-		}
-		ret.FilterTypeMask = PlayToClientPacketPlayerChatFilterTypeMask2Tmp
-	default:
-		var PlayToClientPacketPlayerChatFilterTypeMaskTmp struct {
-		}
-		ret.FilterTypeMask = PlayToClientPacketPlayerChatFilterTypeMaskTmp
-	}
-	err = ret.Type.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.NetworkName.Decode(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketPlayerChatNetworkTargetNamePresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatNetworkTargetNamePresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketPlayerChatNetworkTargetNamePresent {
-		var PlayToClientPacketPlayerChatNetworkTargetNamePresentValue nbt.Anon
-		err = PlayToClientPacketPlayerChatNetworkTargetNamePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.NetworkTargetName = &PlayToClientPacketPlayerChatNetworkTargetNamePresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.GlobalIndex)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(ret.SenderUuid[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Index)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Signature != nil)
-	if err != nil {
-		return
-	}
-	if ret.Signature != nil {
-		arr := *ret.Signature
-		_, err = w.Write(arr[:])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeString(w, ret.PlainMessage)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Timestamp)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Salt)
-	if err != nil {
-		return
-	}
-	err = ret.PreviousMessages.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.UnsignedChatContent != nil)
-	if err != nil {
-		return
-	}
-	if ret.UnsignedChatContent != nil {
-		err = (*ret.UnsignedChatContent).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, ret.FilterType)
-	if err != nil {
-		return
-	}
-	switch ret.FilterType {
-	case 2:
-		PlayToClientPacketPlayerChatFilterTypeMask, ok := ret.FilterTypeMask.([]int64)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientPacketPlayerChatFilterTypeMask)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketPlayerChatFilterTypeMask := range len(PlayToClientPacketPlayerChatFilterTypeMask) {
-			err = binary.Write(w, binary.BigEndian, PlayToClientPacketPlayerChatFilterTypeMask[iPlayToClientPacketPlayerChatFilterTypeMask])
-			if err != nil {
-				return
-			}
-		}
-	default:
-		_, ok := ret.FilterTypeMask.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	err = ret.Type.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.NetworkName.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.NetworkTargetName != nil)
-	if err != nil {
-		return
-	}
-	if ret.NetworkTargetName != nil {
-		err = (*ret.NetworkTargetName).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketPlayerInfo struct {
-	Action uint8
-	Data   []struct {
-		Uuid         uuid.UUID
-		Player       any
-		ChatSession  any
-		Gamemode     any
-		Listed       any
-		Latency      any
-		DisplayName  any
-		ListPriority any
-		ShowHat      any
-	}
-}
-
-func (ret *PlayToClientPacketPlayerInfo) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Action)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketPlayerInfoData int32
-	lPlayToClientPacketPlayerInfoData, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Data = []struct {
-		Uuid         uuid.UUID
-		Player       any
-		ChatSession  any
-		Gamemode     any
-		Listed       any
-		Latency      any
-		DisplayName  any
-		ListPriority any
-		ShowHat      any
-	}{}
-	for range lPlayToClientPacketPlayerInfoData {
-		var PlayToClientPacketPlayerInfoDataElement struct {
-			Uuid         uuid.UUID
-			Player       any
-			ChatSession  any
-			Gamemode     any
-			Listed       any
-			Latency      any
-			DisplayName  any
-			ListPriority any
-			ShowHat      any
-		}
-		_, err = io.ReadFull(r, PlayToClientPacketPlayerInfoDataElement.Uuid[:])
-		if err != nil {
-			return
-		}
-		switch ret.Action&1 != 0 {
-		case true:
-			var PlayToClientPacketPlayerInfoDataElementPlayerTrueTmp GameProfileNameProp
-			err = PlayToClientPacketPlayerInfoDataElementPlayerTrueTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketPlayerInfoDataElement.Player = PlayToClientPacketPlayerInfoDataElementPlayerTrueTmp
-		default:
-			var PlayToClientPacketPlayerInfoDataElementPlayerTmp struct {
-			}
-			PlayToClientPacketPlayerInfoDataElement.Player = PlayToClientPacketPlayerInfoDataElementPlayerTmp
-		}
-		switch ret.Action&2 != 0 {
-		case true:
-			var PlayToClientPacketPlayerInfoDataElementChatSessionTrueTmp ChatSession
-			err = PlayToClientPacketPlayerInfoDataElementChatSessionTrueTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketPlayerInfoDataElement.ChatSession = PlayToClientPacketPlayerInfoDataElementChatSessionTrueTmp
-		default:
-			var PlayToClientPacketPlayerInfoDataElementChatSessionTmp struct {
-			}
-			PlayToClientPacketPlayerInfoDataElement.ChatSession = PlayToClientPacketPlayerInfoDataElementChatSessionTmp
-		}
-		switch ret.Action&4 != 0 {
-		case true:
-			var PlayToClientPacketPlayerInfoDataElementGamemodeTrueTmp int32
-			PlayToClientPacketPlayerInfoDataElementGamemodeTrueTmp, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketPlayerInfoDataElement.Gamemode = PlayToClientPacketPlayerInfoDataElementGamemodeTrueTmp
-		default:
-			var PlayToClientPacketPlayerInfoDataElementGamemodeTmp struct {
-			}
-			PlayToClientPacketPlayerInfoDataElement.Gamemode = PlayToClientPacketPlayerInfoDataElementGamemodeTmp
-		}
-		switch ret.Action&8 != 0 {
-		case true:
-			var PlayToClientPacketPlayerInfoDataElementListedTrueTmp int32
-			PlayToClientPacketPlayerInfoDataElementListedTrueTmp, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketPlayerInfoDataElement.Listed = PlayToClientPacketPlayerInfoDataElementListedTrueTmp
-		default:
-			var PlayToClientPacketPlayerInfoDataElementListedTmp struct {
-			}
-			PlayToClientPacketPlayerInfoDataElement.Listed = PlayToClientPacketPlayerInfoDataElementListedTmp
-		}
-		switch ret.Action&10 != 0 {
-		case true:
-			var PlayToClientPacketPlayerInfoDataElementLatencyTrueTmp int32
-			PlayToClientPacketPlayerInfoDataElementLatencyTrueTmp, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketPlayerInfoDataElement.Latency = PlayToClientPacketPlayerInfoDataElementLatencyTrueTmp
-		default:
-			var PlayToClientPacketPlayerInfoDataElementLatencyTmp struct {
-			}
-			PlayToClientPacketPlayerInfoDataElement.Latency = PlayToClientPacketPlayerInfoDataElementLatencyTmp
-		}
-		switch ret.Action&20 != 0 {
-		case true:
-			var PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp *nbt.Anon
-			var PlayToClientPacketPlayerInfoDataElementDisplayNamePresent bool
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerInfoDataElementDisplayNamePresent)
-			if err != nil {
-				return
-			}
-			if PlayToClientPacketPlayerInfoDataElementDisplayNamePresent {
-				var PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue nbt.Anon
-				err = PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue.Decode(r)
-				if err != nil {
-					return
-				}
-				PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp = &PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue
-			}
-			PlayToClientPacketPlayerInfoDataElement.DisplayName = PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp
-		default:
-			var PlayToClientPacketPlayerInfoDataElementDisplayNameTmp struct {
-			}
-			PlayToClientPacketPlayerInfoDataElement.DisplayName = PlayToClientPacketPlayerInfoDataElementDisplayNameTmp
-		}
-		switch ret.Action&80 != 0 {
-		case true:
-			var PlayToClientPacketPlayerInfoDataElementListPriorityTrueTmp int32
-			PlayToClientPacketPlayerInfoDataElementListPriorityTrueTmp, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketPlayerInfoDataElement.ListPriority = PlayToClientPacketPlayerInfoDataElementListPriorityTrueTmp
-		default:
-			var PlayToClientPacketPlayerInfoDataElementListPriorityTmp struct {
-			}
-			PlayToClientPacketPlayerInfoDataElement.ListPriority = PlayToClientPacketPlayerInfoDataElementListPriorityTmp
-		}
-		switch ret.Action&40 != 0 {
-		case true:
-			var PlayToClientPacketPlayerInfoDataElementShowHatTrueTmp bool
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerInfoDataElementShowHatTrueTmp)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketPlayerInfoDataElement.ShowHat = PlayToClientPacketPlayerInfoDataElementShowHatTrueTmp
-		default:
-			var PlayToClientPacketPlayerInfoDataElementShowHatTmp struct {
-			}
-			PlayToClientPacketPlayerInfoDataElement.ShowHat = PlayToClientPacketPlayerInfoDataElementShowHatTmp
-		}
-		ret.Data = append(ret.Data, PlayToClientPacketPlayerInfoDataElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Action)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Data)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketPlayerInfoData := range len(ret.Data) {
-		_, err = w.Write(ret.Data[iPlayToClientPacketPlayerInfoData].Uuid[:])
-		if err != nil {
-			return
-		}
-		switch ret.Action&1 != 0 {
-		case true:
-			PlayToClientPacketPlayerInfoDataInnerPlayer, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Player.(GameProfileNameProp)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = PlayToClientPacketPlayerInfoDataInnerPlayer.Encode(w)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Player.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-		switch ret.Action&2 != 0 {
-		case true:
-			PlayToClientPacketPlayerInfoDataInnerChatSession, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(ChatSession)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = PlayToClientPacketPlayerInfoDataInnerChatSession.Encode(w)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ChatSession.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-		switch ret.Action&4 != 0 {
-		case true:
-			PlayToClientPacketPlayerInfoDataInnerGamemode, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(int32)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = proto_base.EncodeVarInt(w, PlayToClientPacketPlayerInfoDataInnerGamemode)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Gamemode.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-		switch ret.Action&8 != 0 {
-		case true:
-			PlayToClientPacketPlayerInfoDataInnerListed, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(int32)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = proto_base.EncodeVarInt(w, PlayToClientPacketPlayerInfoDataInnerListed)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Listed.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-		switch ret.Action&10 != 0 {
-		case true:
-			PlayToClientPacketPlayerInfoDataInnerLatency, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(int32)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = proto_base.EncodeVarInt(w, PlayToClientPacketPlayerInfoDataInnerLatency)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].Latency.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-		switch ret.Action&20 != 0 {
-		case true:
-			PlayToClientPacketPlayerInfoDataInnerDisplayName, ok := ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(*nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, PlayToClientPacketPlayerInfoDataInnerDisplayName != nil)
-			if err != nil {
-				return
-			}
-			if PlayToClientPacketPlayerInfoDataInnerDisplayName != nil {
-				err = (*PlayToClientPacketPlayerInfoDataInnerDisplayName).Encode(w)
-				if err != nil {
-					return
-				}
-			}
-		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].DisplayName.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-		switch ret.Action&80 != 0 {
-		case true:
-			PlayToClientPacketPlayerInfoDataInnerListPriority, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(int32)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = proto_base.EncodeVarInt(w, PlayToClientPacketPlayerInfoDataInnerListPriority)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ListPriority.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-		switch ret.Action&40 != 0 {
-		case true:
-			PlayToClientPacketPlayerInfoDataInnerShowHat, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(bool)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = binary.Write(w, binary.BigEndian, PlayToClientPacketPlayerInfoDataInnerShowHat)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := ret.Data[iPlayToClientPacketPlayerInfoData].ShowHat.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-	}
-	return
-}
-
-type PlayToClientPacketPlayerRemove struct {
-	Players []uuid.UUID
-}
-
-func (ret *PlayToClientPacketPlayerRemove) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketPlayerRemovePlayers int32
-	lPlayToClientPacketPlayerRemovePlayers, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Players = []uuid.UUID{}
-	for range lPlayToClientPacketPlayerRemovePlayers {
-		var PlayToClientPacketPlayerRemovePlayersElement uuid.UUID
-		_, err = io.ReadFull(r, PlayToClientPacketPlayerRemovePlayersElement[:])
-		if err != nil {
-			return
-		}
-		ret.Players = append(ret.Players, PlayToClientPacketPlayerRemovePlayersElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketPlayerRemove) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Players)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketPlayerRemovePlayers := range len(ret.Players) {
-		_, err = w.Write(ret.Players[iPlayToClientPacketPlayerRemovePlayers][:])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketPlayerRotation struct {
-	Yaw           float32
-	RelativeYaw   bool
-	Pitch         float32
-	RelativePitch bool
-}
-
-func (ret *PlayToClientPacketPlayerRotation) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.RelativeYaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.RelativePitch)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketPlayerRotation) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.RelativeYaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.RelativePitch)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketPlayerlistHeader struct {
-	Header nbt.Anon
-	Footer nbt.Anon
-}
-
-func (ret *PlayToClientPacketPlayerlistHeader) Decode(r io.Reader) (err error) {
-	err = ret.Header.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Footer.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketPlayerlistHeader) Encode(w io.Writer) (err error) {
-	err = ret.Header.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Footer.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketPosition struct {
-	TeleportId int32
-	X          float64
-	Y          float64
-	Z          float64
-	Dx         float64
-	Dy         float64
-	Dz         float64
-	Yaw        float32
-	Pitch      float32
-	Flags      PlayToClientPositionUpdateRelatives
-}
-
-func (ret *PlayToClientPacketPosition) Decode(r io.Reader) (err error) {
-	ret.TeleportId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Dx)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Dy)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Dz)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = ret.Flags.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketPosition) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.TeleportId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Dx)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Dy)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Dz)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = ret.Flags.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketProfilelessChat struct {
-	Message nbt.Anon
-	Type    PlayToClientChatTypesHolder
-	Name    nbt.Anon
-	Target  *nbt.Anon
-}
-
-func (ret *PlayToClientPacketProfilelessChat) Decode(r io.Reader) (err error) {
-	err = ret.Message.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Type.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Name.Decode(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketProfilelessChatTargetPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketProfilelessChatTargetPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketProfilelessChatTargetPresent {
-		var PlayToClientPacketProfilelessChatTargetPresentValue nbt.Anon
-		err = PlayToClientPacketProfilelessChatTargetPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Target = &PlayToClientPacketProfilelessChatTargetPresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketProfilelessChat) Encode(w io.Writer) (err error) {
-	err = ret.Message.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Type.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Name.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Target != nil)
-	if err != nil {
-		return
-	}
-	if ret.Target != nil {
-		err = (*ret.Target).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketRecipeBookAdd struct {
-	Entries []struct {
-		Recipe struct {
-			DisplayId            int32
-			Display              PlayToClientRecipeDisplay
-			Group                Optvarint
-			Category             string
-			CraftingRequirements *[]IDSet
-		}
-		Flags uint8
-	}
-	Replace bool
-}
-
-var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap = map[int32]string{0: "crafting_building_blocks", 1: "crafting_redstone", 10: "stonecutter", 11: "smithing", 12: "campfire", 2: "crafting_equipment", 3: "crafting_misc", 4: "furnace_food", 5: "furnace_blocks", 6: "furnace_misc", 7: "blast_furnace_blocks", 8: "blast_furnace_misc", 9: "smoker_food"}
-
-func (ret *PlayToClientPacketRecipeBookAdd) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketRecipeBookAddEntries int32
-	lPlayToClientPacketRecipeBookAddEntries, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Entries = []struct {
-		Recipe struct {
-			DisplayId            int32
-			Display              PlayToClientRecipeDisplay
-			Group                Optvarint
-			Category             string
-			CraftingRequirements *[]IDSet
-		}
-		Flags uint8
-	}{}
-	for range lPlayToClientPacketRecipeBookAddEntries {
-		var PlayToClientPacketRecipeBookAddEntriesElement struct {
-			Recipe struct {
-				DisplayId            int32
-				Display              PlayToClientRecipeDisplay
-				Group                Optvarint
-				Category             string
-				CraftingRequirements *[]IDSet
-			}
-			Flags uint8
-		}
-		PlayToClientPacketRecipeBookAddEntriesElement.Recipe.DisplayId, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketRecipeBookAddEntriesElement.Recipe.Display.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketRecipeBookAddEntriesElement.Recipe.Group.Decode(r)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey int32
-		PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketRecipeBookAddEntriesElement.Recipe.Category, err = proto_base.ErroringIndex(PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap, PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryKey)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresent bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresent)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresent {
-			var PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue []IDSet
-			var lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements int32
-			lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue = []IDSet{}
-			for range lPlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirements {
-				var PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsElement IDSet
-				err = PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsElement.Decode(r)
-				if err != nil {
-					return
-				}
-				PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue = append(PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue, PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsElement)
-			}
-			PlayToClientPacketRecipeBookAddEntriesElement.Recipe.CraftingRequirements = &PlayToClientPacketRecipeBookAddEntriesElementRecipeCraftingRequirementsPresentValue
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketRecipeBookAddEntriesElement.Flags)
-		if err != nil {
-			return
-		}
-		ret.Entries = append(ret.Entries, PlayToClientPacketRecipeBookAddEntriesElement)
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Replace)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var PlayToClientPacketRecipeBookAddEntriesInnerRecipeCategoryReverseMap = map[string]int32{"crafting_building_blocks": 0, "crafting_redstone": 1, "stonecutter": 10, "smithing": 11, "campfire": 12, "crafting_equipment": 2, "crafting_misc": 3, "furnace_food": 4, "furnace_blocks": 5, "furnace_misc": 6, "blast_furnace_blocks": 7, "blast_furnace_misc": 8, "smoker_food": 9}
-
-func (ret *PlayToClientPacketRecipeBookAdd) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Entries)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketRecipeBookAddEntries := range len(ret.Entries) {
-		err = proto_base.EncodeVarInt(w, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.DisplayId)
-		if err != nil {
-			return
-		}
-		err = ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Display.Encode(w)
-		if err != nil {
-			return
-		}
-		err = ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Group.Encode(w)
-		if err != nil {
-			return
-		}
-		var vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory int32
-		vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory, err = proto_base.ErroringIndex(PlayToClientPacketRecipeBookAddEntriesInnerRecipeCategoryReverseMap, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Category)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, vPlayToClientPacketRecipeBookAddEntriesInnerRecipeCategory)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements != nil)
-		if err != nil {
-			return
-		}
-		if ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements != nil {
-			err = proto_base.EncodeVarInt(w, int32(len(*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements)))
-			if err != nil {
-				return
-			}
-			for iPlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirements := range len(*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements) {
-				err = (*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements)[iPlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirements].Encode(w)
-				if err != nil {
-					return
-				}
-			}
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Flags)
-		if err != nil {
-			return
-		}
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Replace)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketRecipeBookRemove struct {
-	RecipeIds []int32
-}
-
-func (ret *PlayToClientPacketRecipeBookRemove) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketRecipeBookRemoveRecipeIds int32
-	lPlayToClientPacketRecipeBookRemoveRecipeIds, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.RecipeIds = []int32{}
-	for range lPlayToClientPacketRecipeBookRemoveRecipeIds {
-		var PlayToClientPacketRecipeBookRemoveRecipeIdsElement int32
-		PlayToClientPacketRecipeBookRemoveRecipeIdsElement, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.RecipeIds = append(ret.RecipeIds, PlayToClientPacketRecipeBookRemoveRecipeIdsElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketRecipeBookRemove) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.RecipeIds)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketRecipeBookRemoveRecipeIds := range len(ret.RecipeIds) {
-		err = proto_base.EncodeVarInt(w, ret.RecipeIds[iPlayToClientPacketRecipeBookRemoveRecipeIds])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketRecipeBookSettings struct {
-	Crafting PlayToClientRecipeBookSetting
-	Furnace  PlayToClientRecipeBookSetting
-	Blast    PlayToClientRecipeBookSetting
-	Smoker   PlayToClientRecipeBookSetting
-}
-
-func (ret *PlayToClientPacketRecipeBookSettings) Decode(r io.Reader) (err error) {
-	err = ret.Crafting.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Furnace.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Blast.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.Smoker.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketRecipeBookSettings) Encode(w io.Writer) (err error) {
-	err = ret.Crafting.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Furnace.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Blast.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.Smoker.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketRelEntityMove struct {
-	EntityId int32
-	DX       int16
-	DY       int16
-	DZ       int16
-	OnGround bool
-}
-
-func (ret *PlayToClientPacketRelEntityMove) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DX)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DY)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.DZ)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketRelEntityMove) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DX)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DY)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.DZ)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketRemoveEntityEffect struct {
-	EntityId int32
-	EffectId int32
-}
-
-func (ret *PlayToClientPacketRemoveEntityEffect) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.EffectId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketRemoveEntityEffect) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.EffectId)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketResetScore struct {
-	EntityName    string
-	ObjectiveName *string
-}
-
-func (ret *PlayToClientPacketResetScore) Decode(r io.Reader) (err error) {
-	ret.EntityName, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketResetScoreObjectiveNamePresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketResetScoreObjectiveNamePresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketResetScoreObjectiveNamePresent {
-		var PlayToClientPacketResetScoreObjectiveNamePresentValue string
-		PlayToClientPacketResetScoreObjectiveNamePresentValue, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.ObjectiveName = &PlayToClientPacketResetScoreObjectiveNamePresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketResetScore) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.EntityName)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ObjectiveName != nil)
-	if err != nil {
-		return
-	}
-	if ret.ObjectiveName != nil {
-		err = proto_base.EncodeString(w, *ret.ObjectiveName)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketRespawn struct {
-	WorldState   PlayToClientSpawnInfo
-	CopyMetadata uint8
-}
-
-func (ret *PlayToClientPacketRespawn) Decode(r io.Reader) (err error) {
-	err = ret.WorldState.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.CopyMetadata)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketRespawn) Encode(w io.Writer) (err error) {
-	err = ret.WorldState.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.CopyMetadata)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketScoreboardDisplayObjective struct {
-	Position int32
-	Name     string
-}
-
-func (ret *PlayToClientPacketScoreboardDisplayObjective) Decode(r io.Reader) (err error) {
-	ret.Position, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Name, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketScoreboardDisplayObjective) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Position)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Name)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketScoreboardObjective struct {
-	Name         string
-	Action       int8
-	DisplayText  any
-	Type         any
-	NumberFormat any
-	Styling      any
-}
-
-func (ret *PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (err error) {
-	ret.Name, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Action)
-	if err != nil {
-		return
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketScoreboardObjectiveDisplayText0Tmp nbt.Anon
-		err = PlayToClientPacketScoreboardObjectiveDisplayText0Tmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.DisplayText = PlayToClientPacketScoreboardObjectiveDisplayText0Tmp
-	case 2:
-		var PlayToClientPacketScoreboardObjectiveDisplayText2Tmp nbt.Anon
-		err = PlayToClientPacketScoreboardObjectiveDisplayText2Tmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.DisplayText = PlayToClientPacketScoreboardObjectiveDisplayText2Tmp
-	default:
-		var PlayToClientPacketScoreboardObjectiveDisplayTextTmp struct {
-		}
-		ret.DisplayText = PlayToClientPacketScoreboardObjectiveDisplayTextTmp
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketScoreboardObjectiveType0Tmp int32
-		PlayToClientPacketScoreboardObjectiveType0Tmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Type = PlayToClientPacketScoreboardObjectiveType0Tmp
-	case 2:
-		var PlayToClientPacketScoreboardObjectiveType2Tmp int32
-		PlayToClientPacketScoreboardObjectiveType2Tmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Type = PlayToClientPacketScoreboardObjectiveType2Tmp
-	default:
-		var PlayToClientPacketScoreboardObjectiveTypeTmp struct {
-		}
-		ret.Type = PlayToClientPacketScoreboardObjectiveTypeTmp
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp *int32
-		var PlayToClientPacketScoreboardObjectiveNumberFormatPresent bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormatPresent)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketScoreboardObjectiveNumberFormatPresent {
-			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue int32
-			PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp = &PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue
-		}
-		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp
-	case 2:
-		var PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp *int32
-		var PlayToClientPacketScoreboardObjectiveNumberFormatPresent bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormatPresent)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketScoreboardObjectiveNumberFormatPresent {
-			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue int32
-			PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp = &PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue
-		}
-		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp
-	default:
-		var PlayToClientPacketScoreboardObjectiveNumberFormatTmp struct {
-		}
-		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormatTmp
-	}
-	switch ret.Action {
-	case 0:
-		var PlayToClientPacketScoreboardObjectiveStyling0Tmp any
-		switch ret.NumberFormat {
-		case 1:
-			var PlayToClientPacketScoreboardObjectiveStyling1Tmp nbt.Anon
-			err = PlayToClientPacketScoreboardObjectiveStyling1Tmp.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling1Tmp
-		case 2:
-			var PlayToClientPacketScoreboardObjectiveStyling2Tmp nbt.Anon
-			err = PlayToClientPacketScoreboardObjectiveStyling2Tmp.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling2Tmp
-		default:
-			var PlayToClientPacketScoreboardObjectiveStylingTmp struct {
-			}
-			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStylingTmp
-		}
-		ret.Styling = PlayToClientPacketScoreboardObjectiveStyling0Tmp
-	case 2:
-		var PlayToClientPacketScoreboardObjectiveStyling2Tmp any
-		switch ret.NumberFormat {
-		case 1:
-			var PlayToClientPacketScoreboardObjectiveStyling1Tmp nbt.Anon
-			err = PlayToClientPacketScoreboardObjectiveStyling1Tmp.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling1Tmp
-		case 2:
-			var PlayToClientPacketScoreboardObjectiveStyling2Tmp nbt.Anon
-			err = PlayToClientPacketScoreboardObjectiveStyling2Tmp.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling2Tmp
-		default:
-			var PlayToClientPacketScoreboardObjectiveStylingTmp struct {
-			}
-			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStylingTmp
-		}
-		ret.Styling = PlayToClientPacketScoreboardObjectiveStyling2Tmp
-	default:
-		var PlayToClientPacketScoreboardObjectiveStylingTmp struct {
-		}
-		ret.Styling = PlayToClientPacketScoreboardObjectiveStylingTmp
-	}
-	return
-}
-func (ret *PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Name)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Action)
-	if err != nil {
-		return
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketScoreboardObjectiveDisplayText, ok := ret.DisplayText.(nbt.Anon)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketScoreboardObjectiveDisplayText.Encode(w)
-		if err != nil {
-			return
-		}
-	case 2:
-		PlayToClientPacketScoreboardObjectiveDisplayText, ok := ret.DisplayText.(nbt.Anon)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketScoreboardObjectiveDisplayText.Encode(w)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.DisplayText.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketScoreboardObjectiveType, ok := ret.Type.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketScoreboardObjectiveType)
-		if err != nil {
-			return
-		}
-	case 2:
-		PlayToClientPacketScoreboardObjectiveType, ok := ret.Type.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketScoreboardObjectiveType)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Type.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketScoreboardObjectiveNumberFormat, ok := ret.NumberFormat.(*int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketScoreboardObjectiveNumberFormat != nil)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketScoreboardObjectiveNumberFormat != nil {
-			err = proto_base.EncodeVarInt(w, *PlayToClientPacketScoreboardObjectiveNumberFormat)
-			if err != nil {
-				return
-			}
-		}
-	case 2:
-		PlayToClientPacketScoreboardObjectiveNumberFormat, ok := ret.NumberFormat.(*int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketScoreboardObjectiveNumberFormat != nil)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketScoreboardObjectiveNumberFormat != nil {
-			err = proto_base.EncodeVarInt(w, *PlayToClientPacketScoreboardObjectiveNumberFormat)
-			if err != nil {
-				return
-			}
-		}
-	default:
-		_, ok := ret.NumberFormat.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Action {
-	case 0:
-		PlayToClientPacketScoreboardObjectiveStyling, ok := ret.Styling.(any)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		switch ret.NumberFormat {
-		case 1:
-			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
-			if err != nil {
-				return
-			}
-		case 2:
-			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := PlayToClientPacketScoreboardObjectiveStyling.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-	case 2:
-		PlayToClientPacketScoreboardObjectiveStyling, ok := ret.Styling.(any)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		switch ret.NumberFormat {
-		case 1:
-			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
-			if err != nil {
-				return
-			}
-		case 2:
-			PlayToClientPacketScoreboardObjectiveStyling, ok := PlayToClientPacketScoreboardObjectiveStyling.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
-			if err != nil {
-				return
-			}
-		default:
-			_, ok := PlayToClientPacketScoreboardObjectiveStyling.(struct {
-			})
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-		}
-	default:
-		_, ok := ret.Styling.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketScoreboardScore struct {
-	ItemName     string
-	ScoreName    string
-	Value        int32
-	DisplayName  *nbt.Anon
-	NumberFormat *int32
-	Styling      any
-}
-
-func (ret *PlayToClientPacketScoreboardScore) Decode(r io.Reader) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-func (ret *PlayToClientPacketScoreboardScore) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-
-type PlayToClientPacketSelectAdvancementTab struct {
-	Id *string
-}
-
-func (ret *PlayToClientPacketSelectAdvancementTab) Decode(r io.Reader) (err error) {
-	var PlayToClientPacketSelectAdvancementTabIdPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketSelectAdvancementTabIdPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketSelectAdvancementTabIdPresent {
-		var PlayToClientPacketSelectAdvancementTabIdPresentValue string
-		PlayToClientPacketSelectAdvancementTabIdPresentValue, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Id = &PlayToClientPacketSelectAdvancementTabIdPresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketSelectAdvancementTab) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Id != nil)
-	if err != nil {
-		return
-	}
-	if ret.Id != nil {
-		err = proto_base.EncodeString(w, *ret.Id)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketServerData struct {
-	Motd      nbt.Anon
-	IconBytes *ByteArray
-}
-
-func (ret *PlayToClientPacketServerData) Decode(r io.Reader) (err error) {
-	err = ret.Motd.Decode(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketServerDataIconBytesPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketServerDataIconBytesPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketServerDataIconBytesPresent {
-		var PlayToClientPacketServerDataIconBytesPresentValue ByteArray
-		err = PlayToClientPacketServerDataIconBytesPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.IconBytes = &PlayToClientPacketServerDataIconBytesPresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketServerData) Encode(w io.Writer) (err error) {
-	err = ret.Motd.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IconBytes != nil)
-	if err != nil {
-		return
-	}
-	if ret.IconBytes != nil {
-		err = (*ret.IconBytes).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketSetCooldown struct {
-	CooldownGroup string
-	CooldownTicks int32
-}
-
-func (ret *PlayToClientPacketSetCooldown) Decode(r io.Reader) (err error) {
-	ret.CooldownGroup, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.CooldownTicks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetCooldown) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.CooldownGroup)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.CooldownTicks)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSetCursorItem struct {
-	Contents Slot
-}
-
-func (ret *PlayToClientPacketSetCursorItem) Decode(r io.Reader) (err error) {
-	err = ret.Contents.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetCursorItem) Encode(w io.Writer) (err error) {
-	err = ret.Contents.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSetPassengers struct {
-	EntityId   int32
-	Passengers []int32
-}
-
-func (ret *PlayToClientPacketSetPassengers) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketSetPassengersPassengers int32
-	lPlayToClientPacketSetPassengersPassengers, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Passengers = []int32{}
-	for range lPlayToClientPacketSetPassengersPassengers {
-		var PlayToClientPacketSetPassengersPassengersElement int32
-		PlayToClientPacketSetPassengersPassengersElement, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Passengers = append(ret.Passengers, PlayToClientPacketSetPassengersPassengersElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketSetPassengers) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Passengers)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketSetPassengersPassengers := range len(ret.Passengers) {
-		err = proto_base.EncodeVarInt(w, ret.Passengers[iPlayToClientPacketSetPassengersPassengers])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketSetPlayerInventory struct {
-	SlotId   int32
-	Contents Slot
-}
-
-func (ret *PlayToClientPacketSetPlayerInventory) Decode(r io.Reader) (err error) {
-	ret.SlotId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.Contents.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetPlayerInventory) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.SlotId)
-	if err != nil {
-		return
-	}
-	err = ret.Contents.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSetProjectilePower struct {
-	Id                int32
-	AccelerationPower float64
-}
-
-func (ret *PlayToClientPacketSetProjectilePower) Decode(r io.Reader) (err error) {
-	ret.Id, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.AccelerationPower)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetProjectilePower) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Id)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.AccelerationPower)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSetSlot struct {
-	WindowId ContainerID
-	StateId  int32
-	Slot     int16
-	Item     Slot
-}
-
-func (ret *PlayToClientPacketSetSlot) Decode(r io.Reader) (err error) {
-	err = ret.WindowId.Decode(r)
-	if err != nil {
-		return
-	}
-	ret.StateId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Slot)
-	if err != nil {
-		return
-	}
-	err = ret.Item.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetSlot) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.StateId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Slot)
-	if err != nil {
-		return
-	}
-	err = ret.Item.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSetTickingState struct {
-	TickRate float32
-	IsFrozen bool
-}
-
-func (ret *PlayToClientPacketSetTickingState) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.TickRate)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.IsFrozen)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetTickingState) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.TickRate)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IsFrozen)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSetTitleSubtitle struct {
-	Text nbt.Anon
-}
-
-func (ret *PlayToClientPacketSetTitleSubtitle) Decode(r io.Reader) (err error) {
-	err = ret.Text.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetTitleSubtitle) Encode(w io.Writer) (err error) {
-	err = ret.Text.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSetTitleText struct {
-	Text nbt.Anon
-}
-
-func (ret *PlayToClientPacketSetTitleText) Decode(r io.Reader) (err error) {
-	err = ret.Text.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetTitleText) Encode(w io.Writer) (err error) {
-	err = ret.Text.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSetTitleTime struct {
-	FadeIn  int32
-	Stay    int32
-	FadeOut int32
-}
-
-func (ret *PlayToClientPacketSetTitleTime) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.FadeIn)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Stay)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.FadeOut)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSetTitleTime) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.FadeIn)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Stay)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.FadeOut)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketShowDialog struct {
-	Dialog any
-}
-
-func (ret *PlayToClientPacketShowDialog) Decode(r io.Reader) (err error) {
-	var PlayToClientPacketShowDialogDialogId int32
-	PlayToClientPacketShowDialogDialogId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketShowDialogDialogId != 0 {
-		ret.Dialog = PlayToClientPacketShowDialogDialogId
-	} else {
-		var PlayToClientPacketShowDialogDialogResult nbt.Anon
-		err = PlayToClientPacketShowDialogDialogResult.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Dialog = PlayToClientPacketShowDialogDialogResult
-	}
-	return
-}
-func (ret *PlayToClientPacketShowDialog) Encode(w io.Writer) (err error) {
-	switch PlayToClientPacketShowDialogDialogKnownType := ret.Dialog.(type) {
-	case int32:
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketShowDialogDialogKnownType)
-		if err != nil {
-			return
-		}
-	case nbt.Anon:
-		err = proto_base.EncodeVarInt(w, 0)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketShowDialogDialogKnownType.Encode(w)
-		if err != nil {
-			return
-		}
-	default:
-		err = proto_base.BadTypeError
-	}
-	return
-}
-
-type PlayToClientPacketSimulationDistance struct {
-	Distance int32
-}
-
-func (ret *PlayToClientPacketSimulationDistance) Decode(r io.Reader) (err error) {
-	ret.Distance, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSimulationDistance) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.Distance)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSoundEffect struct {
-	Sound         ItemSoundHolder
-	SoundCategory SoundSource
-	X             int32
-	Y             int32
-	Z             int32
-	Volume        float32
-	Pitch         float32
-	Seed          int64
-}
-
-func (ret *PlayToClientPacketSoundEffect) Decode(r io.Reader) (err error) {
-	err = ret.Sound.Decode(r)
-	if err != nil {
-		return
-	}
-	err = ret.SoundCategory.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Volume)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Seed)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSoundEffect) Encode(w io.Writer) (err error) {
-	err = ret.Sound.Encode(w)
-	if err != nil {
-		return
-	}
-	err = ret.SoundCategory.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Volume)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Seed)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSpawnEntity struct {
-	EntityId   int32
-	ObjectUUID uuid.UUID
-	Type       int32
-	X          float64
-	Y          float64
-	Z          float64
-	Velocity   proto_base.LpVec3d
-	Pitch      int8
-	Yaw        int8
-	HeadPitch  int8
-	ObjectData int32
-}
-
-func (ret *PlayToClientPacketSpawnEntity) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	_, err = io.ReadFull(r, ret.ObjectUUID[:])
-	if err != nil {
-		return
-	}
-	ret.Type, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = ret.Velocity.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.HeadPitch)
-	if err != nil {
-		return
-	}
-	ret.ObjectData, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSpawnEntity) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(ret.ObjectUUID[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Type)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = ret.Velocity.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.HeadPitch)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ObjectData)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSpawnPosition struct {
-	Val RespawnData
-}
-
-func (ret *PlayToClientPacketSpawnPosition) Decode(r io.Reader) (err error) {
-	err = ret.Val.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSpawnPosition) Encode(w io.Writer) (err error) {
-	err = ret.Val.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketStartConfiguration struct {
-}
-
-func (ret *PlayToClientPacketStartConfiguration) Decode(r io.Reader) (err error) {
-	return
-}
-func (ret *PlayToClientPacketStartConfiguration) Encode(w io.Writer) (err error) {
-	return
-}
-
-type PlayToClientPacketStatistics struct {
-	Entries []struct {
-		CategoryId  int32
-		StatisticId int32
-		Value       int32
-	}
-}
-
-func (ret *PlayToClientPacketStatistics) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketStatisticsEntries int32
-	lPlayToClientPacketStatisticsEntries, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Entries = []struct {
-		CategoryId  int32
-		StatisticId int32
-		Value       int32
-	}{}
-	for range lPlayToClientPacketStatisticsEntries {
-		var PlayToClientPacketStatisticsEntriesElement struct {
-			CategoryId  int32
-			StatisticId int32
-			Value       int32
-		}
-		PlayToClientPacketStatisticsEntriesElement.CategoryId, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketStatisticsEntriesElement.StatisticId, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketStatisticsEntriesElement.Value, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Entries = append(ret.Entries, PlayToClientPacketStatisticsEntriesElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketStatistics) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Entries)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketStatisticsEntries := range len(ret.Entries) {
-		err = proto_base.EncodeVarInt(w, ret.Entries[iPlayToClientPacketStatisticsEntries].CategoryId)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, ret.Entries[iPlayToClientPacketStatisticsEntries].StatisticId)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, ret.Entries[iPlayToClientPacketStatisticsEntries].Value)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketStepTick struct {
-	TickSteps int32
-}
-
-func (ret *PlayToClientPacketStepTick) Decode(r io.Reader) (err error) {
-	ret.TickSteps, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketStepTick) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.TickSteps)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketStopSound struct {
-	Flags  int8
-	Source any
-	Sound  any
-}
-
-func (ret *PlayToClientPacketStopSound) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Flags)
-	if err != nil {
-		return
-	}
-	switch ret.Flags {
-	case 1:
-		var PlayToClientPacketStopSoundSource1Tmp int32
-		PlayToClientPacketStopSoundSource1Tmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Source = PlayToClientPacketStopSoundSource1Tmp
-	case 3:
-		var PlayToClientPacketStopSoundSource3Tmp int32
-		PlayToClientPacketStopSoundSource3Tmp, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Source = PlayToClientPacketStopSoundSource3Tmp
-	default:
-		var PlayToClientPacketStopSoundSourceTmp struct {
-		}
-		ret.Source = PlayToClientPacketStopSoundSourceTmp
-	}
-	switch ret.Flags {
-	case 2:
-		var PlayToClientPacketStopSoundSound2Tmp string
-		PlayToClientPacketStopSoundSound2Tmp, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Sound = PlayToClientPacketStopSoundSound2Tmp
-	case 3:
-		var PlayToClientPacketStopSoundSound3Tmp string
-		PlayToClientPacketStopSoundSound3Tmp, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Sound = PlayToClientPacketStopSoundSound3Tmp
-	default:
-		var PlayToClientPacketStopSoundSoundTmp struct {
-		}
-		ret.Sound = PlayToClientPacketStopSoundSoundTmp
-	}
-	return
-}
-func (ret *PlayToClientPacketStopSound) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Flags)
-	if err != nil {
-		return
-	}
-	switch ret.Flags {
-	case 1:
-		PlayToClientPacketStopSoundSource, ok := ret.Source.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketStopSoundSource)
-		if err != nil {
-			return
-		}
-	case 3:
-		PlayToClientPacketStopSoundSource, ok := ret.Source.(int32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketStopSoundSource)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Source.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Flags {
-	case 2:
-		PlayToClientPacketStopSoundSound, ok := ret.Sound.(string)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeString(w, PlayToClientPacketStopSoundSound)
-		if err != nil {
-			return
-		}
-	case 3:
-		PlayToClientPacketStopSoundSound, ok := ret.Sound.(string)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeString(w, PlayToClientPacketStopSoundSound)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Sound.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketSyncEntityPosition struct {
-	EntityId int32
-	X        float64
-	Y        float64
-	Z        float64
-	Dx       float64
-	Dy       float64
-	Dz       float64
-	Yaw      float32
-	Pitch    float32
-	OnGround bool
-}
-
-func (ret *PlayToClientPacketSyncEntityPosition) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Dx)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Dy)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Dz)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSyncEntityPosition) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Dx)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Dy)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Dz)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OnGround)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketSystemChat struct {
-	Content     nbt.Anon
-	IsActionBar bool
-}
-
-func (ret *PlayToClientPacketSystemChat) Decode(r io.Reader) (err error) {
-	err = ret.Content.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.IsActionBar)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketSystemChat) Encode(w io.Writer) (err error) {
-	err = ret.Content.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IsActionBar)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketTabComplete struct {
-	TransactionId int32
-	Start         int32
-	Length        int32
-	Matches       []struct {
-		Match   string
-		Tooltip *nbt.Anon
-	}
-}
-
-func (ret *PlayToClientPacketTabComplete) Decode(r io.Reader) (err error) {
-	ret.TransactionId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Start, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Length, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketTabCompleteMatches int32
-	lPlayToClientPacketTabCompleteMatches, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Matches = []struct {
-		Match   string
-		Tooltip *nbt.Anon
-	}{}
-	for range lPlayToClientPacketTabCompleteMatches {
-		var PlayToClientPacketTabCompleteMatchesElement struct {
-			Match   string
-			Tooltip *nbt.Anon
-		}
-		PlayToClientPacketTabCompleteMatchesElement.Match, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketTabCompleteMatchesElementTooltipPresent bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTabCompleteMatchesElementTooltipPresent)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketTabCompleteMatchesElementTooltipPresent {
-			var PlayToClientPacketTabCompleteMatchesElementTooltipPresentValue nbt.Anon
-			err = PlayToClientPacketTabCompleteMatchesElementTooltipPresentValue.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketTabCompleteMatchesElement.Tooltip = &PlayToClientPacketTabCompleteMatchesElementTooltipPresentValue
-		}
-		ret.Matches = append(ret.Matches, PlayToClientPacketTabCompleteMatchesElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketTabComplete) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.TransactionId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Start)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Length)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Matches)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketTabCompleteMatches := range len(ret.Matches) {
-		err = proto_base.EncodeString(w, ret.Matches[iPlayToClientPacketTabCompleteMatches].Match)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip != nil)
-		if err != nil {
-			return
-		}
-		if ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip != nil {
-			err = (*ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip).Encode(w)
-			if err != nil {
-				return
-			}
-		}
-	}
-	return
-}
-
-type PlayToClientPacketTags struct {
-	Tags []struct {
-		TagType string
-		Tags    Tags
-	}
-}
-
-func (ret *PlayToClientPacketTags) Decode(r io.Reader) (err error) {
-	var lPlayToClientPacketTagsTags int32
-	lPlayToClientPacketTagsTags, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Tags = []struct {
-		TagType string
-		Tags    Tags
-	}{}
-	for range lPlayToClientPacketTagsTags {
-		var PlayToClientPacketTagsTagsElement struct {
-			TagType string
-			Tags    Tags
-		}
-		PlayToClientPacketTagsTagsElement.TagType, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTagsTagsElement.Tags.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Tags = append(ret.Tags, PlayToClientPacketTagsTagsElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketTags) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Tags)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketTagsTags := range len(ret.Tags) {
-		err = proto_base.EncodeString(w, ret.Tags[iPlayToClientPacketTagsTags].TagType)
-		if err != nil {
-			return
-		}
-		err = ret.Tags[iPlayToClientPacketTagsTags].Tags.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketTeams struct {
-	Team    string
-	Mode    string
-	Anon    any
-	Players any
-}
-
-var PlayToClientPacketTeamsModeMap = map[int8]string{0: "add", 1: "remove", 2: "change", 3: "join", 4: "leave"}
-var PlayToClientPacketTeamsAnonNameTagVisibilityMap = map[int32]string{0: "always", 1: "never", 2: "hide_for_other_teams", 3: "hide_for_own_team"}
-var PlayToClientPacketTeamsAnonCollisionRuleMap = map[int32]string{0: "always", 1: "never", 2: "push_other_teams", 3: "push_own_team"}
-
-func (ret *PlayToClientPacketTeams) Decode(r io.Reader) (err error) {
-	ret.Team, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketTeamsModeKey int8
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTeamsModeKey)
-	if err != nil {
-		return
-	}
-	ret.Mode, err = proto_base.ErroringIndex(PlayToClientPacketTeamsModeMap, PlayToClientPacketTeamsModeKey)
-	if err != nil {
-		return
-	}
-	switch ret.Mode {
-	case "add":
-		var PlayToClientPacketTeamsAnonAddTmp struct {
-			Name              nbt.Anon
-			Flags             uint8
-			NameTagVisibility string
-			CollisionRule     string
-			Formatting        int32
-			Prefix            nbt.Anon
-			Suffix            nbt.Anon
-		}
-		err = PlayToClientPacketTeamsAnonAddTmp.Name.Decode(r)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTeamsAnonAddTmp.Flags)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketTeamsAnonNameTagVisibilityKey int32
-		PlayToClientPacketTeamsAnonNameTagVisibilityKey, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsAnonAddTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketTeamsAnonCollisionRuleKey int32
-		PlayToClientPacketTeamsAnonCollisionRuleKey, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsAnonAddTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsAnonAddTmp.Formatting, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTeamsAnonAddTmp.Prefix.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTeamsAnonAddTmp.Suffix.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Anon = PlayToClientPacketTeamsAnonAddTmp
-	case "change":
-		var PlayToClientPacketTeamsAnonChangeTmp struct {
-			Name              nbt.Anon
-			Flags             uint8
-			NameTagVisibility string
-			CollisionRule     string
-			Formatting        int32
-			Prefix            nbt.Anon
-			Suffix            nbt.Anon
-		}
-		err = PlayToClientPacketTeamsAnonChangeTmp.Name.Decode(r)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTeamsAnonChangeTmp.Flags)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketTeamsAnonNameTagVisibilityKey int32
-		PlayToClientPacketTeamsAnonNameTagVisibilityKey, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsAnonChangeTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketTeamsAnonCollisionRuleKey int32
-		PlayToClientPacketTeamsAnonCollisionRuleKey, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsAnonChangeTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsAnonChangeTmp.Formatting, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTeamsAnonChangeTmp.Prefix.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTeamsAnonChangeTmp.Suffix.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Anon = PlayToClientPacketTeamsAnonChangeTmp
-	default:
-		var PlayToClientPacketTeamsAnonTmp struct {
-		}
-		ret.Anon = PlayToClientPacketTeamsAnonTmp
-	}
-	switch ret.Mode {
-	case "add":
-		var PlayToClientPacketTeamsPlayersAddTmp []string
-		var lPlayToClientPacketTeamsPlayers int32
-		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsPlayersAddTmp = []string{}
-		for range lPlayToClientPacketTeamsPlayers {
-			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketTeamsPlayersAddTmp = append(PlayToClientPacketTeamsPlayersAddTmp, PlayToClientPacketTeamsPlayersElement)
-		}
-		ret.Players = PlayToClientPacketTeamsPlayersAddTmp
-	case "join":
-		var PlayToClientPacketTeamsPlayersJoinTmp []string
-		var lPlayToClientPacketTeamsPlayers int32
-		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsPlayersJoinTmp = []string{}
-		for range lPlayToClientPacketTeamsPlayers {
-			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketTeamsPlayersJoinTmp = append(PlayToClientPacketTeamsPlayersJoinTmp, PlayToClientPacketTeamsPlayersElement)
-		}
-		ret.Players = PlayToClientPacketTeamsPlayersJoinTmp
-	case "leave":
-		var PlayToClientPacketTeamsPlayersLeaveTmp []string
-		var lPlayToClientPacketTeamsPlayers int32
-		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTeamsPlayersLeaveTmp = []string{}
-		for range lPlayToClientPacketTeamsPlayers {
-			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketTeamsPlayersLeaveTmp = append(PlayToClientPacketTeamsPlayersLeaveTmp, PlayToClientPacketTeamsPlayersElement)
-		}
-		ret.Players = PlayToClientPacketTeamsPlayersLeaveTmp
-	default:
-		var PlayToClientPacketTeamsPlayersTmp struct {
-		}
-		ret.Players = PlayToClientPacketTeamsPlayersTmp
-	}
-	return
-}
-
-var PlayToClientPacketTeamsModeReverseMap = map[string]int8{"add": 0, "remove": 1, "change": 2, "join": 3, "leave": 4}
-var PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap = map[string]int32{"always": 0, "never": 1, "hide_for_other_teams": 2, "hide_for_own_team": 3}
-var PlayToClientPacketTeamsAnonCollisionRuleReverseMap = map[string]int32{"always": 0, "never": 1, "push_other_teams": 2, "push_own_team": 3}
-
-func (ret *PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Team)
-	if err != nil {
-		return
-	}
-	var vPlayToClientPacketTeamsMode int8
-	vPlayToClientPacketTeamsMode, err = proto_base.ErroringIndex(PlayToClientPacketTeamsModeReverseMap, ret.Mode)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, vPlayToClientPacketTeamsMode)
-	if err != nil {
-		return
-	}
-	switch ret.Mode {
-	case "add":
-		PlayToClientPacketTeamsAnon, ok := ret.Anon.(struct {
-			Name              nbt.Anon
-			Flags             uint8
-			NameTagVisibility string
-			CollisionRule     string
-			Formatting        int32
-			Prefix            nbt.Anon
-			Suffix            nbt.Anon
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketTeamsAnon.Name.Encode(w)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketTeamsAnon.Flags)
-		if err != nil {
-			return
-		}
-		var vPlayToClientPacketTeamsAnonNameTagVisibility int32
-		vPlayToClientPacketTeamsAnonNameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap, PlayToClientPacketTeamsAnon.NameTagVisibility)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, vPlayToClientPacketTeamsAnonNameTagVisibility)
-		if err != nil {
-			return
-		}
-		var vPlayToClientPacketTeamsAnonCollisionRule int32
-		vPlayToClientPacketTeamsAnonCollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleReverseMap, PlayToClientPacketTeamsAnon.CollisionRule)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, vPlayToClientPacketTeamsAnonCollisionRule)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketTeamsAnon.Formatting)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTeamsAnon.Prefix.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTeamsAnon.Suffix.Encode(w)
-		if err != nil {
-			return
-		}
-	case "change":
-		PlayToClientPacketTeamsAnon, ok := ret.Anon.(struct {
-			Name              nbt.Anon
-			Flags             uint8
-			NameTagVisibility string
-			CollisionRule     string
-			Formatting        int32
-			Prefix            nbt.Anon
-			Suffix            nbt.Anon
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketTeamsAnon.Name.Encode(w)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketTeamsAnon.Flags)
-		if err != nil {
-			return
-		}
-		var vPlayToClientPacketTeamsAnonNameTagVisibility int32
-		vPlayToClientPacketTeamsAnonNameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityReverseMap, PlayToClientPacketTeamsAnon.NameTagVisibility)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, vPlayToClientPacketTeamsAnonNameTagVisibility)
-		if err != nil {
-			return
-		}
-		var vPlayToClientPacketTeamsAnonCollisionRule int32
-		vPlayToClientPacketTeamsAnonCollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleReverseMap, PlayToClientPacketTeamsAnon.CollisionRule)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, vPlayToClientPacketTeamsAnonCollisionRule)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketTeamsAnon.Formatting)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTeamsAnon.Prefix.Encode(w)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTeamsAnon.Suffix.Encode(w)
-		if err != nil {
-			return
-		}
-	default:
-		_, ok := ret.Anon.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	switch ret.Mode {
-	case "add":
-		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientPacketTeamsPlayers)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
-			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
-			if err != nil {
-				return
-			}
-		}
-	case "join":
-		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientPacketTeamsPlayers)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
-			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
-			if err != nil {
-				return
-			}
-		}
-	case "leave":
-		PlayToClientPacketTeamsPlayers, ok := ret.Players.([]string)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, int32(len(PlayToClientPacketTeamsPlayers)))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketTeamsPlayers := range len(PlayToClientPacketTeamsPlayers) {
-			err = proto_base.EncodeString(w, PlayToClientPacketTeamsPlayers[iPlayToClientPacketTeamsPlayers])
-			if err != nil {
-				return
-			}
-		}
-	default:
-		_, ok := ret.Players.(struct {
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketTestInstanceBlockStatus struct {
-	Status nbt.Anon
-	Size   *Vec3i
-}
-
-func (ret *PlayToClientPacketTestInstanceBlockStatus) Decode(r io.Reader) (err error) {
-	err = ret.Status.Decode(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketTestInstanceBlockStatusSizePresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTestInstanceBlockStatusSizePresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketTestInstanceBlockStatusSizePresent {
-		var PlayToClientPacketTestInstanceBlockStatusSizePresentValue Vec3i
-		err = PlayToClientPacketTestInstanceBlockStatusSizePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Size = &PlayToClientPacketTestInstanceBlockStatusSizePresentValue
-	}
-	return
-}
-func (ret *PlayToClientPacketTestInstanceBlockStatus) Encode(w io.Writer) (err error) {
-	err = ret.Status.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Size != nil)
-	if err != nil {
-		return
-	}
-	if ret.Size != nil {
-		err = (*ret.Size).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketTileEntityData struct {
-	Location Position
-	Action   int32
-	NbtData  nbt.Anon
-}
-
-func (ret *PlayToClientPacketTileEntityData) Decode(r io.Reader) (err error) {
-	err = ret.Location.Decode(r)
-	if err != nil {
-		return
-	}
-	ret.Action, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.NbtData.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketTileEntityData) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Action)
-	if err != nil {
-		return
-	}
-	err = ret.NbtData.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketTrackedWaypoint struct {
-	Operation string
-	Waypoint  struct {
-		HasUUID bool
-		Anon    any
-		Icon    struct {
-			Style string
-			Color *struct {
-				Red   uint8
-				Green uint8
-				Blue  uint8
-			}
-		}
-		Type string
-		Data any
-	}
-}
-
-var PlayToClientPacketTrackedWaypointOperationMap = map[int32]string{0: "track", 1: "untrack", 2: "update"}
-var PlayToClientPacketTrackedWaypointWaypointTypeMap = map[int32]string{0: "empty", 1: "vec3i", 2: "chunk", 3: "azimuth"}
-
-func (ret *PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (err error) {
-	var PlayToClientPacketTrackedWaypointOperationKey int32
-	PlayToClientPacketTrackedWaypointOperationKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Operation, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointOperationMap, PlayToClientPacketTrackedWaypointOperationKey)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Waypoint.HasUUID)
-	if err != nil {
-		return
-	}
-	switch ret.Waypoint.HasUUID {
-	case false:
-		var PlayToClientPacketTrackedWaypointWaypointAnonFalseTmp struct {
-			Id string
-		}
-		PlayToClientPacketTrackedWaypointWaypointAnonFalseTmp.Id, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Waypoint.Anon = PlayToClientPacketTrackedWaypointWaypointAnonFalseTmp
-	case true:
-		var PlayToClientPacketTrackedWaypointWaypointAnonTrueTmp struct {
-			Uuid uuid.UUID
-		}
-		_, err = io.ReadFull(r, PlayToClientPacketTrackedWaypointWaypointAnonTrueTmp.Uuid[:])
-		if err != nil {
-			return
-		}
-		ret.Waypoint.Anon = PlayToClientPacketTrackedWaypointWaypointAnonTrueTmp
-	}
-	ret.Waypoint.Icon.Style, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var PlayToClientPacketTrackedWaypointWaypointIconColorPresent bool
-	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointIconColorPresent)
-	if err != nil {
-		return
-	}
-	if PlayToClientPacketTrackedWaypointWaypointIconColorPresent {
-		var PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue struct {
-			Red   uint8
-			Green uint8
-			Blue  uint8
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue.Red)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue.Green)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue.Blue)
-		if err != nil {
-			return
-		}
-		ret.Waypoint.Icon.Color = &PlayToClientPacketTrackedWaypointWaypointIconColorPresentValue
-	}
-	var PlayToClientPacketTrackedWaypointWaypointTypeKey int32
-	PlayToClientPacketTrackedWaypointWaypointTypeKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Waypoint.Type, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointWaypointTypeMap, PlayToClientPacketTrackedWaypointWaypointTypeKey)
-	if err != nil {
-		return
-	}
-	switch ret.Waypoint.Type {
-	case "azimuth":
-		var PlayToClientPacketTrackedWaypointWaypointDataAzimuthTmp float32
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTrackedWaypointWaypointDataAzimuthTmp)
-		if err != nil {
-			return
-		}
-		ret.Waypoint.Data = PlayToClientPacketTrackedWaypointWaypointDataAzimuthTmp
-	case "chunk":
-		var PlayToClientPacketTrackedWaypointWaypointDataChunkTmp struct {
-			ChunkX int32
-			ChunkZ int32
-		}
-		PlayToClientPacketTrackedWaypointWaypointDataChunkTmp.ChunkX, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTrackedWaypointWaypointDataChunkTmp.ChunkZ, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		ret.Waypoint.Data = PlayToClientPacketTrackedWaypointWaypointDataChunkTmp
-	case "vec3i":
-		var PlayToClientPacketTrackedWaypointWaypointDataVec3iTmp Vec3i
-		err = PlayToClientPacketTrackedWaypointWaypointDataVec3iTmp.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Waypoint.Data = PlayToClientPacketTrackedWaypointWaypointDataVec3iTmp
-	}
-	return
-}
-
-var PlayToClientPacketTrackedWaypointOperationReverseMap = map[string]int32{"track": 0, "untrack": 1, "update": 2}
-var PlayToClientPacketTrackedWaypointWaypointTypeReverseMap = map[string]int32{"empty": 0, "vec3i": 1, "chunk": 2, "azimuth": 3}
-
-func (ret *PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
-	var vPlayToClientPacketTrackedWaypointOperation int32
-	vPlayToClientPacketTrackedWaypointOperation, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointOperationReverseMap, ret.Operation)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vPlayToClientPacketTrackedWaypointOperation)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Waypoint.HasUUID)
-	if err != nil {
-		return
-	}
-	switch ret.Waypoint.HasUUID {
-	case false:
-		PlayToClientPacketTrackedWaypointWaypointAnon, ok := ret.Waypoint.Anon.(struct {
-			Id string
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeString(w, PlayToClientPacketTrackedWaypointWaypointAnon.Id)
-		if err != nil {
-			return
-		}
-	case true:
-		PlayToClientPacketTrackedWaypointWaypointAnon, ok := ret.Waypoint.Anon.(struct {
-			Uuid uuid.UUID
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		_, err = w.Write(PlayToClientPacketTrackedWaypointWaypointAnon.Uuid[:])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeString(w, ret.Waypoint.Icon.Style)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Waypoint.Icon.Color != nil)
-	if err != nil {
-		return
-	}
-	if ret.Waypoint.Icon.Color != nil {
-		err = binary.Write(w, binary.BigEndian, (*ret.Waypoint.Icon.Color).Red)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, (*ret.Waypoint.Icon.Color).Green)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, (*ret.Waypoint.Icon.Color).Blue)
-		if err != nil {
-			return
-		}
-	}
-	var vPlayToClientPacketTrackedWaypointWaypointType int32
-	vPlayToClientPacketTrackedWaypointWaypointType, err = proto_base.ErroringIndex(PlayToClientPacketTrackedWaypointWaypointTypeReverseMap, ret.Waypoint.Type)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vPlayToClientPacketTrackedWaypointWaypointType)
-	if err != nil {
-		return
-	}
-	switch ret.Waypoint.Type {
-	case "azimuth":
-		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(float32)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, PlayToClientPacketTrackedWaypointWaypointData)
-		if err != nil {
-			return
-		}
-	case "chunk":
-		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(struct {
-			ChunkX int32
-			ChunkZ int32
-		})
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketTrackedWaypointWaypointData.ChunkX)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, PlayToClientPacketTrackedWaypointWaypointData.ChunkZ)
-		if err != nil {
-			return
-		}
-	case "vec3i":
-		PlayToClientPacketTrackedWaypointWaypointData, ok := ret.Waypoint.Data.(Vec3i)
-		if !ok {
-			err = proto_base.BadTypeError
-			return
-		}
-		err = PlayToClientPacketTrackedWaypointWaypointData.Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type PlayToClientPacketTradeList struct {
-	WindowId ContainerID
-	Trades   []struct {
-		InputItem1 struct {
-			ItemId     int32
-			ItemCount  int32
-			Components ExactComponentMatcher
-		}
-		OutputItem Slot
-		InputItem2 *struct {
-			ItemId     int32
-			ItemCount  int32
-			Components ExactComponentMatcher
-		}
-		TradeDisabled      bool
-		NbTradeUses        int32
-		MaximumNbTradeUses int32
-		Xp                 int32
-		SpecialPrice       int32
-		PriceMultiplier    float32
-		Demand             int32
-	}
-	VillagerLevel     int32
-	Experience        int32
-	IsRegularVillager bool
-	CanRestock        bool
-}
-
-func (ret *PlayToClientPacketTradeList) Decode(r io.Reader) (err error) {
-	err = ret.WindowId.Decode(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketTradeListTrades int32
-	lPlayToClientPacketTradeListTrades, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Trades = []struct {
-		InputItem1 struct {
-			ItemId     int32
-			ItemCount  int32
-			Components ExactComponentMatcher
-		}
-		OutputItem Slot
-		InputItem2 *struct {
-			ItemId     int32
-			ItemCount  int32
-			Components ExactComponentMatcher
-		}
-		TradeDisabled      bool
-		NbTradeUses        int32
-		MaximumNbTradeUses int32
-		Xp                 int32
-		SpecialPrice       int32
-		PriceMultiplier    float32
-		Demand             int32
-	}{}
-	for range lPlayToClientPacketTradeListTrades {
-		var PlayToClientPacketTradeListTradesElement struct {
-			InputItem1 struct {
-				ItemId     int32
-				ItemCount  int32
-				Components ExactComponentMatcher
-			}
-			OutputItem Slot
-			InputItem2 *struct {
-				ItemId     int32
-				ItemCount  int32
-				Components ExactComponentMatcher
-			}
-			TradeDisabled      bool
-			NbTradeUses        int32
-			MaximumNbTradeUses int32
-			Xp                 int32
-			SpecialPrice       int32
-			PriceMultiplier    float32
-			Demand             int32
-		}
-		PlayToClientPacketTradeListTradesElement.InputItem1.ItemId, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketTradeListTradesElement.InputItem1.ItemCount, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTradeListTradesElement.InputItem1.Components.Decode(r)
-		if err != nil {
-			return
-		}
-		err = PlayToClientPacketTradeListTradesElement.OutputItem.Decode(r)
-		if err != nil {
-			return
-		}
-		var PlayToClientPacketTradeListTradesElementInputItem2Present bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElementInputItem2Present)
-		if err != nil {
-			return
-		}
-		if PlayToClientPacketTradeListTradesElementInputItem2Present {
-			var PlayToClientPacketTradeListTradesElementInputItem2PresentValue struct {
-				ItemId     int32
-				ItemCount  int32
-				Components ExactComponentMatcher
-			}
-			PlayToClientPacketTradeListTradesElementInputItem2PresentValue.ItemId, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketTradeListTradesElementInputItem2PresentValue.ItemCount, err = proto_base.DecodeVarInt(r)
-			if err != nil {
-				return
-			}
-			err = PlayToClientPacketTradeListTradesElementInputItem2PresentValue.Components.Decode(r)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketTradeListTradesElement.InputItem2 = &PlayToClientPacketTradeListTradesElementInputItem2PresentValue
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.TradeDisabled)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.NbTradeUses)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.MaximumNbTradeUses)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.Xp)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.SpecialPrice)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.PriceMultiplier)
-		if err != nil {
-			return
-		}
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketTradeListTradesElement.Demand)
-		if err != nil {
-			return
-		}
-		ret.Trades = append(ret.Trades, PlayToClientPacketTradeListTradesElement)
-	}
-	ret.VillagerLevel, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Experience, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.IsRegularVillager)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.CanRestock)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketTradeList) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Trades)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketTradeListTrades := range len(ret.Trades) {
-		err = proto_base.EncodeVarInt(w, ret.Trades[iPlayToClientPacketTradeListTrades].InputItem1.ItemId)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeVarInt(w, ret.Trades[iPlayToClientPacketTradeListTrades].InputItem1.ItemCount)
-		if err != nil {
-			return
-		}
-		err = ret.Trades[iPlayToClientPacketTradeListTrades].InputItem1.Components.Encode(w)
-		if err != nil {
-			return
-		}
-		err = ret.Trades[iPlayToClientPacketTradeListTrades].OutputItem.Encode(w)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2 != nil)
-		if err != nil {
-			return
-		}
-		if ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2 != nil {
-			err = proto_base.EncodeVarInt(w, (*ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2).ItemId)
-			if err != nil {
-				return
-			}
-			err = proto_base.EncodeVarInt(w, (*ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2).ItemCount)
-			if err != nil {
-				return
-			}
-			err = (*ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2).Components.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].TradeDisabled)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].NbTradeUses)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].MaximumNbTradeUses)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].Xp)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].SpecialPrice)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].PriceMultiplier)
-		if err != nil {
-			return
-		}
-		err = binary.Write(w, binary.BigEndian, ret.Trades[iPlayToClientPacketTradeListTrades].Demand)
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, ret.VillagerLevel)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Experience)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.IsRegularVillager)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.CanRestock)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketUnloadChunk struct {
-	ChunkZ int32
-	ChunkX int32
-}
-
-func (ret *PlayToClientPacketUnloadChunk) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.ChunkZ)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ChunkX)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketUnloadChunk) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.ChunkZ)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ChunkX)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketUpdateHealth struct {
-	Health         float32
-	Food           int32
-	FoodSaturation float32
-}
-
-func (ret *PlayToClientPacketUpdateHealth) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Health)
-	if err != nil {
-		return
-	}
-	ret.Food, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.FoodSaturation)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketUpdateHealth) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Health)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Food)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.FoodSaturation)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketUpdateLight struct {
-	ChunkX              int32
-	ChunkZ              int32
-	SkyLightMask        []int64
-	BlockLightMask      []int64
-	EmptySkyLightMask   []int64
-	EmptyBlockLightMask []int64
-	SkyLight            [][]uint8
-	BlockLight          [][]uint8
-}
-
-func (ret *PlayToClientPacketUpdateLight) Decode(r io.Reader) (err error) {
-	ret.ChunkX, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ChunkZ, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketUpdateLightSkyLightMask int32
-	lPlayToClientPacketUpdateLightSkyLightMask, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SkyLightMask = []int64{}
-	for range lPlayToClientPacketUpdateLightSkyLightMask {
-		var PlayToClientPacketUpdateLightSkyLightMaskElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightSkyLightMaskElement)
-		if err != nil {
-			return
-		}
-		ret.SkyLightMask = append(ret.SkyLightMask, PlayToClientPacketUpdateLightSkyLightMaskElement)
-	}
-	var lPlayToClientPacketUpdateLightBlockLightMask int32
-	lPlayToClientPacketUpdateLightBlockLightMask, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.BlockLightMask = []int64{}
-	for range lPlayToClientPacketUpdateLightBlockLightMask {
-		var PlayToClientPacketUpdateLightBlockLightMaskElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightBlockLightMaskElement)
-		if err != nil {
-			return
-		}
-		ret.BlockLightMask = append(ret.BlockLightMask, PlayToClientPacketUpdateLightBlockLightMaskElement)
-	}
-	var lPlayToClientPacketUpdateLightEmptySkyLightMask int32
-	lPlayToClientPacketUpdateLightEmptySkyLightMask, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.EmptySkyLightMask = []int64{}
-	for range lPlayToClientPacketUpdateLightEmptySkyLightMask {
-		var PlayToClientPacketUpdateLightEmptySkyLightMaskElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightEmptySkyLightMaskElement)
-		if err != nil {
-			return
-		}
-		ret.EmptySkyLightMask = append(ret.EmptySkyLightMask, PlayToClientPacketUpdateLightEmptySkyLightMaskElement)
-	}
-	var lPlayToClientPacketUpdateLightEmptyBlockLightMask int32
-	lPlayToClientPacketUpdateLightEmptyBlockLightMask, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.EmptyBlockLightMask = []int64{}
-	for range lPlayToClientPacketUpdateLightEmptyBlockLightMask {
-		var PlayToClientPacketUpdateLightEmptyBlockLightMaskElement int64
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightEmptyBlockLightMaskElement)
-		if err != nil {
-			return
-		}
-		ret.EmptyBlockLightMask = append(ret.EmptyBlockLightMask, PlayToClientPacketUpdateLightEmptyBlockLightMaskElement)
-	}
-	var lPlayToClientPacketUpdateLightSkyLight int32
-	lPlayToClientPacketUpdateLightSkyLight, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.SkyLight = [][]uint8{}
-	for range lPlayToClientPacketUpdateLightSkyLight {
-		var PlayToClientPacketUpdateLightSkyLightElement []uint8
-		var lPlayToClientPacketUpdateLightSkyLightElement int32
-		lPlayToClientPacketUpdateLightSkyLightElement, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketUpdateLightSkyLightElement = []uint8{}
-		for range lPlayToClientPacketUpdateLightSkyLightElement {
-			var PlayToClientPacketUpdateLightSkyLightElementElement uint8
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightSkyLightElementElement)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketUpdateLightSkyLightElement = append(PlayToClientPacketUpdateLightSkyLightElement, PlayToClientPacketUpdateLightSkyLightElementElement)
-		}
-		ret.SkyLight = append(ret.SkyLight, PlayToClientPacketUpdateLightSkyLightElement)
-	}
-	var lPlayToClientPacketUpdateLightBlockLight int32
-	lPlayToClientPacketUpdateLightBlockLight, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.BlockLight = [][]uint8{}
-	for range lPlayToClientPacketUpdateLightBlockLight {
-		var PlayToClientPacketUpdateLightBlockLightElement []uint8
-		var lPlayToClientPacketUpdateLightBlockLightElement int32
-		lPlayToClientPacketUpdateLightBlockLightElement, err = proto_base.DecodeVarInt(r)
-		if err != nil {
-			return
-		}
-		PlayToClientPacketUpdateLightBlockLightElement = []uint8{}
-		for range lPlayToClientPacketUpdateLightBlockLightElement {
-			var PlayToClientPacketUpdateLightBlockLightElementElement uint8
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketUpdateLightBlockLightElementElement)
-			if err != nil {
-				return
-			}
-			PlayToClientPacketUpdateLightBlockLightElement = append(PlayToClientPacketUpdateLightBlockLightElement, PlayToClientPacketUpdateLightBlockLightElementElement)
-		}
-		ret.BlockLight = append(ret.BlockLight, PlayToClientPacketUpdateLightBlockLightElement)
-	}
-	return
-}
-func (ret *PlayToClientPacketUpdateLight) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.ChunkX)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ChunkZ)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLightMask)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketUpdateLightSkyLightMask := range len(ret.SkyLightMask) {
-		err = binary.Write(w, binary.BigEndian, ret.SkyLightMask[iPlayToClientPacketUpdateLightSkyLightMask])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLightMask)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketUpdateLightBlockLightMask := range len(ret.BlockLightMask) {
-		err = binary.Write(w, binary.BigEndian, ret.BlockLightMask[iPlayToClientPacketUpdateLightBlockLightMask])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.EmptySkyLightMask)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketUpdateLightEmptySkyLightMask := range len(ret.EmptySkyLightMask) {
-		err = binary.Write(w, binary.BigEndian, ret.EmptySkyLightMask[iPlayToClientPacketUpdateLightEmptySkyLightMask])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.EmptyBlockLightMask)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketUpdateLightEmptyBlockLightMask := range len(ret.EmptyBlockLightMask) {
-		err = binary.Write(w, binary.BigEndian, ret.EmptyBlockLightMask[iPlayToClientPacketUpdateLightEmptyBlockLightMask])
-		if err != nil {
-			return
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLight)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketUpdateLightSkyLight := range len(ret.SkyLight) {
-		err = proto_base.EncodeVarInt(w, int32(len(ret.SkyLight[iPlayToClientPacketUpdateLightSkyLight])))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketUpdateLightSkyLightInner := range len(ret.SkyLight[iPlayToClientPacketUpdateLightSkyLight]) {
-			err = binary.Write(w, binary.BigEndian, ret.SkyLight[iPlayToClientPacketUpdateLightSkyLight][iPlayToClientPacketUpdateLightSkyLightInner])
-			if err != nil {
-				return
-			}
-		}
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLight)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketUpdateLightBlockLight := range len(ret.BlockLight) {
-		err = proto_base.EncodeVarInt(w, int32(len(ret.BlockLight[iPlayToClientPacketUpdateLightBlockLight])))
-		if err != nil {
-			return
-		}
-		for iPlayToClientPacketUpdateLightBlockLightInner := range len(ret.BlockLight[iPlayToClientPacketUpdateLightBlockLight]) {
-			err = binary.Write(w, binary.BigEndian, ret.BlockLight[iPlayToClientPacketUpdateLightBlockLight][iPlayToClientPacketUpdateLightBlockLightInner])
-			if err != nil {
-				return
-			}
-		}
-	}
-	return
-}
-
-type PlayToClientPacketUpdateTime struct {
-	Age         int64
-	Time        int64
-	TickDayTime bool
-}
-
-func (ret *PlayToClientPacketUpdateTime) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Age)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Time)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.TickDayTime)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketUpdateTime) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Age)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Time)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.TickDayTime)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketUpdateViewDistance struct {
-	ViewDistance int32
-}
-
-func (ret *PlayToClientPacketUpdateViewDistance) Decode(r io.Reader) (err error) {
-	ret.ViewDistance, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketUpdateViewDistance) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketUpdateViewPosition struct {
-	ChunkX int32
-	ChunkZ int32
-}
-
-func (ret *PlayToClientPacketUpdateViewPosition) Decode(r io.Reader) (err error) {
-	ret.ChunkX, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ChunkZ, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketUpdateViewPosition) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.ChunkX)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ChunkZ)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketVehicleMove struct {
-	X     float64
-	Y     float64
-	Z     float64
-	Yaw   float32
-	Pitch float32
-}
-
-func (ret *PlayToClientPacketVehicleMove) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketVehicleMove) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketWindowItems struct {
-	WindowId    ContainerID
-	StateId     int32
-	Items       []Slot
-	CarriedItem Slot
-}
-
-func (ret *PlayToClientPacketWindowItems) Decode(r io.Reader) (err error) {
-	err = ret.WindowId.Decode(r)
-	if err != nil {
-		return
-	}
-	ret.StateId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	var lPlayToClientPacketWindowItemsItems int32
-	lPlayToClientPacketWindowItemsItems, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Items = []Slot{}
-	for range lPlayToClientPacketWindowItemsItems {
-		var PlayToClientPacketWindowItemsItemsElement Slot
-		err = PlayToClientPacketWindowItemsItemsElement.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Items = append(ret.Items, PlayToClientPacketWindowItemsItemsElement)
-	}
-	err = ret.CarriedItem.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketWindowItems) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.StateId)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Items)))
-	if err != nil {
-		return
-	}
-	for iPlayToClientPacketWindowItemsItems := range len(ret.Items) {
-		err = ret.Items[iPlayToClientPacketWindowItemsItems].Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	err = ret.CarriedItem.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketWorldBorderCenter struct {
-	X float64
-	Z float64
-}
-
-func (ret *PlayToClientPacketWorldBorderCenter) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketWorldBorderCenter) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketWorldBorderLerpSize struct {
-	OldDiameter float64
-	NewDiameter float64
-	Speed       int32
-}
-
-func (ret *PlayToClientPacketWorldBorderLerpSize) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.OldDiameter)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.NewDiameter)
-	if err != nil {
-		return
-	}
-	ret.Speed, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketWorldBorderLerpSize) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.OldDiameter)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.NewDiameter)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Speed)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketWorldBorderSize struct {
-	Diameter float64
-}
-
-func (ret *PlayToClientPacketWorldBorderSize) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.Diameter)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketWorldBorderSize) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Diameter)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketWorldBorderWarningDelay struct {
-	WarningTime int32
-}
-
-func (ret *PlayToClientPacketWorldBorderWarningDelay) Decode(r io.Reader) (err error) {
-	ret.WarningTime, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketWorldBorderWarningDelay) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.WarningTime)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketWorldBorderWarningReach struct {
-	WarningBlocks int32
-}
-
-func (ret *PlayToClientPacketWorldBorderWarningReach) Decode(r io.Reader) (err error) {
-	ret.WarningBlocks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketWorldBorderWarningReach) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.WarningBlocks)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketWorldEvent struct {
-	EffectId int32
-	Location Position
-	Data     int32
-	Global   bool
-}
-
-func (ret *PlayToClientPacketWorldEvent) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.EffectId)
-	if err != nil {
-		return
-	}
-	err = ret.Location.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Data)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Global)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketWorldEvent) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.EffectId)
-	if err != nil {
-		return
-	}
-	err = ret.Location.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Data)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Global)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type PlayToClientPacketWorldParticles struct {
-	LongDistance   bool
-	AlwaysShow     bool
-	X              float64
-	Y              float64
-	Z              float64
-	OffsetX        float32
-	OffsetY        float32
-	OffsetZ        float32
-	VelocityOffset float32
-	Amount         int32
-	Particle       Particle
-}
-
-func (ret *PlayToClientPacketWorldParticles) Decode(r io.Reader) (err error) {
-	err = binary.Read(r, binary.BigEndian, &ret.LongDistance)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.AlwaysShow)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OffsetX)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OffsetY)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.OffsetZ)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.VelocityOffset)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Amount)
-	if err != nil {
-		return
-	}
-	err = ret.Particle.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *PlayToClientPacketWorldParticles) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.LongDistance)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.AlwaysShow)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OffsetX)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OffsetY)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.OffsetZ)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.VelocityOffset)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Amount)
-	if err != nil {
-		return
-	}
-	err = ret.Particle.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
 type ArmorTrimMaterial struct {
 	AssetBase           string
 	OverrideArmorAssets []struct {
@@ -26281,7 +26921,10 @@ func (ret *ChunkBlockEntity) Decode(r io.Reader) (err error) {
 	return
 }
 func (ret *ChunkBlockEntity) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Anon)
+	var ChunkBlockEntityAnonPacked uint8
+	ChunkBlockEntityAnonPacked |= (uint8(ret.Anon.Z) & 0xF) << 0x0
+	ChunkBlockEntityAnonPacked |= (uint8(ret.Anon.X) & 0xF) << 0x4
+	err = binary.Write(w, binary.BigEndian, ChunkBlockEntityAnonPacked)
 	if err != nil {
 		return
 	}
@@ -26356,7 +26999,14 @@ func (ret *CommandNode) Decode(r io.Reader) (err error) {
 	return
 }
 func (ret *CommandNode) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Flags)
+	var CommandNodeFlagsPacked uint8
+	CommandNodeFlagsPacked |= (uint8(ret.Flags.CommandNodeType) & 0x3) << 0x0
+	CommandNodeFlagsPacked |= (proto_base.Bool2uint8(ret.Flags.HasCommand) & 0x1) << 0x2
+	CommandNodeFlagsPacked |= (proto_base.Bool2uint8(ret.Flags.HasRedirectNode) & 0x1) << 0x3
+	CommandNodeFlagsPacked |= (proto_base.Bool2uint8(ret.Flags.HasCustomSuggestions) & 0x1) << 0x4
+	CommandNodeFlagsPacked |= (proto_base.Bool2uint8(ret.Flags.AllowsRestricted) & 0x1) << 0x5
+	CommandNodeFlagsPacked |= (uint8(ret.Flags.Unused) & 0x3) << 0x6
+	err = binary.Write(w, binary.BigEndian, CommandNodeFlagsPacked)
 	if err != nil {
 		return
 	}
@@ -27384,7 +28034,11 @@ func (ret *Position) Decode(r io.Reader) (err error) {
 	return
 }
 func (ret *Position) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret)
+	var PositionPacked uint64
+	PositionPacked |= (uint64(ret.Y) & 0xFFF) << 0x0
+	PositionPacked |= (uint64(ret.Z) & 0x3FFFFFF) << 0xC
+	PositionPacked |= (uint64(ret.X) & 0x3FFFFFF) << 0x26
+	err = binary.Write(w, binary.BigEndian, PositionPacked)
 	if err != nil {
 		return
 	}
@@ -27786,637 +28440,6 @@ func (ret *Vec4f) Encode(w io.Writer) (err error) {
 		return
 	}
 	err = binary.Write(w, binary.BigEndian, ret.W)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToClientPacket struct {
-	Name   string
-	Params any
-}
-
-var HandshakingToClientPacketNameMap = map[int32]string{}
-
-func (ret *HandshakingToClientPacket) Decode(r io.Reader) (err error) {
-	var HandshakingToClientPacketNameKey int32
-	HandshakingToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Name, err = proto_base.ErroringIndex(HandshakingToClientPacketNameMap, HandshakingToClientPacketNameKey)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var HandshakingToClientPacketNameReverseMap = map[string]int32{}
-
-func (ret *HandshakingToClientPacket) Encode(w io.Writer) (err error) {
-	var vHandshakingToClientPacketName int32
-	vHandshakingToClientPacketName, err = proto_base.ErroringIndex(HandshakingToClientPacketNameReverseMap, ret.Name)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vHandshakingToClientPacketName)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonAddResourcePack struct {
-	Uuid          uuid.UUID
-	Url           string
-	Hash          string
-	Forced        bool
-	PromptMessage *nbt.Anon
-}
-
-func (ret *HandshakingToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
-	_, err = io.ReadFull(r, ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	ret.Url, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Hash, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Forced)
-	if err != nil {
-		return
-	}
-	var HandshakingToClientPacketCommonAddResourcePackPromptMessagePresent bool
-	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonAddResourcePackPromptMessagePresent)
-	if err != nil {
-		return
-	}
-	if HandshakingToClientPacketCommonAddResourcePackPromptMessagePresent {
-		var HandshakingToClientPacketCommonAddResourcePackPromptMessagePresentValue nbt.Anon
-		err = HandshakingToClientPacketCommonAddResourcePackPromptMessagePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.PromptMessage = &HandshakingToClientPacketCommonAddResourcePackPromptMessagePresentValue
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err error) {
-	_, err = w.Write(ret.Uuid[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Url)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeString(w, ret.Hash)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Forced)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.PromptMessage != nil)
-	if err != nil {
-		return
-	}
-	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonClearDialog struct {
-}
-
-func (ret *HandshakingToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
-	return
-}
-func (ret *HandshakingToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
-	return
-}
-
-type HandshakingToClientPacketCommonCookieRequest struct {
-	Cookie string
-}
-
-func (ret *HandshakingToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
-	ret.Cookie, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonCookieRequest) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Cookie)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonCookieResponse struct {
-	Key   string
-	Value *ByteArray
-}
-
-func (ret *HandshakingToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var HandshakingToClientPacketCommonCookieResponseValuePresent bool
-	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonCookieResponseValuePresent)
-	if err != nil {
-		return
-	}
-	if HandshakingToClientPacketCommonCookieResponseValuePresent {
-		var HandshakingToClientPacketCommonCookieResponseValuePresentValue ByteArray
-		err = HandshakingToClientPacketCommonCookieResponseValuePresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Value = &HandshakingToClientPacketCommonCookieResponseValuePresentValue
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonCookieResponse) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Value != nil)
-	if err != nil {
-		return
-	}
-	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonCustomClickAction struct {
-	Id  string
-	Nbt *nbt.Anon
-}
-
-func (ret *HandshakingToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
-	ret.Id, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	var HandshakingToClientPacketCommonCustomClickActionNbtPresent bool
-	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonCustomClickActionNbtPresent)
-	if err != nil {
-		return
-	}
-	if HandshakingToClientPacketCommonCustomClickActionNbtPresent {
-		var HandshakingToClientPacketCommonCustomClickActionNbtPresentValue nbt.Anon
-		err = HandshakingToClientPacketCommonCustomClickActionNbtPresentValue.Decode(r)
-		if err != nil {
-			return
-		}
-		ret.Nbt = &HandshakingToClientPacketCommonCustomClickActionNbtPresentValue
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Id)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Nbt != nil)
-	if err != nil {
-		return
-	}
-	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonCustomReportDetails struct {
-	Details []struct {
-		Key   string
-		Value string
-	}
-}
-
-func (ret *HandshakingToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
-	var lHandshakingToClientPacketCommonCustomReportDetailsDetails int32
-	lHandshakingToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Details = []struct {
-		Key   string
-		Value string
-	}{}
-	for range lHandshakingToClientPacketCommonCustomReportDetailsDetails {
-		var HandshakingToClientPacketCommonCustomReportDetailsDetailsElement struct {
-			Key   string
-			Value string
-		}
-		HandshakingToClientPacketCommonCustomReportDetailsDetailsElement.Key, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		HandshakingToClientPacketCommonCustomReportDetailsDetailsElement.Value, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Details = append(ret.Details, HandshakingToClientPacketCommonCustomReportDetailsDetailsElement)
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonCustomReportDetails) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Details)))
-	if err != nil {
-		return
-	}
-	for iHandshakingToClientPacketCommonCustomReportDetailsDetails := range len(ret.Details) {
-		err = proto_base.EncodeString(w, ret.Details[iHandshakingToClientPacketCommonCustomReportDetailsDetails].Key)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Details[iHandshakingToClientPacketCommonCustomReportDetailsDetails].Value)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonRemoveResourcePack struct {
-	Uuid *uuid.UUID
-}
-
-func (ret *HandshakingToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
-	var HandshakingToClientPacketCommonRemoveResourcePackUuidPresent bool
-	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonRemoveResourcePackUuidPresent)
-	if err != nil {
-		return
-	}
-	if HandshakingToClientPacketCommonRemoveResourcePackUuidPresent {
-		var HandshakingToClientPacketCommonRemoveResourcePackUuidPresentValue uuid.UUID
-		_, err = io.ReadFull(r, HandshakingToClientPacketCommonRemoveResourcePackUuidPresentValue[:])
-		if err != nil {
-			return
-		}
-		ret.Uuid = &HandshakingToClientPacketCommonRemoveResourcePackUuidPresentValue
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonRemoveResourcePack) Encode(w io.Writer) (err error) {
-	err = binary.Write(w, binary.BigEndian, ret.Uuid != nil)
-	if err != nil {
-		return
-	}
-	if ret.Uuid != nil {
-		_, err = w.Write((*ret.Uuid)[:])
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonSelectKnownPacks struct {
-	Packs []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}
-}
-
-func (ret *HandshakingToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
-	var lHandshakingToClientPacketCommonSelectKnownPacksPacks int32
-	lHandshakingToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Packs = []struct {
-		Namespace string
-		Id        string
-		Version   string
-	}{}
-	for range lHandshakingToClientPacketCommonSelectKnownPacksPacks {
-		var HandshakingToClientPacketCommonSelectKnownPacksPacksElement struct {
-			Namespace string
-			Id        string
-			Version   string
-		}
-		HandshakingToClientPacketCommonSelectKnownPacksPacksElement.Namespace, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		HandshakingToClientPacketCommonSelectKnownPacksPacksElement.Id, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		HandshakingToClientPacketCommonSelectKnownPacksPacksElement.Version, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Packs = append(ret.Packs, HandshakingToClientPacketCommonSelectKnownPacksPacksElement)
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonSelectKnownPacks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Packs)))
-	if err != nil {
-		return
-	}
-	for iHandshakingToClientPacketCommonSelectKnownPacksPacks := range len(ret.Packs) {
-		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToClientPacketCommonSelectKnownPacksPacks].Namespace)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToClientPacketCommonSelectKnownPacksPacks].Id)
-		if err != nil {
-			return
-		}
-		err = proto_base.EncodeString(w, ret.Packs[iHandshakingToClientPacketCommonSelectKnownPacksPacks].Version)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonServerLinks struct {
-	Links []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}
-}
-
-func (ret *HandshakingToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
-	var lHandshakingToClientPacketCommonServerLinksLinks int32
-	lHandshakingToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.Links = []struct {
-		HasKnownType bool
-		KnownType    any
-		UnknownType  any
-		Link         string
-	}{}
-	for range lHandshakingToClientPacketCommonServerLinksLinks {
-		var HandshakingToClientPacketCommonServerLinksLinksElement struct {
-			HasKnownType bool
-			KnownType    any
-			UnknownType  any
-			Link         string
-		}
-		err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonServerLinksLinksElement.HasKnownType)
-		if err != nil {
-			return
-		}
-		switch HandshakingToClientPacketCommonServerLinksLinksElement.HasKnownType {
-		case true:
-			var HandshakingToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp ServerLinkType
-			err = HandshakingToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			HandshakingToClientPacketCommonServerLinksLinksElement.KnownType = HandshakingToClientPacketCommonServerLinksLinksElementKnownTypeTrueTmp
-		}
-		switch HandshakingToClientPacketCommonServerLinksLinksElement.HasKnownType {
-		case false:
-			var HandshakingToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp nbt.Anon
-			err = HandshakingToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp.Decode(r)
-			if err != nil {
-				return
-			}
-			HandshakingToClientPacketCommonServerLinksLinksElement.UnknownType = HandshakingToClientPacketCommonServerLinksLinksElementUnknownTypeFalseTmp
-		}
-		HandshakingToClientPacketCommonServerLinksLinksElement.Link, err = proto_base.DecodeString(r)
-		if err != nil {
-			return
-		}
-		ret.Links = append(ret.Links, HandshakingToClientPacketCommonServerLinksLinksElement)
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, int32(len(ret.Links)))
-	if err != nil {
-		return
-	}
-	for iHandshakingToClientPacketCommonServerLinksLinks := range len(ret.Links) {
-		err = binary.Write(w, binary.BigEndian, ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].HasKnownType)
-		if err != nil {
-			return
-		}
-		switch ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].HasKnownType {
-		case true:
-			HandshakingToClientPacketCommonServerLinksLinksInnerKnownType, ok := ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].KnownType.(ServerLinkType)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = HandshakingToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		switch ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].HasKnownType {
-		case false:
-			HandshakingToClientPacketCommonServerLinksLinksInnerUnknownType, ok := ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].UnknownType.(nbt.Anon)
-			if !ok {
-				err = proto_base.BadTypeError
-				return
-			}
-			err = HandshakingToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
-			if err != nil {
-				return
-			}
-		}
-		err = proto_base.EncodeString(w, ret.Links[iHandshakingToClientPacketCommonServerLinksLinks].Link)
-		if err != nil {
-			return
-		}
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonSettings struct {
-	Locale              string
-	ViewDistance        int8
-	ChatFlags           int32
-	ChatColors          bool
-	SkinParts           uint8
-	MainHand            int32
-	EnableTextFiltering bool
-	EnableServerListing bool
-	ParticleStatus      string
-}
-
-var HandshakingToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
-
-func (ret *HandshakingToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
-	ret.Locale, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	ret.ChatFlags, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.SkinParts)
-	if err != nil {
-		return
-	}
-	ret.MainHand, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var HandshakingToClientPacketCommonSettingsParticleStatusKey int32
-	HandshakingToClientPacketCommonSettingsParticleStatusKey, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	ret.ParticleStatus, err = proto_base.ErroringIndex(HandshakingToClientPacketCommonSettingsParticleStatusMap, HandshakingToClientPacketCommonSettingsParticleStatusKey)
-	if err != nil {
-		return
-	}
-	return
-}
-
-var HandshakingToClientPacketCommonSettingsParticleStatusReverseMap = map[string]int32{"all": 0, "decreased": 1, "minimal": 2}
-
-func (ret *HandshakingToClientPacketCommonSettings) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Locale)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ViewDistance)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ChatFlags)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.ChatColors)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.SkinParts)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.MainHand)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableTextFiltering)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.EnableServerListing)
-	if err != nil {
-		return
-	}
-	var vHandshakingToClientPacketCommonSettingsParticleStatus int32
-	vHandshakingToClientPacketCommonSettingsParticleStatus, err = proto_base.ErroringIndex(HandshakingToClientPacketCommonSettingsParticleStatusReverseMap, ret.ParticleStatus)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, vHandshakingToClientPacketCommonSettingsParticleStatus)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonStoreCookie struct {
-	Key   string
-	Value ByteArray
-}
-
-func (ret *HandshakingToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
-	ret.Key, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Decode(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Key)
-	if err != nil {
-		return
-	}
-	err = ret.Value.Encode(w)
-	if err != nil {
-		return
-	}
-	return
-}
-
-type HandshakingToClientPacketCommonTransfer struct {
-	Host string
-	Port int32
-}
-
-func (ret *HandshakingToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
-	ret.Host, err = proto_base.DecodeString(r)
-	if err != nil {
-		return
-	}
-	ret.Port, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	return
-}
-func (ret *HandshakingToClientPacketCommonTransfer) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeString(w, ret.Host)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Port)
 	if err != nil {
 		return
 	}

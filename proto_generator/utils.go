@@ -49,12 +49,6 @@ func ReverseMap[M map[K]V, K cmp.Ordered, V cmp.Ordered](m M) map[V]K {
 	return ret
 }
 
-func must(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 func PopFront[T any](s []T) (T, []T, bool) {
 	if len(s) == 0 {
 		var zero T

@@ -3,6 +3,8 @@ package main
 import (
 	"go/ast"
 	"go/token"
+	"slices"
+	"strconv"
 
 	"github.com/admin-else/strom/proto_generator/protodef"
 	"github.com/go-viper/mapstructure/v2"
@@ -156,11 +158,47 @@ func BitFieldEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	for _, field := range data {
 		totalSize += field.Size
 	}
-	p, err := BitSizeToUnsignedProtodefName(totalSize)
+	packedVarName := name + "Packed"
+	packedExpr := Ident(packedVarName)
+	packedTypeStr := "uint" + strconv.Itoa(totalSize)
+
+	s = append(s, VarStmt(packedVarName, Ident(packedTypeStr)))
+
+	slices.Reverse(data)
+	shiftBy := 0
+	for _, field := range data {
+		boolFix := packedTypeStr
+		if field.Size == 1 {
+			boolFix = "proto_base.Bool2" + boolFix
+		}
+
+		s = append(s, OrAssign( // lisp ahh
+			packedExpr,
+			LeftShift(
+				Grouping(
+					BinAnd(
+						Call(
+							Ident(boolFix),
+							SelectorExprAndStr(
+								varToSet,
+								CamelCase(field.Name),
+							),
+						),
+						NumLitHex((1<<field.Size)-1),
+					),
+				),
+				NumLitHex(shiftBy),
+			),
+		))
+		shiftBy += field.Size
+	}
+
+	encodePacked, err := g.VisitEncoder(packedExpr, "u"+strconv.Itoa(totalSize), name)
 	if err != nil {
 		return
 	}
-	return g.VisitEncoder(varToSet, p, name)
+	s = append(s, encodePacked...)
+	return
 }
 
 func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
