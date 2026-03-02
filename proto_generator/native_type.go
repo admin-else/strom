@@ -90,7 +90,22 @@ func VisitOptionType(g *Generator, dataRaw any) (e ast.Expr, err error) {
 	return
 }
 
-func TotalBitfieldSizeToProtodefName(totalSize int) (e string, err error) {
+func BitSizeToSignedProtodefName(totalSize int) (e string, err error) {
+	if totalSize <= 8 {
+		e = "i8"
+	} else if totalSize <= 16 {
+		e = "i16"
+	} else if totalSize <= 32 {
+		e = "i32"
+	} else if totalSize <= 64 {
+		e = "i64"
+	} else {
+		err = errors.New("bitfield size too large")
+	}
+	return
+}
+
+func BitSizeToUnsignedProtodefName(totalSize int) (e string, err error) {
 	if totalSize <= 8 {
 		e = "u8"
 	} else if totalSize <= 16 {
@@ -120,7 +135,7 @@ func VisitBitFieldType(g *Generator, dataRaw any) (e ast.Expr, err error) {
 		totalSize += field.Size
 	}
 	// TODO: we will want to generate Methods and other stuff
-	p, err := TotalBitfieldSizeToProtodefName(totalSize)
+	p, err := BitSizeToUnsignedProtodefName(totalSize)
 	if err != nil {
 		return
 	}

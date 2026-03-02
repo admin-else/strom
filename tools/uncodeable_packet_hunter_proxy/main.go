@@ -101,7 +101,7 @@ import (
 func TestFailedPacket%10X(t *testing.T) {
 	p := v1_21_8.Play%vPacket{}
 	b := bytes.NewBuffer(%#v)
-	p, err := p.Decode(b)
+	err := p.Decode(b)
 	if err != nil {
 		t.Fatal(err)
 	}

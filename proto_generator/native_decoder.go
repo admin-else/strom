@@ -386,7 +386,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	for _, field := range data {
 		totalSize += field.Size
 	}
-	p, err := TotalBitfieldSizeToProtodefName(totalSize)
+	p, err := BitSizeToUnsignedProtodefName(totalSize)
 	if err != nil {
 		return
 	}
