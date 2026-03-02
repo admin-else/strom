@@ -136,7 +136,7 @@ func ArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 		if err == nil {
 			e = NumLit(n)
 		} else {
-			e, err = g.ParseCompareTo(data.Count)
+			e, _, err = g.ParseCompareTo(data.Count)
 		}
 		s2 = append(s2, Assign121(Ident(lName), e))
 	}
@@ -180,7 +180,7 @@ func TypeForwardDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name strin
 	return g.VisitDecoder(varToSet, data.Type, name)
 }
 
-var DontStringify = []string{"true", "false"}
+var BooleanValues = []string{"true", "false"}
 
 // CaseExprType This exists to fix this
 // "switch",
@@ -194,13 +194,22 @@ var DontStringify = []string{"true", "false"}
 //	 "default": [
 //
 // Protodef is best!!!
+// they are also inconsistent with bool compare to sometimes they use false sometimes they use numbers
+// that's why this bullshit exists
 type CaseExprType int
 
 const (
 	CaseExprTypeUnset CaseExprType = iota
 	CaseExprTypeNumber
-	CaseExprTypeSpecial
+	CaseExprTypeBool
 	CaseExprTypeString
+
+	// CaseExprTypeOnlyNumber CaseExprTypeOnlyBool CaseExprTypeStringOnly These are special overwrite values retuned by
+	// the compare to for the case of being certain that it's the right type.
+
+	CaseExprTypeOnlyNumber
+	CaseExprTypeOnlyBool
+	CaseExprTypeStringOnly
 )
 
 func MultiTypeFix(s string, t *CaseExprType) (e ast.Expr) {
@@ -210,9 +219,9 @@ func MultiTypeFix(s string, t *CaseExprType) (e ast.Expr) {
 		err = nil
 		e = NumLit(n)
 		ct = CaseExprTypeNumber
-	} else if slices.Contains(DontStringify, s) {
+	} else if slices.Contains(BooleanValues, s) {
 		e = Ident(s)
-		ct = CaseExprTypeSpecial
+		ct = CaseExprTypeBool
 	} else {
 		e = StrLit(s)
 		ct = CaseExprTypeString
@@ -222,9 +231,19 @@ func MultiTypeFix(s string, t *CaseExprType) (e ast.Expr) {
 		*t = ct
 		return
 	}
-	if *t != ct {
-		e = nil
+	if *t == ct {
+		return
 	}
+
+	if ct == CaseExprTypeNumber && *t == CaseExprTypeOnlyBool {
+		if s == "0" {
+			e = Ident("false")
+		} else {
+			e = Ident("true")
+		}
+		return
+	}
+	e = nil
 	return
 }
 
@@ -238,11 +257,10 @@ func SwitchDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	if err != nil {
 		return
 	}
-	compareToExpr, err := g.ParseCompareTo(data.CompareTo)
+	compareToExpr, cet, err := g.ParseCompareTo(data.CompareTo)
 	if err != nil {
 		return
 	}
-	cet := CaseExprTypeUnset
 	for _, fName := range OrderedKeys(data.Fields) {
 		fType := data.Fields[fName]
 		e := MultiTypeFix(fName, &cet)
@@ -375,7 +393,7 @@ func BufferDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
 	var data []struct {
 		Name   string
-		Singed bool
+		Signed bool
 		Size   int
 	}
 	err = mapstructure.Decode(dataRaw, &data)
@@ -386,11 +404,74 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	for _, field := range data {
 		totalSize += field.Size
 	}
-	p, err := BitSizeToUnsignedProtodefName(totalSize)
+	packedTypeProtodef, err := BitSizeToUnsignedProtodefName(totalSize)
 	if err != nil {
 		return
 	}
-	return g.VisitDecoder(varToSet, p, name)
+	t, err := g.VisitType(packedTypeProtodef)
+	if err != nil {
+		return
+	}
+	packed := name + "Packed"
+	packedVarStmt := VarStmt(packed, t)
+	stmts, err := g.VisitDecoder(Ident(packed), packedTypeProtodef, name)
+	if err != nil {
+		return
+	}
+	s = append(s, packedVarStmt)
+	s = append(s, stmts...)
+	lShiftBy := 0
+	for _, field := range data {
+		var fieldTypeProtodef string
+		if field.Signed {
+			fieldTypeProtodef, err = BitSizeToSignedProtodefName(field.Size)
+		} else {
+			fieldTypeProtodef, err = BitSizeToUnsignedProtodefName(field.Size)
+		}
+		if err != nil {
+			return
+		}
+		var fieldType ast.Expr
+		fieldType, err = g.VisitType(fieldTypeProtodef)
+		if err != nil {
+			return
+		}
+
+		rShiftBy := totalSize - field.Size
+		fieldToSet := SelectorExprAndStr(varToSet, CamelCase(field.Name))
+
+		var getDataExpr ast.Expr
+		getDataExpr = RightShift(
+			LeftShift(
+				Ident(packed),
+				NumLit(lShiftBy)),
+			NumLit(rShiftBy),
+		)
+		if fieldTypeProtodef == "bool" {
+			getDataExpr = Equals(getDataExpr, NumLit(1))
+		} else if fieldTypeProtodef != packedTypeProtodef {
+			getDataExpr = Call(fieldType, getDataExpr)
+		}
+
+		s = append(s, Assign121(fieldToSet, getDataExpr))
+		if field.Signed {
+			s = append(s, If(
+				GreaterThanOrEqual(
+					fieldToSet,
+					LeftShift(NumLit(1), NumLit(field.Size-1)),
+				),
+				NewBlockEllipsis(
+					SubAssign(
+						fieldToSet,
+						LeftShift(NumLit(1), NumLit(field.Size)),
+					),
+				),
+			))
+		}
+
+		lShiftBy += field.Size
+	}
+	return
 }
 
 func RegistryEntryHolderSetDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {

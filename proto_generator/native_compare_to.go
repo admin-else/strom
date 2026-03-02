@@ -6,10 +6,11 @@ import (
 	"go/ast"
 	"strings"
 
+	"github.com/admin-else/strom/proto_generator/protodef"
 	"github.com/go-viper/mapstructure/v2"
 )
 
-func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, err error) {
+func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, cet CaseExprType, err error) {
 	parts := strings.Split(compareTo, "/")
 	downPrefixCount := 0
 	for _, part := range parts {
@@ -19,12 +20,12 @@ func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, err error) {
 	}
 	parts = parts[downPrefixCount:]
 	startingPoint := g.ContainerStack[len(g.ContainerStack)-downPrefixCount-1]
-	e, err = g.VisitCompareTo(parts, startingPoint.VarToSet, CombineNamAndData("container", startingPoint.Data))
+	e, cet, err = g.VisitCompareTo(parts, startingPoint.VarToSet, CombineNamAndData("container", startingPoint.Data))
 	//	return ParseCompareToLegacy(compareTo, varToSet)
 	return
 }
 
-func (g *Generator) VisitCompareTo(parts []string, inExpr ast.Expr, data any) (e ast.Expr, err error) {
+func (g *Generator) VisitCompareTo(parts []string, inExpr ast.Expr, data any) (e ast.Expr, cet CaseExprType, err error) {
 	tName, tData, err := ParseType(data)
 	if err != nil {
 		return
@@ -37,7 +38,7 @@ func (g *Generator) VisitCompareTo(parts []string, inExpr ast.Expr, data any) (e
 	return
 }
 
-func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw any) (e ast.Expr, err error) {
+func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw any) (e ast.Expr, cet CaseExprType, err error) {
 	var data []struct {
 		Name string
 		Type any
@@ -62,11 +63,43 @@ func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw a
 	return
 }
 
-func ReturnInputCompareTo(_ *Generator, _ []string, inExpr ast.Expr, _ any) (e ast.Expr, err error) {
-	return inExpr, nil
+func ReturnInputCompareTo(_ *Generator, _ []string, inExpr ast.Expr, _ any) (e ast.Expr, cet CaseExprType, err error) {
+	return inExpr, CaseExprTypeUnset, nil
 }
 
-func BitflagsCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw any) (e ast.Expr, err error) {
+func BitfieldCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw any) (e ast.Expr, cet CaseExprType, err error) {
+	var data protodef.BitField
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+	fieldName, parts, found := PopFront(parts)
+	if !found {
+		err = errors.New("expected name part")
+		return
+	}
+	var field struct {
+		Name   string
+		Singed bool
+		Size   int
+	}
+	for _, f := range data {
+		if f.Name == fieldName {
+			field = f
+			break
+		}
+	}
+	if field.Size == 1 {
+		cet = CaseExprTypeOnlyBool
+	} else {
+		cet = CaseExprTypeOnlyNumber
+	}
+
+	e = SelectorExprAndStr(inExpr, CamelCase(fieldName))
+	return
+}
+
+func BitflagsCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw any) (e ast.Expr, cet CaseExprType, err error) {
 	var data struct {
 		Flags []string
 		Type  any
@@ -98,7 +131,7 @@ func (g *Generator) RegisterCompareToNatives() {
 		"bool":      ReturnInputCompareTo,
 		"mapper":    ReturnInputCompareTo,
 		"varint":    ReturnInputCompareTo,
-		"bitfield":  ReturnInputCompareTo,
+		"bitfield":  BitfieldCompareTo,
 		"u8":        ReturnInputCompareTo,
 		"i8":        ReturnInputCompareTo,
 		"bitflags":  BitflagsCompareTo,

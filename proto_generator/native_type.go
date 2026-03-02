@@ -27,7 +27,8 @@ func VisitContainerType(g *Generator, dataRaw any) (ast.Expr, error) {
 
 	s := NewStruct()
 	for _, field := range data {
-		t, err := g.VisitType(field.Type)
+		var t ast.Expr
+		t, err = g.VisitType(field.Type)
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +107,9 @@ func BitSizeToSignedProtodefName(totalSize int) (e string, err error) {
 }
 
 func BitSizeToUnsignedProtodefName(totalSize int) (e string, err error) {
-	if totalSize <= 8 {
+	if totalSize == 1 {
+		e = "bool"
+	} else if totalSize <= 8 {
 		e = "u8"
 	} else if totalSize <= 16 {
 		e = "u16"
@@ -123,23 +126,33 @@ func BitSizeToUnsignedProtodefName(totalSize int) (e string, err error) {
 func VisitBitFieldType(g *Generator, dataRaw any) (e ast.Expr, err error) {
 	var data []struct {
 		Name   string
-		Singed bool
+		Signed bool
 		Size   int
 	}
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
 	}
-	totalSize := 0
+	ret := NewStruct()
 	for _, field := range data {
-		totalSize += field.Size
+		var p string
+		if field.Signed {
+			p, err = BitSizeToSignedProtodefName(field.Size)
+		} else {
+			p, err = BitSizeToUnsignedProtodefName(field.Size)
+		}
+		if err != nil {
+			return
+		}
+		var fieldType ast.Expr
+		fieldType, err = g.VisitType(p)
+		if err != nil {
+			return
+		}
+		AddFieldToStruct(ret, CamelCase(field.Name), fieldType)
 	}
-	// TODO: we will want to generate Methods and other stuff
-	p, err := BitSizeToUnsignedProtodefName(totalSize)
-	if err != nil {
-		return
-	}
-	return g.VisitType(p)
+	e = ret
+	return
 }
 
 func VisitBitFlagsType(g *Generator, dataRaw any) (e ast.Expr, err error) {

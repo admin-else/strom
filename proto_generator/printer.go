@@ -186,6 +186,14 @@ func Define121(lhs, rhs ast.Expr) (s *ast.AssignStmt) {
 	}
 }
 
+func SubAssign(lhs, rhs ast.Expr) (s *ast.AssignStmt) {
+	return &ast.AssignStmt{
+		Lhs: []ast.Expr{lhs},
+		Tok: token.SUB_ASSIGN,
+		Rhs: []ast.Expr{rhs},
+	}
+}
+
 func Exprs(exprs ...ast.Expr) []ast.Expr {
 	return exprs
 }
@@ -227,6 +235,14 @@ func Equals(lhs, rhs ast.Expr) *ast.BinaryExpr {
 	return &ast.BinaryExpr{
 		X:  lhs,
 		Op: token.EQL,
+		Y:  rhs,
+	}
+}
+
+func GreaterThanOrEqual(lhs, rhs ast.Expr) *ast.BinaryExpr {
+	return &ast.BinaryExpr{
+		X:  lhs,
+		Op: token.GEQ,
 		Y:  rhs,
 	}
 }
@@ -476,6 +492,22 @@ func BinAnd(lhs, rhs ast.Expr) *ast.BinaryExpr {
 	return &ast.BinaryExpr{
 		X:  lhs,
 		Op: token.AND,
+		Y:  rhs,
+	}
+}
+
+func RightShift(lhs, rhs ast.Expr) *ast.BinaryExpr {
+	return &ast.BinaryExpr{
+		X:  lhs,
+		Op: token.SHR,
+		Y:  rhs,
+	}
+}
+
+func LeftShift(lhs, rhs ast.Expr) *ast.BinaryExpr {
+	return &ast.BinaryExpr{
+		X:  lhs,
+		Op: token.SHL,
 		Y:  rhs,
 	}
 }

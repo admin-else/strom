@@ -38,6 +38,12 @@ type ContainerStackEntry struct {
 	VarToSet ast.Expr
 }
 
+type ExprGeneratorFunc func(g *Generator, data any) (ast.Expr, error)
+
+type CompareToGeneratorFunc func(g *Generator, parts []string, inExpr ast.Expr, data any) (e ast.Expr, cet CaseExprType, err error)
+
+type FunctionGeneratorFunc func(g *Generator, varToSet ast.Expr, data any, name string) ([]ast.Stmt, error)
+
 type Generator struct {
 	packetInfos []PacketInfo
 
@@ -60,7 +66,6 @@ type Generator struct {
 	Depth          int
 	Declared       []string
 	ContainerStack []ContainerStackEntry
-	VtsStack       []ast.Expr
 }
 
 func (g *Generator) Decl(name string, t token.Token, e ast.Expr) {
@@ -103,12 +108,6 @@ func ParseType(t any) (tName string, tData any, err error) {
 	err = fmt.Errorf("unable to parse type %v", t)
 	return
 }
-
-type ExprGeneratorFunc func(g *Generator, data any) (ast.Expr, error)
-
-type CompareToGeneratorFunc func(g *Generator, parts []string, inExpr ast.Expr, data any) (ast.Expr, error)
-
-type FunctionGeneratorFunc func(g *Generator, varToSet ast.Expr, data any, name string) ([]ast.Stmt, error)
 
 func (g *Generator) VisitType(data any) (e ast.Expr, err error) {
 	tName, tData, err := ParseType(data)

@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 
+	"github.com/admin-else/strom/proto_generator/protodef"
 	"github.com/go-viper/mapstructure/v2"
 )
 
@@ -146,11 +147,7 @@ func BufferEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 }
 
 func BitFieldEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data []struct {
-		Name   string
-		Singed bool
-		Size   int
-	}
+	var data protodef.BitField
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -176,11 +173,10 @@ func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	if err != nil {
 		return
 	}
-	compareToExpr, err := g.ParseCompareTo(data.CompareTo)
+	compareToExpr, cet, err := g.ParseCompareTo(data.CompareTo)
 	if err != nil {
 		return
 	}
-	cet := CaseExprTypeUnset
 	for _, fName := range OrderedKeys(data.Fields) {
 		fType := data.Fields[fName]
 		e := MultiTypeFix(fName, &cet)
