@@ -280,17 +280,19 @@ func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err err
 		}
 	}
 
-	for prefix, types := range prefixTypeMap {
-		for k, v := range types.Types.Types {
+	for _, prefix := range OrderedKeys(prefixTypeMap) {
+		types := prefixTypeMap[prefix]
+		for _, k := range OrderedKeys(types.Types.Types) {
+			typeData := types.Types.Types[k]
 			if k != "packet" {
 				continue
 			}
-			packetIds := v.([]any)[1].([]any)[0].(map[string]any)["type"].([]any)[1].(map[string]any)["mappings"].(map[string]any)
+			packetIds := typeData.([]any)[1].([]any)[0].(map[string]any)["type"].([]any)[1].(map[string]any)["mappings"].(map[string]any)
 			packetIdsStrings := AssertAndConvertMapValues[string](packetIds)
 			packetIdsRev := ReverseMap(packetIdsStrings)
-			v := v.([]any)[1].([]any)[1].(map[string]any)["type"].([]any)[1].(map[string]any)["fields"].(map[string]any)
-			for k2, v2 := range v {
-				v2 := v2.(string)
+			v := typeData.([]any)[1].([]any)[1].(map[string]any)["type"].([]any)[1].(map[string]any)["fields"].(map[string]any)
+			for _, k2 := range OrderedKeys(v) {
+				v2 := v[k2].(string)
 				typeName := prefix + CamelCase(v2)
 				g.packetInfos = append(g.packetInfos, PacketInfo{
 					PacketDef:        v2,
@@ -306,7 +308,8 @@ func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err err
 		}
 	}
 
-	for prefix, types := range prefixTypeMap {
+	for _, prefix := range OrderedKeys(prefixTypeMap) {
+		types := prefixTypeMap[prefix]
 		err = g.GenerateTypes(prefix, types.Types)
 		if err != nil {
 			return
