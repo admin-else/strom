@@ -34,6 +34,7 @@ var StatusResponse = server.StatusResponse{
 type Server struct {
 	*proto.Conn
 	*client.Timer
+	MinCycle, MaxCycle, Current int32
 }
 
 var packet = &v1_21_8.PlayToClientPacketMapChunk{X: 0, Z: 0, Heightmaps: []struct {
@@ -82,7 +83,7 @@ func (s *Server) OnStart(_ event.OnStart) (err error) {
 	err = s.Send(&v1_21_8.PlayToClientPacketPosition{
 		TeleportId: 0,
 		X:          0,
-		Y:          64,
+		Y:          -60,
 		Z:          0,
 		Dx:         0,
 		Dy:         0,
@@ -123,6 +124,7 @@ func (s *Server) OnStart(_ event.OnStart) (err error) {
 		return
 	}
 	s.Timer.Every(time.Second*15, s.SendKeepAlive)
+	s.Timer.Every(time.Second, s.CycleBlockForTesting)
 	s.Timer.Active = true
 	return
 }
@@ -132,22 +134,34 @@ func (s *Server) OnTick(_ event.Tick) (err error) {
 	return
 }
 
+func (s *Server) CycleBlockForTesting() (err error) {
+	err = s.Send(&v1_21_8.PlayToClientPacketBlockChange{
+		Location: v1_21_8.Position{
+			X: 1,
+			Z: 1,
+			Y: -60,
+		},
+		Type: s.Current,
+	})
+	s.Current++
+	if s.Current > s.MaxCycle {
+		s.Current = s.MinCycle
+	}
+	return
+}
+
 func (s *Server) SendKeepAlive() (err error) {
 	err = s.Send(&v1_21_8.PlayToClientPacketKeepAlive{KeepAliveId: rand.Int64()})
 	if err != nil {
 		return
 	}
-	err = s.Send(&v1_21_8.PlayToClientPacketBlockChange{
-		Location: v1_21_8.Position{},
-		Type:     0,
-	})
 	return
 }
 
 func main() {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 	err := server.StartServerWithFactory(":25565", func(c *proto.Conn) (h any, err error) {
-		s := &Server{Conn: c}
+		s := &Server{Conn: c, MinCycle: 2938, MaxCycle: 3017, Current: 2938}
 		s.Timer = &client.Timer{}
 		h = s
 		return

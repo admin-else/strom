@@ -66,3 +66,13 @@ func LookupBlockByStateId(version string, stateId int32) (block Block, ok bool) 
 	}
 	return
 }
+
+func LookupBlockByName(version string, stateId int32) (block Block, ok bool) {
+	for _, b := range BlocksForVersion(version) {
+		if b.MinStateId <= stateId && stateId <= b.MaxStateId {
+			block = b
+			ok = true
+		}
+	}
+	return
+}
