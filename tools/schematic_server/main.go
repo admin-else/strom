@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/admin-else/strom/client"
+	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
@@ -67,10 +68,11 @@ var voidChunk = &v1_21_8.PlayToClientPacketMapChunk{X: 3, Z: 3, Heightmaps: []st
 
 func (s *Server) OnStart(_ event.OnStart) (err error) {
 	//goland:noinspection GoResourceLeak captures the conn object which should NOT be closed
-	_, err = server.ServeLogin(s.Conn, server.WithRawStatus(StatusResponse))
+	playerData, err := server.ServeLogin(s.Conn, server.WithRawStatus(StatusResponse), server.WithCompatibleVersions(772))
 	if err != nil {
 		return
 	}
+	slog.Info("player logged in", "name", playerData.Requested.Name)
 	err = server.ServeConfig(s.Conn)
 	if err != nil {
 		return
@@ -124,7 +126,7 @@ func (s *Server) OnStart(_ event.OnStart) (err error) {
 		return
 	}
 	s.Timer.Every(time.Second*15, s.SendKeepAlive)
-	s.Timer.Every(time.Second, s.CycleBlockForTesting)
+	s.Timer.Every(time.Second*20, s.CycleBlockForTesting)
 	s.Timer.Active = true
 	return
 }
@@ -135,6 +137,12 @@ func (s *Server) OnTick(_ event.Tick) (err error) {
 }
 
 func (s *Server) CycleBlockForTesting() (err error) {
+	_, stateData, err := data.FromBlockState(s.Version, s.Current)
+	if err != nil {
+		return
+	}
+	slog.Info("cycle block", "state", stateData, "cycle", s.Current)
+
 	err = s.Send(&v1_21_8.PlayToClientPacketBlockChange{
 		Location: v1_21_8.Position{
 			X: 1,
@@ -159,9 +167,9 @@ func (s *Server) SendKeepAlive() (err error) {
 }
 
 func main() {
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	slog.SetLogLoggerLevel(slog.LevelInfo)
 	err := server.StartServerWithFactory(":25565", func(c *proto.Conn) (h any, err error) {
-		s := &Server{Conn: c, MinCycle: 2938, MaxCycle: 3017, Current: 2938}
+		s := &Server{Conn: c, MinCycle: 8297, MaxCycle: 8304, Current: 8297}
 		s.Timer = &client.Timer{}
 		h = s
 		return

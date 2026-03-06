@@ -15,7 +15,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var StatusServedError = errors.New("status served")
+var StatusServedErr = errors.New("status served")
 
 var UnexpectedStatusRequest = UnexpectedNextStateError{proto_base.Status}
 
@@ -59,7 +59,7 @@ func (l *LoginServer) OnHandshake(packet *v1_21_8.HandshakingToServerPacketSetPr
 	}
 
 	if len(l.CompatibleVersions) != 0 && !slices.Contains(l.CompatibleVersions, packet.ProtocolVersion) {
-		err = fmt.Errorf("incompatible protocol version please use one of %v you can look up the real coresponding version at https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers", l.CompatibleVersions)
+		err = fmt.Errorf("incompatible protocol version please use one of %v you can look up the real corresponding version at https://minecraft.wiki/w/Minecraft_Wiki:Projects/wiki.vg_merge/Protocol_version_numbers", l.CompatibleVersions)
 		return
 	}
 
@@ -76,7 +76,7 @@ func (l *LoginServer) OnStatusPing(packet *v1_21_8.StatusToServerPacketPing) (er
 	if err != nil {
 		return
 	}
-	return event.HandlerDoneErr{Return: StatusServedError}
+	return event.HandlerDoneErr{Return: StatusServedErr}
 }
 
 func (l *LoginServer) SetCompressionThreshold(threshold int32) (err error) {

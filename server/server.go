@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"log/slog"
 	"net"
 
@@ -21,13 +22,24 @@ func Servee(c net.Conn) (ret *proto.Conn) {
 	return
 }
 
-func ServeClient(cNet net.Conn, factory func(c *proto.Conn) (h any, err error)) (err error) {
+func ServeClient(cNet net.Conn, factory func(c *proto.Conn) (h any, err error)) {
 	c := Servee(cNet)
+	defer c.Close()
 	h, err := factory(c)
 	if err != nil {
 		return
 	}
 	err = c.Start(h)
+	if errors.Is(err, StatusServedErr) {
+		return
+	}
+	if err != nil {
+		slog.Error("Error while handling client", "error", err, "client", c.Conn.RemoteAddr())
+		err = Kick(c, text.Pretty(err.Error()))
+		if err != nil {
+			slog.Error("Error while kicking client", "error", err, "client", c.Conn.RemoteAddr())
+		}
+	}
 	return
 }
 
@@ -42,12 +54,7 @@ func StartServerWithFactory(listenAddr string, factory func(c *proto.Conn) (h an
 		if err != nil {
 			return
 		}
-		go func() {
-			err := ServeClient(cNet, factory)
-			if err != nil {
-				slog.Error("error while serving client", "error", err, "client", cNet.RemoteAddr())
-			}
-		}()
+		go ServeClient(cNet, factory)
 	}
 }
 
