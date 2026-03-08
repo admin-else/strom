@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"sync"
 
 	"github.com/admin-else/strom/crypto"
 	"github.com/admin-else/strom/proto_base"
@@ -15,17 +16,31 @@ import (
 
 type RawConn struct {
 	net.Conn
-	R                    io.Reader
-	W                    io.Writer
-	CompressionThreshold int32
+	R                       io.Reader
+	W                       io.Writer
+	compressionThreshold    int32
+	CompressionThresholdMut sync.RWMutex
+}
+
+func (c *RawConn) SetCompressionThreshold(threshold int32) {
+	c.CompressionThresholdMut.Lock()
+	defer c.CompressionThresholdMut.Unlock()
+	c.compressionThreshold = threshold
+}
+
+func (c *RawConn) GetCompressionThreshold() int32 {
+	c.CompressionThresholdMut.RLock()
+	defer c.CompressionThresholdMut.RUnlock()
+	return c.compressionThreshold
 }
 
 func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
 	//fmt.Println("send:", rawPacketBytes)
 	var packetBytes []byte
-	if c.CompressionThreshold > 0 {
+	threshold := c.GetCompressionThreshold()
+	if threshold > 0 {
 		packetBuffer := bytes.NewBuffer(nil)
-		if int32(len(rawPacketBytes)) >= c.CompressionThreshold {
+		if int32(len(rawPacketBytes)) >= threshold {
 			err = proto_base.EncodeVarInt(packetBuffer, int32(len(rawPacketBytes)))
 			if err != nil {
 				return
@@ -80,7 +95,7 @@ func (c *RawConn) ReceiveRaw() (packetBytes []byte, err error) {
 		return
 	}
 	rawPacketBuffer := bytes.NewBuffer(rawPacketBytes)
-	if c.CompressionThreshold > 0 {
+	if c.GetCompressionThreshold() > 0 {
 		var packetLen int32
 		packetLen, err = proto_base.DecodeVarInt(rawPacketBuffer)
 		if err != nil {

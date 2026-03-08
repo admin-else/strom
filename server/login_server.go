@@ -90,10 +90,6 @@ func (l *LoginServer) SetCompressionThreshold(threshold int32) (err error) {
 
 func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart) (err error) {
 	l.Requested = NameAndUUID{packet.Username, packet.PlayerUUID}
-	//err = l.SetCompressionThreshold(l.CompressionThreshold)
-	//if err != nil {
-	//	return
-	//}
 	if l.Given == nil {
 		l.Given = &l.Requested
 	}
@@ -124,7 +120,7 @@ func (l *LoginServer) OnCycle(_ event.Tick) (err error) {
 	return
 }
 
-func (s *LoginServer) OnClose(_ event.Close) (err error) {
+func (l *LoginServer) OnClose(_ event.Close) (err error) {
 	return
 }
 

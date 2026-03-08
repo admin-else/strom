@@ -80,7 +80,7 @@ func (s *LoginClient) OnStart(_ event.Start) (err error) {
 }
 
 func (s *LoginClient) OnCompress(compress *v1_21_8.LoginToClientPacketCompress) (err error) {
-	s.CompressionThreshold = compress.Threshold
+	s.SetCompressionThreshold(compress.Threshold)
 	return
 }
 

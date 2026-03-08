@@ -2,16 +2,27 @@
 package event
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log/slog"
 	"reflect"
 	"strings"
+	"time"
+)
+
+const (
+	LoopsPerSecond = 100 // i dunno seems reasonable
+	TimePerLoop    = time.Second / LoopsPerSecond
 )
 
 type Loop struct {
 	handlerFunctions map[reflect.Type][]reflect.Value
 	Handlers         []any
+
+	Ctx     context.Context
+	ErrChan chan error
+	cancel  context.CancelFunc
 }
 
 type Unhandled struct {
@@ -107,15 +118,18 @@ func (l *Loop) Fire(event any) (err error) {
 	return
 }
 
-func (l *Loop) Start() (err error) {
+func (l *Loop) startLoop() (err error) {
 	_ = *l // exit early on nil loop
 	l.UpdateHandlerFunctions()
+
 	err = l.Fire(Start{})
 	for err == nil {
+		tickStartTime := time.Now()
 		err = l.Fire(Tick{})
 		if err != nil {
 			break
 		}
+		time.Sleep(TimePerLoop - time.Since(tickStartTime))
 	}
 	if errors.Is(err, HandlerDoneErr{}) {
 		err = errors.Unwrap(err)
@@ -124,5 +138,16 @@ func (l *Loop) Start() (err error) {
 	if closeErr != nil {
 		err = errors.Join(err, errors.Join(WhileClosingErr, closeErr))
 	}
+	return
+}
+
+func (l *Loop) Start() (err error) {
+	l.ErrChan = make(chan error)
+	l.Ctx, l.cancel = context.WithCancel(context.Background())
+	go func() {
+		l.ErrChan <- l.startLoop()
+	}()
+	err = <-l.ErrChan
+	l.cancel()
 	return
 }

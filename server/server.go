@@ -14,7 +14,7 @@ func Servee(c net.Conn) (ret *proto.Conn) {
 	ret = &proto.Conn{}
 	_ = ret.SetVersion("1.21.8") // cant fail
 	ret.SetState(proto_base.Handshaking)
-	ret.CompressionThreshold = -1
+	ret.SetCompressionThreshold(-1)
 	ret.Actor = proto_base.Servee
 	ret.Conn = c
 	ret.R = c

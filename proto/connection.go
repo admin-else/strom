@@ -16,6 +16,7 @@ import (
 var BadPacketTypeError = errors.New("bad packet type")
 var BadPacketIdError = errors.New("bad packet id")
 var PacketNotFullyDecodedError = errors.New("packet not fully decoded")
+var ErrContextDone = errors.New("context done")
 
 // UnCodablePacket represents a packet that could not be decoded.
 type UnCodablePacket struct {
@@ -42,6 +43,25 @@ type Conn struct {
 	Actor           proto_base.Actor
 	Version         string
 	ProtocolVersion int32
+
+	receiveRoutine bool
+	packetCh       chan proto_base.EncodeDecodeAble
+}
+
+func (c *Conn) ReceiveJob() {
+	for {
+		select {
+		case <-c.Ctx.Done():
+			return
+		default:
+			packet, err := c.Receive()
+			if err != nil {
+				c.ErrChan <- err
+				return
+			}
+			c.packetCh <- packet
+		}
+	}
 }
 
 func (c *Conn) SetState(state proto_base.State) {
@@ -62,8 +82,15 @@ func (c *Conn) SetVersion(version string) (err error) {
 	if err != nil {
 		return
 	}
-	c.ProtocolVersion = int32(versionData.Version)
+	c.ProtocolVersion = versionData.Version
 	return
+}
+
+func (c *Conn) ActivateReceiveRoutine() {
+	c.receiveRoutine = true
+	c.packetCh = make(chan proto_base.EncodeDecodeAble, 100) // i dunno how many to buffer 100 seems reasonable
+	go c.ReceiveJob()
+
 }
 
 func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
@@ -120,12 +147,25 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 }
 
 func (c *Conn) OnTick(_ event.Tick) (err error) {
-	packet, err := c.Receive()
-	if err != nil {
-		return
+	var packet proto_base.EncodeDecodeAble
+	if c.receiveRoutine {
+		select {
+		case packet = <-c.packetCh:
+			slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
+			err = c.Loop.Fire(packet)
+		case <-c.Ctx.Done():
+			err = ErrContextDone
+			return
+		default:
+		}
+	} else {
+		packet, err = c.Receive()
+		if err != nil {
+			return
+		}
+		slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
+		err = c.Loop.Fire(packet)
 	}
-	slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
-	err = c.Loop.Fire(packet)
 	return
 }
 

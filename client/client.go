@@ -15,7 +15,7 @@ func Connect(addr string) (ret *proto.Conn, err error) {
 		return
 	}
 	ret.SetState(proto_base.Handshaking)
-	ret.CompressionThreshold = -1
+	ret.SetCompressionThreshold(-1)
 	ret.Actor = proto_base.Client
 	ret.Conn, err = net.Dial("tcp", addr)
 	if err != nil {
