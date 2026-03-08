@@ -30,7 +30,7 @@ func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
 			if err != nil {
 				return
 			}
-			zW := zlib.NewWriter(packetBuffer)
+			zW := zlib.NewWriter(packetBuffer) // ignore we don't care about the result if it errors
 			_, err = zW.Write(rawPacketBytes)
 			if err != nil {
 				return
@@ -106,7 +106,6 @@ func (c *RawConn) ReceiveRaw() (packetBytes []byte, err error) {
 	} else {
 		packetBytes = rawPacketBytes
 	}
-	//fmt.Println("recv:", packetBytes)
 	return
 }
 

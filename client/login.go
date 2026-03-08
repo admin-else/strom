@@ -46,7 +46,11 @@ func (s *LoginClient) OnCycle(_ event.Tick) (err error) {
 	return
 }
 
-func (s *LoginClient) OnStart(_ event.OnStart) (err error) {
+func (s *LoginClient) OnClose(_ event.Close) (err error) {
+	return
+}
+
+func (s *LoginClient) OnStart(_ event.Start) (err error) {
 	if s.ServerHost == "" && s.ServerPort == 0 {
 		var portStr string
 		s.ServerHost, portStr, err = net.SplitHostPort(s.RemoteAddr().String())

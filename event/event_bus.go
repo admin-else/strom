@@ -10,9 +10,8 @@ import (
 )
 
 type Loop struct {
-	HandlerFunctions map[reflect.Type][]reflect.Value
+	handlerFunctions map[reflect.Type][]reflect.Value
 	Handlers         []any
-	HandlerIndex     int
 }
 
 type Unhandled struct {
@@ -24,13 +23,18 @@ type Anything struct {
 }
 
 type (
-	OnStart struct{}
-	Tick    struct{}
+	Start struct{}
+	Tick  struct{}
 )
 
 // HandlerDoneErr will stop the event loop and return the error if provided.
 type HandlerDoneErr struct {
 	Return error
+}
+
+// Close is fired when the loop shuts down.
+type Close struct {
+	Reason error
 }
 
 func (e HandlerDoneErr) Error() string {
@@ -43,10 +47,11 @@ func (e HandlerDoneErr) Unwrap() error {
 
 // ErrDontForward will stop the event from being forwarded to other handlers, including anything handlers.
 var ErrDontForward = errors.New("dont forward")
+var WhileClosingErr = errors.New("error while closing")
 
-// SetHandlerFunctions initializes and populates the HandlerFunctions map by reflecting over methods of registered handlers.
-func (l *Loop) SetHandlerFunctions() {
-	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
+// UpdateHandlerFunctions initializes and populates the handlerFunctions map by reflecting over methods of registered handlers.
+func (l *Loop) UpdateHandlerFunctions() {
+	l.handlerFunctions = make(map[reflect.Type][]reflect.Value)
 	for _, inst := range l.Handlers {
 		t := reflect.TypeOf(inst)
 		v := reflect.ValueOf(inst)
@@ -54,14 +59,14 @@ func (l *Loop) SetHandlerFunctions() {
 			method := t.Method(i)
 			if strings.HasPrefix(method.Name, "On") {
 				if method.Type.NumIn() != 2 || method.Type.NumOut() != 1 || method.Type.Out(0) != reflect.TypeFor[error]() {
-					fmt.Println("Invalid event handler signature:", t.String(), ".", method.Name)
+					slog.Warn("Invalid event handler signature", "at", t.String()+"."+method.Name)
 					continue
 				}
 			} else {
 				continue
 			}
 			eventType := method.Type.In(1)
-			l.HandlerFunctions[eventType] = append(l.HandlerFunctions[eventType], v.Method(i))
+			l.handlerFunctions[eventType] = append(l.handlerFunctions[eventType], v.Method(i))
 			slog.Debug("Registered Handler", "at", t.String()+"."+method.Name, "for", eventType.String())
 		}
 	}
@@ -70,7 +75,7 @@ func (l *Loop) SetHandlerFunctions() {
 // FireFound triggers all handlers registered for the specified event type and returns if handlers were found or an error occurred.
 func (l *Loop) FireFound(event any) (found bool, err error) {
 	var handlers []reflect.Value
-	if handlers, found = l.HandlerFunctions[reflect.TypeOf(event)]; found {
+	if handlers, found = l.handlerFunctions[reflect.TypeOf(event)]; found {
 		for _, handler := range handlers {
 			errV := handler.Call([]reflect.Value{reflect.ValueOf(event)})[0]
 			if !errV.IsNil() {
@@ -103,9 +108,9 @@ func (l *Loop) Fire(event any) (err error) {
 }
 
 func (l *Loop) Start() (err error) {
-	_ = *l // exit early on nil connection
-	l.SetHandlerFunctions()
-	err = l.Fire(OnStart{})
+	_ = *l // exit early on nil loop
+	l.UpdateHandlerFunctions()
+	err = l.Fire(Start{})
 	for err == nil {
 		err = l.Fire(Tick{})
 		if err != nil {
@@ -114,6 +119,10 @@ func (l *Loop) Start() (err error) {
 	}
 	if errors.Is(err, HandlerDoneErr{}) {
 		err = errors.Unwrap(err)
+	}
+	closeErr := l.Fire(Close{err})
+	if closeErr != nil {
+		err = errors.Join(err, errors.Join(WhileClosingErr, closeErr))
 	}
 	return
 }

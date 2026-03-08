@@ -17,7 +17,7 @@ var BadPacketTypeError = errors.New("bad packet type")
 var BadPacketIdError = errors.New("bad packet id")
 var PacketNotFullyDecodedError = errors.New("packet not fully decoded")
 
-// UnCodablePacket represents a packet that could not be decoded due to proto_generated not supporting all packets.
+// UnCodablePacket represents a packet that could not be decoded.
 type UnCodablePacket struct {
 	Err       error
 	Data      []byte
@@ -109,13 +109,13 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	if err != nil {
 		packet = &UnCodablePacket{Err: err, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		err = nil
+		return
 	}
 	if b.Len() != 0 {
 		err = nil
 		packet = &UnCodablePacket{Err: PacketNotFullyDecodedError, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
 	}
-	//fmt.Println("recv:", packet)
 	return
 }
 
@@ -130,11 +130,11 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 }
 
 func (c *Conn) Start(handlers ...any) (err error) {
-	c.Loop = &event.Loop{}
-	c.Handlers = append(c.Handlers, c)
+	if c.Loop == nil {
+		c.Loop = &event.Loop{}
+	}
+	c.Handlers = []any{c}
 	c.Handlers = append(c.Handlers, handlers...)
 	err = c.Loop.Start()
-	c.Handlers = c.Handlers[:len(c.Handlers)-len(handlers)]
-	c.Loop.SetHandlerFunctions()
 	return
 }

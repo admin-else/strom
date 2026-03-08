@@ -34,7 +34,7 @@ func (p *ProxyClient) OnCycle(_ event.Tick) (err error) {
 	return
 }
 
-func (p *ProxyClient) OnStart(_ event.OnStart) (err error) {
+func (p *ProxyClient) OnStart(_ event.Start) (err error) {
 	return
 }
 
@@ -65,7 +65,7 @@ func (p *Proxy) OnCycle(_ event.Tick) (err error) {
 	return
 }
 
-func (p *Proxy) OnStart(_ event.OnStart) (err error) {
+func (p *Proxy) OnStart(_ event.Start) (err error) {
 	return
 }
 
@@ -121,7 +121,7 @@ func SaveUnCodeAbleAsTest(d proto_base.Direction, packet *proto.UnCodablePacket)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Error", packet.Err, "saved to", f.Name(), "data:", packet.Data)
+	slog.Info("Packet failed to parse", "error", packet.Err, "saved", f.Name(), "data", fmt.Sprintf("%q", packet.Data))
 }
 
 var StatusResponse = server.StatusResponse{

@@ -116,11 +116,15 @@ func (l *LoginServer) OnDefault(event event.Unhandled) (err error) {
 	return
 }
 
-func (l *LoginServer) OnStart(_ event.OnStart) (err error) {
+func (l *LoginServer) OnStart(_ event.Start) (err error) {
 	return
 }
 
 func (l *LoginServer) OnCycle(_ event.Tick) (err error) {
+	return
+}
+
+func (s *LoginServer) OnClose(_ event.Close) (err error) {
 	return
 }
 

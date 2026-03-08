@@ -21,7 +21,7 @@ func (c *ConfigServer) Default(event event.Anything) (err error) {
 	return
 }
 
-func (c *ConfigServer) OnStart(_ event.OnStart) (err error) {
+func (c *ConfigServer) OnStart(_ event.Start) (err error) {
 	n, err := data.LoadRegistry(c.Version)
 	if err != nil {
 		return

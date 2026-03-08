@@ -23,7 +23,7 @@ func (s *StatusClient) Default(event any) (err error) {
 	return
 }
 
-func (s *StatusClient) OnStart(_ event.OnStart) (err error) {
+func (s *StatusClient) OnStart(_ event.Start) (err error) {
 	parts := strings.Split(s.RemoteAddr().String(), ":")
 	versionData, err := data.LookUpVersionByName(s.Version)
 	if err != nil {
