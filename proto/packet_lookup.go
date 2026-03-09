@@ -7,7 +7,7 @@ import (
 	"github.com/admin-else/strom/proto_generated"
 )
 
-// I know this is in-performant and i dont care until it becomes a problem for somebody it will stay like this and it is pretty easy to make caches or simular to speed this up so yeah
+// I know this is in-performant and i dont care until it becomes a problem for somebody it will stay like this and it is pretty easy to make caches or similar to speed this up so yeah
 
 func LookUpTypeByPacketInfo(direction proto_base.Direction, state proto_base.State, pid, version int32) (p proto_base.PacketInfo, ok bool) {
 	for _, pin := range proto_generated.Packets {
@@ -50,22 +50,19 @@ func LookupPacketInfoByType(packet proto_base.EncodeDecodeAble) (p proto_base.Pa
 	return
 }
 
-func LookupPacketInfoByTypeLookupPacketInfoByTypeAndMore(packet proto_base.EncodeDecodeAble, state proto_base.State) (p proto_base.PacketInfo, ok bool) {
-	switch packet := packet.(type) {
-	case *UnCodablePacket:
-		p = proto_base.PacketInfo{
-			Type:            &UnCodablePacket{},
-			Name:            "undecodeable",
-			Direction:       packet.Direction,
-			State:           -1,
-			PacketId:        -1,
-			ProtocolVersion: -1,
+func LookupPacketInfoByTypeAndState(packet proto_base.EncodeDecodeAble, state proto_base.State) (p proto_base.PacketInfo, ok bool) {
+	for _, p := range proto_generated.Packets {
+		if state == p.State && reflect.TypeOf(p.Type) == reflect.TypeOf(packet) {
+			return p, true
 		}
-	default:
-		for _, p := range proto_generated.Packets {
-			if state == p.State && reflect.TypeOf(p.Type) == reflect.TypeOf(packet) {
-				return p, true
-			}
+	}
+	return
+}
+
+func LookupPacketInfoByNameProtocolVersionAndState(name string, version int32, state proto_base.State) (p proto_base.PacketInfo, ok bool) {
+	for _, p := range proto_generated.Packets {
+		if state == p.State && p.Name == name && p.ProtocolVersion == version {
+			return p, true
 		}
 	}
 	return

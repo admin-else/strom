@@ -76,71 +76,62 @@ func LongsToData(data []uint64, n, bpe int32) (ret []int32) {
 	return
 }
 
-func UnpackBlockData(r io.Reader) (blocks [BlocksPerChunkSection]int32, err error) {
+func UnpackBlockData(r io.Reader) (blocks []int32, err error) {
 	var bitsPerEntry uint8
 	err = binary.Read(r, binary.BigEndian, &bitsPerEntry)
 	if err != nil {
 		return
 	}
-	var blocksSlice []int32
 	fmt.Println("blocks bpe", bitsPerEntry)
 	switch bitsPerEntry {
 	case 0:
-		blocksSlice, err = UnpackSingleValuePalette(r, BlocksPerChunkSection)
+		blocks, err = UnpackSingleValuePalette(r, BlocksPerChunkSection)
 	case 1, 2, 3, 4:
-		blocksSlice, err = UnpackArrayPalette(r, bitsPerEntry, BlocksPerChunkSection)
+		blocks, err = UnpackArrayPalette(r, bitsPerEntry, BlocksPerChunkSection)
 	case 5, 6, 7, 8:
 		err = errors.New("unimplemented")
 	default:
-		blocksSlice, err = UnpackLongData(r, bitsPerEntry, BlocksPerChunkSection)
+		blocks, err = UnpackLongData(r, bitsPerEntry, BlocksPerChunkSection)
 	}
 	if err != nil {
 		return
 	}
-	blocks = [BlocksPerChunkSection]int32(blocksSlice)
 	return
 }
 
-func UnpackBiomeData(r io.Reader) (biomes [BiomesPerChunkSection]int32, err error) {
+func UnpackBiomeData(r io.Reader) (biomes []int32, err error) {
 	// net.minecraft.world.chunk.PaletteProvider#forBiomes
 	var bitsPerEntry uint8
 	err = binary.Read(r, binary.BigEndian, &bitsPerEntry)
 	if err != nil {
 		return
 	}
-	var biomesSlice []int32
 	fmt.Println("biome bpe", bitsPerEntry)
 	switch bitsPerEntry {
 	case 0:
-		biomesSlice, err = UnpackSingleValuePalette(r, BiomesPerChunkSection)
+		biomes, err = UnpackSingleValuePalette(r, BiomesPerChunkSection)
 	case 1, 2, 3:
-		biomesSlice, err = UnpackArrayPalette(r, bitsPerEntry, BiomesPerChunkSection)
+		biomes, err = UnpackArrayPalette(r, bitsPerEntry, BiomesPerChunkSection)
 	default:
-		biomesSlice, err = UnpackLongData(r, bitsPerEntry, BiomesPerChunkSection)
+		biomes, err = UnpackLongData(r, bitsPerEntry, BiomesPerChunkSection)
 	}
 	if err != nil {
 		return
 	}
-	biomes = [BiomesPerChunkSection]int32(biomesSlice)
 	return
 }
 
-type ChunkSection struct {
-	BlockData [BlocksPerChunkSection]int32
-	BiomeData [BiomesPerChunkSection]int32
-}
-
-func UnpackSection(r io.Reader) (s ChunkSection, err error) {
+func UnpackSection(r io.Reader) (blocks, biomes []int32, err error) {
 	var blockCount int16
 	err = binary.Read(r, binary.BigEndian, &blockCount)
 	if err != nil {
 		return
 	}
-	s.BlockData, err = UnpackBlockData(r)
+	blocks, err = UnpackBlockData(r)
 	if err != nil {
 		return
 	}
-	s.BiomeData, err = UnpackBiomeData(r)
+	biomes, err = UnpackBiomeData(r)
 	if err != nil {
 		return
 	}

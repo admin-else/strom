@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
-	"strconv"
 
 	"github.com/admin-else/strom/api"
 	"github.com/admin-else/strom/crypto"
@@ -51,26 +49,16 @@ func (s *LoginClient) OnClose(_ event.Close) (err error) {
 }
 
 func (s *LoginClient) OnStart(_ event.Start) (err error) {
+	p, err := MakeHandshakePacket(s.Conn, proto_base.Login)
+	if err != nil {
+		return
+	}
 	if s.ServerHost == "" && s.ServerPort == 0 {
-		var portStr string
-		s.ServerHost, portStr, err = net.SplitHostPort(s.RemoteAddr().String())
-		if err != nil {
-			return
-		}
-		var portUint uint64
-		portUint, err = strconv.ParseUint(portStr, 10, 16)
-		if err != nil {
-			return
-		}
-		s.ServerPort = uint16(portUint)
+		p.ServerHost = s.ServerHost
+		p.ServerPort = s.ServerPort
 	}
 
-	err = s.Send(&v1_21_8.HandshakingToServerPacketSetProtocol{
-		ProtocolVersion: s.ProtocolVersion,
-		ServerHost:      s.ServerHost,
-		ServerPort:      s.ServerPort,
-		NextState:       int32(proto_base.Login),
-	})
+	err = s.Send(p)
 	if err != nil {
 		return
 	}
