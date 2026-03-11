@@ -5,9 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"reflect"
-	"strings"
 	"time"
 )
 
@@ -16,9 +14,12 @@ const (
 	TimePerLoop    = time.Second / LoopsPerSecond
 )
 
+type Handler interface {
+	OnStart() (err error)
+}
+
 type Loop struct {
 	handlerFunctions map[reflect.Type][]reflect.Value
-	Handlers         []any
 
 	Ctx     context.Context
 	ErrChan chan error
@@ -34,8 +35,7 @@ type Anything struct {
 }
 
 type (
-	Start struct{}
-	Tick  struct{}
+	Tick struct{}
 )
 
 // HandlerDoneErr will stop the event loop and return the error if provided.
@@ -60,27 +60,28 @@ func (e HandlerDoneErr) Unwrap() error {
 var ErrDontForward = errors.New("dont forward")
 var WhileClosingErr = errors.New("error while closing")
 
-// UpdateHandlerFunctions initializes and populates the handlerFunctions map by reflecting over methods of registered handlers.
-func (l *Loop) UpdateHandlerFunctions() {
-	l.handlerFunctions = make(map[reflect.Type][]reflect.Value)
-	for _, inst := range l.Handlers {
-		t := reflect.TypeOf(inst)
-		v := reflect.ValueOf(inst)
-		for i := 0; i < t.NumMethod(); i++ {
-			method := t.Method(i)
-			if strings.HasPrefix(method.Name, "On") {
-				if method.Type.NumIn() != 2 || method.Type.NumOut() != 1 || method.Type.Out(0) != reflect.TypeFor[error]() {
-					slog.Warn("Invalid event handler signature", "at", t.String()+"."+method.Name)
-					continue
-				}
-			} else {
-				continue
-			}
-			eventType := method.Type.In(1)
-			l.handlerFunctions[eventType] = append(l.handlerFunctions[eventType], v.Method(i))
-			slog.Debug("Registered Handler", "at", t.String()+"."+method.Name, "for", eventType.String())
-		}
+func ValidateHandler(h any) (hv reflect.Value, eventType reflect.Type) {
+	hv = reflect.ValueOf(h)
+	if hv.Kind() != reflect.Func {
+		panic("expected method")
 	}
+	if hv.Type().NumIn() != 1 {
+		panic("expected method with one argument")
+	}
+	if hv.Type().NumOut() != 1 || hv.Type().Out(0) != reflect.TypeFor[error]() {
+		panic("expected method that returns an error")
+	}
+	eventType = hv.Type().In(0)
+	return
+}
+
+func (l *Loop) Register(h any) {
+	hv, eventType := ValidateHandler(h)
+	l.RegisterDirect(eventType, hv)
+}
+
+func (l *Loop) RegisterDirect(k reflect.Type, h reflect.Value) {
+	l.handlerFunctions[k] = append(l.handlerFunctions[k], h)
 }
 
 // FireFound triggers all handlers registered for the specified event type and returns if handlers were found or an error occurred.
@@ -118,11 +119,10 @@ func (l *Loop) Fire(event any) (err error) {
 	return
 }
 
-func (l *Loop) startLoop() (err error) {
+func (l *Loop) startLoop(handler Handler) (err error) {
 	_ = *l // exit early on nil loop
-	l.UpdateHandlerFunctions()
-
-	err = l.Fire(Start{})
+	l.handlerFunctions = make(map[reflect.Type][]reflect.Value)
+	err = handler.OnStart()
 	for err == nil {
 		tickStartTime := time.Now()
 		err = l.Fire(Tick{})
@@ -141,11 +141,11 @@ func (l *Loop) startLoop() (err error) {
 	return
 }
 
-func (l *Loop) Start() (err error) {
+func (l *Loop) Start(handler Handler) (err error) {
 	l.ErrChan = make(chan error)
 	l.Ctx, l.cancel = context.WithCancel(context.Background())
 	go func() {
-		l.ErrChan <- l.startLoop()
+		l.ErrChan <- l.startLoop(handler)
 	}()
 	err = <-l.ErrChan
 	l.cancel()

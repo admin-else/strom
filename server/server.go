@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net"
 
+	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/text"
@@ -22,7 +23,9 @@ func Servee(c net.Conn) (ret *proto.Conn) {
 	return
 }
 
-func ServeClient(cNet net.Conn, factory func(c *proto.Conn) (h any, err error)) {
+type Factory func(c *proto.Conn) (h event.Handler, err error)
+
+func ServeClient(cNet net.Conn, factory Factory) {
 	c := Servee(cNet)
 	defer c.Close()
 	h, err := factory(c)
@@ -43,7 +46,7 @@ func ServeClient(cNet net.Conn, factory func(c *proto.Conn) (h any, err error)) 
 	return
 }
 
-func StartServerWithFactory(listenAddr string, factory func(c *proto.Conn) (h any, err error)) (err error) {
+func StartServerWithFactory(listenAddr string, factory Factory) (err error) {
 	l, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		return

@@ -27,6 +27,12 @@ type LoginClient struct {
 	GivenAccount *v1_21_8.LoginToClientPacketSuccess
 }
 
+var (
+	NoTokenErr          = errors.New("the account has no token so we cant join online servers")
+	BadPublicKeyTypeErr = errors.New("the public key is not rsa")
+	FailedToLoginErr    = errors.New("failed to login")
+)
+
 type KickedDuringLoginErr struct {
 	text.Component
 }
@@ -35,7 +41,7 @@ func (k KickedDuringLoginErr) Error() string {
 	return k.String()
 }
 
-func (s *LoginClient) Default(event event.Unhandled) (err error) {
+func (s *LoginClient) OnDefault(event event.Unhandled) (err error) {
 	err = fmt.Errorf("unexpected event: %#v", event)
 	return
 }
@@ -45,25 +51,6 @@ func (s *LoginClient) OnCycle(_ event.Tick) (err error) {
 }
 
 func (s *LoginClient) OnClose(_ event.Close) (err error) {
-	return
-}
-
-func (s *LoginClient) OnStart(_ event.Start) (err error) {
-	p, err := MakeHandshakePacket(s.Conn, proto_base.Login)
-	if err != nil {
-		return
-	}
-	if s.ServerHost == "" && s.ServerPort == 0 {
-		p.ServerHost = s.ServerHost
-		p.ServerPort = s.ServerPort
-	}
-
-	err = s.Send(p)
-	if err != nil {
-		return
-	}
-	s.SetState(proto_base.Login)
-	err = s.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Name, PlayerUUID: s.Account.Uuid})
 	return
 }
 
@@ -78,7 +65,7 @@ func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBeg
 
 	if packet.ShouldAuthenticate {
 		if s.Account.Ygg == "" {
-			err = fmt.Errorf("the account has no token so we cant join online servers")
+			err = NoTokenErr
 			return
 		}
 		serverId := crypto.AuthDigest([]byte(packet.ServerId), sharedSecret, packet.PublicKey)
@@ -94,7 +81,7 @@ func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBeg
 	}
 	pub, ok := pubAny.(*rsa.PublicKey)
 	if !ok {
-		err = fmt.Errorf("public key is not rsa")
+		err = BadPublicKeyTypeErr
 		return
 	}
 	verifyTokenEnc, err := rsa.EncryptPKCS1v15(rand.Reader, pub, packet.VerifyToken)
@@ -136,13 +123,40 @@ func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (er
 	return
 }
 
+func (s *LoginClient) OnStart() (err error) {
+	s.Register(s.OnDefault)
+	s.Register(s.OnCycle)
+	s.Register(s.OnClose)
+	s.RegisterUntilLatest(s.OnCompress)
+	s.RegisterUntilLatest(s.OnEncrypt)
+	s.RegisterUntilLatest(s.OnDisconnect)
+	s.RegisterUntilLatest(s.OnSuccess)
+
+	p, err := MakeHandshakePacket(s.Conn, proto_base.Login)
+	if err != nil {
+		return
+	}
+	if s.ServerHost == "" && s.ServerPort == 0 {
+		p.ServerHost = s.ServerHost
+		p.ServerPort = s.ServerPort
+	}
+
+	err = s.Send(p)
+	if err != nil {
+		return
+	}
+	s.SetState(proto_base.Login)
+	err = s.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Name, PlayerUUID: s.Account.Uuid})
+	return
+}
+
 func Login(c *proto.Conn, account *api.Account) (err error) {
 	err = c.Start(&LoginClient{
 		Conn:    c,
 		Account: account,
 	})
 	if err != nil {
-		err = errors.Join(err, errors.New("failed to login"))
+		err = errors.Join(FailedToLoginErr, err)
 	}
 	return
 }
@@ -157,7 +171,7 @@ func ConnectAndLogin(connectTo string, account *api.Account) (c *proto.Conn, err
 		Account: account,
 	})
 	if err != nil {
-		err = errors.Join(errors.New("failed to login"), err)
+		err = errors.Join(FailedToLoginErr, err)
 	}
 	return
 }

@@ -13,8 +13,7 @@ type Stdin struct {
 type StdinHandler struct {
 	*Loop
 	stdInChan chan Stdin
-	ctx       context.Context
-	cancel    context.CancelFunc
+	Ctx       context.Context
 }
 
 func (s *StdinHandler) OnTick(_ Tick) (err error) {
@@ -31,21 +30,15 @@ func (s *StdinHandler) ScanJob() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		select {
-		case <-s.ctx.Done():
+		case <-s.Ctx.Done():
 			return
 		default:
 			s.stdInChan <- Stdin{scanner.Text()}
 		}
 	}
 }
-func (s *StdinHandler) OnStart(_ Start) (err error) {
+func (s *StdinHandler) OnStart() (err error) {
 	s.stdInChan = make(chan Stdin)
-	s.ctx, s.cancel = context.WithCancel(context.Background())
 	go s.ScanJob()
-	return
-}
-
-func (s *StdinHandler) OnClose(_ Close) (err error) {
-	s.cancel()
 	return
 }

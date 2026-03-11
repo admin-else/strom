@@ -112,7 +112,7 @@ func (l *LoginServer) OnDefault(event event.Unhandled) (err error) {
 	return
 }
 
-func (l *LoginServer) OnStart(_ event.Start) (err error) {
+func (l *LoginServer) OnStart() (err error) {
 	return
 }
 

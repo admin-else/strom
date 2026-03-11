@@ -48,6 +48,10 @@ type StatusServer struct {
 	Status string
 }
 
+func (p *StatusServer) OnStart() (err error) {
+	return
+}
+
 func (p *StatusServer) Default(_ any) (err error) {
 	return
 }

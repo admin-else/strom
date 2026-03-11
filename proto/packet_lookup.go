@@ -29,22 +29,9 @@ func LookUpTypeByPacketInfoAndCopyType(direction proto_base.Direction, state pro
 }
 
 func LookupPacketInfoByType(packet proto_base.EncodeDecodeAble) (p proto_base.PacketInfo, ok bool) {
-	switch packet := packet.(type) {
-	case *UnCodablePacket:
-		p = proto_base.PacketInfo{
-			Type:            &UnCodablePacket{},
-			Name:            "undecodeable",
-			Direction:       packet.Direction,
-			State:           -1,
-			PacketId:        -1,
-			ProtocolVersion: -1,
-		}
-		ok = true
-	default:
-		for _, p := range proto_generated.Packets {
-			if reflect.TypeOf(p.Type) == reflect.TypeOf(packet) {
-				return p, true
-			}
+	for _, p := range proto_generated.Packets {
+		if reflect.TypeOf(p.Type) == reflect.TypeOf(packet) {
+			return p, true
 		}
 	}
 	return

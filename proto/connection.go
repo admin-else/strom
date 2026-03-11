@@ -7,11 +7,13 @@ import (
 	"io"
 	"log/slog"
 	"reflect"
+	"slices"
 	"sync"
 
 	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto_base"
+	"github.com/admin-else/strom/proto_generated"
 )
 
 var (
@@ -24,6 +26,8 @@ var (
 	CantTranslateErr                    = errors.New("cant translate packet")
 	PacketDoesntExistInFutureVersionErr = errors.New("packet doesnt exist in future version")
 )
+
+var LatestVersion = proto_generated.SupportedVersions[len(proto_generated.SupportedVersions)-1]
 
 // UnCodablePacket represents a packet that could not be decoded.
 type UnCodablePacket struct {
@@ -51,8 +55,60 @@ type Conn struct {
 	Version         string
 	ProtocolVersion int32
 
+	handler        event.Handler
 	receiveRoutine bool
 	packetCh       chan proto_base.EncodeDecodeAble
+}
+
+func (c *Conn) RegisterUntilLatest(h any) {
+	c.RegisterUntil(h, LatestVersion)
+}
+
+func (c *Conn) RegisterUntil(h any, until string) {
+	hv, eventType := event.ValidateHandler(h)
+	c.RegisterDirect(eventType, hv)
+	if !eventType.Implements(reflect.TypeFor[proto_base.EncodeDecodeAble]()) {
+		panic("expected method with argument that implements proto_base.EncodeDecodeAble")
+	}
+	packetInfo, found := LookupPacketInfoByType(reflect.Zero(eventType).Interface().(proto_base.EncodeDecodeAble))
+	if !found {
+		panic("packet not found")
+	}
+	versionInfo, err := data.LookUpVersionByProtocolVersion(packetInfo.ProtocolVersion)
+	if err != nil {
+		panic("protocol version not found")
+	}
+	startIndex := slices.Index(proto_generated.SupportedVersions, versionInfo.MinecraftVersion)
+	endIndex := slices.Index(proto_generated.SupportedVersions, until)
+	for i := startIndex + 1; i <= endIndex; i++ {
+		versionName := proto_generated.SupportedVersions[i]
+		versionInfo, err = data.LookUpVersionByName(versionName)
+		if err != nil {
+			panic("protocol version not found")
+		}
+		var newPacketInfo proto_base.PacketInfo
+		newPacketInfo, found = LookupPacketInfoByNameProtocolVersionAndState(packetInfo.Name, versionInfo.Version, packetInfo.State)
+		if !found {
+			panic("packet not found")
+		}
+		newT := reflect.TypeOf(newPacketInfo.Type)
+		if !SmartConvertibleTo(newT, reflect.TypeOf(packetInfo.Type)) {
+			panic(fmt.Sprintf("packet %v is not convertible to %v", newT, reflect.TypeOf(packetInfo.Type)))
+		}
+		handleFunc := func(packet any) error {
+			v := hv.Call([]reflect.Value{SmartConvert(reflect.ValueOf(packet), reflect.TypeOf(packetInfo.Type))})[0]
+			if v.IsNil() {
+				return nil
+			}
+			return v.Interface().(error)
+		}
+		c.RegisterDirect(newT, reflect.ValueOf(handleFunc))
+	}
+}
+
+func (c *Conn) OnStart() (err error) {
+	c.Register(c.OnTick)
+	return c.handler.OnStart()
 }
 
 func (c *Conn) ReceiveJob() {
@@ -120,14 +176,14 @@ func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packet
 		err = PacketDoesntExistInFutureVersionErr
 		return
 	}
+
 	dstType := reflect.TypeOf(packetInfoReal.Type)
-	if !reflect.TypeOf(packetInfo.Type).ConvertibleTo(dstType) {
+	if !SmartConvertibleTo(reflect.TypeOf(packetInfo.Type), dstType) {
 		err = CantTranslateErr
 		return
 	}
 	// can't fail cause pacetinfo.type is proto_base.EncodeDecodeAble
-	convertedPacket = reflect.ValueOf(packet).Convert(dstType).Interface().(proto_base.EncodeDecodeAble)
-
+	convertedPacket = SmartConvert(reflect.ValueOf(packet), dstType).Interface().(proto_base.EncodeDecodeAble)
 	return
 }
 
@@ -226,12 +282,10 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 	return
 }
 
-func (c *Conn) Start(handlers ...any) (err error) {
+func (c *Conn) Start(handler event.Handler) (err error) {
 	if c.Loop == nil {
 		c.Loop = &event.Loop{}
 	}
-	c.Handlers = []any{c}
-	c.Handlers = append(c.Handlers, handlers...)
-	err = c.Loop.Start()
-	return
+	c.handler = handler
+	return c.Loop.Start(c)
 }

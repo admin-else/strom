@@ -15,6 +15,15 @@ type ConfigIgnorer struct {
 	*proto.Conn
 }
 
+func (c *ConfigIgnorer) OnStart() (err error) {
+	c.Register(c.Default)
+	c.RegisterUntilLatest(c.OnKnownPacks)
+	c.RegisterUntilLatest(c.OnFinish)
+	c.RegisterUntilLatest(c.OnPing)
+	c.RegisterUntilLatest(c.OnKeepAlive)
+	return
+}
+
 func (c *ConfigIgnorer) Default(event event.Anything) (err error) {
 	slog.Debug("Config ignorer", "packet", fmt.Sprintf("%#v", event))
 	return

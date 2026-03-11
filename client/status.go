@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/admin-else/strom/event"
@@ -19,12 +18,10 @@ type StatusClient struct {
 	PingSendTime, PingReceiveTime time.Time
 }
 
-func (s *StatusClient) Default(event any) (err error) {
-	err = fmt.Errorf("unexpected event: %v", event)
-	return
-}
+func (s *StatusClient) OnStart() (err error) {
+	s.RegisterUntilLatest(s.OnStatus)
+	s.RegisterUntilLatest(s.OnPong)
 
-func (s *StatusClient) OnStart(_ event.Start) (err error) {
 	p, err := MakeHandshakePacket(s.Conn, proto_base.Status)
 	if err != nil {
 		return
