@@ -3,6 +3,7 @@ package nbt
 import (
 	"compress/gzip"
 	"io"
+	"os"
 )
 
 func WriteFile(file io.Writer, n Tag) (err error) {
@@ -21,4 +22,13 @@ func ReadFile(file io.Reader) (n *Tag, err error) {
 	n = &Tag{}
 	err = n.Decode(r)
 	return
+}
+
+func ReadFilePath(path string) (n *Tag, err error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	return ReadFile(f)
 }

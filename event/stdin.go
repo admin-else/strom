@@ -38,6 +38,7 @@ func (s *StdinHandler) ScanJob() {
 	}
 }
 func (s *StdinHandler) OnStart() (err error) {
+	s.Register(s.OnTick)
 	s.stdInChan = make(chan Stdin)
 	go s.ScanJob()
 	return

@@ -165,9 +165,9 @@ func (c *Conn) ActivateReceiveRoutine() {
 	if c.receiveRoutine {
 		return
 	}
-	c.receiveRoutine = true
 	c.packetCh = make(chan proto_base.EncodeDecodeAble, 100) // i dunno how many to buffer 100 seems reasonable
 	go c.ReceiveJob()
+	c.receiveRoutine = true
 }
 
 func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packetInfo proto_base.PacketInfo) (convertedPacket proto_base.EncodeDecodeAble, err error) {

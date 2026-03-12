@@ -69,6 +69,7 @@ func LookupBlockByStateId(version string, stateId int32) (block *Block, ok bool)
 		if b.MinStateId <= stateId && stateId <= b.MaxStateId {
 			block = b
 			ok = true
+			return
 		}
 	}
 	return
@@ -99,6 +100,8 @@ func FromBlockState(version string, stateId int32) (b *Block, stateData map[stri
 	stateData, err = b.StateMapFromId(stateId)
 	return
 }
+
+// TODO: mc stores these as strings so we will do the same
 
 func mcDataBlockStateTypeParse(n int32, s *BlockState) (v any, err error) {
 	switch s.Type {

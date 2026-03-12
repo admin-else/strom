@@ -2,8 +2,6 @@ package level
 
 import (
 	"encoding/binary"
-	"errors"
-	"fmt"
 	"io"
 	"math"
 
@@ -22,7 +20,8 @@ func UnpackArrayPalette(r io.Reader, bitsPerEntry uint8, numberOfEntries int) (d
 	}
 	var pallet []int32 // remember we can't use make because this is user-controlled data
 	for range palletLen {
-		entry, err := proto_base.DecodeVarInt(r)
+		var entry int32
+		entry, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
@@ -76,20 +75,18 @@ func LongsToData(data []uint64, n, bpe int32) (ret []int32) {
 	return
 }
 
+// UnpackBlockData minecraft does this at net.minecraft.world.chunk.PaletteProvider
 func UnpackBlockData(r io.Reader) (blocks []int32, err error) {
 	var bitsPerEntry uint8
 	err = binary.Read(r, binary.BigEndian, &bitsPerEntry)
 	if err != nil {
 		return
 	}
-	fmt.Println("blocks bpe", bitsPerEntry)
 	switch bitsPerEntry {
 	case 0:
 		blocks, err = UnpackSingleValuePalette(r, BlocksPerChunkSection)
-	case 1, 2, 3, 4:
+	case 1, 2, 3, 4, 5, 6, 7, 8:
 		blocks, err = UnpackArrayPalette(r, bitsPerEntry, BlocksPerChunkSection)
-	case 5, 6, 7, 8:
-		err = errors.New("unimplemented")
 	default:
 		blocks, err = UnpackLongData(r, bitsPerEntry, BlocksPerChunkSection)
 	}
@@ -106,7 +103,6 @@ func UnpackBiomeData(r io.Reader) (biomes []int32, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println("biome bpe", bitsPerEntry)
 	switch bitsPerEntry {
 	case 0:
 		biomes, err = UnpackSingleValuePalette(r, BiomesPerChunkSection)
@@ -132,9 +128,18 @@ func UnpackSection(r io.Reader) (blocks, biomes []int32, err error) {
 		return
 	}
 	biomes, err = UnpackBiomeData(r)
-	if err != nil {
-		return
-	}
+	return
+}
 
+func UnpackNSections(r io.Reader, n int) (blocks, biomes [][]int32, err error) {
+	for range n {
+		var blocksSection, biomesSections []int32
+		blocksSection, biomesSections, err = UnpackSection(r)
+		if err != nil {
+			return
+		}
+		blocks = append(blocks, blocksSection)
+		biomes = append(biomes, biomesSections)
+	}
 	return
 }
