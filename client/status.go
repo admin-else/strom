@@ -53,6 +53,7 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 	if err != nil {
 		return
 	}
+	defer c.Close()
 	err = c.SetVersion("1.21.8")
 	if err != nil {
 		return
@@ -61,7 +62,6 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 		Conn: c,
 	}
 	err = s.Start(s)
-	defer c.Close()
 	return
 }
 

@@ -8,6 +8,7 @@ import (
 )
 
 // Connect connects to the given address note that it does not resolve the SRV records it's just a raw net.Dial
+// You must close the connection when you're done with it
 func Connect(addr string) (ret *proto.Conn, err error) {
 	s, err := Status(addr)
 	if err != nil {
@@ -23,6 +24,7 @@ func Connect(addr string) (ret *proto.Conn, err error) {
 
 // ConnectVersionLess connects to the given address without setting the version you should set it
 // when using this function.
+// You must close the connection when you're done with it
 func ConnectVersionLess(addr string) (ret *proto.Conn, err error) {
 	ret = &proto.Conn{}
 	ret.SetState(proto_base.Handshaking)

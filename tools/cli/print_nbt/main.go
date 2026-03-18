@@ -1,4 +1,4 @@
-package main
+package print_nbt
 
 import (
 	"encoding/json"
@@ -9,11 +9,15 @@ import (
 )
 
 var (
-	FileFlag = flag.String("file", "", "The NBT file to print")
+	cmd      = flag.NewFlagSet("print-nbt", flag.ContinueOnError)
+	FileFlag = cmd.String("file", "", "The NBT file to print")
 )
 
-func mainE() (err error) {
-	flag.Parse()
+func Run(args []string) (err error) {
+	err = cmd.Parse(args)
+	if err != nil {
+		return
+	}
 	f, err := os.Open(*FileFlag)
 	if err != nil {
 		return
@@ -29,11 +33,4 @@ func mainE() (err error) {
 	}
 	_, err = os.Stdout.Write(b)
 	return
-}
-
-func main() {
-	err := mainE()
-	if err != nil {
-		panic(err)
-	}
 }
