@@ -10,6 +10,7 @@ import (
 
 	"github.com/admin-else/strom/tools/cli/offline_uuid"
 	"github.com/admin-else/strom/tools/cli/print_nbt"
+	"github.com/admin-else/strom/tools/cli/status"
 )
 
 var ExpectedASubcommandErr = errors.New("expected a subcommand")
@@ -18,6 +19,7 @@ var UnknownSubcommandErr = errors.New("unknown subcommand")
 var subcommands = map[string]func(args []string) error{
 	"offline-uuid": offline_uuid.Run,
 	"print-nbt":    print_nbt.Run,
+	"status":       status.Run,
 }
 
 func Help(args []string) (err error) {

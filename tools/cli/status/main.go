@@ -8,8 +8,8 @@ import (
 )
 
 var cmd = flag.NewFlagSet("status", flag.ContinueOnError)
-var addrFlag = flag.String("addr", "localhost:25565", "address to connect to")
-var srvFlag = flag.Bool("srv", false, "use SRV records to resolve the address")
+var addrFlag = cmd.String("addr", "localhost:25565", "address to connect to")
+var srvFlag = cmd.Bool("srv", false, "use SRV records to resolve the address")
 
 func Run(args []string) (err error) {
 	err = cmd.Parse(args)
@@ -27,6 +27,6 @@ func Run(args []string) (err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println(status)
+	fmt.Println(status.Status)
 	return
 }
