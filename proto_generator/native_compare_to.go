@@ -39,11 +39,7 @@ func (g *Generator) VisitCompareTo(parts []string, inExpr ast.Expr, data any) (e
 }
 
 func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw any) (e ast.Expr, cet CaseExprType, err error) {
-	var data []struct {
-		Name string
-		Type any
-		Anon bool
-	}
+	var data protodef.Container
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -78,11 +74,7 @@ func BitfieldCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw an
 		err = errors.New("expected name part")
 		return
 	}
-	var field struct {
-		Name   string
-		Singed bool
-		Size   int
-	}
+	var field protodef.BitFieldEntry
 	for _, f := range data {
 		if f.Name == fieldName {
 			field = f
@@ -100,10 +92,7 @@ func BitfieldCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw an
 }
 
 func BitflagsCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw any) (e ast.Expr, cet CaseExprType, err error) {
-	var data struct {
-		Flags []string
-		Type  any
-	}
+	var data protodef.BitFlags
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return

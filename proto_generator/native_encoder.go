@@ -23,11 +23,7 @@ func DefaultEncoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.S
 }
 
 func ContainerEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data []struct {
-		Name string
-		Type any
-		Anon bool
-	}
+	var data protodef.Container
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -66,11 +62,7 @@ func SimpleTypeEncoder(_ *Generator, data ast.Expr, _ any, _ string) (s []ast.St
 }
 
 func ArrayEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		CountType any
-		Count     string
-		Type      any
-	}
+	var data protodef.Array
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -119,10 +111,7 @@ func OptionEncoder(g *Generator, data ast.Expr, dataRaw any, name string) (s []a
 }
 
 func BufferEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		Count     int
-		CountType any
-	}
+	var data protodef.Buffer
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -202,11 +191,7 @@ func BitFieldEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 }
 
 func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		CompareTo string
-		Fields    map[string]any
-		Default   any
-	}
+	var data protodef.Switch
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -268,9 +253,7 @@ func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 }
 
 func TypeForwardEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		Type string
-	}
+	var data protodef.TypeForward
 	if err = mapstructure.Decode(dataRaw, &data); err != nil {
 		return
 	}
@@ -278,10 +261,7 @@ func TypeForwardEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name strin
 }
 
 func MapperEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		Mappings map[string]string
-		Type     any
-	}
+	var data protodef.Mapper
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -328,7 +308,7 @@ func UUIDEncoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.Stmt
 }
 
 func RegistryEntryHolderEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data EntryHolderSet
+	var data protodef.EntryHolderSet
 	err = mapstructure.Decode(dataRaw, &data)
 	otherwiseType, err := g.VisitType(data.Otherwise.Type)
 	if err != nil {

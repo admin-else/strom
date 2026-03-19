@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/admin-else/strom/proto_generator/protodef"
 	"github.com/go-viper/mapstructure/v2"
 )
 
@@ -31,11 +32,7 @@ func UUIDDecoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.Stmt
 }
 
 func ContainerDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data []struct {
-		Name string
-		Type any
-		Anon bool
-	}
+	var data protodef.Container
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -108,11 +105,7 @@ func OptionDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 }
 
 func ArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		CountType any
-		Count     string
-		Type      any
-	}
+	var data protodef.Array
 	lName := "l" + CamelCase(name)
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
@@ -171,9 +164,7 @@ func ArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 }
 
 func TypeForwardDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		Type string
-	}
+	var data protodef.TypeForward
 	if err = mapstructure.Decode(dataRaw, &data); err != nil {
 		return
 	}
@@ -248,11 +239,7 @@ func MultiTypeFix(s string, t *CaseExprType) (e ast.Expr) {
 }
 
 func SwitchDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		CompareTo string
-		Fields    map[string]any
-		Default   any
-	}
+	var data protodef.Switch
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -317,10 +304,7 @@ func ToDoDecoder(_ *Generator, _ ast.Expr, _ any, _ string) (s []ast.Stmt, err e
 }
 
 func MapperDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		Mappings map[string]string
-		Type     any
-	}
+	var data protodef.Mapper
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -353,10 +337,7 @@ func MapperDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 }
 
 func BufferDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		Count     int
-		CountType any
-	}
+	var data protodef.Buffer
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -391,11 +372,7 @@ func BufferDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 }
 
 func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data []struct {
-		Name   string
-		Signed bool
-		Size   int
-	}
+	var data protodef.BitField
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -423,7 +400,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	lShiftBy := 0
 	for _, field := range data {
 		var fieldTypeProtodef string
-		if field.Signed {
+		if field.Singed {
 			fieldTypeProtodef, err = BitSizeToSignedProtodefName(field.Size)
 		} else {
 			fieldTypeProtodef, err = BitSizeToUnsignedProtodefName(field.Size)
@@ -454,7 +431,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 		}
 
 		s = append(s, Assign121(fieldToSet, getDataExpr))
-		if field.Signed {
+		if field.Singed {
 			s = append(s, If(
 				GreaterThanOrEqual(
 					fieldToSet,
@@ -475,16 +452,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 }
 
 func RegistryEntryHolderSetDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data struct {
-		Base struct {
-			Name string
-			Type any
-		}
-		Otherwise struct {
-			Name string
-			Type any
-		}
-	}
+	var data protodef.RegistryEntryHolderSet
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -543,7 +511,7 @@ func RegistryEntryHolderSetDecoder(g *Generator, varToSet ast.Expr, dataRaw any,
 }
 
 func RegistryEntryHolderDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
-	var data EntryHolderSet
+	var data protodef.EntryHolderSet
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
