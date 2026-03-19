@@ -16,7 +16,7 @@ type ConfigIgnorer struct {
 }
 
 func (c *ConfigIgnorer) OnStart() (err error) {
-	c.Register(c.Default)
+	c.RegisterCritical(c.Default)
 	c.RegisterUntilLatest(c.OnKnownPacks)
 	c.RegisterUntilLatest(c.OnFinish)
 	c.RegisterUntilLatest(c.OnPing)

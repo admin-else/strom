@@ -7,7 +7,6 @@ import (
 	"io"
 	"log/slog"
 	"reflect"
-	"slices"
 	"sync"
 
 	"github.com/admin-else/strom/data"
@@ -60,54 +59,8 @@ type Conn struct {
 	packetCh       chan proto_base.EncodeDecodeAble
 }
 
-func (c *Conn) RegisterUntilLatest(h any) {
-	c.RegisterUntil(h, LatestVersion)
-}
-
-func (c *Conn) RegisterUntil(h any, until string) {
-	hv, eventType := event.ValidateHandler(h)
-	c.RegisterDirect(eventType, hv)
-	if !eventType.Implements(reflect.TypeFor[proto_base.EncodeDecodeAble]()) {
-		panic("expected method with argument that implements proto_base.EncodeDecodeAble")
-	}
-	packetInfo, found := LookupPacketInfoByType(reflect.Zero(eventType).Interface().(proto_base.EncodeDecodeAble))
-	if !found {
-		panic("packet not found")
-	}
-	versionInfo, err := data.LookUpVersionByProtocolVersion(packetInfo.ProtocolVersion)
-	if err != nil {
-		panic("protocol version not found")
-	}
-	startIndex := slices.Index(proto_generated.SupportedVersions, versionInfo.MinecraftVersion)
-	endIndex := slices.Index(proto_generated.SupportedVersions, until)
-	for i := startIndex + 1; i <= endIndex; i++ {
-		versionName := proto_generated.SupportedVersions[i]
-		versionInfo, err = data.LookUpVersionByName(versionName)
-		if err != nil {
-			panic("protocol version not found")
-		}
-		var newPacketInfo proto_base.PacketInfo
-		newPacketInfo, found = LookupPacketInfoByNameProtocolVersionAndState(packetInfo.Name, versionInfo.Version, packetInfo.State)
-		if !found {
-			panic("packet not found")
-		}
-		newT := reflect.TypeOf(newPacketInfo.Type)
-		if !SmartConvertibleTo(newT, reflect.TypeOf(packetInfo.Type)) {
-			panic(fmt.Sprintf("packet %v is not convertible to %v", newT, reflect.TypeOf(packetInfo.Type)))
-		}
-		handleFunc := func(packet any) error {
-			v := hv.Call([]reflect.Value{SmartConvert(reflect.ValueOf(packet), reflect.TypeOf(packetInfo.Type))})[0]
-			if v.IsNil() {
-				return nil
-			}
-			return v.Interface().(error)
-		}
-		c.RegisterDirect(newT, reflect.ValueOf(handleFunc))
-	}
-}
-
 func (c *Conn) OnStart() (err error) {
-	c.Register(c.OnTick)
+	c.RegisterCritical(c.OnTick)
 	return c.handler.OnStart()
 }
 

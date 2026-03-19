@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"reflect"
 	"time"
 )
@@ -60,7 +61,7 @@ func (e HandlerDoneErr) Unwrap() error {
 var ErrDontForward = errors.New("dont forward")
 var WhileClosingErr = errors.New("error while closing")
 
-func ValidateHandler(h any) (hv reflect.Value, eventType reflect.Type) {
+func ValidateHandler(h any) (eventType reflect.Type, hv reflect.Value) {
 	hv = reflect.ValueOf(h)
 	if hv.Kind() != reflect.Func {
 		panic("expected method")
@@ -75,8 +76,31 @@ func ValidateHandler(h any) (hv reflect.Value, eventType reflect.Type) {
 	return
 }
 
+// Register registers a handler that will not close the loop if it returns an error.
+// Instead, it will log it to slog.Error
+// Warning: If a bad handler is passed in the program will panic.
 func (l *Loop) Register(h any) {
-	hv, eventType := ValidateHandler(h)
+	l.RegisterCustomType(ValidateHandler(h))
+}
+
+// RegisterCustomType registers a handler that will not close the loop if it returns an error.
+// Instead, it will log it to slog.Error
+// Warning: If a bad handler is passed in the program will panic.
+func (l *Loop) RegisterCustomType(eventType reflect.Type, hv reflect.Value) {
+	handleFunc := func(packet any) error {
+		v := hv.Call([]reflect.Value{reflect.ValueOf(packet)})[0]
+		if !v.IsNil() {
+			slog.Error("handler failed", v.Interface().(error))
+		}
+		return nil
+	}
+	l.RegisterDirect(eventType, reflect.ValueOf(handleFunc))
+}
+
+// RegisterCritical registers a handler that will close the loop if it returns an error.
+// Warning: If a bad handler is passed in the program will panic.
+func (l *Loop) RegisterCritical(h any) {
+	eventType, hv := ValidateHandler(h)
 	l.RegisterDirect(eventType, hv)
 }
 

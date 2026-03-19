@@ -124,9 +124,9 @@ func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (er
 }
 
 func (s *LoginClient) OnStart() (err error) {
-	s.Register(s.OnDefault)
-	s.Register(s.OnCycle)
-	s.Register(s.OnClose)
+	s.RegisterCritical(s.OnDefault)
+	s.RegisterCritical(s.OnCycle)
+	s.RegisterCritical(s.OnClose)
 	s.RegisterUntilLatest(s.OnCompress)
 	s.RegisterUntilLatest(s.OnEncrypt)
 	s.RegisterUntilLatest(s.OnDisconnect)
