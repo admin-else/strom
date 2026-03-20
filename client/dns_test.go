@@ -4,18 +4,24 @@ import "testing"
 
 func TestDoDNS(t *testing.T) {
 	type Case struct {
-		Input  string
-		Output string
+		Input string
+		Host  string
+		portN uint16
 	}
-	for _, c := range []Case{{"localhost", "127.0.0.1:25565"}, {"1f2d.net", "50.114.4.126:25565"}} {
+	cases := []Case{
+		{"localhost", "localhost", 25565},
+		{"play.hypixel.net", "play.hypixel.net", 25565},
+		{"1f2d.net", "tcpshield.1f2d.net", 25565},
+	}
+	for _, c := range cases {
 		t.Logf("Testing %s", c.Input)
-		out, err := DoDns(c.Input)
+		_, host, portN, err := DoDns(c.Input)
 		if err != nil {
 			t.Error(err)
 			continue
 		}
-		if out != c.Output {
-			t.Errorf("Expected %s, got %s", c.Output, out)
+		if host != c.Host || portN != c.portN {
+			t.Errorf("expected %s:%d, got %s:%d", c.Host, c.portN, host, portN)
 		}
 	}
 }
