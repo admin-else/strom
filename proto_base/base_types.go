@@ -222,20 +222,6 @@ type EncodeDecodeAble interface {
 	Decode(r io.Reader) (err error)
 }
 
-type LpVec3d struct {
-	X, Y, Z float64
-}
-
-func (v LpVec3d) Encode(w io.Writer) (err error) {
-	err = UnimplementedErr
-	return
-}
-
-func (v LpVec3d) Decode(r io.Reader) (err error) {
-	err = UnimplementedErr
-	return
-}
-
 type Void struct{}
 
 func (v Void) Encode(w io.Writer) (err error) {

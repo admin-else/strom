@@ -210,6 +210,6 @@ func (g *Generator) RegisterNatives() {
 		"bitflags":                 VisitBitFlagsType,
 		"topBitSetTerminatedArray": VisitToDoType,
 		"todo":                     VisitToDoType,
-		"lpVec3":                   MakeSelectorVisitor("proto_base", "LpVec3d"),
+		"lpVec3":                   VisitToDoType,
 	}
 }
