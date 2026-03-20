@@ -59,7 +59,7 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 	s.RegisterUntilLatest(s.OnStatus)
 	s.RegisterUntilLatest(s.OnPong)
 
-	p, err := MakeHandshakePacket(s.Conn, proto_base.Status)
+	p, err := MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {
 		return
 	}
