@@ -42,7 +42,7 @@ func (t *Timer) Tick() (err error) {
 			if err != nil {
 				return
 			}
-			slices.Delete(t.Once, i, i)
+			t.Once = slices.Delete(t.Once, i, i)
 		}
 	}
 	return

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/ast"
 
+	"github.com/admin-else/strom/proto_generator/protodef"
 	"github.com/go-viper/mapstructure/v2"
 )
 
@@ -94,32 +95,24 @@ func VisitOptionType(g *Generator, dataRaw any) (e ast.Expr, err error) {
 	return
 }
 
-func BitSizeToSignedProtodefName(totalSize int) (e string, err error) {
-	if totalSize <= 8 {
-		e = "i8"
-	} else if totalSize <= 16 {
-		e = "i16"
-	} else if totalSize <= 32 {
-		e = "i32"
-	} else if totalSize <= 64 {
-		e = "i64"
-	} else {
-		err = errors.New("bitfield size too large")
-	}
-	return
-}
-
-func BitSizeToUnsignedProtodefName(totalSize int) (e string, err error) {
-	if totalSize == 1 {
+func BitSizeToProtodef(totalSize int, singed bool) (e string, err error) {
+	if !singed && totalSize == 1 {
 		e = "bool"
-	} else if totalSize <= 8 {
-		e = "u8"
+		return
+	}
+	if singed {
+		e = "i"
+	} else {
+		e = "u"
+	}
+	if totalSize <= 8 {
+		e += "8"
 	} else if totalSize <= 16 {
-		e = "u16"
+		e += "16"
 	} else if totalSize <= 32 {
-		e = "u32"
+		e += "32"
 	} else if totalSize <= 64 {
-		e = "u64"
+		e += "64"
 	} else {
 		err = errors.New("bitfield size too large")
 	}
@@ -127,11 +120,7 @@ func BitSizeToUnsignedProtodefName(totalSize int) (e string, err error) {
 }
 
 func VisitBitFieldType(g *Generator, dataRaw any) (e ast.Expr, err error) {
-	var data []struct {
-		Name   string
-		Signed bool
-		Size   int
-	}
+	var data protodef.BitField
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -139,11 +128,7 @@ func VisitBitFieldType(g *Generator, dataRaw any) (e ast.Expr, err error) {
 	ret := NewStruct()
 	for _, field := range data {
 		var p string
-		if field.Signed {
-			p, err = BitSizeToSignedProtodefName(field.Size)
-		} else {
-			p, err = BitSizeToUnsignedProtodefName(field.Size)
-		}
+		p, err = BitSizeToProtodef(field.Size, field.Signed)
 		if err != nil {
 			return
 		}

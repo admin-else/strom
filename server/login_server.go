@@ -164,7 +164,7 @@ func WithCompatibleVersionsRange(start, end int32) LoginServerSetting {
 
 func WithCompatibleVersions(versions ...int32) LoginServerSetting {
 	return func(s *LoginServer) {
-		s.CompatibleVersions = append(versions)
+		s.CompatibleVersions = versions
 	}
 }
 

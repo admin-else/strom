@@ -1104,19 +1104,19 @@ func (ret *ItemConsumeEffect) Decode(r io.Reader) (err error) {
 			Effects     []ItemPotionEffect
 			Probability float32
 		}
-		var lItemConsumeEffectAnonEffects int32
-		lItemConsumeEffectAnonEffects, err = proto_base.DecodeVarInt(r)
+		var lItemConsumeEffectAnonApplyEffectsTmpEffects int32
+		lItemConsumeEffectAnonApplyEffectsTmpEffects, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		ItemConsumeEffectAnonApplyEffectsTmp.Effects = []ItemPotionEffect{}
-		for range lItemConsumeEffectAnonEffects {
-			var ItemConsumeEffectAnonEffectsElement ItemPotionEffect
-			err = ItemConsumeEffectAnonEffectsElement.Decode(r)
+		for range lItemConsumeEffectAnonApplyEffectsTmpEffects {
+			var ItemConsumeEffectAnonApplyEffectsTmpEffectsElement ItemPotionEffect
+			err = ItemConsumeEffectAnonApplyEffectsTmpEffectsElement.Decode(r)
 			if err != nil {
 				return
 			}
-			ItemConsumeEffectAnonApplyEffectsTmp.Effects = append(ItemConsumeEffectAnonApplyEffectsTmp.Effects, ItemConsumeEffectAnonEffectsElement)
+			ItemConsumeEffectAnonApplyEffectsTmp.Effects = append(ItemConsumeEffectAnonApplyEffectsTmp.Effects, ItemConsumeEffectAnonApplyEffectsTmpEffectsElement)
 		}
 		err = binary.Read(r, binary.BigEndian, &ItemConsumeEffectAnonApplyEffectsTmp.Probability)
 		if err != nil {
@@ -1816,7 +1816,7 @@ type Particle struct {
 }
 
 var ParticleTypeMap = map[int32]string{0: "angry_villager", 1: "block", 10: "falling_lava", 100: "wax_off", 101: "electric_spark", 102: "scrape", 103: "shriek", 104: "egg_crack", 105: "dust_plume", 106: "trial_spawner_detected_player", 107: "trial_spawner_detected_player_ominous", 108: "vault_connection", 109: "dust_pillar", 11: "landing_lava", 110: "ominous_spawning", 111: "raid_omen", 112: "trial_omen", 113: "block_crumble", 114: "firefly", 12: "dripping_water", 13: "falling_water", 14: "dust", 15: "dust_color_transition", 16: "effect", 17: "elder_guardian", 18: "enchanted_hit", 19: "enchant", 2: "block_marker", 20: "end_rod", 21: "entity_effect", 22: "explosion_emitter", 23: "explosion", 24: "gust", 25: "small_gust", 26: "gust_emitter_large", 27: "gust_emitter_small", 28: "sonic_boom", 29: "falling_dust", 3: "bubble", 30: "firework", 31: "fishing", 32: "flame", 33: "infested", 34: "cherry_leaves", 35: "pale_oak_leaves", 36: "tinted_leaves", 37: "sculk_soul", 38: "sculk_charge", 39: "sculk_charge_pop", 4: "cloud", 40: "soul_fire_flame", 41: "soul", 42: "flash", 43: "happy_villager", 44: "composter", 45: "heart", 46: "instant_effect", 47: "item", 48: "vibration", 49: "trail", 5: "copper_fire_flame", 50: "item_slime", 51: "item_cobweb", 52: "item_snowball", 53: "large_smoke", 54: "lava", 55: "mycelium", 56: "note", 57: "poof", 58: "portal", 59: "rain", 6: "crit", 60: "smoke", 61: "white_smoke", 62: "sneeze", 63: "spit", 64: "squid_ink", 65: "sweep_attack", 66: "totem_of_undying", 67: "underwater", 68: "splash", 69: "witch", 7: "damage_indicator", 70: "bubble_pop", 71: "current_down", 72: "bubble_column_up", 73: "nautilus", 74: "dolphin", 75: "campfire_cosy_smoke", 76: "campfire_signal_smoke", 77: "dripping_honey", 78: "falling_honey", 79: "landing_honey", 8: "dragon_breath", 80: "falling_nectar", 81: "falling_spore_blossom", 82: "ash", 83: "crimson_spore", 84: "warped_spore", 85: "spore_blossom_air", 86: "dripping_obsidian_tear", 87: "falling_obsidian_tear", 88: "landing_obsidian_tear", 89: "reverse_portal", 9: "dripping_lava", 90: "white_ash", 91: "small_flame", 92: "snowflake", 93: "dripping_dripstone_lava", 94: "falling_dripstone_lava", 95: "dripping_dripstone_water", 96: "falling_dripstone_water", 97: "glow_squid_ink", 98: "glow", 99: "wax_on"}
-var ParticleDataPositionTypeMap = map[int32]string{0: "block", 1: "entity"}
+var ParticleDataVibrationTmpPositionTypeMap = map[int32]string{0: "block", 1: "entity"}
 
 func (ret *Particle) Decode(r io.Reader) (err error) {
 	var ParticleTypeKey int32
@@ -2030,37 +2030,37 @@ func (ret *Particle) Decode(r io.Reader) (err error) {
 			Position     any
 			Ticks        int32
 		}
-		var ParticleDataPositionTypeKey int32
-		ParticleDataPositionTypeKey, err = proto_base.DecodeVarInt(r)
+		var ParticleDataVibrationTmpPositionTypeKey int32
+		ParticleDataVibrationTmpPositionTypeKey, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		ParticleDataVibrationTmp.PositionType, err = proto_base.ErroringIndex(ParticleDataPositionTypeMap, ParticleDataPositionTypeKey)
+		ParticleDataVibrationTmp.PositionType, err = proto_base.ErroringIndex(ParticleDataVibrationTmpPositionTypeMap, ParticleDataVibrationTmpPositionTypeKey)
 		if err != nil {
 			return
 		}
 		switch ParticleDataVibrationTmp.PositionType {
 		case "block":
-			var ParticleDataPositionBlockTmp Position
-			err = ParticleDataPositionBlockTmp.Decode(r)
+			var ParticleDataVibrationTmpPositionBlockTmp Position
+			err = ParticleDataVibrationTmpPositionBlockTmp.Decode(r)
 			if err != nil {
 				return
 			}
-			ParticleDataVibrationTmp.Position = ParticleDataPositionBlockTmp
+			ParticleDataVibrationTmp.Position = ParticleDataVibrationTmpPositionBlockTmp
 		case "entity":
-			var ParticleDataPositionEntityTmp struct {
+			var ParticleDataVibrationTmpPositionEntityTmp struct {
 				EntityId        int32
 				EntityEyeHeight float32
 			}
-			ParticleDataPositionEntityTmp.EntityId, err = proto_base.DecodeVarInt(r)
+			ParticleDataVibrationTmpPositionEntityTmp.EntityId, err = proto_base.DecodeVarInt(r)
 			if err != nil {
 				return
 			}
-			err = binary.Read(r, binary.BigEndian, &ParticleDataPositionEntityTmp.EntityEyeHeight)
+			err = binary.Read(r, binary.BigEndian, &ParticleDataVibrationTmpPositionEntityTmp.EntityEyeHeight)
 			if err != nil {
 				return
 			}
-			ParticleDataVibrationTmp.Position = ParticleDataPositionEntityTmp
+			ParticleDataVibrationTmp.Position = ParticleDataVibrationTmpPositionEntityTmp
 		}
 		ParticleDataVibrationTmp.Ticks, err = proto_base.DecodeVarInt(r)
 		if err != nil {
@@ -3516,7 +3516,7 @@ type EntityMetadataEntry struct {
 }
 
 var EntityMetadataEntryTypeMap = map[int32]string{0: "byte", 1: "int", 10: "block_pos", 11: "optional_block_pos", 12: "direction", 13: "optional_uuid", 14: "block_state", 15: "optional_block_state", 16: "particle", 17: "particles", 18: "villager_data", 19: "optional_unsigned_int", 2: "long", 20: "pose", 21: "cat_variant", 22: "cow_variant", 23: "wolf_variant", 24: "wolf_sound_variant", 25: "frog_variant", 26: "pig_variant", 27: "chicken_variant", 28: "zombie_nautilus_variant", 29: "optional_global_pos", 3: "float", 30: "painting_variant", 31: "sniffer_state", 32: "armadillo_state", 33: "copper_golem_state", 34: "weathering_copper_golem_state", 35: "vector3", 36: "quaternion", 37: "resolvable_profile", 38: "humanoid_arm", 4: "string", 5: "component", 6: "optional_component", 7: "item_stack", 8: "boolean", 9: "rotations"}
-var EntityMetadataEntryValueMap = map[int32]string{0: "left", 1: "right"}
+var EntityMetadataEntryValueHumanoidArmTmpMap = map[int32]string{0: "left", 1: "right"}
 
 func (ret *EntityMetadataEntry) Decode(r io.Reader) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Key)
@@ -3626,12 +3626,12 @@ func (ret *EntityMetadataEntry) Decode(r io.Reader) (err error) {
 		ret.Value = EntityMetadataEntryValueFrogVariantTmp
 	case "humanoid_arm":
 		var EntityMetadataEntryValueHumanoidArmTmp string
-		var EntityMetadataEntryValueKey int32
-		EntityMetadataEntryValueKey, err = proto_base.DecodeVarInt(r)
+		var EntityMetadataEntryValueHumanoidArmTmpKey int32
+		EntityMetadataEntryValueHumanoidArmTmpKey, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		EntityMetadataEntryValueHumanoidArmTmp, err = proto_base.ErroringIndex(EntityMetadataEntryValueMap, EntityMetadataEntryValueKey)
+		EntityMetadataEntryValueHumanoidArmTmp, err = proto_base.ErroringIndex(EntityMetadataEntryValueHumanoidArmTmpMap, EntityMetadataEntryValueHumanoidArmTmpKey)
 		if err != nil {
 			return
 		}
@@ -3659,18 +3659,18 @@ func (ret *EntityMetadataEntry) Decode(r io.Reader) (err error) {
 		ret.Value = EntityMetadataEntryValueLongTmp
 	case "optional_block_pos":
 		var EntityMetadataEntryValueOptionalBlockPosTmp *Position
-		var EntityMetadataEntryValuePresent bool
-		err = binary.Read(r, binary.BigEndian, &EntityMetadataEntryValuePresent)
+		var EntityMetadataEntryValueOptionalBlockPosTmpPresent bool
+		err = binary.Read(r, binary.BigEndian, &EntityMetadataEntryValueOptionalBlockPosTmpPresent)
 		if err != nil {
 			return
 		}
-		if EntityMetadataEntryValuePresent {
-			var EntityMetadataEntryValuePresentValue Position
-			err = EntityMetadataEntryValuePresentValue.Decode(r)
+		if EntityMetadataEntryValueOptionalBlockPosTmpPresent {
+			var EntityMetadataEntryValueOptionalBlockPosTmpPresentValue Position
+			err = EntityMetadataEntryValueOptionalBlockPosTmpPresentValue.Decode(r)
 			if err != nil {
 				return
 			}
-			EntityMetadataEntryValueOptionalBlockPosTmp = &EntityMetadataEntryValuePresentValue
+			EntityMetadataEntryValueOptionalBlockPosTmp = &EntityMetadataEntryValueOptionalBlockPosTmpPresentValue
 		}
 		ret.Value = EntityMetadataEntryValueOptionalBlockPosTmp
 	case "optional_block_state":
@@ -3682,34 +3682,34 @@ func (ret *EntityMetadataEntry) Decode(r io.Reader) (err error) {
 		ret.Value = EntityMetadataEntryValueOptionalBlockStateTmp
 	case "optional_component":
 		var EntityMetadataEntryValueOptionalComponentTmp *nbt.Anon
-		var EntityMetadataEntryValuePresent bool
-		err = binary.Read(r, binary.BigEndian, &EntityMetadataEntryValuePresent)
+		var EntityMetadataEntryValueOptionalComponentTmpPresent bool
+		err = binary.Read(r, binary.BigEndian, &EntityMetadataEntryValueOptionalComponentTmpPresent)
 		if err != nil {
 			return
 		}
-		if EntityMetadataEntryValuePresent {
-			var EntityMetadataEntryValuePresentValue nbt.Anon
-			err = EntityMetadataEntryValuePresentValue.Decode(r)
+		if EntityMetadataEntryValueOptionalComponentTmpPresent {
+			var EntityMetadataEntryValueOptionalComponentTmpPresentValue nbt.Anon
+			err = EntityMetadataEntryValueOptionalComponentTmpPresentValue.Decode(r)
 			if err != nil {
 				return
 			}
-			EntityMetadataEntryValueOptionalComponentTmp = &EntityMetadataEntryValuePresentValue
+			EntityMetadataEntryValueOptionalComponentTmp = &EntityMetadataEntryValueOptionalComponentTmpPresentValue
 		}
 		ret.Value = EntityMetadataEntryValueOptionalComponentTmp
 	case "optional_global_pos":
 		var EntityMetadataEntryValueOptionalGlobalPosTmp *GlobalPos
-		var EntityMetadataEntryValuePresent bool
-		err = binary.Read(r, binary.BigEndian, &EntityMetadataEntryValuePresent)
+		var EntityMetadataEntryValueOptionalGlobalPosTmpPresent bool
+		err = binary.Read(r, binary.BigEndian, &EntityMetadataEntryValueOptionalGlobalPosTmpPresent)
 		if err != nil {
 			return
 		}
-		if EntityMetadataEntryValuePresent {
-			var EntityMetadataEntryValuePresentValue GlobalPos
-			err = EntityMetadataEntryValuePresentValue.Decode(r)
+		if EntityMetadataEntryValueOptionalGlobalPosTmpPresent {
+			var EntityMetadataEntryValueOptionalGlobalPosTmpPresentValue GlobalPos
+			err = EntityMetadataEntryValueOptionalGlobalPosTmpPresentValue.Decode(r)
 			if err != nil {
 				return
 			}
-			EntityMetadataEntryValueOptionalGlobalPosTmp = &EntityMetadataEntryValuePresentValue
+			EntityMetadataEntryValueOptionalGlobalPosTmp = &EntityMetadataEntryValueOptionalGlobalPosTmpPresentValue
 		}
 		ret.Value = EntityMetadataEntryValueOptionalGlobalPosTmp
 	case "optional_unsigned_int":
@@ -3721,36 +3721,36 @@ func (ret *EntityMetadataEntry) Decode(r io.Reader) (err error) {
 		ret.Value = EntityMetadataEntryValueOptionalUnsignedIntTmp
 	case "optional_uuid":
 		var EntityMetadataEntryValueOptionalUuidTmp *uuid.UUID
-		var EntityMetadataEntryValuePresent bool
-		err = binary.Read(r, binary.BigEndian, &EntityMetadataEntryValuePresent)
+		var EntityMetadataEntryValueOptionalUuidTmpPresent bool
+		err = binary.Read(r, binary.BigEndian, &EntityMetadataEntryValueOptionalUuidTmpPresent)
 		if err != nil {
 			return
 		}
-		if EntityMetadataEntryValuePresent {
-			var EntityMetadataEntryValuePresentValue uuid.UUID
-			_, err = io.ReadFull(r, EntityMetadataEntryValuePresentValue[:])
+		if EntityMetadataEntryValueOptionalUuidTmpPresent {
+			var EntityMetadataEntryValueOptionalUuidTmpPresentValue uuid.UUID
+			_, err = io.ReadFull(r, EntityMetadataEntryValueOptionalUuidTmpPresentValue[:])
 			if err != nil {
 				return
 			}
-			EntityMetadataEntryValueOptionalUuidTmp = &EntityMetadataEntryValuePresentValue
+			EntityMetadataEntryValueOptionalUuidTmp = &EntityMetadataEntryValueOptionalUuidTmpPresentValue
 		}
 		ret.Value = EntityMetadataEntryValueOptionalUuidTmp
 	case "painting_variant":
 		var EntityMetadataEntryValuePaintingVariantTmp any
-		var EntityMetadataEntryValueId int32
-		EntityMetadataEntryValueId, err = proto_base.DecodeVarInt(r)
+		var EntityMetadataEntryValuePaintingVariantTmpId int32
+		EntityMetadataEntryValuePaintingVariantTmpId, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		if EntityMetadataEntryValueId != 0 {
-			EntityMetadataEntryValuePaintingVariantTmp = EntityMetadataEntryValueId
+		if EntityMetadataEntryValuePaintingVariantTmpId != 0 {
+			EntityMetadataEntryValuePaintingVariantTmp = EntityMetadataEntryValuePaintingVariantTmpId
 		} else {
-			var EntityMetadataEntryValueResult EntityMetadataPaintingVariant
-			err = EntityMetadataEntryValueResult.Decode(r)
+			var EntityMetadataEntryValuePaintingVariantTmpResult EntityMetadataPaintingVariant
+			err = EntityMetadataEntryValuePaintingVariantTmpResult.Decode(r)
 			if err != nil {
 				return
 			}
-			EntityMetadataEntryValuePaintingVariantTmp = EntityMetadataEntryValueResult
+			EntityMetadataEntryValuePaintingVariantTmp = EntityMetadataEntryValuePaintingVariantTmpResult
 		}
 		ret.Value = EntityMetadataEntryValuePaintingVariantTmp
 	case "particle":
@@ -3762,19 +3762,19 @@ func (ret *EntityMetadataEntry) Decode(r io.Reader) (err error) {
 		ret.Value = EntityMetadataEntryValueParticleTmp
 	case "particles":
 		var EntityMetadataEntryValueParticlesTmp []Particle
-		var lEntityMetadataEntryValue int32
-		lEntityMetadataEntryValue, err = proto_base.DecodeVarInt(r)
+		var lEntityMetadataEntryValueParticlesTmp int32
+		lEntityMetadataEntryValueParticlesTmp, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		EntityMetadataEntryValueParticlesTmp = []Particle{}
-		for range lEntityMetadataEntryValue {
-			var EntityMetadataEntryValueElement Particle
-			err = EntityMetadataEntryValueElement.Decode(r)
+		for range lEntityMetadataEntryValueParticlesTmp {
+			var EntityMetadataEntryValueParticlesTmpElement Particle
+			err = EntityMetadataEntryValueParticlesTmpElement.Decode(r)
 			if err != nil {
 				return
 			}
-			EntityMetadataEntryValueParticlesTmp = append(EntityMetadataEntryValueParticlesTmp, EntityMetadataEntryValueElement)
+			EntityMetadataEntryValueParticlesTmp = append(EntityMetadataEntryValueParticlesTmp, EntityMetadataEntryValueParticlesTmpElement)
 		}
 		ret.Value = EntityMetadataEntryValueParticlesTmp
 	case "pig_variant":
@@ -10635,19 +10635,19 @@ func (ret *PlayToClientRecipeDisplay) Decode(r io.Reader) (err error) {
 		if err != nil {
 			return
 		}
-		var lPlayToClientRecipeDisplayDataIngredients int32
-		lPlayToClientRecipeDisplayDataIngredients, err = proto_base.DecodeVarInt(r)
+		var lPlayToClientRecipeDisplayDataCraftingShapedTmpIngredients int32
+		lPlayToClientRecipeDisplayDataCraftingShapedTmpIngredients, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients = []PlayToClientSlotDisplay{}
-		for range lPlayToClientRecipeDisplayDataIngredients {
-			var PlayToClientRecipeDisplayDataIngredientsElement PlayToClientSlotDisplay
-			err = PlayToClientRecipeDisplayDataIngredientsElement.Decode(r)
+		for range lPlayToClientRecipeDisplayDataCraftingShapedTmpIngredients {
+			var PlayToClientRecipeDisplayDataCraftingShapedTmpIngredientsElement PlayToClientSlotDisplay
+			err = PlayToClientRecipeDisplayDataCraftingShapedTmpIngredientsElement.Decode(r)
 			if err != nil {
 				return
 			}
-			PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients = append(PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients, PlayToClientRecipeDisplayDataIngredientsElement)
+			PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients = append(PlayToClientRecipeDisplayDataCraftingShapedTmp.Ingredients, PlayToClientRecipeDisplayDataCraftingShapedTmpIngredientsElement)
 		}
 		err = PlayToClientRecipeDisplayDataCraftingShapedTmp.Result.Decode(r)
 		if err != nil {
@@ -10664,19 +10664,19 @@ func (ret *PlayToClientRecipeDisplay) Decode(r io.Reader) (err error) {
 			Result          PlayToClientSlotDisplay
 			CraftingStation PlayToClientSlotDisplay
 		}
-		var lPlayToClientRecipeDisplayDataIngredients int32
-		lPlayToClientRecipeDisplayDataIngredients, err = proto_base.DecodeVarInt(r)
+		var lPlayToClientRecipeDisplayDataCraftingShapelessTmpIngredients int32
+		lPlayToClientRecipeDisplayDataCraftingShapelessTmpIngredients, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients = []PlayToClientSlotDisplay{}
-		for range lPlayToClientRecipeDisplayDataIngredients {
-			var PlayToClientRecipeDisplayDataIngredientsElement PlayToClientSlotDisplay
-			err = PlayToClientRecipeDisplayDataIngredientsElement.Decode(r)
+		for range lPlayToClientRecipeDisplayDataCraftingShapelessTmpIngredients {
+			var PlayToClientRecipeDisplayDataCraftingShapelessTmpIngredientsElement PlayToClientSlotDisplay
+			err = PlayToClientRecipeDisplayDataCraftingShapelessTmpIngredientsElement.Decode(r)
 			if err != nil {
 				return
 			}
-			PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients = append(PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients, PlayToClientRecipeDisplayDataIngredientsElement)
+			PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients = append(PlayToClientRecipeDisplayDataCraftingShapelessTmp.Ingredients, PlayToClientRecipeDisplayDataCraftingShapelessTmpIngredientsElement)
 		}
 		err = PlayToClientRecipeDisplayDataCraftingShapelessTmp.Result.Decode(r)
 		if err != nil {
@@ -10971,19 +10971,19 @@ func (ret *PlayToClientSlotDisplay) Decode(r io.Reader) (err error) {
 		ret.Data = PlayToClientSlotDisplayDataAnyFuelTmp
 	case "composite":
 		var PlayToClientSlotDisplayDataCompositeTmp []PlayToClientSlotDisplay
-		var lPlayToClientSlotDisplayData int32
-		lPlayToClientSlotDisplayData, err = proto_base.DecodeVarInt(r)
+		var lPlayToClientSlotDisplayDataCompositeTmp int32
+		lPlayToClientSlotDisplayDataCompositeTmp, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		PlayToClientSlotDisplayDataCompositeTmp = []PlayToClientSlotDisplay{}
-		for range lPlayToClientSlotDisplayData {
-			var PlayToClientSlotDisplayDataElement PlayToClientSlotDisplay
-			err = PlayToClientSlotDisplayDataElement.Decode(r)
+		for range lPlayToClientSlotDisplayDataCompositeTmp {
+			var PlayToClientSlotDisplayDataCompositeTmpElement PlayToClientSlotDisplay
+			err = PlayToClientSlotDisplayDataCompositeTmpElement.Decode(r)
 			if err != nil {
 				return
 			}
-			PlayToClientSlotDisplayDataCompositeTmp = append(PlayToClientSlotDisplayDataCompositeTmp, PlayToClientSlotDisplayDataElement)
+			PlayToClientSlotDisplayDataCompositeTmp = append(PlayToClientSlotDisplayDataCompositeTmp, PlayToClientSlotDisplayDataCompositeTmpElement)
 		}
 		ret.Data = PlayToClientSlotDisplayDataCompositeTmp
 	case "empty":
@@ -11018,20 +11018,20 @@ func (ret *PlayToClientSlotDisplay) Decode(r io.Reader) (err error) {
 		if err != nil {
 			return
 		}
-		var PlayToClientSlotDisplayDataPatternId int32
-		PlayToClientSlotDisplayDataPatternId, err = proto_base.DecodeVarInt(r)
+		var PlayToClientSlotDisplayDataSmithingTrimTmpPatternId int32
+		PlayToClientSlotDisplayDataSmithingTrimTmpPatternId, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		if PlayToClientSlotDisplayDataPatternId != 0 {
-			PlayToClientSlotDisplayDataSmithingTrimTmp.Pattern = PlayToClientSlotDisplayDataPatternId
+		if PlayToClientSlotDisplayDataSmithingTrimTmpPatternId != 0 {
+			PlayToClientSlotDisplayDataSmithingTrimTmp.Pattern = PlayToClientSlotDisplayDataSmithingTrimTmpPatternId
 		} else {
-			var PlayToClientSlotDisplayDataPatternResult ArmorTrimPattern
-			err = PlayToClientSlotDisplayDataPatternResult.Decode(r)
+			var PlayToClientSlotDisplayDataSmithingTrimTmpPatternResult ArmorTrimPattern
+			err = PlayToClientSlotDisplayDataSmithingTrimTmpPatternResult.Decode(r)
 			if err != nil {
 				return
 			}
-			PlayToClientSlotDisplayDataSmithingTrimTmp.Pattern = PlayToClientSlotDisplayDataPatternResult
+			PlayToClientSlotDisplayDataSmithingTrimTmp.Pattern = PlayToClientSlotDisplayDataSmithingTrimTmpPatternResult
 		}
 		ret.Data = PlayToClientSlotDisplayDataSmithingTrimTmp
 	case "tag":
@@ -18380,19 +18380,19 @@ func (ret *PlayToClientPacketPlayerChat) Decode(r io.Reader) (err error) {
 	switch ret.FilterType {
 	case 2:
 		var PlayToClientPacketPlayerChatFilterTypeMask2Tmp []int64
-		var lPlayToClientPacketPlayerChatFilterTypeMask int32
-		lPlayToClientPacketPlayerChatFilterTypeMask, err = proto_base.DecodeVarInt(r)
+		var lPlayToClientPacketPlayerChatFilterTypeMask2Tmp int32
+		lPlayToClientPacketPlayerChatFilterTypeMask2Tmp, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		PlayToClientPacketPlayerChatFilterTypeMask2Tmp = []int64{}
-		for range lPlayToClientPacketPlayerChatFilterTypeMask {
-			var PlayToClientPacketPlayerChatFilterTypeMaskElement int64
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatFilterTypeMaskElement)
+		for range lPlayToClientPacketPlayerChatFilterTypeMask2Tmp {
+			var PlayToClientPacketPlayerChatFilterTypeMask2TmpElement int64
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerChatFilterTypeMask2TmpElement)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketPlayerChatFilterTypeMask2Tmp = append(PlayToClientPacketPlayerChatFilterTypeMask2Tmp, PlayToClientPacketPlayerChatFilterTypeMaskElement)
+			PlayToClientPacketPlayerChatFilterTypeMask2Tmp = append(PlayToClientPacketPlayerChatFilterTypeMask2Tmp, PlayToClientPacketPlayerChatFilterTypeMask2TmpElement)
 		}
 		ret.FilterTypeMask = PlayToClientPacketPlayerChatFilterTypeMask2Tmp
 	default:
@@ -18643,18 +18643,18 @@ func (ret *PlayToClientPacketPlayerInfo) Decode(r io.Reader) (err error) {
 		switch ret.Action&0x20 != 0 {
 		case true:
 			var PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp *nbt.Anon
-			var PlayToClientPacketPlayerInfoDataElementDisplayNamePresent bool
-			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerInfoDataElementDisplayNamePresent)
+			var PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmpPresent bool
+			err = binary.Read(r, binary.BigEndian, &PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmpPresent)
 			if err != nil {
 				return
 			}
-			if PlayToClientPacketPlayerInfoDataElementDisplayNamePresent {
-				var PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue nbt.Anon
-				err = PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue.Decode(r)
+			if PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmpPresent {
+				var PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmpPresentValue nbt.Anon
+				err = PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmpPresentValue.Decode(r)
 				if err != nil {
 					return
 				}
-				PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp = &PlayToClientPacketPlayerInfoDataElementDisplayNamePresentValue
+				PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp = &PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmpPresentValue
 			}
 			PlayToClientPacketPlayerInfoDataElement.DisplayName = PlayToClientPacketPlayerInfoDataElementDisplayNameTrueTmp
 		default:
@@ -19619,34 +19619,34 @@ func (ret *PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (err error
 	switch ret.Action {
 	case 0:
 		var PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp *int32
-		var PlayToClientPacketScoreboardObjectiveNumberFormatPresent bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormatPresent)
+		var PlayToClientPacketScoreboardObjectiveNumberFormat0TmpPresent bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormat0TmpPresent)
 		if err != nil {
 			return
 		}
-		if PlayToClientPacketScoreboardObjectiveNumberFormatPresent {
-			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue int32
-			PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue, err = proto_base.DecodeVarInt(r)
+		if PlayToClientPacketScoreboardObjectiveNumberFormat0TmpPresent {
+			var PlayToClientPacketScoreboardObjectiveNumberFormat0TmpPresentValue int32
+			PlayToClientPacketScoreboardObjectiveNumberFormat0TmpPresentValue, err = proto_base.DecodeVarInt(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp = &PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue
+			PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp = &PlayToClientPacketScoreboardObjectiveNumberFormat0TmpPresentValue
 		}
 		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormat0Tmp
 	case 2:
 		var PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp *int32
-		var PlayToClientPacketScoreboardObjectiveNumberFormatPresent bool
-		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormatPresent)
+		var PlayToClientPacketScoreboardObjectiveNumberFormat2TmpPresent bool
+		err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardObjectiveNumberFormat2TmpPresent)
 		if err != nil {
 			return
 		}
-		if PlayToClientPacketScoreboardObjectiveNumberFormatPresent {
-			var PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue int32
-			PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue, err = proto_base.DecodeVarInt(r)
+		if PlayToClientPacketScoreboardObjectiveNumberFormat2TmpPresent {
+			var PlayToClientPacketScoreboardObjectiveNumberFormat2TmpPresentValue int32
+			PlayToClientPacketScoreboardObjectiveNumberFormat2TmpPresentValue, err = proto_base.DecodeVarInt(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp = &PlayToClientPacketScoreboardObjectiveNumberFormatPresentValue
+			PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp = &PlayToClientPacketScoreboardObjectiveNumberFormat2TmpPresentValue
 		}
 		ret.NumberFormat = PlayToClientPacketScoreboardObjectiveNumberFormat2Tmp
 	default:
@@ -19659,46 +19659,46 @@ func (ret *PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (err error
 		var PlayToClientPacketScoreboardObjectiveStyling0Tmp any
 		switch ret.NumberFormat {
 		case 1:
-			var PlayToClientPacketScoreboardObjectiveStyling1Tmp nbt.Anon
-			err = PlayToClientPacketScoreboardObjectiveStyling1Tmp.Decode(r)
+			var PlayToClientPacketScoreboardObjectiveStyling0Tmp1Tmp nbt.Anon
+			err = PlayToClientPacketScoreboardObjectiveStyling0Tmp1Tmp.Decode(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling1Tmp
+			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling0Tmp1Tmp
 		case 2:
-			var PlayToClientPacketScoreboardObjectiveStyling2Tmp nbt.Anon
-			err = PlayToClientPacketScoreboardObjectiveStyling2Tmp.Decode(r)
+			var PlayToClientPacketScoreboardObjectiveStyling0Tmp2Tmp nbt.Anon
+			err = PlayToClientPacketScoreboardObjectiveStyling0Tmp2Tmp.Decode(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling2Tmp
+			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling0Tmp2Tmp
 		default:
-			var PlayToClientPacketScoreboardObjectiveStylingTmp struct {
+			var PlayToClientPacketScoreboardObjectiveStyling0TmpTmp struct {
 			}
-			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStylingTmp
+			PlayToClientPacketScoreboardObjectiveStyling0Tmp = PlayToClientPacketScoreboardObjectiveStyling0TmpTmp
 		}
 		ret.Styling = PlayToClientPacketScoreboardObjectiveStyling0Tmp
 	case 2:
 		var PlayToClientPacketScoreboardObjectiveStyling2Tmp any
 		switch ret.NumberFormat {
 		case 1:
-			var PlayToClientPacketScoreboardObjectiveStyling1Tmp nbt.Anon
-			err = PlayToClientPacketScoreboardObjectiveStyling1Tmp.Decode(r)
+			var PlayToClientPacketScoreboardObjectiveStyling2Tmp1Tmp nbt.Anon
+			err = PlayToClientPacketScoreboardObjectiveStyling2Tmp1Tmp.Decode(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling1Tmp
+			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling2Tmp1Tmp
 		case 2:
-			var PlayToClientPacketScoreboardObjectiveStyling2Tmp nbt.Anon
-			err = PlayToClientPacketScoreboardObjectiveStyling2Tmp.Decode(r)
+			var PlayToClientPacketScoreboardObjectiveStyling2Tmp2Tmp nbt.Anon
+			err = PlayToClientPacketScoreboardObjectiveStyling2Tmp2Tmp.Decode(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling2Tmp
+			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling2Tmp2Tmp
 		default:
-			var PlayToClientPacketScoreboardObjectiveStylingTmp struct {
+			var PlayToClientPacketScoreboardObjectiveStyling2TmpTmp struct {
 			}
-			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStylingTmp
+			PlayToClientPacketScoreboardObjectiveStyling2Tmp = PlayToClientPacketScoreboardObjectiveStyling2TmpTmp
 		}
 		ret.Styling = PlayToClientPacketScoreboardObjectiveStyling2Tmp
 	default:
@@ -21055,8 +21055,10 @@ type PlayToClientPacketTeams struct {
 }
 
 var PlayToClientPacketTeamsModeMap = map[int8]string{0: "add", 1: "remove", 2: "change", 3: "join", 4: "leave"}
-var PlayToClientPacketTeamsAnonNameTagVisibilityMap = map[int32]string{0: "always", 1: "never", 2: "hide_for_other_teams", 3: "hide_for_own_team"}
-var PlayToClientPacketTeamsAnonCollisionRuleMap = map[int32]string{0: "always", 1: "never", 2: "push_other_teams", 3: "push_own_team"}
+var PlayToClientPacketTeamsAnonAddTmpNameTagVisibilityMap = map[int32]string{0: "always", 1: "never", 2: "hide_for_other_teams", 3: "hide_for_own_team"}
+var PlayToClientPacketTeamsAnonAddTmpCollisionRuleMap = map[int32]string{0: "always", 1: "never", 2: "push_other_teams", 3: "push_own_team"}
+var PlayToClientPacketTeamsAnonChangeTmpNameTagVisibilityMap = map[int32]string{0: "always", 1: "never", 2: "hide_for_other_teams", 3: "hide_for_own_team"}
+var PlayToClientPacketTeamsAnonChangeTmpCollisionRuleMap = map[int32]string{0: "always", 1: "never", 2: "push_other_teams", 3: "push_own_team"}
 
 func (ret *PlayToClientPacketTeams) Decode(r io.Reader) (err error) {
 	ret.Team, err = proto_base.DecodeString(r)
@@ -21091,21 +21093,21 @@ func (ret *PlayToClientPacketTeams) Decode(r io.Reader) (err error) {
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketTeamsAnonNameTagVisibilityKey int32
-		PlayToClientPacketTeamsAnonNameTagVisibilityKey, err = proto_base.DecodeVarInt(r)
+		var PlayToClientPacketTeamsAnonAddTmpNameTagVisibilityKey int32
+		PlayToClientPacketTeamsAnonAddTmpNameTagVisibilityKey, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketTeamsAnonAddTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
+		PlayToClientPacketTeamsAnonAddTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonAddTmpNameTagVisibilityMap, PlayToClientPacketTeamsAnonAddTmpNameTagVisibilityKey)
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketTeamsAnonCollisionRuleKey int32
-		PlayToClientPacketTeamsAnonCollisionRuleKey, err = proto_base.DecodeVarInt(r)
+		var PlayToClientPacketTeamsAnonAddTmpCollisionRuleKey int32
+		PlayToClientPacketTeamsAnonAddTmpCollisionRuleKey, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketTeamsAnonAddTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
+		PlayToClientPacketTeamsAnonAddTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonAddTmpCollisionRuleMap, PlayToClientPacketTeamsAnonAddTmpCollisionRuleKey)
 		if err != nil {
 			return
 		}
@@ -21140,21 +21142,21 @@ func (ret *PlayToClientPacketTeams) Decode(r io.Reader) (err error) {
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketTeamsAnonNameTagVisibilityKey int32
-		PlayToClientPacketTeamsAnonNameTagVisibilityKey, err = proto_base.DecodeVarInt(r)
+		var PlayToClientPacketTeamsAnonChangeTmpNameTagVisibilityKey int32
+		PlayToClientPacketTeamsAnonChangeTmpNameTagVisibilityKey, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketTeamsAnonChangeTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonNameTagVisibilityMap, PlayToClientPacketTeamsAnonNameTagVisibilityKey)
+		PlayToClientPacketTeamsAnonChangeTmp.NameTagVisibility, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonChangeTmpNameTagVisibilityMap, PlayToClientPacketTeamsAnonChangeTmpNameTagVisibilityKey)
 		if err != nil {
 			return
 		}
-		var PlayToClientPacketTeamsAnonCollisionRuleKey int32
-		PlayToClientPacketTeamsAnonCollisionRuleKey, err = proto_base.DecodeVarInt(r)
+		var PlayToClientPacketTeamsAnonChangeTmpCollisionRuleKey int32
+		PlayToClientPacketTeamsAnonChangeTmpCollisionRuleKey, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
-		PlayToClientPacketTeamsAnonChangeTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonCollisionRuleMap, PlayToClientPacketTeamsAnonCollisionRuleKey)
+		PlayToClientPacketTeamsAnonChangeTmp.CollisionRule, err = proto_base.ErroringIndex(PlayToClientPacketTeamsAnonChangeTmpCollisionRuleMap, PlayToClientPacketTeamsAnonChangeTmpCollisionRuleKey)
 		if err != nil {
 			return
 		}
@@ -21179,53 +21181,53 @@ func (ret *PlayToClientPacketTeams) Decode(r io.Reader) (err error) {
 	switch ret.Mode {
 	case "add":
 		var PlayToClientPacketTeamsPlayersAddTmp []string
-		var lPlayToClientPacketTeamsPlayers int32
-		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
+		var lPlayToClientPacketTeamsPlayersAddTmp int32
+		lPlayToClientPacketTeamsPlayersAddTmp, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		PlayToClientPacketTeamsPlayersAddTmp = []string{}
-		for range lPlayToClientPacketTeamsPlayers {
-			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
+		for range lPlayToClientPacketTeamsPlayersAddTmp {
+			var PlayToClientPacketTeamsPlayersAddTmpElement string
+			PlayToClientPacketTeamsPlayersAddTmpElement, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketTeamsPlayersAddTmp = append(PlayToClientPacketTeamsPlayersAddTmp, PlayToClientPacketTeamsPlayersElement)
+			PlayToClientPacketTeamsPlayersAddTmp = append(PlayToClientPacketTeamsPlayersAddTmp, PlayToClientPacketTeamsPlayersAddTmpElement)
 		}
 		ret.Players = PlayToClientPacketTeamsPlayersAddTmp
 	case "join":
 		var PlayToClientPacketTeamsPlayersJoinTmp []string
-		var lPlayToClientPacketTeamsPlayers int32
-		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
+		var lPlayToClientPacketTeamsPlayersJoinTmp int32
+		lPlayToClientPacketTeamsPlayersJoinTmp, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		PlayToClientPacketTeamsPlayersJoinTmp = []string{}
-		for range lPlayToClientPacketTeamsPlayers {
-			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
+		for range lPlayToClientPacketTeamsPlayersJoinTmp {
+			var PlayToClientPacketTeamsPlayersJoinTmpElement string
+			PlayToClientPacketTeamsPlayersJoinTmpElement, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketTeamsPlayersJoinTmp = append(PlayToClientPacketTeamsPlayersJoinTmp, PlayToClientPacketTeamsPlayersElement)
+			PlayToClientPacketTeamsPlayersJoinTmp = append(PlayToClientPacketTeamsPlayersJoinTmp, PlayToClientPacketTeamsPlayersJoinTmpElement)
 		}
 		ret.Players = PlayToClientPacketTeamsPlayersJoinTmp
 	case "leave":
 		var PlayToClientPacketTeamsPlayersLeaveTmp []string
-		var lPlayToClientPacketTeamsPlayers int32
-		lPlayToClientPacketTeamsPlayers, err = proto_base.DecodeVarInt(r)
+		var lPlayToClientPacketTeamsPlayersLeaveTmp int32
+		lPlayToClientPacketTeamsPlayersLeaveTmp, err = proto_base.DecodeVarInt(r)
 		if err != nil {
 			return
 		}
 		PlayToClientPacketTeamsPlayersLeaveTmp = []string{}
-		for range lPlayToClientPacketTeamsPlayers {
-			var PlayToClientPacketTeamsPlayersElement string
-			PlayToClientPacketTeamsPlayersElement, err = proto_base.DecodeString(r)
+		for range lPlayToClientPacketTeamsPlayersLeaveTmp {
+			var PlayToClientPacketTeamsPlayersLeaveTmpElement string
+			PlayToClientPacketTeamsPlayersLeaveTmpElement, err = proto_base.DecodeString(r)
 			if err != nil {
 				return
 			}
-			PlayToClientPacketTeamsPlayersLeaveTmp = append(PlayToClientPacketTeamsPlayersLeaveTmp, PlayToClientPacketTeamsPlayersElement)
+			PlayToClientPacketTeamsPlayersLeaveTmp = append(PlayToClientPacketTeamsPlayersLeaveTmp, PlayToClientPacketTeamsPlayersLeaveTmpElement)
 		}
 		ret.Players = PlayToClientPacketTeamsPlayersLeaveTmp
 	default:

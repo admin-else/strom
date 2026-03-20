@@ -115,6 +115,7 @@ func SaveUnCodeAbleAsTest(d proto_base.Direction, packet *proto.UnCodablePacket)
 	if err != nil {
 		panic(err)
 	}
+
 	//goland:noinspection GoUnhandledErrorResult
 	defer f.Close()
 	_, err = fmt.Fprintf(f, TestSrcF, packet.Err, h, d.Opposite(), packet.Data)
@@ -130,7 +131,7 @@ var StatusResponse = server.StatusResponse{
 		Protocol: 772,
 	},
 	Players:            server.StatusResponsePlayers{},
-	Description:        text.Pretty("Hunt the uncodeable packets"),
+	Description:        text.Pretty("Hunt the un-code-able packets"),
 	Favicon:            "",
 	EnforcesSecureChat: false,
 }

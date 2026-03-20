@@ -263,7 +263,7 @@ func SwitchDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 		s1 := VarStmt(tName, tType)
 		s3 := Assign121(varToSet, Ident(tName))
 		var caseDecodeValueStmts []ast.Stmt
-		caseDecodeValueStmts, err = g.VisitDecoder(Ident(tName), fType, name)
+		caseDecodeValueStmts, err = g.VisitDecoder(Ident(tName), fType, tName)
 		if err != nil {
 			return
 		}
@@ -381,7 +381,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	for _, field := range data {
 		totalSize += field.Size
 	}
-	packedTypeProtodef, err := BitSizeToUnsignedProtodefName(totalSize)
+	packedTypeProtodef, err := BitSizeToProtodef(totalSize, false)
 	if err != nil {
 		return
 	}
@@ -400,11 +400,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	lShiftBy := 0
 	for _, field := range data {
 		var fieldTypeProtodef string
-		if field.Singed {
-			fieldTypeProtodef, err = BitSizeToSignedProtodefName(field.Size)
-		} else {
-			fieldTypeProtodef, err = BitSizeToUnsignedProtodefName(field.Size)
-		}
+		fieldTypeProtodef, err = BitSizeToProtodef(field.Size, field.Signed)
 		if err != nil {
 			return
 		}
@@ -431,7 +427,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 		}
 
 		s = append(s, Assign121(fieldToSet, getDataExpr))
-		if field.Singed {
+		if field.Signed {
 			s = append(s, If(
 				GreaterThanOrEqual(
 					fieldToSet,

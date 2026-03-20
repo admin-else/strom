@@ -3,7 +3,7 @@ package protodef
 type (
 	BitFieldEntry struct {
 		Name   string
-		Singed bool
+		Signed bool
 		Size   int
 	}
 
