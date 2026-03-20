@@ -16458,30 +16458,15 @@ func (ret *PlayToClientPacketEntityUpdateAttributes) Encode(w io.Writer) (err er
 }
 
 type PlayToClientPacketEntityVelocity struct {
-	EntityId int32
-	Velocity proto_base.LpVec3d
+	Val proto_base.ToDo
 }
 
 func (ret *PlayToClientPacketEntityVelocity) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = ret.Velocity.Decode(r)
-	if err != nil {
-		return
-	}
+	err = proto_base.ToDoError
 	return
 }
 func (ret *PlayToClientPacketEntityVelocity) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	err = ret.Velocity.Encode(w)
-	if err != nil {
-		return
-	}
+	err = proto_base.ToDoError
 	return
 }
 
@@ -20258,111 +20243,15 @@ func (ret *PlayToClientPacketSoundEffect) Encode(w io.Writer) (err error) {
 }
 
 type PlayToClientPacketSpawnEntity struct {
-	EntityId   int32
-	ObjectUUID uuid.UUID
-	Type       int32
-	X          float64
-	Y          float64
-	Z          float64
-	Velocity   proto_base.LpVec3d
-	Pitch      int8
-	Yaw        int8
-	HeadPitch  int8
-	ObjectData int32
+	Val proto_base.ToDo
 }
 
 func (ret *PlayToClientPacketSpawnEntity) Decode(r io.Reader) (err error) {
-	ret.EntityId, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	_, err = io.ReadFull(r, ret.ObjectUUID[:])
-	if err != nil {
-		return
-	}
-	ret.Type, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Z)
-	if err != nil {
-		return
-	}
-	err = ret.Velocity.Decode(r)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Read(r, binary.BigEndian, &ret.HeadPitch)
-	if err != nil {
-		return
-	}
-	ret.ObjectData, err = proto_base.DecodeVarInt(r)
-	if err != nil {
-		return
-	}
+	err = proto_base.ToDoError
 	return
 }
 func (ret *PlayToClientPacketSpawnEntity) Encode(w io.Writer) (err error) {
-	err = proto_base.EncodeVarInt(w, ret.EntityId)
-	if err != nil {
-		return
-	}
-	_, err = w.Write(ret.ObjectUUID[:])
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.Type)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.X)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Y)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Z)
-	if err != nil {
-		return
-	}
-	err = ret.Velocity.Encode(w)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Pitch)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.Yaw)
-	if err != nil {
-		return
-	}
-	err = binary.Write(w, binary.BigEndian, ret.HeadPitch)
-	if err != nil {
-		return
-	}
-	err = proto_base.EncodeVarInt(w, ret.ObjectData)
-	if err != nil {
-		return
-	}
+	err = proto_base.ToDoError
 	return
 }
 

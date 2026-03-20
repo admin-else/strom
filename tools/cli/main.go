@@ -28,21 +28,24 @@ func Help(args []string) (err error) {
 }
 
 func mainE() (err error) {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	subcommands["help"] = Help // this is here because if it isn't tools/cli/main.go:17:5: initialization cycle for subcommands
 	//	tools/cli/main.go:17:5: subcommands refers to Help
 	//	tools/cli/main.go:22:6: Help refers to subcommands
+	args := os.Args
+	args = []string{"TEST", "status", "-addr", "tcpshield.1f2d.net:25565"}
 
-	if len(os.Args) < 2 {
+	if len(args) < 2 {
 		err = ExpectedASubcommandErr
 		return
 	}
 
-	f, ok := subcommands[os.Args[1]]
+	f, ok := subcommands[args[1]]
 	if !ok {
 		err = UnknownSubcommandErr
 		return
 	}
-	err = f(os.Args[2:])
+	err = f(args[2:])
 	return
 }
 

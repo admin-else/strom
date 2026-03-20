@@ -112,18 +112,6 @@ func (l *LoginServer) OnDefault(event event.Unhandled) (err error) {
 	return
 }
 
-func (l *LoginServer) OnStart() (err error) {
-	return
-}
-
-func (l *LoginServer) OnCycle(_ event.Tick) (err error) {
-	return
-}
-
-func (l *LoginServer) OnClose(_ event.Close) (err error) {
-	return
-}
-
 type LoginServerSetting func(*LoginServer)
 
 func WithOtherAccount(a *api.Account) LoginServerSetting {
@@ -170,10 +158,16 @@ func WithCompatibleVersions(versions ...int32) LoginServerSetting {
 
 func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
+	ret.RegisterCritical(ret.OnDefault)
+	ret.RegisterUntilLatest(ret.OnHandshake)
+	ret.RegisterUntilLatest(ret.OnLoginStart)
+	ret.RegisterUntilLatest(ret.OnLoginAcknowledged)
+	ret.RegisterUntilLatest(ret.OnStatusRequest)
+	ret.RegisterUntilLatest(ret.OnStatusPing)
 	for _, s := range settings {
 		s(ret)
 	}
 	ret.CompressionThreshold = 256
-	err = ret.Start(ret)
+	err = ret.Start()
 	return
 }

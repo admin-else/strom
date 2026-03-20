@@ -16,29 +16,21 @@ type StatusClient struct {
 	*proto.Conn
 	Status                        string
 	PingSendTime, PingReceiveTime time.Time
+	DoPingRoundTripTime           bool
 }
 
 func (s *StatusClient) OnStart() (err error) {
-	s.RegisterUntilLatest(s.OnStatus)
-	s.RegisterUntilLatest(s.OnPong)
-
-	p, err := MakeHandshakePacket(s.Conn, proto_base.Status)
-	if err != nil {
-		return
-	}
-	err = s.Send(p)
-	if err != nil {
-		return
-	}
-	s.SetState(proto_base.Status)
-	err = s.Send(&v1_21_8.StatusToServerPacketPingStart{})
 	return
 }
 
 func (s *StatusClient) OnStatus(p *v1_21_8.StatusToClientPacketServerInfo) (err error) {
 	s.Status = p.Response
 	s.PingSendTime = time.Now()
-	err = s.Send(&v1_21_8.StatusToServerPacketPing{Time: s.PingSendTime.UnixMilli()})
+	if s.DoPingRoundTripTime {
+		err = s.Send(&v1_21_8.StatusToServerPacketPing{Time: s.PingSendTime.UnixMilli()})
+	} else {
+		err = event.HandlerDoneErr{}
+	}
 	return
 }
 
@@ -63,7 +55,22 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 	s = &StatusClient{
 		Conn: c,
 	}
-	err = s.Start(s)
+	s.Loop = event.NewLoop()
+	s.RegisterUntilLatest(s.OnStatus)
+	s.RegisterUntilLatest(s.OnPong)
+
+	p, err := MakeHandshakePacket(s.Conn, proto_base.Status)
+	if err != nil {
+		return
+	}
+	err = s.Send(p)
+	if err != nil {
+		return
+	}
+	s.SetState(proto_base.Status)
+	err = s.Send(&v1_21_8.StatusToServerPacketPingStart{})
+
+	err = s.StartConn()
 	return
 }
 

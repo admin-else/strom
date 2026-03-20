@@ -48,14 +48,6 @@ type StatusServer struct {
 	Status string
 }
 
-func (p *StatusServer) OnStart() (err error) {
-	return
-}
-
-func (p *StatusServer) Default(_ any) (err error) {
-	return
-}
-
 func (p *StatusServer) OnStatusRequest(_ *v1_21_8.StatusToServerPacketPingStart) (err error) {
 	return p.Send(&v1_21_8.StatusToClientPacketServerInfo{Response: p.Status})
 }
@@ -73,6 +65,8 @@ func ServeStatus(c *proto.Conn, s StatusResponse) (err error) {
 		Conn:   c,
 		Status: string(status),
 	}
-	err = server.Start(server)
+	server.RegisterUntilLatest(server.OnStatusRequest)
+	server.RegisterUntilLatest(server.OnStatusPing)
+	err = server.Start()
 	return
 }

@@ -21,7 +21,7 @@ func (c *ConfigServer) Default(event event.Anything) (err error) {
 	return
 }
 
-func (c *ConfigServer) OnStart() (err error) {
+func ServeConfig(c *proto.Conn) (err error) {
 	n, err := data.LoadRegistry(c.Version)
 	if err != nil {
 		return
@@ -64,17 +64,12 @@ func (c *ConfigServer) OnStart() (err error) {
 		return
 	}
 	err = c.Send(&v1_21_8.ConfigurationToClientPacketFinishConfiguration{})
-	return
+	cs := &ConfigServer{c}
+	return cs.Start()
 }
 
 func (c *ConfigServer) OnFinishConfiguration(_ *v1_21_8.ConfigurationToServerPacketFinishConfiguration) (err error) {
 	c.SetState(proto_base.Play)
 	err = event.HandlerDoneErr{}
-	return
-}
-
-func ServeConfig(c *proto.Conn) (err error) {
-	cs := &ConfigServer{c}
-	err = cs.Start(cs)
 	return
 }

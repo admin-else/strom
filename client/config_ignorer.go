@@ -16,11 +16,6 @@ type ConfigIgnorer struct {
 }
 
 func (c *ConfigIgnorer) OnStart() (err error) {
-	c.RegisterCritical(c.Default)
-	c.RegisterUntilLatest(c.OnKnownPacks)
-	c.RegisterUntilLatest(c.OnFinish)
-	c.RegisterUntilLatest(c.OnPing)
-	c.RegisterUntilLatest(c.OnKeepAlive)
 	return
 }
 
@@ -54,7 +49,14 @@ func (c *ConfigIgnorer) OnKeepAlive(packet *v1_21_8.ConfigurationToClientPacketK
 }
 
 func IgnoreConfig(c *proto.Conn) (err error) {
-	err = c.Start(&ConfigIgnorer{c})
+	ci := &ConfigIgnorer{c}
+	ci.RegisterCritical(ci.Default)
+	ci.RegisterUntilLatest(ci.OnKnownPacks)
+	ci.RegisterUntilLatest(ci.OnFinish)
+	ci.RegisterUntilLatest(ci.OnPing)
+	ci.RegisterUntilLatest(ci.OnKeepAlive)
+
+	err = ci.Start()
 	if err != nil {
 		err = errors.Join(err, errors.New("failed to ignore config"))
 	}

@@ -54,14 +54,13 @@ type Conn struct {
 	Version         string
 	ProtocolVersion int32
 
-	handler        event.Handler
 	receiveRoutine bool
 	packetCh       chan proto_base.EncodeDecodeAble
 }
 
-func (c *Conn) OnStart() (err error) {
+func (c *Conn) StartConn() (err error) {
 	c.RegisterCritical(c.OnTick)
-	return c.handler.OnStart()
+	return c.Loop.Start()
 }
 
 func (c *Conn) ReceiveJob() {
@@ -235,10 +234,9 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 	return
 }
 
-func (c *Conn) Start(handler event.Handler) (err error) {
+func (c *Conn) Start() (err error) {
 	if c.Loop == nil {
 		c.Loop = &event.Loop{}
 	}
-	c.handler = handler
-	return c.Loop.Start(c)
+	return c.Loop.Start()
 }

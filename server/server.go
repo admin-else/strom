@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/text"
@@ -23,7 +22,9 @@ func Servee(c net.Conn) (ret *proto.Conn) {
 	return
 }
 
-type Factory func(c *proto.Conn) (h event.Handler, err error)
+type ConnAcceptor func(c net.Conn) (err error)
+
+type Factory func(c *proto.Conn) (h ConnAcceptor, err error)
 
 func ServeClient(cNet net.Conn, factory Factory) {
 	c := Servee(cNet)
@@ -32,7 +33,7 @@ func ServeClient(cNet net.Conn, factory Factory) {
 	if err != nil {
 		return
 	}
-	err = c.Start(h)
+	err = h(c)
 	if errors.Is(err, StatusServedErr) {
 		return
 	}

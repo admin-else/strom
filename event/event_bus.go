@@ -15,12 +15,8 @@ const (
 	TimePerLoop    = time.Second / LoopsPerSecond
 )
 
-type Handler interface {
-	OnStart() (err error)
-}
-
 type Loop struct {
-	handlerFunctions map[reflect.Type][]reflect.Value
+	HandlerFunctions map[reflect.Type][]reflect.Value
 
 	Ctx     context.Context
 	ErrChan chan error
@@ -105,13 +101,13 @@ func (l *Loop) RegisterCritical(h any) {
 }
 
 func (l *Loop) RegisterDirect(k reflect.Type, h reflect.Value) {
-	l.handlerFunctions[k] = append(l.handlerFunctions[k], h)
+	l.HandlerFunctions[k] = append(l.HandlerFunctions[k], h)
 }
 
 // FireFound triggers all handlers registered for the specified event type and returns if handlers were found or an error occurred.
 func (l *Loop) FireFound(event any) (found bool, err error) {
 	var handlers []reflect.Value
-	if handlers, found = l.handlerFunctions[reflect.TypeOf(event)]; found {
+	if handlers, found = l.HandlerFunctions[reflect.TypeOf(event)]; found {
 		for _, handler := range handlers {
 			errV := handler.Call([]reflect.Value{reflect.ValueOf(event)})[0]
 			if !errV.IsNil() {
@@ -143,11 +139,9 @@ func (l *Loop) Fire(event any) (err error) {
 	return
 }
 
-func (l *Loop) startLoop(handler Handler) (err error) {
+func (l *Loop) startLoop() (err error) {
 	_ = *l // exit early on nil loop
-	l.handlerFunctions = make(map[reflect.Type][]reflect.Value)
-	err = handler.OnStart()
-	for err == nil {
+	for {
 		tickStartTime := time.Now()
 		err = l.Fire(Tick{})
 		if err != nil {
@@ -165,13 +159,19 @@ func (l *Loop) startLoop(handler Handler) (err error) {
 	return
 }
 
-func (l *Loop) Start(handler Handler) (err error) {
-	l.ErrChan = make(chan error)
-	l.Ctx, l.cancel = context.WithCancel(context.Background())
+func (l *Loop) Start() (err error) {
 	go func() {
-		l.ErrChan <- l.startLoop(handler)
+		l.ErrChan <- l.startLoop()
 	}()
 	err = <-l.ErrChan
 	l.cancel()
+	return
+}
+
+func NewLoop() (l *Loop) {
+	l = &Loop{}
+	l.ErrChan = make(chan error)
+	l.Ctx, l.cancel = context.WithCancel(context.Background())
+	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
 	return
 }

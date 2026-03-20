@@ -124,37 +124,35 @@ func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (er
 }
 
 func (s *LoginClient) OnStart() (err error) {
-	s.RegisterCritical(s.OnDefault)
-	s.RegisterCritical(s.OnCycle)
-	s.RegisterCritical(s.OnClose)
-	s.RegisterUntilLatest(s.OnCompress)
-	s.RegisterUntilLatest(s.OnEncrypt)
-	s.RegisterUntilLatest(s.OnDisconnect)
-	s.RegisterUntilLatest(s.OnSuccess)
-
-	p, err := MakeHandshakePacket(s.Conn, proto_base.Login)
-	if err != nil {
-		return
-	}
-	if s.ServerHost == "" && s.ServerPort == 0 {
-		p.ServerHost = s.ServerHost
-		p.ServerPort = s.ServerPort
-	}
-
-	err = s.Send(p)
-	if err != nil {
-		return
-	}
-	s.SetState(proto_base.Login)
-	err = s.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: s.Account.Name, PlayerUUID: s.Account.Uuid})
 	return
 }
 
 func Login(c *proto.Conn, account *api.Account) (err error) {
-	err = c.Start(&LoginClient{
+	lc := &LoginClient{
 		Conn:    c,
 		Account: account,
-	})
+	}
+	lc.RegisterCritical(lc.OnDefault)
+	lc.RegisterCritical(lc.OnCycle)
+	lc.RegisterCritical(lc.OnClose)
+	lc.RegisterUntilLatest(lc.OnCompress)
+	lc.RegisterUntilLatest(lc.OnEncrypt)
+	lc.RegisterUntilLatest(lc.OnDisconnect)
+	lc.RegisterUntilLatest(lc.OnSuccess)
+
+	p, err := MakeHandshakePacket(lc.Conn, proto_base.Login)
+	if err != nil {
+		return
+	}
+
+	err = lc.Send(p)
+	if err != nil {
+		return
+	}
+	lc.SetState(proto_base.Login)
+	err = lc.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: lc.Account.Name, PlayerUUID: lc.Account.Uuid})
+
+	err = lc.Start()
 	if err != nil {
 		err = errors.Join(FailedToLoginErr, err)
 	}
@@ -166,10 +164,7 @@ func ConnectAndLogin(connectTo string, account *api.Account) (c *proto.Conn, err
 	if err != nil {
 		return
 	}
-	err = c.Start(&LoginClient{
-		Conn:    c,
-		Account: account,
-	})
+	err = Login(c, account)
 	if err != nil {
 		err = errors.Join(FailedToLoginErr, err)
 	}
