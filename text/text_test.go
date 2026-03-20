@@ -167,14 +167,14 @@ func TestPretty(t *testing.T) {
 
 func TestPrettyF(t *testing.T) {
 	got := PrettyF("Hello §b%s", "World")
-	want := Component{
+	want := &Component{
 		Text: "Hello ",
 		Extra: []Component{
 			{Text: "World", Color: "aqua"},
 		},
 	}
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("PrettyF() = %+v, want %+v", got, want)
+		t.Errorf("PrettyF() = \n%+v\n, want \n%+v", got, want)
 	}
 }
 

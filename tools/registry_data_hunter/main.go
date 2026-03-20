@@ -48,6 +48,14 @@ type Proxy struct {
 	Data           nbt.Tag
 }
 
+func (p *Proxy) OnStart() (err error) {
+	p.Client.RegisterCritical(p.OnAnything)
+	p.Servee.RegisterCritical(p.OnAnything)
+
+	p.Client.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
+	return
+}
+
 func (p *Proxy) OnAnything(e event.Anything) (err error) {
 	packet, ok := e.Val.(proto_base.EncodeDecodeAble)
 	if !ok {

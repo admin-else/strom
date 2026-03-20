@@ -90,7 +90,7 @@ func (l *Loop) RegisterCustomType(eventType reflect.Type, hv reflect.Value) {
 	handleFunc := func(packet any) error {
 		v := hv.Call([]reflect.Value{reflect.ValueOf(packet)})[0]
 		if !v.IsNil() {
-			slog.Error("handler failed", v.Interface().(error))
+			slog.Error("handler failed", "err", v.Interface().(error))
 		}
 		return nil
 	}

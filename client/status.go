@@ -48,6 +48,8 @@ func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
 	return
 }
 
+// StatusRaw returns a StatusClient that is not connected to a server.
+// So ignore the resource leak warning. And maybe attach a warn ignore comment
 func StatusRaw(addr string) (s *StatusClient, err error) {
 	c, err := ConnectVersionLess(addr)
 	if err != nil {

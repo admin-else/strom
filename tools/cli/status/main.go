@@ -17,7 +17,7 @@ func Run(args []string) (err error) {
 		return
 	}
 	if *srvFlag {
-		*addrFlag, err = client.DoDNS(*addrFlag)
+		*addrFlag, err = client.DoDnsSimple(*addrFlag)
 		if err != nil {
 			return
 		}
