@@ -152,7 +152,7 @@ func Login(c *proto.Conn, account *api.Account) (err error) {
 	lc.SetState(proto_base.Login)
 	err = lc.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: lc.Account.Name, PlayerUUID: lc.Account.Uuid})
 
-	err = lc.Start()
+	err = lc.StartConn()
 	if err != nil {
 		err = errors.Join(FailedToLoginErr, err)
 	}
@@ -165,8 +165,5 @@ func ConnectAndLogin(connectTo string, account *api.Account) (c *proto.Conn, err
 		return
 	}
 	err = Login(c, account)
-	if err != nil {
-		err = errors.Join(FailedToLoginErr, err)
-	}
 	return
 }

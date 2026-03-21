@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"strconv"
 )
 
 //  {
@@ -75,13 +76,23 @@ func LookupBlockByStateId(version string, stateId int32) (block *Block, ok bool)
 	return
 }
 
-func LookupBlockByName(version string, stateId int32) (block *Block, ok bool) {
+func LookupBlockByName(version string, name string) (block *Block, ok bool) {
 	for _, b := range BlocksForVersion(version) {
-		if b.MinStateId <= stateId && stateId <= b.MaxStateId {
+		if b.Name == name {
 			block = b
 			ok = true
 		}
 	}
+	return
+}
+
+func StateIdFromBlocKAndStateMap(version string, name string, stateMap map[string]string) (stateId int32, err error) {
+	b, ok := LookupBlockByName(version, name)
+	if !ok {
+		err = BlockNotFoundErr
+		return
+	}
+	stateId, err = b.IdFromStateMap(stateMap)
 	return
 }
 
@@ -92,7 +103,7 @@ var BadBlockStateTypeErr = errors.New("bad block state type")
 var BadEnumErr = errors.New("bad enum")
 var SupplyAllStatesErr = errors.New("supply all states")
 
-func FromBlockState(version string, stateId int32) (b *Block, stateData map[string]any, err error) {
+func FromBlockState(version string, stateId int32) (b *Block, stateData map[string]string, err error) {
 	b, ok := LookupBlockByStateId(version, stateId)
 	if !ok {
 		err = BlockNotFoundErr
@@ -101,19 +112,17 @@ func FromBlockState(version string, stateId int32) (b *Block, stateData map[stri
 	return
 }
 
-// TODO: mc stores these as strings so we will do the same
-
-func mcDataBlockStateTypeParse(n int32, s *BlockState) (v any, err error) {
+func mcDataBlockStateTypeParse(n int32, s *BlockState) (v string, err error) {
 	switch s.Type {
 	case "int":
-		v = n
+		v = strconv.Itoa(int(n))
 	case "enum":
 		v = s.Values[n]
 	case "bool":
 		if n == 0 { // MOJANK: 0 is true, 1 is false
-			v = true
+			v = "true"
 		} else if n == 1 {
-			v = false
+			v = "false"
 		} else {
 			err = InvalidBoolValueErr
 		}
@@ -123,35 +132,32 @@ func mcDataBlockStateTypeParse(n int32, s *BlockState) (v any, err error) {
 	return
 }
 
-func mcDataBlockStateTypeSerialize(v any, s *BlockState) (n int32, err error) {
-	switch t := v.(type) {
-	case int32:
-		n = t
-	case bool:
-		if t {
-			n = 0
-		} else {
-			n = 1
-		}
-	case string:
-		for i, enumValue := range s.Values {
-			if enumValue == t {
-				return int32(i), nil
-			}
-		}
-		err = BadEnumErr
-	default:
-		err = BadBlockStateTypeErr
+func mcDataBlockStateTypeSerialize(v string, s *BlockState) (n int32, err error) {
+	if v == "true" {
+		return 0, nil
 	}
+	if v == "false" {
+		return 1, nil
+	}
+	n1, errMabye := strconv.Atoi(v)
+	if errMabye == nil {
+		return int32(n1), nil
+	}
+	for i, enumValue := range s.Values {
+		if enumValue == v {
+			return int32(i), nil
+		}
+	}
+	err = BadEnumErr
 	return
 }
 
-func (b *Block) StateMapFromId(stateId int32) (ret map[string]any, err error) {
+func (b *Block) StateMapFromId(stateId int32) (ret map[string]string, err error) {
 	if stateId < b.MinStateId || stateId > b.MaxStateId {
 		err = BlockStateOutOfRangeErr
 		return
 	}
-	ret = make(map[string]any)
+	ret = make(map[string]string)
 	stateId -= b.MinStateId
 
 	a := int32(1)
@@ -166,7 +172,7 @@ func (b *Block) StateMapFromId(stateId int32) (ret map[string]any, err error) {
 	return
 }
 
-func (b *Block) IdFromStateMap(m map[string]any) (ret int32, err error) {
+func (b *Block) IdFromStateMap(m map[string]string) (ret int32, err error) {
 	a := int32(1)
 	for i := range len(b.States) {
 		s := b.States[len(b.States)-1-i]

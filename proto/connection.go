@@ -60,13 +60,19 @@ type Conn struct {
 
 func (c *Conn) StartConn() (err error) {
 	c.RegisterCritical(c.OnTick)
-	return c.Loop.Start()
+	if c.state == proto_base.Play {
+		c.ActivateReceiveRoutine()
+	}
+	err = c.Loop.StartLoop()
+	c.Loop = event.NewLoop()
+	return
 }
 
 func (c *Conn) ReceiveJob() {
+	ctx := c.Ctx
 	for {
 		select {
-		case <-c.Ctx.Done():
+		case <-ctx.Done():
 			return
 		default:
 			packet, err := c.Receive()
@@ -232,11 +238,4 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 		err = c.Loop.Fire(packet)
 	}
 	return
-}
-
-func (c *Conn) Start() (err error) {
-	if c.Loop == nil {
-		c.Loop = &event.Loop{}
-	}
-	return c.Loop.Start()
 }

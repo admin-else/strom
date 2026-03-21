@@ -53,9 +53,12 @@ func (e HandlerDoneErr) Unwrap() error {
 	return e.Return
 }
 
-// ErrDontForward will stop the event from being forwarded to other handlers, including anything handlers.
-var ErrDontForward = errors.New("dont forward")
+// DontForwardErr will stop the event from being forwarded to other handlers, including anything handlers.
+var DontForwardErr = errors.New("dont forward")
 var WhileClosingErr = errors.New("error while closing")
+
+// CloseNonCriticalErr will close even when the event is non-critical
+var CloseNonCriticalErr = errors.New("close non-critical")
 
 func ValidateHandler(h any) (eventType reflect.Type, hv reflect.Value) {
 	hv = reflect.ValueOf(h)
@@ -86,7 +89,11 @@ func (l *Loop) RegisterCustomType(eventType reflect.Type, hv reflect.Value) {
 	handleFunc := func(packet any) error {
 		v := hv.Call([]reflect.Value{reflect.ValueOf(packet)})[0]
 		if !v.IsNil() {
-			slog.Error("handler failed", "err", v.Interface().(error))
+			err := v.Interface().(error)
+			if errors.Is(err, CloseNonCriticalErr) {
+				return err
+			}
+			slog.Error("handler failed", "err", err)
 		}
 		return nil
 	}
@@ -124,7 +131,7 @@ func (l *Loop) FireFound(event any) (found bool, err error) {
 func (l *Loop) Fire(event any) (err error) {
 	found, err := l.FireFound(event)
 	if err != nil {
-		if errors.Is(err, ErrDontForward) {
+		if errors.Is(err, DontForwardErr) {
 			err = nil
 		}
 		return
@@ -159,7 +166,7 @@ func (l *Loop) startLoop() (err error) {
 	return
 }
 
-func (l *Loop) Start() (err error) {
+func (l *Loop) StartLoop() (err error) {
 	go func() {
 		l.ErrChan <- l.startLoop()
 	}()

@@ -106,7 +106,7 @@ func DoDnsSimple(in string) (out string, err error) {
 	if err != nil {
 		return
 	}
-	out = in
+	out = host + ":" + strconv.Itoa(int(portN))
 	if portN != 25565 {
 		return
 	}

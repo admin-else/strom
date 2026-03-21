@@ -19,10 +19,6 @@ type StatusClient struct {
 	DoPingRoundTripTime           bool
 }
 
-func (s *StatusClient) OnStart() (err error) {
-	return
-}
-
 func (s *StatusClient) OnStatus(p *v1_21_8.StatusToClientPacketServerInfo) (err error) {
 	s.Status = p.Response
 	s.PingSendTime = time.Now()
@@ -55,9 +51,8 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 	s = &StatusClient{
 		Conn: c,
 	}
-	s.Loop = event.NewLoop()
-	s.RegisterUntilLatest(s.OnStatus)
-	s.RegisterUntilLatest(s.OnPong)
+	s.RegisterCriticalUntilLatest(s.OnStatus)
+	s.RegisterCriticalUntilLatest(s.OnPong)
 
 	p, err := MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {

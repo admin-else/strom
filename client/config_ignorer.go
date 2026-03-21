@@ -19,8 +19,11 @@ func (c *ConfigIgnorer) OnStart() (err error) {
 	return
 }
 
-func (c *ConfigIgnorer) Default(event event.Anything) (err error) {
-	slog.Debug("Config ignorer", "packet", fmt.Sprintf("%#v", event))
+func (c *ConfigIgnorer) Default(e event.Anything) (err error) {
+	if e.Val == (event.Tick{}) {
+		return
+	}
+	slog.Debug("Config ignorer", "packet", fmt.Sprintf("%#v", e))
 	return
 }
 
@@ -56,7 +59,7 @@ func IgnoreConfig(c *proto.Conn) (err error) {
 	ci.RegisterUntilLatest(ci.OnPing)
 	ci.RegisterUntilLatest(ci.OnKeepAlive)
 
-	err = ci.Start()
+	err = ci.StartConn()
 	if err != nil {
 		err = errors.Join(err, errors.New("failed to ignore config"))
 	}

@@ -168,6 +168,6 @@ func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer
 		s(ret)
 	}
 	ret.CompressionThreshold = 256
-	err = ret.Start()
+	err = ret.StartLoop()
 	return
 }

@@ -1,11 +1,11 @@
-package level
+package structure
 
 import (
 	"github.com/admin-else/strom/nbt"
 	"github.com/go-viper/mapstructure/v2"
 )
 
-func LoadStructure(fileName string) (s *Structure, err error) {
+func Load(fileName string) (s *Structure, err error) {
 	n, err := nbt.ReadFilePath(fileName)
 	if err != nil {
 		return

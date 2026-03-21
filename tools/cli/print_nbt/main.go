@@ -1,6 +1,7 @@
 package print_nbt
 
 import (
+	"bytes"
 	"encoding/json"
 	"flag"
 	"os"
@@ -9,8 +10,9 @@ import (
 )
 
 var (
-	cmd      = flag.NewFlagSet("print-nbt", flag.ContinueOnError)
-	FileFlag = cmd.String("file", "", "The NBT file to print")
+	cmd            = flag.NewFlagSet("print-nbt", flag.ContinueOnError)
+	FileFlag       = cmd.String("file", "", "The NBT file to print")
+	HashFormatFlag = cmd.Bool("snbt", false, "will print with go %#v")
 )
 
 func Run(args []string) (err error) {
@@ -27,7 +29,18 @@ func Run(args []string) (err error) {
 	if err != nil {
 		return
 	}
-	b, err := json.MarshalIndent(n, "", "  ")
+	var b []byte
+	if *HashFormatFlag {
+		bb := bytes.NewBuffer(nil)
+		err = nbt.PrintSNBTAny(n.Value, bb)
+		if err != nil {
+			return
+		}
+		b = bb.Bytes()
+		//b = []byte(strings.ReplaceAll(string(b), ",", ",\n"))
+	} else {
+		b, err = json.MarshalIndent(n, "", "  ")
+	}
 	if err != nil {
 		return
 	}

@@ -12,7 +12,7 @@ package data
 type VersionInfo struct {
 	MinecraftVersion string
 	Version          int32
-	DataVersion      int
+	DataVersion      int32
 	UsesNetty        bool
 	MajorVersion     string
 	ReleaseType      string
@@ -36,6 +36,16 @@ func LookUpVersionByProtocolVersion(version int32) (ret VersionInfo, err error) 
 		if v.Version == version {
 			ret = v
 			return
+		}
+	}
+	err = UnknownMinecraftVersionError
+	return
+}
+
+func LookUpVersionByDataVersion(version int32) (ret VersionInfo, err error) {
+	for _, v := range ProtocolVersions {
+		if v.DataVersion == version {
+			ret = v
 		}
 	}
 	err = UnknownMinecraftVersionError

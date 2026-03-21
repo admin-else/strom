@@ -154,10 +154,10 @@ func main() {
 		errChan := make(chan error)
 		defer pc.Close()
 		go func() {
-			errChan <- pc.Start(pc)
+			errChan <- pc.StartConn()
 		}()
 		go func() {
-			errChan <- p.Start(p)
+			errChan <- p.StartConn()
 		}()
 		err = <-errChan
 		return

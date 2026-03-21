@@ -65,7 +65,7 @@ func ServeConfig(c *proto.Conn) (err error) {
 	}
 	err = c.Send(&v1_21_8.ConfigurationToClientPacketFinishConfiguration{})
 	cs := &ConfigServer{c}
-	return cs.Start()
+	return cs.StartLoop()
 }
 
 func (c *ConfigServer) OnFinishConfiguration(_ *v1_21_8.ConfigurationToServerPacketFinishConfiguration) (err error) {

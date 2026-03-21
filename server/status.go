@@ -67,6 +67,6 @@ func ServeStatus(c *proto.Conn, s StatusResponse) (err error) {
 	}
 	server.RegisterUntilLatest(server.OnStatusRequest)
 	server.RegisterUntilLatest(server.OnStatusPing)
-	err = server.Start()
+	err = server.StartLoop()
 	return
 }

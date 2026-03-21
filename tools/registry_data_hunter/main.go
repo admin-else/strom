@@ -116,10 +116,7 @@ func handleClient(c *proto.Conn) (err error) {
 		return
 	}
 	defer sockPuppet.Close()
-	err = sockPuppet.Start(&client.LoginClient{
-		Conn:    sockPuppet,
-		Account: acc,
-	})
+	err = sockPuppet.StartLoop()
 	if err != nil {
 		return
 	}
@@ -127,10 +124,10 @@ func handleClient(c *proto.Conn) (err error) {
 	p := &Proxy{Client: sockPuppet, Servee: c}
 	p.Data.Value = map[string]any{"Registries": []any{}}
 	go func() {
-		errChan <- p.Client.Start(p)
+		errChan <- p.Client.StartLoop()
 	}()
 	go func() {
-		errChan <- p.Servee.Start(p)
+		errChan <- p.Servee.StartLoop()
 	}()
 	err = <-errChan
 	f, err := os.Create("data/registry/" + SaveAs + ".nbt")

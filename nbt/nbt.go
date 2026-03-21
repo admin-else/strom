@@ -291,6 +291,8 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 	return
 }
 
+var UnknownTagTypeErr = errors.New("unknown nbt type")
+
 func writePayload(v any, w io.Writer) (err error) {
 	switch v := v.(type) {
 	case struct{}:
@@ -361,7 +363,7 @@ func writePayload(v any, w io.Writer) (err error) {
 		}
 		err = binary.Write(w, Order, End)
 	default:
-		err = errors.New("unknown nbt type")
+		err = UnknownTagTypeErr
 	}
 	return
 }
