@@ -75,6 +75,13 @@ func LongsToData(data []uint64, n, bpe int32) (ret []int32) {
 	return
 }
 
+func GetEntryFromLongs(data []uint64, i, bpe int32) (ret int32) {
+	mask := (uint64(1) << uint32(bpe)) - 1
+	elementsPerLong := 64 / bpe
+	ret = int32((data[i/elementsPerLong] >> ((i % elementsPerLong) * bpe)) & mask)
+	return
+}
+
 // UnpackBlockData minecraft does this at net.minecraft.world.chunk.PaletteProvider
 func UnpackBlockData(r io.Reader) (blocks []int32, err error) {
 	var bitsPerEntry uint8

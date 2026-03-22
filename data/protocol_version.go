@@ -46,6 +46,7 @@ func LookUpVersionByDataVersion(version int32) (ret VersionInfo, err error) {
 	for _, v := range ProtocolVersions {
 		if v.DataVersion == version {
 			ret = v
+			return
 		}
 	}
 	err = UnknownMinecraftVersionError
