@@ -1,5 +1,7 @@
 package data
 
+import "sync"
+
 //   {
 //    "id": 2,
 //    "name": "granite",
@@ -15,15 +17,21 @@ type Item struct {
 }
 
 var ItemsCache = make(map[string][]*Item)
+var ItemsCacheMutex = &sync.RWMutex{}
 
 func ItemsForVersion(v string) (ret []*Item) {
 	var ok bool
+	ItemsCacheMutex.RLock()
 	if ret, ok = ItemsCache[v]; ok {
+		ItemsCacheMutex.RUnlock()
 		return
 	}
+	ItemsCacheMutex.RUnlock()
 	var b []*Item
 	must(LoadVersionedJson(v, "items", &b))
+	ItemsCacheMutex.Lock()
 	ItemsCache[v] = b
+	ItemsCacheMutex.Unlock()
 	return b
 }
 

@@ -35,14 +35,14 @@ type (
 	Tick struct{}
 )
 
-// HandlerDoneErr will stop the event loop and return the error if provided.
-type HandlerDoneErr struct {
-	Return error
-}
-
 // Close is fired when the loop shuts down.
 type Close struct {
 	Reason error
+}
+
+// HandlerDoneErr will stop the event loop and return the error if provided.
+type HandlerDoneErr struct {
+	Return error
 }
 
 func (e HandlerDoneErr) Error() string {
@@ -53,12 +53,26 @@ func (e HandlerDoneErr) Unwrap() error {
 	return e.Return
 }
 
+// MainHandlerErr is a special error used to tell the event loop that the main loop has exited
+type MainHandlerErr struct {
+	Return error
+}
+
+func (e MainHandlerErr) Error() string {
+	return "MainHandlerErr"
+}
+
+func (e MainHandlerErr) Unwrap() error {
+	return e.Return
+}
+
 // DontForwardErr will stop the event from being forwarded to other handlers, including anything handlers.
 var DontForwardErr = errors.New("dont forward")
 var WhileClosingErr = errors.New("error while closing")
 
 // CloseNonCriticalErr will close even when the event is non-critical
 var CloseNonCriticalErr = errors.New("close non-critical")
+var ContextDoneErr = errors.New("context done")
 
 func ValidateHandler(h any) (eventType reflect.Type, hv reflect.Value) {
 	hv = reflect.ValueOf(h)
@@ -146,6 +160,15 @@ func (l *Loop) Fire(event any) (err error) {
 	return
 }
 
+func (l *Loop) OnTick(_ Tick) (err error) {
+	select {
+	case <-l.Ctx.Done():
+		err = ContextDoneErr
+	default:
+	}
+	return
+}
+
 func (l *Loop) startLoop() (err error) {
 	_ = *l // exit early on nil loop
 	for {
@@ -168,10 +191,17 @@ func (l *Loop) startLoop() (err error) {
 
 func (l *Loop) StartLoop() (err error) {
 	go func() {
-		l.ErrChan <- l.startLoop()
+		l.ErrChan <- MainHandlerErr{l.startLoop()}
 	}()
 	err = <-l.ErrChan
 	l.cancel()
+	errMaybe := MainHandlerErr{}
+	if errors.As(err, &errMaybe) {
+		err = errors.Unwrap(err)
+	} else {
+		for !errors.Is(<-l.ErrChan, MainHandlerErr{}) {
+		}
+	}
 	return
 }
 

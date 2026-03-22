@@ -19,7 +19,6 @@ var (
 	BadPacketTypeErr                    = errors.New("bad packet type")
 	BadPacketIdErr                      = errors.New("bad packet id")
 	PacketNotFullyDecodedErr            = errors.New("packet not fully decoded")
-	ContextDoneErr                      = errors.New("context done")
 	WrongStateErr                       = errors.New("wrong state")
 	WrongDirectionErr                   = errors.New("wrong direction")
 	CantTranslateErr                    = errors.New("cant translate packet")
@@ -224,9 +223,6 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 		case packet = <-c.packetCh:
 			slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 			err = c.Loop.Fire(packet)
-		case <-c.Ctx.Done():
-			err = ContextDoneErr
-			return
 		default:
 		}
 	} else {
