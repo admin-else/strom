@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"unsafe"
 
 	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/level"
@@ -42,10 +43,9 @@ type Region struct {
 }
 
 func (r *Region) GetBlockAt(x, y, z int32) (name string, properties map[string]string, err error) {
-	uintSlice := make([]uint64, len(r.BlockStates))
-	for i, v := range r.BlockStates {
-		uintSlice[i] = uint64(v)
-	}
+
+	// this is probably fine
+	uintSlice := unsafe.Slice((*uint64)(unsafe.Pointer(unsafe.SliceData(r.BlockStates))), len(r.BlockStates))
 	if r.Size.X < 0 {
 		r.Size.X *= -1
 	}
@@ -56,7 +56,7 @@ func (r *Region) GetBlockAt(x, y, z int32) (name string, properties map[string]s
 		r.Size.Z *= -1
 	}
 
-	if x >= r.Size.X || y >= r.Size.Y || z >= r.Size.Z {
+	if x >= r.Size.X || y >= r.Size.Y || z >= r.Size.Z || x < 0 || y < 0 || z < 0 {
 		err = OutOfBoundsErr
 		return
 	}

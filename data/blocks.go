@@ -53,6 +53,7 @@ type BlockState struct {
 }
 
 var BlocksCache = make(map[string][]*Block)
+var BlocksCacheIdMap = make(map[string]map[int32]*Block)
 
 func BlocksForVersion(v string) (ret []*Block) {
 	var ok bool
@@ -66,13 +67,16 @@ func BlocksForVersion(v string) (ret []*Block) {
 }
 
 func LookupBlockByStateId(version string, stateId int32) (block *Block, ok bool) {
-	for _, b := range BlocksForVersion(version) {
-		if b.MinStateId <= stateId && stateId <= b.MaxStateId {
-			block = b
-			ok = true
-			return
+	idmap, found := BlocksCacheIdMap[version]
+	if !found {
+		idmap = make(map[int32]*Block)
+		for _, b := range BlocksForVersion(version) {
+			for i := range b.MaxStateId - b.MinStateId + 1 {
+				idmap[b.MinStateId+i] = b
+			}
 		}
 	}
+	block, ok = idmap[stateId]
 	return
 }
 

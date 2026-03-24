@@ -2,6 +2,7 @@ package proto
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -221,7 +222,9 @@ func (c *Conn) OnTick(_ event.Tick) (err error) {
 	if c.receiveRoutine {
 		select {
 		case packet = <-c.packetCh:
-			slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
+			if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
+				slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
+			}
 			err = c.Loop.Fire(packet)
 		default:
 		}

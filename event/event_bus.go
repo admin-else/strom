@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	LoopsPerSecond = 100 // i dunno seems reasonable
+	LoopsPerSecond = 10000 // this is just so the cpu doesn't burn itself in an unlimited infinite loop
 	TimePerLoop    = time.Second / LoopsPerSecond
 )
 
