@@ -75,6 +75,7 @@ func LookupBlockByStateId(version string, stateId int32) (block *Block, ok bool)
 				idmap[b.MinStateId+i] = b
 			}
 		}
+		BlocksCacheIdMap[version] = idmap
 	}
 	block, ok = idmap[stateId]
 	return
