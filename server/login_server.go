@@ -63,6 +63,7 @@ func (l *LoginServer) OnHandshake(packet *v1_21_8.HandshakingToServerPacketSetPr
 		return
 	}
 
+	err = l.SetProtocolVersion(packet.ProtocolVersion)
 	return
 }
 
@@ -159,6 +160,7 @@ func WithCompatibleVersions(versions ...int32) LoginServerSetting {
 func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
 	ret.RegisterCritical(ret.OnDefault)
+	ret.RegisterIgnore(event.Close{})
 	ret.RegisterUntilLatest(ret.OnHandshake)
 	ret.RegisterUntilLatest(ret.OnLoginStart)
 	ret.RegisterUntilLatest(ret.OnLoginAcknowledged)
@@ -168,6 +170,6 @@ func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer
 		s(ret)
 	}
 	ret.CompressionThreshold = 256
-	err = ret.StartLoop()
+	err = ret.StartConn()
 	return
 }

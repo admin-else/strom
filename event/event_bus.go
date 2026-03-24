@@ -125,6 +125,10 @@ func (l *Loop) RegisterDirect(k reflect.Type, h reflect.Value) {
 	l.HandlerFunctions[k] = append(l.HandlerFunctions[k], h)
 }
 
+func (l *Loop) RegisterIgnore(t any) {
+	l.RegisterDirect(reflect.TypeOf(t), reflect.ValueOf(func(any) error { return nil }))
+}
+
 // FireFound triggers all handlers registered for the specified event type and returns if handlers were found or an error occurred.
 func (l *Loop) FireFound(event any) (found bool, err error) {
 	var handlers []reflect.Value

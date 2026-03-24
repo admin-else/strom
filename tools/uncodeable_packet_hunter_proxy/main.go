@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha256"
+	_ "embed"
 	"fmt"
 	"log/slog"
 	"os"
@@ -9,104 +10,75 @@ import (
 	"github.com/admin-else/strom/api"
 	"github.com/admin-else/strom/client"
 	"github.com/admin-else/strom/event"
+	"github.com/admin-else/strom/nbt"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
-	"github.com/admin-else/strom/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/proto_generated/v1_21_11"
 	"github.com/admin-else/strom/server"
 	"github.com/admin-else/strom/text"
 )
 
-type ProxyClient struct {
-	*proto.Conn
-	Server *Proxy
-}
-
-func (p *ProxyClient) OnDefault(event event.Unhandled) (err error) {
-	packet, isPacket := event.Val.(proto_base.EncodeDecodeAble)
-	if !isPacket {
-		return
-	}
-	err = p.Server.Send(packet)
-	return
-}
-
-func (p *ProxyClient) OnCycle(_ event.Tick) (err error) {
-	return
-}
-
-func (p *ProxyClient) OnStart() (err error) {
-	return
-}
-
-func (p *ProxyClient) OnUnCodeAble(packet *proto.UnCodablePacket) (err error) {
-	err = p.OnDefault(event.Unhandled{Val: packet})
-	if err != nil {
-		return
-	}
-	SaveUnCodeAbleAsTest(proto_base.ToServer, packet)
-	return
-}
+//go:embed failed_packet.go.tmpl
+var TestSrcF string
 
 type Proxy struct {
-	*proto.Conn
-	Client *ProxyClient
+	Client, Servee *proto.Conn
+	Data           nbt.Tag
 }
 
-func (p *Proxy) OnDefault(event event.Unhandled) (err error) {
-	packet, isPacket := event.Val.(proto_base.EncodeDecodeAble)
-	if !isPacket {
+func (p *Proxy) Start() (err error) {
+	p.Client.RegisterCritical(p.OnAnything)
+	p.Servee.RegisterCritical(p.OnAnything)
+
+	p.Servee.Register(p.OnUnCodeAble)
+	p.Client.Register(p.OnUnCodeAble)
+
+	p.Servee.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
+
+	errChan := make(chan error)
+	go func() {
+		errChan <- p.Client.StartConn()
+	}()
+	go func() {
+		errChan <- p.Servee.StartConn()
+	}()
+	err = <-errChan
+	return
+}
+
+func (p *Proxy) OnAnything(e event.Anything) (err error) {
+	packet, ok := e.Val.(proto_base.EncodeDecodeAble)
+	if !ok {
 		return
 	}
+	packetInfo, ok := proto.LookupPacketInfoByType(packet)
+	if !ok {
+		return
+	}
+	switch packetInfo.Direction {
+	case proto_base.ToServer:
+		err = p.Client.Send(packet)
+	case proto_base.ToClient:
+		err = p.Servee.Send(packet)
+	}
+	return
+}
+
+func (p *Proxy) OnFinishConfiguration(packet *v1_21_11.ConfigurationToServerPacketFinishConfiguration) (err error) {
 	err = p.Client.Send(packet)
-	return
-}
-
-func (p *Proxy) OnCycle(_ event.Tick) (err error) {
-	return
-}
-
-func (p *Proxy) OnStart() (err error) {
-	return
-}
-
-func (p *Proxy) OnFinishConfiguration(packet *v1_21_8.ConfigurationToServerPacketFinishConfiguration) (err error) {
-	err = p.OnDefault(event.Unhandled{Val: packet})
 	if err != nil {
 		return
 	}
-	p.SetState(proto_base.Play)
+	p.Servee.SetState(proto_base.Play)
 	p.Client.SetState(proto_base.Play)
+	err = event.DontForwardErr
 	return
 }
 
 func (p *Proxy) OnUnCodeAble(packet *proto.UnCodablePacket) (err error) {
-	err = p.OnDefault(event.Unhandled{Val: packet})
-	if err != nil {
-		return
-	}
-	SaveUnCodeAbleAsTest(proto_base.ToClient, packet)
+	SaveUnCodeAbleAsTest(packet.Direction, packet)
 	return
 }
-
-const TestSrcF = `package failed_packets_test
-
-import (
-	"bytes"
-	"testing"
-
-	"github.com/admin-else/strom/proto_generated/v1_21_8"
-)
-
-// Error: %v
-func TestFailedPacket%10X(t *testing.T) {
-	p := v1_21_8.Play%vPacket{}
-	b := bytes.NewBuffer(%#v)
-	err := p.Decode(b)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-`
 
 func SaveUnCodeAbleAsTest(d proto_base.Direction, packet *proto.UnCodablePacket) {
 	hUntrimmed := sha256.Sum256(packet.Data)
@@ -138,28 +110,20 @@ var StatusResponse = server.StatusResponse{
 
 func main() {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	err := server.StartServerWithOnConn(":25565", func(serveeConn *proto.Conn) (err error) {
-		p := &Proxy{Conn: serveeConn, Client: nil}
+	err := server.StartServerWithOnConn(":25566", func(serveeConn *proto.Conn) (err error) {
+		p := &Proxy{Servee: serveeConn, Client: nil}
 		acc := api.NewOfflineAccount("sigma")
 		_, err = server.ServeLogin(serveeConn, server.WithOtherAccount(acc), server.WithStatus(StatusResponse))
 		if err != nil {
 			return
 		}
-		c, err := client.ConnectAndLogin("127.0.0.1:25566", acc)
+		c, err := client.ConnectAndLogin("127.0.0.1:25565", acc)
 		if err != nil {
 			return
 		}
-		pc := &ProxyClient{Conn: c, Server: p}
-		p.Client = pc
-		errChan := make(chan error)
-		defer pc.Close()
-		go func() {
-			errChan <- pc.StartConn()
-		}()
-		go func() {
-			errChan <- p.StartConn()
-		}()
-		err = <-errChan
+		defer c.Close()
+		p.Client = c
+		err = p.Start()
 		return
 	})
 	if err != nil {

@@ -1,0 +1,18 @@
+package failed_packets_test
+
+import (
+	"bytes"
+	"testing"
+
+	"github.com/admin-else/strom/proto_generated/v1_21_8"
+)
+
+// Error: %v
+func TestFailedPacket%10X(t *testing.T) {
+	p := v1_21_8.Play%vPacket{}
+	b := bytes.NewBuffer(%#v)
+	err := p.Decode(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
