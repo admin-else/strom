@@ -9,32 +9,40 @@ import (
 	"strings"
 	"time"
 
-	"github.com/admin-else/strom/crypto"
 	"github.com/google/uuid"
 )
 
+type Servers struct {
+	ServicesHost string
+	SessionHost  string
+	ProfilesHost string
+}
+
+var DefaultServers = &Servers{
+	ServicesHost: "https://api.minecraftservices.com",
+	SessionHost:  "https://sessionserver.mojang.com",
+	ProfilesHost: "https://api.mojang.com",
+}
+
 type Account struct {
+	*Servers
 	Name string
 	Uuid uuid.UUID
 	Ygg  string
 }
-
-const (
-	BaseUrlApi = "https://api.minecraftservices.com"
-)
 
 func (a *Account) doMcApiRequest(method string, url string, from any, to any) (err error) {
 	var b []byte
 	if method != "GET" {
 		b, err = json.Marshal(from)
 		if err != nil {
-			return err
+			return
 		}
 	}
 
 	r, err := http.NewRequest(method, url, bytes.NewReader(b))
 	if err != nil {
-		return err
+		return
 	}
 
 	r.Header.Set("Content-Type", "application/json")
@@ -44,21 +52,22 @@ func (a *Account) doMcApiRequest(method string, url string, from any, to any) (e
 
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return err
+		return
 	}
+	defer resp.Body.Close()
 
 	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
 		return fmt.Errorf("bad status code %v", resp.StatusCode)
 	}
 	b, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return
 	}
 	err = json.Unmarshal(b, to)
 	if err != nil {
-		return err
+		return
 	}
-	return nil
+	return
 }
 
 type PlayerKeys struct {
@@ -73,7 +82,7 @@ type PlayerKeys struct {
 }
 
 func (a *Account) FetchKeys() (keys PlayerKeys, err error) {
-	err = a.doMcApiRequest("POST", BaseUrlApi+"/player/certificates", nil, &keys)
+	err = a.doMcApiRequest("POST", a.ServicesHost+"/player/certificates", nil, &keys)
 	return
 }
 
@@ -90,10 +99,12 @@ func (a *Account) JoinServer(serverId string) (err error) {
 	if err != nil {
 		return
 	}
-	resp, err := http.Post("https://sessionserver.mojang.com/session/minecraft/join", "application/json", bytes.NewReader(body))
+	resp, err := http.Post(a.SessionHost+"/session/minecraft/join", "application/json", bytes.NewReader(body))
 	if err != nil {
 		return
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode != 204 {
 		body, err = io.ReadAll(resp.Body)
 		if err != nil {
@@ -112,15 +123,8 @@ type NameChangResp struct {
 }
 
 func (a *Account) NameChangeInfo() (r NameChangResp, err error) {
-	err = a.doMcApiRequest("GET", "https://api.minecraftservices.com/minecraft/profile/namechange", nil, &r)
+	err = a.doMcApiRequest("GET", a.ServicesHost+"/minecraft/profile/namechange", nil, &r)
 	return
-}
-
-func NewOfflineAccount(name string) *Account {
-	return &Account{
-		Name: name,
-		Uuid: crypto.FromOfflinePlayer(name),
-	}
 }
 
 // PlayerProfile represents the player's profile information
@@ -143,7 +147,7 @@ type PlayerProfile struct {
 
 // QueryProfile queries the player's profile
 func (a *Account) QueryProfile() (profile PlayerProfile, err error) {
-	err = a.doMcApiRequest("GET", BaseUrlApi+"/minecraft/profile", nil, &profile)
+	err = a.doMcApiRequest("GET", a.ServicesHost+"/minecraft/profile", nil, &profile)
 	return
 }
 
@@ -181,7 +185,7 @@ type PlayerAttributes struct {
 
 // QueryAttributes queries the player's attributes
 func (a *Account) QueryAttributes() (attrs PlayerAttributes, err error) {
-	err = a.doMcApiRequest("GET", BaseUrlApi+"/player/attributes", nil, &attrs)
+	err = a.doMcApiRequest("GET", a.ServicesHost+"/player/attributes", nil, &attrs)
 	return
 }
 
@@ -194,7 +198,7 @@ type ModifyAttributesRequest struct {
 
 // ModifyAttributes modifies the player's attributes
 func (a *Account) ModifyAttributes(req ModifyAttributesRequest) (attrs PlayerAttributes, err error) {
-	err = a.doMcApiRequest("POST", BaseUrlApi+"/player/attributes", req, &attrs)
+	err = a.doMcApiRequest("POST", a.ServicesHost+"/player/attributes", req, &attrs)
 	return
 }
 
@@ -205,24 +209,23 @@ type BlockedUsers struct {
 
 // GetBlocklist gets the list of blocked users
 func (a *Account) GetBlocklist() (blocklist BlockedUsers, err error) {
-	err = a.doMcApiRequest("GET", BaseUrlApi+"/privacy/blocklist", nil, &blocklist)
+	err = a.doMcApiRequest("GET", a.ServicesHost+"/privacy/blocklist", nil, &blocklist)
 	return
 }
 
-// CheckNameAvailability checks if a name is available
 type NameAvailability struct {
 	Status string `json:"status"` // DUPLICATE, AVAILABLE, NOT_ALLOWED
 }
 
 // CheckNameAvailability checks if a name is available
 func (a *Account) CheckNameAvailability(name string) (avail NameAvailability, err error) {
-	err = a.doMcApiRequest("GET", BaseUrlApi+"/minecraft/profile/name/"+name+"/available", nil, &avail)
+	err = a.doMcApiRequest("GET", a.ServicesHost+"/minecraft/profile/name/"+name+"/available", nil, &avail)
 	return
 }
 
 // ChangeName changes the player's name
 func (a *Account) ChangeName(newName string) (profile PlayerProfile, err error) {
-	err = a.doMcApiRequest("PUT", BaseUrlApi+"/minecraft/profile/name/"+newName, nil, &profile)
+	err = a.doMcApiRequest("PUT", a.ServicesHost+"/minecraft/profile/name/"+newName, nil, &profile)
 	return
 }
 
@@ -234,19 +237,19 @@ type ChangeSkinRequest struct {
 
 // ChangeSkin changes the player's skin
 func (a *Account) ChangeSkin(req ChangeSkinRequest) (profile PlayerProfile, err error) {
-	err = a.doMcApiRequest("POST", BaseUrlApi+"/minecraft/profile/skins", req, &profile)
+	err = a.doMcApiRequest("POST", a.ServicesHost+"/minecraft/profile/skins", req, &profile)
 	return
 }
 
 // ResetSkin resets the player's skin to default
 func (a *Account) ResetSkin() (profile PlayerProfile, err error) {
-	err = a.doMcApiRequest("DELETE", BaseUrlApi+"/minecraft/profile/skins/active", nil, &profile)
+	err = a.doMcApiRequest("DELETE", a.ServicesHost+"/minecraft/profile/skins/active", nil, &profile)
 	return
 }
 
 // HideCape hides the player's active cape
 func (a *Account) HideCape() (profile PlayerProfile, err error) {
-	err = a.doMcApiRequest("DELETE", BaseUrlApi+"/minecraft/profile/capes/active", nil, &profile)
+	err = a.doMcApiRequest("DELETE", a.ServicesHost+"/minecraft/profile/capes/active", nil, &profile)
 	return
 }
 
@@ -258,29 +261,53 @@ type ShowCapeRequest struct {
 // ShowCape shows a specific cape
 func (a *Account) ShowCape(capeID string) (profile PlayerProfile, err error) {
 	req := ShowCapeRequest{CapeID: capeID}
-	err = a.doMcApiRequest("PUT", BaseUrlApi+"/minecraft/profile/capes/active", req, &profile)
+	err = a.doMcApiRequest("PUT", a.ServicesHost+"/minecraft/profile/capes/active", req, &profile)
 	return
 }
 
 // CheckGiftCodeValidity checks if a gift code is valid
 func (a *Account) CheckGiftCodeValidity(giftCode string) (valid bool, err error) {
-	url := BaseUrlApi + "/productvoucher/giftcode"
+	url := a.ServicesHost + "/productvoucher/" + giftCode
 	r, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return false, err
+		return
 	}
 
 	r.Header.Set("Authorization", "Bearer "+a.Ygg)
 
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return false, err
+		return
 	}
 	defer resp.Body.Close()
 
 	// Returns HTTP 200 or 204 if valid, 404 if invalid
 	if resp.StatusCode == 200 || resp.StatusCode == 204 {
-		return true, nil
+		valid = true
+		return
 	}
-	return false, nil
+	return
+}
+
+func NewAccountFromYGG(ygg string) (a *Account, err error) {
+	a = &Account{
+		Ygg:     ygg,
+		Servers: DefaultServers,
+	}
+	p, err := a.QueryProfile()
+	if err != nil {
+		return
+	}
+	a.Name = p.Name
+	a.Uuid, err = uuid.Parse(strings.ReplaceAll(p.ID, "-", ""))
+	return
+}
+
+func NewAccount(name string, uuid uuid.UUID, ygg string) (a *Account) {
+	return &Account{
+		Name:    name,
+		Uuid:    uuid,
+		Ygg:     ygg,
+		Servers: DefaultServers,
+	}
 }
