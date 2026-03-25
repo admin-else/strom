@@ -37,7 +37,8 @@ func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
 }
 
 // StatusRaw returns a StatusClient that is not connected to a server.
-// So ignore the resource leak warning. And maybe attach a warn ignore comment
+// So ignore the resource leak warning. And maybe attach a warn ignore comment.
+// It does not resolve SRV records.
 func StatusRaw(addr string) (s *StatusClient, err error) {
 	c, err := ConnectVersionLess(addr)
 	if err != nil {
@@ -69,11 +70,21 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 	return
 }
 
-func Status(addr string) (status server.StatusResponse, err error) {
+// StatusNoDns is like Status but does not resolve SRV records.
+func StatusNoDns(addr string) (status server.StatusResponse, err error) {
 	s, err := StatusRaw(addr)
 	if err != nil {
 		return
 	}
 	err = json.Unmarshal([]byte(s.Status), &status)
 	return
+}
+
+// Status resolves the status of the minecraft server at the given address.
+func Status(addr string) (status server.StatusResponse, err error) {
+	addr, err = DoDnsSimple(addr)
+	if err != nil {
+		return
+	}
+	return StatusNoDns(addr)
 }

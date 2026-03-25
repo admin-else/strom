@@ -1,11 +1,8 @@
-package main
+package packet_inspector
 
 import (
-	"crypto/sha256"
-	_ "embed"
-	"fmt"
+	"flag"
 	"log/slog"
-	"os"
 
 	"github.com/admin-else/strom/api"
 	"github.com/admin-else/strom/client"
@@ -18,8 +15,13 @@ import (
 	"github.com/admin-else/strom/text"
 )
 
-//go:embed failed_packet.go.tmpl
-var TestSrcF string
+var Cmd = flag.NewFlagSet("packet-inspector", flag.ContinueOnError)
+
+var OfflineNameFlag = Cmd.String("name", "packet_inspector", "offline player name")
+var Token = Cmd.String("token", "", "token to use")
+
+var TargetAddr = Cmd.String("addr", "127.0.0.1:25565", "address to connect to")
+var ListenAddr = Cmd.String("listen", "127.0.0.1:25566", "address to listen on")
 
 type Proxy struct {
 	Client, Servee *proto.Conn
@@ -29,9 +31,6 @@ type Proxy struct {
 func (p *Proxy) Start() (err error) {
 	p.Client.RegisterCritical(p.OnAnything)
 	p.Servee.RegisterCritical(p.OnAnything)
-
-	p.Servee.Register(p.OnUnCodeAble)
-	p.Client.Register(p.OnUnCodeAble)
 
 	p.Servee.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
 
@@ -75,49 +74,38 @@ func (p *Proxy) OnFinishConfiguration(packet *v1_21_11.ConfigurationToServerPack
 	return
 }
 
-func (p *Proxy) OnUnCodeAble(packet *proto.UnCodablePacket) (err error) {
-	SaveUnCodeAbleAsTest(packet.Direction, packet)
-	return
-}
-
-func SaveUnCodeAbleAsTest(d proto_base.Direction, packet *proto.UnCodablePacket) {
-	hUntrimmed := sha256.Sum256(packet.Data)
-	h := hUntrimmed[:8]
-	f, err := os.Create(fmt.Sprintf(".failed_packets/%v_%10x_test.go", len(packet.Data), h))
-	if err != nil {
-		panic(err)
-	}
-
-	//goland:noinspection GoUnhandledErrorResult
-	defer f.Close()
-	_, err = fmt.Fprintf(f, TestSrcF, packet.Err, h, d.Opposite(), packet.Data)
-	if err != nil {
-		panic(err)
-	}
-	slog.Info("Packet failed to parse", "error", packet.Err, "saved", f.Name(), "data", fmt.Sprintf("%q", packet.Data))
-}
-
 var StatusResponse = server.StatusResponse{
 	Version: server.StatusResponseVersion{
 		Name:     text.Pretty("STROM"),
 		Protocol: 772,
 	},
 	Players:            server.StatusResponsePlayers{},
-	Description:        text.Pretty("Hunt the un-code-able packets"),
+	Description:        text.Pretty("Packet spy forwards to " + *TargetAddr),
 	Favicon:            "",
 	EnforcesSecureChat: false,
 }
 
-func main() {
+func Run(args []string) (err error) {
+	err = Cmd.Parse(args)
+	if err != nil {
+		return
+	}
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	err := server.StartServerWithOnConn(":25566", func(serveeConn *proto.Conn) (err error) {
+	slog.Info("Starting packet inspector", "listen", *ListenAddr)
+	err = server.StartServerWithOnConn(*ListenAddr, func(serveeConn *proto.Conn) (err error) {
 		p := &Proxy{Servee: serveeConn, Client: nil}
-		acc := api.NewOfflineAccount("sigma")
+		var acc = api.NewOfflineAccount(*OfflineNameFlag)
+		if *Token != "" {
+			acc, err = api.NewAccountFromYGG(*Token)
+			if err != nil {
+				return
+			}
+		}
 		_, err = server.ServeLogin(serveeConn, server.WithOtherAccount(acc), server.WithStatus(StatusResponse))
 		if err != nil {
 			return
 		}
-		c, err := client.LoginNoSrv("127.0.0.1:25565", acc)
+		c, err := client.Login(*TargetAddr, acc)
 		if err != nil {
 			return
 		}
@@ -126,7 +114,5 @@ func main() {
 		err = p.Start()
 		return
 	})
-	if err != nil {
-		panic(err)
-	}
+	return
 }

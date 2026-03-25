@@ -9,6 +9,7 @@ import (
 	"slices"
 
 	"github.com/admin-else/strom/cmd/strom/offline_uuid"
+	"github.com/admin-else/strom/cmd/strom/packet_inspector"
 	"github.com/admin-else/strom/cmd/strom/print_nbt"
 	"github.com/admin-else/strom/cmd/strom/status"
 )
@@ -20,6 +21,7 @@ var subcommands = map[string]func(args []string) error{
 	"offline-uuid": offline_uuid.Run,
 	"print-nbt":    print_nbt.Run,
 	"status":       status.Run,
+	"packet-spy":   packet_inspector.Run,
 }
 
 func Help(args []string) (err error) {

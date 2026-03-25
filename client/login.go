@@ -127,7 +127,7 @@ func (s *LoginClient) OnStart() (err error) {
 	return
 }
 
-func Login(c *proto.Conn, account *api.Account) (err error) {
+func LoginRaw(c *proto.Conn, account *api.Account, addr string) (err error) {
 	lc := &LoginClient{
 		Conn:    c,
 		Account: account,
@@ -159,11 +159,24 @@ func Login(c *proto.Conn, account *api.Account) (err error) {
 	return
 }
 
-func ConnectAndLogin(connectTo string, account *api.Account) (c *proto.Conn, err error) {
+func LoginNoSrv(connectTo string, account *api.Account) (c *proto.Conn, err error) {
 	c, err = Connect(connectTo)
 	if err != nil {
 		return
 	}
-	err = Login(c, account)
+	err = LoginRaw(c, account, connectTo)
+	return
+}
+
+func Login(connectTo string, account *api.Account) (c *proto.Conn, err error) {
+	connectTo, err = DoDnsSimple(connectTo)
+	if err != nil {
+		return
+	}
+	c, err = Connect(connectTo)
+	if err != nil {
+		return
+	}
+	err = LoginRaw(c, account, connectTo)
 	return
 }

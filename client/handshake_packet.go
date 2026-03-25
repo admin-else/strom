@@ -13,6 +13,7 @@ func MakeHandshakePacket(c *proto.Conn, nextState proto_base.State) (p *v1_21_8.
 	return MakeHandshakePacketAddr(c, nextState, c.RemoteAddr().String())
 }
 
+// MakeHandshakePacketAddr gets a custom addr
 func MakeHandshakePacketAddr(s *proto.Conn, nextState proto_base.State, addr string) (p *v1_21_8.HandshakingToServerPacketSetProtocol, err error) {
 	p = &v1_21_8.HandshakingToServerPacketSetProtocol{NextState: int32(nextState), ProtocolVersion: s.ProtocolVersion}
 	var portStr string
