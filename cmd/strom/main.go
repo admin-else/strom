@@ -8,9 +8,9 @@ import (
 	"os"
 	"slices"
 
-	"github.com/admin-else/strom/tools/cli/offline_uuid"
-	"github.com/admin-else/strom/tools/cli/print_nbt"
-	"github.com/admin-else/strom/tools/cli/status"
+	"github.com/admin-else/strom/cmd/strom/offline_uuid"
+	"github.com/admin-else/strom/cmd/strom/print_nbt"
+	"github.com/admin-else/strom/cmd/strom/status"
 )
 
 var ExpectedASubcommandErr = errors.New("expected a subcommand")
