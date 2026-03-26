@@ -66,9 +66,7 @@ type Conn struct {
 }
 
 func (c *Conn) StartConn() (err error) {
-	if c.State() != proto_base.Play {
-		c.sendTickAlways = true
-	}
+	c.sendTickAlways = c.State() != proto_base.Play
 
 	c.RegisterEventSource(c.ActivateReceiveRoutine())
 	c.RegisterCritical(c.OnLoginTick)
