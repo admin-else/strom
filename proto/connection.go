@@ -2,7 +2,6 @@ package proto
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -16,6 +15,10 @@ import (
 	"github.com/admin-else/strom/proto_generated"
 )
 
+const (
+	BufferNPackets = 100
+)
+
 var (
 	BadPacketTypeErr                    = errors.New("bad packet type")
 	BadPacketIdErr                      = errors.New("bad packet id")
@@ -25,6 +28,9 @@ var (
 	CantTranslateErr                    = errors.New("cant translate packet")
 	PacketDoesntExistInFutureVersionErr = errors.New("packet doesnt exist in future version")
 )
+
+// LoginTick is used as a subsite for the old event system because it is very useful in login contexts
+type LoginTick struct{}
 
 var LatestVersion = proto_generated.SupportedVersions[len(proto_generated.SupportedVersions)-1]
 
@@ -54,35 +60,28 @@ type Conn struct {
 	Version         string
 	ProtocolVersion int32
 
-	receiveRoutine bool
-	packetCh       chan proto_base.EncodeDecodeAble
+	sendTickAlways bool
 }
 
 func (c *Conn) StartConn() (err error) {
-	c.RegisterCritical(c.OnTick)
-	if c.state == proto_base.Play {
-		c.ActivateReceiveRoutine()
+	if c.State() != proto_base.Play {
+		c.sendTickAlways = true
 	}
+
+	c.RegisterEventSource(c.ActivateReceiveRoutine())
+	c.RegisterCritical(c.OnLoginTick)
 	err = c.Loop.StartLoop()
 	c.Loop = event.NewLoop()
 	return
 }
 
-func (c *Conn) ReceiveJob() {
-	ctx := c.Ctx
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			packet, err := c.Receive()
-			if err != nil {
-				c.ErrChan <- err
-				return
-			}
-			c.packetCh <- packet
-		}
+func (c *Conn) OnLoginTick(_ LoginTick) (err error) {
+	packet, err := c.Receive()
+	if err != nil {
+		return
 	}
+	err = c.Fire(packet)
+	return
 }
 
 func (c *Conn) SetState(state proto_base.State) {
@@ -119,13 +118,30 @@ func (c *Conn) SetProtocolVersion(version int32) (err error) {
 
 // ActivateReceiveRoutine activates the receive-routine.
 // It ensures that the receive-routine is only started once and creates a buffered channel for packet handling.
-func (c *Conn) ActivateReceiveRoutine() {
-	if c.receiveRoutine {
-		return
-	}
-	c.packetCh = make(chan proto_base.EncodeDecodeAble, 100) // i dunno how many to buffer 100 seems reasonable
-	go c.ReceiveJob()
-	c.receiveRoutine = true
+func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
+	ch := make(chan any, BufferNPackets)
+	go func() {
+		ctx := c.Ctx // this prevents c.Ctx being reassigned
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				if c.sendTickAlways {
+					ch <- LoginTick{}
+				} else {
+					packet, err := c.Receive()
+					if err != nil {
+						ch <- err
+						return
+					}
+					ch <- packet
+				}
+			}
+		}
+	}()
+	chSending = ch
+	return
 }
 
 func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packetInfo proto_base.PacketInfo) (convertedPacket proto_base.EncodeDecodeAble, err error) {
@@ -213,28 +229,6 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		err = nil
 		packet = &UnCodablePacket{Err: PacketNotFullyDecodedErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
-	}
-	return
-}
-
-func (c *Conn) OnTick(_ event.Tick) (err error) {
-	var packet proto_base.EncodeDecodeAble
-	if c.receiveRoutine {
-		select {
-		case packet = <-c.packetCh:
-			if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
-				slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
-			}
-			err = c.Loop.Fire(packet)
-		default:
-		}
-	} else {
-		packet, err = c.Receive()
-		if err != nil {
-			return
-		}
-		slog.Debug("receive", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
-		err = c.Loop.Fire(packet)
 	}
 	return
 }

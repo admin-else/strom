@@ -1,6 +1,8 @@
 package event
 
 import (
+	"context"
+	"reflect"
 	"slices"
 	"time"
 )
@@ -48,6 +50,44 @@ func (t *Timer) Tick() (err error) {
 	return
 }
 
+func (t *Timer) Trigger(ch chan any) {
+	triggerAt := time.Time{}
+	found := false
+	iOnce, iInterval := -1, -1
+	var oTask OnceTask
+	for iOnce, oTask = range t.Once {
+		if oTask.Trigger.Before(triggerAt) || triggerAt.IsZero() {
+			found = true
+			triggerAt = oTask.Trigger
+			break
+		}
+	}
+	var iTask IntervalTask
+	for iInterval, iTask = range t.Interval {
+		if iTask.LastTrigger.Add(iTask.Interval).Before(triggerAt) || triggerAt.IsZero() {
+			found = true
+			triggerAt = iTask.LastTrigger.Add(iTask.Interval)
+			break
+		}
+	}
+	if !found {
+		return
+	}
+	now := time.Now()
+	time.Sleep(triggerAt.Sub(now))
+	if iOnce >= 0 {
+		ch <- CallFunc{F: reflect.ValueOf(t.Once[iOnce].F), Args: []reflect.Value{}}
+		t.Once = slices.Delete(t.Once, iOnce, iOnce+1)
+		return
+	}
+	if iInterval >= 0 {
+		ch <- CallFunc{F: reflect.ValueOf(t.Interval[iInterval].F), Args: []reflect.Value{}}
+		t.Interval[iInterval].LastTrigger = now
+		return
+	}
+	panic("unreachable")
+}
+
 func (t *Timer) Every(interval time.Duration, f func() error) {
 	t.Interval = append(t.Interval, IntervalTask{
 		F:        f,
@@ -60,4 +100,24 @@ func (t *Timer) In(interval time.Duration, f func() error) {
 		F:       f,
 		Trigger: time.Now().Add(interval),
 	})
+}
+
+func (t *Timer) MakeEventSource(ctx context.Context) (chSending <-chan any) {
+	ch := make(chan any)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				t.Trigger(ch)
+			}
+		}
+	}()
+	chSending = ch
+	return
+}
+
+func (t *Timer) Start(c *Loop) {
+	c.RegisterEventSource(t.MakeEventSource(c.Ctx))
 }

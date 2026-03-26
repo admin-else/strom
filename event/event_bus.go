@@ -7,20 +7,14 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
-	"time"
-)
-
-const (
-	LoopsPerSecond = 10000 // this is just so the cpu doesn't burn itself in an unlimited infinite loop
-	TimePerLoop    = time.Second / LoopsPerSecond
 )
 
 type Loop struct {
 	HandlerFunctions map[reflect.Type][]reflect.Value
 
-	Ctx     context.Context
-	ErrChan chan error
-	cancel  context.CancelFunc
+	Ctx          context.Context
+	cancel       context.CancelFunc
+	eventSources []reflect.SelectCase
 }
 
 type Unhandled struct {
@@ -31,10 +25,6 @@ type Anything struct {
 	Val any
 }
 
-type (
-	Tick struct{}
-)
-
 // Close is fired when the loop shuts down.
 type Close struct {
 	Reason error
@@ -43,6 +33,14 @@ type Close struct {
 // HandlerDoneErr will stop the event loop and return the error if provided.
 type HandlerDoneErr struct {
 	Return error
+}
+
+// CallFunc is a special value that when fired with Loop.Fire it calls a function on the main loop
+// Its usefull for event event sources to call functions on the main loop
+// because event sources dont run on the main loop
+type CallFunc struct {
+	F    reflect.Value
+	Args []reflect.Value
 }
 
 func (e HandlerDoneErr) Error() string {
@@ -73,6 +71,7 @@ var WhileClosingErr = errors.New("error while closing")
 // CloseNonCriticalErr will close even when the event is non-critical
 var CloseNonCriticalErr = errors.New("close non-critical")
 var ContextDoneErr = errors.New("context done")
+var RecvNotOkErr = errors.New("recv not ok")
 
 func ValidateHandler(h any) (eventType reflect.Type, hv reflect.Value) {
 	hv = reflect.ValueOf(h)
@@ -87,6 +86,29 @@ func ValidateHandler(h any) (eventType reflect.Type, hv reflect.Value) {
 	}
 	eventType = hv.Type().In(0)
 	return
+}
+
+// RegisterEventSource registers an event source an event source is a channel this channel along with all other event sources will be reflect.Select 'ed until the loop closes
+// here is an example of an event source function
+//
+//	func() (chSending <-chan any) {
+//			ch := make(chan any)
+//			go func() {
+//				ctx := conn.Ctx
+//				for {
+//					select {
+//					case <-ctx.Done():
+//						return
+//					case eventt := <-otherSource:
+//						err = c.DoCommand(eventt)
+//					}
+//				}
+//			}()
+//			chSending = ch
+//			return
+//		}
+func (l *Loop) RegisterEventSource(ch <-chan any) {
+	l.eventSources = append(l.eventSources, reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(ch)})
 }
 
 // Register registers a handler that will not close the loop if it returns an error.
@@ -137,7 +159,7 @@ func (l *Loop) FireFound(event any) (found bool, err error) {
 			errV := handler.Call([]reflect.Value{reflect.ValueOf(event)})[0]
 			if !errV.IsNil() {
 				err = errV.Interface().(error)
-				err = errors.Join(fmt.Errorf("event handler failed at: %s(%T)", handler.Type().In(0), event), err)
+				err = errors.Join(fmt.Errorf("event handler failed at: %T", event), err)
 				return
 			}
 		}
@@ -147,6 +169,21 @@ func (l *Loop) FireFound(event any) (found bool, err error) {
 
 // Fire dispatches the provided event to all appropriate handlers and invokes fallback handlers if the event is unhandled.
 func (l *Loop) Fire(event any) (err error) {
+	err, isErr := event.(error)
+	if isErr {
+		return
+	}
+	err = nil
+
+	f, isCallFunc := event.(CallFunc)
+	if isCallFunc {
+		errV := f.F.Call(f.Args)[0].Interface()
+		if errV != nil {
+			err = errV.(error)
+		}
+		return
+	}
+
 	found, err := l.FireFound(event)
 	if err != nil {
 		if errors.Is(err, DontForwardErr) {
@@ -164,24 +201,30 @@ func (l *Loop) Fire(event any) (err error) {
 	return
 }
 
-func (l *Loop) OnTick(_ Tick) (err error) {
-	select {
-	case <-l.Ctx.Done():
-		err = ContextDoneErr
-	default:
-	}
-	return
+func (l *Loop) ContextDoneListener() (chSending <-chan any) {
+	ch := make(chan any)
+	go func() {
+		select {
+		case <-l.Ctx.Done():
+			ch <- ContextDoneErr
+		}
+	}()
+	return ch
 }
 
-func (l *Loop) startLoop() (err error) {
+func (l *Loop) StartLoop() (err error) {
 	_ = *l // exit early on nil loop
+	l.RegisterEventSource(l.ContextDoneListener())
 	for {
-		tickStartTime := time.Now()
-		err = l.Fire(Tick{})
+		_, v, ok := reflect.Select(l.eventSources)
+		if !ok {
+			err = RecvNotOkErr
+			break
+		}
+		err = l.Fire(v.Interface())
 		if err != nil {
 			break
 		}
-		time.Sleep(TimePerLoop - time.Since(tickStartTime))
 	}
 	if errors.Is(err, HandlerDoneErr{}) {
 		err = errors.Unwrap(err)
@@ -193,25 +236,8 @@ func (l *Loop) startLoop() (err error) {
 	return
 }
 
-func (l *Loop) StartLoop() (err error) {
-	go func() {
-		l.ErrChan <- MainHandlerErr{l.startLoop()}
-	}()
-	err = <-l.ErrChan
-	l.cancel()
-	errMaybe := MainHandlerErr{}
-	if errors.As(err, &errMaybe) {
-		err = errors.Unwrap(err)
-	} else {
-		for !errors.Is(<-l.ErrChan, MainHandlerErr{}) {
-		}
-	}
-	return
-}
-
 func NewLoop() (l *Loop) {
 	l = &Loop{}
-	l.ErrChan = make(chan error)
 	l.Ctx, l.cancel = context.WithCancel(context.Background())
 	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
 	return

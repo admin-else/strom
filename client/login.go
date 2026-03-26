@@ -46,10 +46,6 @@ func (s *LoginClient) OnDefault(event event.Unhandled) (err error) {
 	return
 }
 
-func (s *LoginClient) OnCycle(_ event.Tick) (err error) {
-	return
-}
-
 func (s *LoginClient) OnClose(_ event.Close) (err error) {
 	return
 }
@@ -133,7 +129,6 @@ func LoginRaw(c *proto.Conn, account *api.Account, addr string) (err error) {
 		Account: account,
 	}
 	lc.RegisterCritical(lc.OnDefault)
-	lc.RegisterCritical(lc.OnCycle)
 	lc.RegisterCritical(lc.OnClose)
 	lc.RegisterUntilLatest(lc.OnCompress)
 	lc.RegisterUntilLatest(lc.OnEncrypt)
