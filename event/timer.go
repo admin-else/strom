@@ -54,22 +54,24 @@ func (t *Timer) Trigger(ch chan any) {
 	triggerAt := time.Time{}
 	found := false
 	iOnce, iInterval := -1, -1
-	var oTask OnceTask
-	for iOnce, oTask = range t.Once {
+
+	for i, oTask := range t.Once {
 		if oTask.Trigger.Before(triggerAt) || triggerAt.IsZero() {
 			found = true
 			triggerAt = oTask.Trigger
-			break
+			iOnce = i
 		}
 	}
-	var iTask IntervalTask
-	for iInterval, iTask = range t.Interval {
+
+	for i, iTask := range t.Interval {
 		if iTask.LastTrigger.Add(iTask.Interval).Before(triggerAt) || triggerAt.IsZero() {
 			found = true
 			triggerAt = iTask.LastTrigger.Add(iTask.Interval)
-			break
+			iOnce = -1
+			iInterval = i
 		}
 	}
+
 	if !found {
 		return
 	}
@@ -87,7 +89,6 @@ func (t *Timer) Trigger(ch chan any) {
 	}
 	panic("unreachable")
 }
-
 func (t *Timer) Every(interval time.Duration, f func() error) {
 	t.Interval = append(t.Interval, IntervalTask{
 		F:        f,
