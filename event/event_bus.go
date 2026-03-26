@@ -212,6 +212,11 @@ func (l *Loop) ContextDoneListener() (chSending <-chan any) {
 	return ch
 }
 
+func (l *Loop) IsTypeRegistered(t reflect.Type) bool {
+	_, ok := l.HandlerFunctions[t]
+	return ok
+}
+
 func (l *Loop) StartLoop() (err error) {
 	_ = *l // exit early on nil loop
 	l.RegisterEventSource(l.ContextDoneListener())

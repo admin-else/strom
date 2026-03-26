@@ -7,15 +7,27 @@ import (
 	"github.com/admin-else/strom/proto_generated"
 )
 
-// I know this is in-performant and i dont care until it becomes a problem for somebody it will stay like this and it is pretty easy to make caches or similar to speed this up so yeah
+type PidEtc struct {
+	Direction       proto_base.Direction
+	State           proto_base.State
+	PacketId        int32
+	ProtocolVersion int32
+}
+
+var pidMap = make(map[PidEtc]*proto_base.PacketInfo)
+
+func init() {
+	for _, pin := range proto_generated.Packets {
+		pidMap[PidEtc{pin.Direction, pin.State, pin.PacketId, pin.ProtocolVersion}] = &pin
+	}
+}
 
 func LookUpTypeByPacketInfo(direction proto_base.Direction, state proto_base.State, pid, version int32) (p proto_base.PacketInfo, ok bool) {
-	for _, pin := range proto_generated.Packets {
-		if pin.Direction != direction || pin.State != state || pin.ProtocolVersion != version || pin.PacketId != pid {
-			continue
-		}
-		return pin, true
+	pP, ok := pidMap[PidEtc{direction, state, pid, version}]
+	if !ok {
+		return
 	}
+	p = *pP
 	return
 }
 

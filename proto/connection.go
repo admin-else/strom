@@ -27,6 +27,7 @@ var (
 	WrongDirectionErr                   = errors.New("wrong direction")
 	CantTranslateErr                    = errors.New("cant translate packet")
 	PacketDoesntExistInFutureVersionErr = errors.New("packet doesnt exist in future version")
+	NoHandlerRegisteredErr              = errors.New("no handler registered")
 )
 
 // LoginTick is used as a subsite for the old event system because it is very useful in login contexts
@@ -54,11 +55,12 @@ func (u *UnCodablePacket) Decode(r io.Reader) (err error) {
 type Conn struct {
 	RawConn
 	*event.Loop
-	state           proto_base.State
-	stateMutex      sync.RWMutex
-	Actor           proto_base.Actor
-	Version         string
-	ProtocolVersion int32
+	state              proto_base.State
+	stateMutex         sync.RWMutex
+	Actor              proto_base.Actor
+	Version            string
+	ProtocolVersion    int32
+	DecodeEvenIfUnused bool
 
 	sendTickAlways bool
 }
@@ -217,6 +219,10 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	packet, ok := LookUpTypeByPacketInfoAndCopyType(c.Actor.ReceiveDirection(), c.State(), id, c.ProtocolVersion)
 	if !ok {
 		packet = &UnCodablePacket{Err: BadPacketIdErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
+		return
+	}
+	if !c.DecodeEvenIfUnused && !c.IsTypeRegistered(reflect.TypeOf(packet)) {
+		packet = &UnCodablePacket{Err: NoHandlerRegisteredErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
 	}
 	err = packet.Decode(b)
