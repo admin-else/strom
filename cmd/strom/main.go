@@ -15,7 +15,7 @@ import (
 )
 
 var ExpectedASubcommandErr = errors.New("expected a subcommand")
-var UnknownSubcommandErr = errors.New("unknown subcommand")
+var UnknownSubcommandErr = errors.New("unknown subcommand try 'strom help' for a list of subcommands")
 
 var subcommands = map[string]func(args []string) error{
 	"offline-uuid": offline_uuid.Run,
