@@ -80,6 +80,7 @@ func (c *Conn) OnLoginTick(_ LoginTick) (err error) {
 	if err != nil {
 		return
 	}
+	slog.Debug("logintick recv", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 	err = c.Fire(packet)
 	return
 }
@@ -135,6 +136,7 @@ func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 						ch <- err
 						return
 					}
+					slog.Debug("recv", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 					ch <- packet
 				}
 			}
