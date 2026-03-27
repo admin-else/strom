@@ -93,6 +93,7 @@ func Run(args []string) (err error) {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 	slog.Info("Starting packet inspector", "listen", *ListenAddr)
 	err = server.StartServerWithOnConn(*ListenAddr, func(serveeConn *proto.Conn) (err error) {
+		serveeConn.DecodeEvenIfUnused = true
 		p := &Proxy{Servee: serveeConn, Client: nil}
 		var acc = api.NewOfflineAccount(*OfflineNameFlag)
 		if *Token != "" {
@@ -105,7 +106,17 @@ func Run(args []string) (err error) {
 		if err != nil {
 			return
 		}
-		c, err := client.Login(*TargetAddr, acc)
+
+		*TargetAddr, err = client.DoDnsSimple(*TargetAddr)
+		if err != nil {
+			return
+		}
+		c, err := client.Connect(*TargetAddr)
+		if err != nil {
+			return
+		}
+		c.DecodeEvenIfUnused = true
+		err = client.LoginRaw(c, acc, *TargetAddr)
 		if err != nil {
 			return
 		}
