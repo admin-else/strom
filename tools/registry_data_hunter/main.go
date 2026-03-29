@@ -74,7 +74,11 @@ func (p *Proxy) OnData(data *v1_21_8.ConfigurationToClientPacketRegistryData) (e
 	d := p.Data.Value.(map[string]any)["Registries"].([]any)
 	var entries []any
 	for _, entry := range data.Entries {
-		entries = append(entries, map[string]any{"TagType": entry.Key, "Value": entry.Value.Value})
+		if entry.Value != nil {
+			entries = append(entries, map[string]any{"TagType": entry.Key, "Value": entry.Value.Value})
+		} else {
+			entries = append(entries, map[string]any{"TagType": entry.Key})
+		}
 	}
 	d = append(d, map[string]any{"Id": data.Id, "Entries": entries})
 	p.Data.Value.(map[string]any)["Registries"] = d
@@ -114,8 +118,8 @@ func handleClient(c *proto.Conn) (err error) {
 	p.Servee.RegisterCritical(p.OnAnything)
 	p.Client.RegisterCriticalUntilLatest(p.OnData)
 	p.Client.RegisterCriticalUntilLatest(p.OnTags)
-
 	p.Client.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
+
 	go func() {
 		errChan <- p.Client.StartConn()
 	}()
@@ -129,6 +133,7 @@ func handleClient(c *proto.Conn) (err error) {
 	}
 	defer f.Close()
 	err = nbt.WriteFile(f, p.Data)
+	slog.Info("saved", "file", SaveAs)
 	return
 }
 
