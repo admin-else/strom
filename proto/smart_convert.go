@@ -125,9 +125,9 @@ func (c *Conn) registerUntil(h any, until string, critical bool) {
 			return v.Interface().(error)
 		}
 		if critical {
-			c.RegisterCustomType(newT, reflect.ValueOf(handleFunc))
-		} else {
 			c.RegisterDirect(newT, reflect.ValueOf(handleFunc))
+		} else {
+			c.RegisterCustomType(newT, reflect.ValueOf(handleFunc))
 		}
 	}
 }

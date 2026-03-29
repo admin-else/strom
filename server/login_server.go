@@ -161,11 +161,11 @@ func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer
 	ret = &LoginServer{Conn: c}
 	ret.RegisterCritical(ret.OnDefault)
 	ret.RegisterIgnore(event.Close{})
-	ret.RegisterUntilLatest(ret.OnHandshake)
-	ret.RegisterUntilLatest(ret.OnLoginStart)
-	ret.RegisterUntilLatest(ret.OnLoginAcknowledged)
-	ret.RegisterUntilLatest(ret.OnStatusRequest)
-	ret.RegisterUntilLatest(ret.OnStatusPing)
+	ret.RegisterCriticalUntilLatest(ret.OnHandshake)
+	ret.RegisterCriticalUntilLatest(ret.OnLoginStart)
+	ret.RegisterCriticalUntilLatest(ret.OnLoginAcknowledged)
+	ret.RegisterCriticalUntilLatest(ret.OnStatusRequest)
+	ret.RegisterCriticalUntilLatest(ret.OnStatusPing)
 	for _, s := range settings {
 		s(ret)
 	}

@@ -130,10 +130,10 @@ func LoginRaw(c *proto.Conn, account *api.Account, addr string) (err error) {
 	}
 	lc.RegisterCritical(lc.OnDefault)
 	lc.RegisterCritical(lc.OnClose)
-	lc.RegisterUntilLatest(lc.OnCompress)
-	lc.RegisterUntilLatest(lc.OnEncrypt)
-	lc.RegisterUntilLatest(lc.OnDisconnect)
-	lc.RegisterUntilLatest(lc.OnSuccess)
+	lc.RegisterCriticalUntilLatest(lc.OnCompress)
+	lc.RegisterCriticalUntilLatest(lc.OnEncrypt)
+	lc.RegisterCriticalUntilLatest(lc.OnDisconnect)
+	lc.RegisterCriticalUntilLatest(lc.OnSuccess)
 
 	p, err := MakeHandshakePacket(lc.Conn, proto_base.Login)
 	if err != nil {
