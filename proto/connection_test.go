@@ -57,7 +57,6 @@ func NewStateFuzzer(state proto_base.State, actor proto_base.Actor) func(t *test
 				cmp.Diff(p, p2, nanIgnorer32, nanIgnorer64, cmpopts.IgnoreFields(proto.UnCodablePacket{}, "Err")),
 			)
 		}
-		return
 	}
 }
 
