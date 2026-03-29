@@ -27,9 +27,8 @@ func wontFail[T any](v T, err error) T {
 
 var (
 	// Edit these two
-
-	SaveAs  = "1.21.8"
-	Version = "1.21.8"
+	Version = "1.21.11"
+	SaveAs  = "data/registry/" + Version + ".nbt"
 
 	CompatibleProtocolVersion = wontFail(data.LookUpVersionByName(Version)).Version
 	FinishedConfigErr         = errors.New("finished configuration")
@@ -46,14 +45,6 @@ var Status = wontFail(json.Marshal(server.StatusResponse{
 type Proxy struct {
 	Client, Servee *proto.Conn
 	Data           nbt.Tag
-}
-
-func (p *Proxy) OnStart() (err error) {
-	p.Client.RegisterCritical(p.OnAnything)
-	p.Servee.RegisterCritical(p.OnAnything)
-
-	p.Client.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
-	return
 }
 
 func (p *Proxy) OnAnything(e event.Anything) (err error) {
@@ -111,26 +102,28 @@ func handleClient(c *proto.Conn) (err error) {
 	if err != nil {
 		return
 	}
-	sockPuppet, err := client.Connect(":25566")
+	sockPuppet, err := client.Login(":25565", acc)
 	if err != nil {
 		return
 	}
 	defer sockPuppet.Close()
-	err = sockPuppet.StartLoop()
-	if err != nil {
-		return
-	}
 	errChan := make(chan error)
 	p := &Proxy{Client: sockPuppet, Servee: c}
 	p.Data.Value = map[string]any{"Registries": []any{}}
+	p.Client.RegisterCritical(p.OnAnything)
+	p.Servee.RegisterCritical(p.OnAnything)
+	p.Client.RegisterCriticalUntilLatest(p.OnData)
+	p.Client.RegisterCriticalUntilLatest(p.OnTags)
+
+	p.Client.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
 	go func() {
-		errChan <- p.Client.StartLoop()
+		errChan <- p.Client.StartConn()
 	}()
 	go func() {
-		errChan <- p.Servee.StartLoop()
+		errChan <- p.Servee.StartConn()
 	}()
 	err = <-errChan
-	f, err := os.Create("data/registry/" + SaveAs + ".nbt")
+	f, err := os.Create(SaveAs)
 	if err != nil {
 		return
 	}
@@ -141,7 +134,7 @@ func handleClient(c *proto.Conn) (err error) {
 
 func main() {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	err := server.StartServerWithOnConn(":25565", handleClient)
+	err := server.StartServerWithOnConn(":25566", handleClient)
 	if err != nil {
 		panic(err)
 	}
