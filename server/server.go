@@ -46,7 +46,6 @@ func ServeClient(cNet net.Conn, factory Factory) {
 			slog.Error("Error while kicking client", "error", err, "client", c.Conn.RemoteAddr())
 		}
 	}
-	return
 }
 
 func StartServerWithFactory(listenAddr string, factory Factory) (err error) {
