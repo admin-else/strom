@@ -242,7 +242,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		return
 	}
 	if debugPrint {
-		slog.Debug("recv", "packet", fmt.Sprint("#v%", packet))
+		slog.Debug("recv", "packet", fmt.Sprintf("%#v", packet))
 	}
 	return
 }
