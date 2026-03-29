@@ -193,7 +193,11 @@ func (c *Conn) sendRegisteredPacket(packet proto_base.EncodeDecodeAble) (err err
 	if err != nil {
 		return
 	}
-	slog.Debug("send", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
+	debugPrint := slog.Default().Enabled(context.Background(), slog.LevelDebug) &&
+		slices.ContainsFunc(c.DebugPrintPackets, func(s string) bool { return strings.Contains(i.Name, s) })
+	if debugPrint {
+		slog.Debug("send", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
+	}
 	return c.SendRaw(packetBuff.Bytes())
 }
 
