@@ -14,6 +14,9 @@ import (
 func SmartConvertibleTo(from, to reflect.Type) bool {
 	switch from.Kind() {
 	case reflect.Struct:
+		if to.Kind() != reflect.Struct {
+			return false
+		}
 		if from.NumField() != to.NumField() {
 			return false
 		}
@@ -23,7 +26,10 @@ func SmartConvertibleTo(from, to reflect.Type) bool {
 			}
 		}
 		return true
-	case reflect.Ptr:
+	case reflect.Pointer, reflect.Slice:
+		if from.Kind() != to.Kind() {
+			return false
+		}
 		return SmartConvertibleTo(from.Elem(), to.Elem())
 	default:
 		return from.ConvertibleTo(to)
@@ -37,15 +43,21 @@ func SmartConvert(from reflect.Value, to reflect.Type) (ret reflect.Value) {
 		for i := range from.NumField() {
 			ret.Field(i).Set(SmartConvert(from.Field(i), to.Field(i).Type))
 		}
-		return ret
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if from.IsNil() {
 			return reflect.Zero(to)
 		}
-		return SmartConvert(from.Elem(), to.Elem()).Addr()
+		ret = SmartConvert(from.Elem(), to.Elem()).Addr()
+	case reflect.Slice:
+		l := from.Len()
+		ret = reflect.MakeSlice(to, l, l)
+		for i := range l {
+			ret.Index(i).Set(SmartConvert(from.Index(i), to.Elem()))
+		}
 	default:
 		return from.Convert(to)
 	}
+	return ret
 }
 
 // RegisterUntilLatest registers a handler for all versions between the passed in packet version and the latest supported version.

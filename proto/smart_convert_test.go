@@ -18,3 +18,14 @@ func TestCanSmartConvert(t *testing.T) {
 	ret := proto.SmartConvert(reflect.ValueOf(packet), reflect.TypeFor[*v1_21_8.PlayToClientPacketPosition]())
 	t.Logf("%#v", ret)
 }
+
+func TestCanSmartConvertTags(t *testing.T) {
+	packet := &v1_21_9.ConfigurationToClientPacketTags{}
+	targetType := reflect.TypeFor[*v1_21_8.ConfigurationToClientPacketTags]()
+	can := proto.SmartConvertibleTo(reflect.TypeOf(packet), targetType)
+	if !can {
+		t.Fatal("can't smart convert")
+	}
+	ret := proto.SmartConvert(reflect.ValueOf(packet), targetType)
+	t.Logf("%#v", ret)
+}
