@@ -30,10 +30,15 @@ func ServeConfig(c *proto.Conn) (err error) {
 		packet := &v1_21_8.ConfigurationToClientPacketRegistryData{Id: p.(map[string]any)["Id"].(string)}
 		for _, entry := range p.(map[string]any)["Entries"].([]any) {
 			entryTyped := entry.(map[string]any)
+			valAny, ok := entryTyped["Value"]
+			var val *nbt.Anon
+			if ok {
+				val = &nbt.Anon{Value: valAny}
+			}
 			packet.Entries = append(packet.Entries, struct {
 				Key   string
 				Value *nbt.Anon
-			}{entryTyped["TagType"].(string), &nbt.Anon{Value: entryTyped["Value"]}})
+			}{entryTyped["TagType"].(string), val})
 		}
 		err = c.Send(packet)
 		if err != nil {
