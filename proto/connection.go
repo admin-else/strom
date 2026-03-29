@@ -2,11 +2,14 @@ package proto
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"reflect"
+	"slices"
+	"strings"
 	"sync"
 
 	"github.com/admin-else/strom/data"
@@ -55,12 +58,12 @@ func (u *UnCodablePacket) Decode(r io.Reader) (err error) {
 type Conn struct {
 	RawConn
 	*event.Loop
-	state              proto_base.State
-	stateMutex         sync.RWMutex
-	Actor              proto_base.Actor
-	Version            string
-	ProtocolVersion    int32
-	DecodeEvenIfUnused bool
+	state             proto_base.State
+	stateMutex        sync.RWMutex
+	Actor             proto_base.Actor
+	Version           string
+	ProtocolVersion   int32
+	DebugPrintPackets []string
 
 	sendTickAlways bool
 }
@@ -80,7 +83,6 @@ func (c *Conn) OnLoginTick(_ LoginTick) (err error) {
 	if err != nil {
 		return
 	}
-	slog.Debug("logintick recv", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 	err = c.Fire(packet)
 	return
 }
@@ -136,7 +138,6 @@ func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 						ch <- err
 						return
 					}
-					slog.Debug("recv", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 					ch <- packet
 				}
 			}
@@ -146,7 +147,7 @@ func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 	return
 }
 
-func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packetInfo proto_base.PacketInfo) (convertedPacket proto_base.EncodeDecodeAble, err error) {
+func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packetInfo proto_base.PacketInfo) (convertedPacket proto_base.EncodeDecodeAble, packetInfoReal proto_base.PacketInfo, err error) {
 	packetInfoReal, found := LookupPacketInfoByNameProtocolVersionAndState(packetInfo.Name, c.ProtocolVersion, c.State())
 	if !found {
 		err = PacketDoesntExistInFutureVersionErr
@@ -178,7 +179,7 @@ func (c *Conn) sendRegisteredPacket(packet proto_base.EncodeDecodeAble) (err err
 		return
 	}
 	if i.ProtocolVersion != c.ProtocolVersion {
-		packet, err = c.translatePacketVersion(packet, i)
+		packet, i, err = c.translatePacketVersion(packet, i)
 		if err != nil {
 			return
 		}
@@ -216,12 +217,16 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	if err != nil {
 		return
 	}
-	packet, ok := LookUpTypeByPacketInfoAndCopyType(c.Actor.ReceiveDirection(), c.State(), id, c.ProtocolVersion)
+
+	i, ok := LookUpTypeByPacketInfo(c.Actor.ReceiveDirection(), c.State(), id, c.ProtocolVersion)
 	if !ok {
 		packet = &UnCodablePacket{Err: BadPacketIdErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
 	}
-	if !c.DecodeEvenIfUnused && !c.IsTypeRegistered(reflect.TypeOf(packet)) {
+	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
+	debugPrint := slog.Default().Enabled(context.Background(), slog.LevelDebug) &&
+		slices.ContainsFunc(c.DebugPrintPackets, func(s string) bool { return strings.Contains(i.Name, s) })
+	if !c.IsTypeRegistered(reflect.TypeOf(packet)) && !debugPrint {
 		packet = &UnCodablePacket{Err: NoHandlerRegisteredErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
 	}
@@ -235,6 +240,9 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		err = nil
 		packet = &UnCodablePacket{Err: PacketNotFullyDecodedErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
+	}
+	if debugPrint {
+		slog.Debug("recv", "packet", fmt.Sprint("#v%", packet))
 	}
 	return
 }
