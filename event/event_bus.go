@@ -13,7 +13,7 @@ type Loop struct {
 	HandlerFunctions map[reflect.Type][]reflect.Value
 
 	Ctx          context.Context
-	cancel       context.CancelFunc
+	Cancel       context.CancelFunc
 	eventSources []reflect.SelectCase
 }
 
@@ -69,7 +69,6 @@ var DontForwardErr = errors.New("dont forward")
 var WhileClosingErr = errors.New("error while closing")
 
 // CloseNonCriticalErr will close even when the event is non-critical
-var CloseNonCriticalErr = errors.New("close non-critical")
 var ContextDoneErr = errors.New("context done")
 var RecvNotOkErr = errors.New("recv not ok")
 
@@ -126,7 +125,7 @@ func (l *Loop) RegisterCustomType(eventType reflect.Type, hv reflect.Value) {
 		v := hv.Call([]reflect.Value{reflect.ValueOf(packet)})[0]
 		if !v.IsNil() {
 			err := v.Interface().(error)
-			if errors.Is(err, CloseNonCriticalErr) {
+			if errors.Is(err, HandlerDoneErr{}) || errors.Is(err, DontForwardErr) {
 				return err
 			}
 			slog.Error("handler failed", "err", err)
@@ -204,10 +203,8 @@ func (l *Loop) Fire(event any) (err error) {
 func (l *Loop) ContextDoneListener() (chSending <-chan any) {
 	ch := make(chan any)
 	go func() {
-		select {
-		case <-l.Ctx.Done():
-			ch <- ContextDoneErr
-		}
+		<-l.Ctx.Done()
+		ch <- ContextDoneErr
 	}()
 	return ch
 }
@@ -238,12 +235,13 @@ func (l *Loop) StartLoop() (err error) {
 	if closeErr != nil {
 		err = errors.Join(err, errors.Join(WhileClosingErr, closeErr))
 	}
+	l.Cancel()
 	return
 }
 
 func NewLoop() (l *Loop) {
 	l = &Loop{}
-	l.Ctx, l.cancel = context.WithCancel(context.Background())
+	l.Ctx, l.Cancel = context.WithCancel(context.Background())
 	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
 	return
 }
