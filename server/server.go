@@ -5,22 +5,17 @@ import (
 	"log/slog"
 	"net"
 
-	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/text"
 )
 
 func Servee(c net.Conn) (ret *proto.Conn) {
-	ret = &proto.Conn{}
-	_ = ret.SetVersion("1.21.8") // cant fail
-	ret.SetState(proto_base.Handshaking)
-	ret.SetCompressionThreshold(-1)
+	ret = proto.NewConn()
 	ret.Actor = proto_base.Servee
 	ret.Conn = c
 	ret.R = c
 	ret.W = c
-	ret.Loop = event.NewLoop()
 	return
 }
 

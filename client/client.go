@@ -3,7 +3,6 @@ package client
 import (
 	"net"
 
-	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 )
@@ -27,11 +26,8 @@ func Connect(addr string) (ret *proto.Conn, err error) {
 // when using this function.
 // You must close the connection when you're done with it
 func ConnectVersionLess(addr string) (ret *proto.Conn, err error) {
-	ret = &proto.Conn{}
-	ret.SetState(proto_base.Handshaking)
-	ret.SetCompressionThreshold(-1)
+	ret = proto.NewConn()
 	ret.Actor = proto_base.Client
-	ret.Loop = event.NewLoop()
 	ret.Conn, err = net.Dial("tcp", addr)
 	if err != nil {
 		return

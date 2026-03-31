@@ -37,6 +37,7 @@ var (
 type LoginTick struct{}
 
 var LatestVersion = proto_generated.SupportedVersions[len(proto_generated.SupportedVersions)-1]
+var EarliestVersion = proto_generated.SupportedVersions[len(proto_generated.SupportedVersions)-1]
 
 // UnCodablePacket represents a packet that could not be decoded.
 type UnCodablePacket struct {
@@ -230,7 +231,8 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
 	debugPrint := slog.Default().Enabled(context.Background(), slog.LevelDebug) &&
 		slices.ContainsFunc(c.DebugPrintPackets, func(s string) bool { return strings.Contains(i.Name, s) })
-	if !c.IsTypeRegistered(reflect.TypeOf(packet)) && !debugPrint {
+	isListenerRegistered := c.IsTypeRegistered(reflect.TypeOf(packet))
+	if !isListenerRegistered && !debugPrint {
 		packet = &UnCodablePacket{Err: NoHandlerRegisteredErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
 		return
 	}
@@ -246,7 +248,19 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		return
 	}
 	if debugPrint {
-		slog.Debug("recv", "packet", fmt.Sprintf("%#v", packet))
+		slog.Debug("recv", "packet", fmt.Sprintf("%#v", packet), "isListenerRegistered", isListenerRegistered)
 	}
+	return
+}
+
+func NewConn() (ret *Conn) {
+	ret = &Conn{}
+	ret.SetState(proto_base.Handshaking)
+	ret.SetCompressionThreshold(-1)
+	err := ret.SetVersion(EarliestVersion)
+	if err != nil {
+		panic(err)
+	}
+	ret.Loop = event.NewLoop()
 	return
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/admin-else/strom/proto"
+	"github.com/admin-else/strom/proto_generated/v1_21_11"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/proto_generated/v1_21_9"
 )
@@ -28,4 +29,20 @@ func TestCanSmartConvertTags(t *testing.T) {
 	}
 	ret := proto.SmartConvert(reflect.ValueOf(packet), targetType)
 	t.Logf("%#v", ret)
+}
+
+func TestRegisterUntilLatest(t *testing.T) {
+	conn := proto.NewConn()
+	ok := false
+	conn.RegisterCriticalUntilLatest(func(p *v1_21_8.ConfigurationToServerPacketFinishConfiguration) error {
+		ok = true
+		return nil
+	})
+	err := conn.Fire(&v1_21_11.ConfigurationToServerPacketFinishConfiguration{})
+	if err != nil {
+		t.Errorf("fire failed err: %v", err)
+	}
+	if !ok {
+		t.Errorf("handler not called")
+	}
 }

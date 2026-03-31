@@ -73,3 +73,12 @@ func LookupPacketInfoByNameProtocolVersionAndState(name string, version int32, s
 	}
 	return
 }
+
+func LookupPacketInfoByNameProtocolVersionStateAndDirection(name string, version int32, state proto_base.State, direction proto_base.Direction) (p proto_base.PacketInfo, ok bool) {
+	for _, p := range proto_generated.Packets {
+		if state == p.State && p.Name == name && p.ProtocolVersion == version && p.Direction == direction {
+			return p, true
+		}
+	}
+	return
+}

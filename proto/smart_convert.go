@@ -88,7 +88,11 @@ func (c *Conn) RegisterCriticalUntil(h any, until string) {
 
 func (c *Conn) registerUntil(h any, until string, critical bool) {
 	eventType, hv := event.ValidateHandler(h)
-	c.RegisterDirect(eventType, hv)
+	if critical {
+		c.RegisterDirect(eventType, hv)
+	} else {
+		c.RegisterCustomType(eventType, hv)
+	}
 	if !eventType.Implements(reflect.TypeFor[proto_base.EncodeDecodeAble]()) {
 		panic("expected method with argument that implements proto_base.EncodeDecodeAble")
 	}
@@ -109,7 +113,7 @@ func (c *Conn) registerUntil(h any, until string, critical bool) {
 			panic("protocol version not found")
 		}
 		var newPacketInfo proto_base.PacketInfo
-		newPacketInfo, found = LookupPacketInfoByNameProtocolVersionAndState(packetInfo.Name, versionInfo.Version, packetInfo.State)
+		newPacketInfo, found = LookupPacketInfoByNameProtocolVersionStateAndDirection(packetInfo.Name, versionInfo.Version, packetInfo.State, packetInfo.Direction)
 		if !found {
 			panic("packet not found")
 		}

@@ -70,6 +70,16 @@ func (p *Proxy) OnFinishConfiguration(_ *v1_21_8.ConfigurationToClientPacketFini
 	return
 }
 
+func (p *Proxy) OnSelectKnownPacks(data *v1_21_8.ConfigurationToClientPacketCommonSelectKnownPacks) (err error) {
+	var entries []any
+	for _, entry := range data.Packs {
+		e := map[string]any{"Namespace": entry.Namespace, "Id": entry.Id, "Version": entry.Version}
+		entries = append(entries, e)
+	}
+	p.Data.Value.(map[string]any)["KnownPacks"] = entries
+	return
+}
+
 func (p *Proxy) OnData(data *v1_21_8.ConfigurationToClientPacketRegistryData) (err error) {
 	d := p.Data.Value.(map[string]any)["Registries"].([]any)
 	var entries []any
@@ -118,6 +128,7 @@ func handleClient(c *proto.Conn) (err error) {
 	p.Servee.RegisterCritical(p.OnAnything)
 	p.Client.RegisterCriticalUntilLatest(p.OnData)
 	p.Client.RegisterCriticalUntilLatest(p.OnTags)
+	p.Client.RegisterCriticalUntilLatest(p.OnSelectKnownPacks)
 	p.Client.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
 
 	go func() {

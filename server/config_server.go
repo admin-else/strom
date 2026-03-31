@@ -1,9 +1,6 @@
 package server
 
 import (
-	"fmt"
-	"log/slog"
-
 	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/nbt"
@@ -14,24 +11,45 @@ import (
 
 type ConfigServer struct {
 	*proto.Conn
-}
-
-func (c *ConfigServer) Default(event event.Anything) (err error) {
-	slog.Debug("Config server", "packet", fmt.Sprintf("%#v", event.Val))
-	return
+	registryData map[string]any
 }
 
 func ServeConfig(c *proto.Conn) (err error) {
+	cs := &ConfigServer{Conn: c}
 	n, err := data.LoadRegistry(c.Version)
 	if err != nil {
 		return
 	}
-	for _, p := range n.Value.(map[string]any)["Registries"].([]any) {
+	err = c.Send(&v1_21_8.ConfigurationToClientPacketFeatureFlags{Features: []string{"minecraft:vanilla"}})
+	if err != nil {
+		return
+	}
+	cs.registryData = n.Value.(map[string]any)
+	packet := &v1_21_8.ConfigurationToClientPacketCommonSelectKnownPacks{}
+	for _, pAny := range cs.registryData["KnownPacks"].([]any) {
+		p := pAny.(map[string]any)
+		packet.Packs = append(packet.Packs, struct {
+			Namespace string
+			Id        string
+			Version   string
+		}{p["Namespace"].(string), p["Id"].(string), p["Version"].(string)})
+	}
+	err = c.Send(packet)
+	if err != nil {
+		return
+	}
+	cs.RegisterCriticalUntilLatest(cs.OnSelectKnownPacksResponse)
+	cs.RegisterCriticalUntilLatest(cs.OnFinishConfiguration)
+	return cs.StartConn()
+}
+
+func (c *ConfigServer) OnSelectKnownPacksResponse(_ *v1_21_8.ConfigurationToServerPacketCommonSelectKnownPacks) (err error) {
+	for _, p := range c.registryData["Registries"].([]any) {
 		packet := &v1_21_8.ConfigurationToClientPacketRegistryData{Id: p.(map[string]any)["Id"].(string)}
 		for _, entry := range p.(map[string]any)["Entries"].([]any) {
 			entryTyped := entry.(map[string]any)
 			valAny, ok := entryTyped["Value"]
-			var val *nbt.Anon
+			var val *nbt.Anon = nil
 			if ok {
 				val = &nbt.Anon{Value: valAny}
 			}
@@ -46,7 +64,7 @@ func ServeConfig(c *proto.Conn) (err error) {
 		}
 	}
 	tagsPacket := &v1_21_8.ConfigurationToClientPacketTags{}
-	for _, p := range n.Value.(map[string]any)["Tags"].([]any) {
+	for _, p := range c.registryData["Tags"].([]any) {
 		p := p.(map[string]any)
 		tags := v1_21_8.Tags{}
 		for _, entry := range p["Entries"].([]any) {
@@ -69,8 +87,7 @@ func ServeConfig(c *proto.Conn) (err error) {
 		return
 	}
 	err = c.Send(&v1_21_8.ConfigurationToClientPacketFinishConfiguration{})
-	cs := &ConfigServer{c}
-	return cs.StartLoop()
+	return
 }
 
 func (c *ConfigServer) OnFinishConfiguration(_ *v1_21_8.ConfigurationToServerPacketFinishConfiguration) (err error) {
