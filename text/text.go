@@ -583,6 +583,12 @@ func (c *Component) writePretty(sb *strings.Builder) {
 		// This is a simplified version of translation handling
 		// In a real client, this would look up the translation key
 		sb.WriteString(c.Translate)
+		sb.WriteRune('(')
+		for _, w := range c.With {
+			w.writePretty(sb)
+			sb.WriteByte(',')
+		}
+		sb.WriteRune(')')
 	}
 
 	for _, extra := range c.Extra {
