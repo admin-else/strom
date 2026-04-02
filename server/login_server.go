@@ -109,7 +109,10 @@ func (l *LoginServer) OnLoginAcknowledged(_ *v1_21_8.LoginToServerPacketLoginAck
 }
 
 func (l *LoginServer) OnDefault(event event.Unhandled) (err error) {
-	err = fmt.Errorf("unexpected event during login: %#v", event)
+	if _, ok := event.Val.(proto_base.EncodeDecodeAble); !ok {
+		return
+	}
+	slog.Warn("unexpected packet during login serving", "packet", event.Val)
 	return
 }
 
@@ -160,7 +163,6 @@ func WithCompatibleVersions(versions ...int32) LoginServerSetting {
 func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
 	ret.RegisterCritical(ret.OnDefault)
-	ret.RegisterIgnore(event.Close{})
 	ret.RegisterCriticalUntilLatest(ret.OnHandshake)
 	ret.RegisterCriticalUntilLatest(ret.OnLoginStart)
 	ret.RegisterCriticalUntilLatest(ret.OnLoginAcknowledged)
