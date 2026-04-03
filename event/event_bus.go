@@ -191,12 +191,12 @@ func (l *Loop) Fire(event any) (err error) {
 		return
 	}
 	if !found {
-		_, err = l.FireFound(Unhandled{event})
+		found, err = l.FireFound(Unhandled{event})
 		if err != nil {
 			return
 		}
 	}
-	_, err = l.FireFound(Anything{event})
+	found, err = l.FireFound(Anything{event})
 	return
 }
 
