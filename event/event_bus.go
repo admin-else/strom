@@ -228,8 +228,9 @@ func (l *Loop) StartLoop() (err error) {
 			break
 		}
 	}
-	if errors.Is(err, HandlerDoneErr{}) {
-		err = errors.Unwrap(err)
+	var contextDoneErr HandlerDoneErr
+	if errors.As(err, &contextDoneErr) {
+		err = contextDoneErr.Return
 	}
 	closeErr := l.Fire(Close{err})
 	if closeErr != nil {
