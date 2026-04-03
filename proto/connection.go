@@ -119,6 +119,8 @@ func (c *Conn) SetProtocolVersion(version int32) (err error) {
 // ActivateReceiveRoutine activates the receive-routine.
 // It ensures that the receive-routine is only started once and creates a buffered channel for packet handling.
 func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
+	// This expects you to start a new routine when switching into play state
+	spamLoginTick := c.State() != proto_base.Play
 	ch := make(chan any, BufferNPackets)
 	go func() {
 		ctx := c.Ctx // this prevents c.Ctx being reassigned
@@ -127,7 +129,7 @@ func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 			case <-ctx.Done():
 				return
 			default:
-				if c.State() != proto_base.Play {
+				if spamLoginTick {
 					ch <- LoginTick{}
 				} else {
 					packet, err := c.Receive()
