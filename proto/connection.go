@@ -65,13 +65,9 @@ type Conn struct {
 	Version           string
 	ProtocolVersion   int32
 	DebugPrintPackets []string
-
-	sendTickAlways bool
 }
 
 func (c *Conn) StartConn() (err error) {
-	c.sendTickAlways = c.State() != proto_base.Play
-
 	c.RegisterEventSource(c.ActivateReceiveRoutine())
 	c.RegisterCritical(c.OnLoginTick)
 	err = c.Loop.StartLoop()
@@ -131,7 +127,7 @@ func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 			case <-ctx.Done():
 				return
 			default:
-				if c.sendTickAlways {
+				if c.State() != proto_base.Play {
 					ch <- LoginTick{}
 				} else {
 					packet, err := c.Receive()
@@ -224,6 +220,9 @@ func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
 }
 
 func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
+	if c.R == nil {
+		return
+	}
 	packetBytes, err := c.ReceiveRaw()
 	if err != nil {
 		return
