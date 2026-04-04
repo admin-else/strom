@@ -200,18 +200,7 @@ func (c *Conn) sendRegisteredPacket(packet proto_base.EncodeDecodeAble) (err err
 	return c.SendRaw(packetBuff.Bytes())
 }
 
-type Send struct {
-	Packet proto_base.EncodeDecodeAble
-}
-
 func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
-	err = c.Fire(Send{Packet: packet})
-	if err != nil {
-		return
-	}
-	if c.W == nil {
-		return
-	}
 	switch packet := packet.(type) {
 	case *UnCodablePacket:
 		err = c.SendRaw(packet.Data)
