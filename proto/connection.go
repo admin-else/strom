@@ -65,6 +65,9 @@ type Conn struct {
 	Version           string
 	ProtocolVersion   int32
 	DebugPrintPackets []string
+
+	asyncPackets      bool
+	asyncPacketsMutex sync.RWMutex
 }
 
 func (c *Conn) StartConn() (err error) {
@@ -96,6 +99,18 @@ func (c *Conn) State() proto_base.State {
 	return c.state
 }
 
+func (c *Conn) SetAsyncPackets(asyncPackets bool) {
+	c.asyncPacketsMutex.Lock()
+	defer c.asyncPacketsMutex.Unlock()
+	c.asyncPackets = asyncPackets
+}
+
+func (c *Conn) GetAsyncPackets() bool {
+	c.asyncPacketsMutex.RLock()
+	defer c.asyncPacketsMutex.RUnlock()
+	return c.asyncPackets
+}
+
 func (c *Conn) SetVersion(version string) (err error) {
 	versionData, err := data.LookUpVersionByName(version)
 	if err != nil {
@@ -120,7 +135,6 @@ func (c *Conn) SetProtocolVersion(version int32) (err error) {
 // It ensures that the receive-routine is only started once and creates a buffered channel for packet handling.
 func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 	// This expects you to start a new routine when switching into play state
-	spamLoginTick := c.State() != proto_base.Play
 	ch := make(chan any, BufferNPackets)
 	go func() {
 		ctx := c.Ctx // this prevents c.Ctx being reassigned
@@ -129,7 +143,7 @@ func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 			case <-ctx.Done():
 				return
 			default:
-				if spamLoginTick {
+				if !c.GetAsyncPackets() {
 					ch <- LoginTick{}
 				} else {
 					packet, err := c.Receive()

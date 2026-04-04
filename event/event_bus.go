@@ -125,7 +125,7 @@ func (l *Loop) RegisterCustomType(eventType reflect.Type, hv reflect.Value) {
 		v := hv.Call([]reflect.Value{reflect.ValueOf(packet)})[0]
 		if !v.IsNil() {
 			err := v.Interface().(error)
-			if errors.Is(err, HandlerDoneErr{}) || errors.Is(err, DontForwardErr) {
+			if errors.As(err, &HandlerDoneErr{}) || errors.Is(err, DontForwardErr) {
 				return err
 			}
 			slog.Error("handler failed", "err", err)
