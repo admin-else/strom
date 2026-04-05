@@ -8,6 +8,7 @@ import (
 	"os"
 	"slices"
 
+	"github.com/admin-else/strom/cmd/strom/api"
 	"github.com/admin-else/strom/cmd/strom/offline_uuid"
 	"github.com/admin-else/strom/cmd/strom/packet_inspector"
 	"github.com/admin-else/strom/cmd/strom/print_nbt"
@@ -22,6 +23,7 @@ var subcommands = map[string]func(args []string) error{
 	"print-nbt":    print_nbt.Run,
 	"status":       status.Run,
 	"packet-spy":   packet_inspector.Run,
+	"api":          api.Run,
 }
 
 func Help(args []string) (err error) {
@@ -37,7 +39,7 @@ func mainE() (err error) {
 
 	// Debug stuff
 	//slog.SetLogLoggerLevel(slog.LevelDebug)
-	//args = []string{"TEST", "status", "-srv", "-addr", "tcpshield.1f2d.net:25565"}
+	args = []string{"TEST", "api", "-name", "Admin_Else"}
 
 	if len(args) < 2 {
 		err = ExpectedASubcommandErr
