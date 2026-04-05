@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"log/slog"
 	"reflect"
 	"slices"
 	"time"
@@ -21,33 +22,6 @@ type OnceTask struct {
 type Timer struct {
 	Once     []OnceTask
 	Interval []IntervalTask
-	Active   bool
-}
-
-func (t *Timer) Tick() (err error) {
-	if !t.Active {
-		return
-	}
-	for i, task := range t.Interval {
-		if time.Since(task.LastTrigger) >= task.Interval {
-			task.LastTrigger = time.Now()
-			err = task.F()
-			if err != nil {
-				return
-			}
-		}
-		t.Interval[i] = task
-	}
-	for i, task := range t.Once {
-		if task.Trigger.After(time.Now()) {
-			err = task.F()
-			if err != nil {
-				return
-			}
-			t.Once = slices.Delete(t.Once, i, i)
-		}
-	}
-	return
 }
 
 func (t *Timer) Trigger(ch chan any) {
@@ -76,23 +50,26 @@ func (t *Timer) Trigger(ch chan any) {
 		return
 	}
 	now := time.Now()
-	time.Sleep(triggerAt.Sub(now))
+	sleepFor := triggerAt.Sub(now)
+	//slog.Debug("sleep next", "dur", sleepFor)
+	time.Sleep(sleepFor)
 	if iOnce >= 0 {
 		ch <- CallFunc{F: reflect.ValueOf(t.Once[iOnce].F), Args: []reflect.Value{}}
 		t.Once = slices.Delete(t.Once, iOnce, iOnce+1)
 		return
 	}
 	if iInterval >= 0 {
+		t.Interval[iInterval].LastTrigger = triggerAt
 		ch <- CallFunc{F: reflect.ValueOf(t.Interval[iInterval].F), Args: []reflect.Value{}}
-		t.Interval[iInterval].LastTrigger = now
 		return
 	}
 	panic("unreachable")
 }
 func (t *Timer) Every(interval time.Duration, f func() error) {
 	t.Interval = append(t.Interval, IntervalTask{
-		F:        f,
-		Interval: interval,
+		F:           f,
+		Interval:    interval,
+		LastTrigger: time.Now(),
 	})
 }
 
