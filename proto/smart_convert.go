@@ -63,36 +63,35 @@ func SmartConvert(from reflect.Value, to reflect.Type) (ret reflect.Value) {
 // RegisterUntilLatest registers a handler for all versions between the passed in packet version and the latest supported version.
 // Warning: If a bad handler is passed in, the program will panic.
 func (c *Conn) RegisterUntilLatest(h any) {
-	c.registerUntil(h, LatestVersion, false)
+	eventType, hv := event.ValidateHandler(h)
+	c.RegisterUntilLow(eventType, hv, LatestVersion, false)
 }
 
 // RegisterUntil registers a handler for all versions between the passed in packet version and the specified version.
 // Warning: If a bad handler is passed in, the program will panic.
 func (c *Conn) RegisterUntil(h any, until string) {
-	c.registerUntil(h, until, false)
+	eventType, hv := event.ValidateHandler(h)
+	c.RegisterUntilLow(eventType, hv, until, false)
 }
 
 // RegisterCriticalUntilLatest registers a handler for all versions between the passed in packet version and the latest supported version.
 // If this handler returns an error, the connection will be closed.
 // Warning: If a bad handler is passed in, the program will panic.
 func (c *Conn) RegisterCriticalUntilLatest(h any) {
-	c.registerUntil(h, LatestVersion, true)
+	eventType, hv := event.ValidateHandler(h)
+	c.RegisterUntilLow(eventType, hv, LatestVersion, true)
 }
 
 // RegisterCriticalUntil registers a handler for all versions between the passed in packet version and the specified version.
 // If this handler returns an error, the connection will be closed.
 // Warning: If a bad handler is passed in, the program will panic.
 func (c *Conn) RegisterCriticalUntil(h any, until string) {
-	c.registerUntil(h, until, true)
+	eventType, hv := event.ValidateHandler(h)
+	c.RegisterUntilLow(eventType, hv, until, true)
 }
 
-func (c *Conn) registerUntil(h any, until string, critical bool) {
-	eventType, hv := event.ValidateHandler(h)
-	if critical {
-		c.RegisterDirect(eventType, hv)
-	} else {
-		c.RegisterCustomType(eventType, hv)
-	}
+func (c *Conn) RegisterUntilLow(eventType reflect.Type, hv reflect.Value, until string, critical bool) {
+	c.RegisterLow(eventType, hv, critical)
 	if !eventType.Implements(reflect.TypeFor[proto_base.EncodeDecodeAble]()) {
 		panic("expected method with argument that implements proto_base.EncodeDecodeAble")
 	}
@@ -110,12 +109,12 @@ func (c *Conn) registerUntil(h any, until string, critical bool) {
 		versionName := proto_generated.SupportedVersions[i]
 		versionInfo, err = data.LookUpVersionByName(versionName)
 		if err != nil {
-			panic("protocol version not found")
+			panic("protocol version not found this should not happen even if a wrong type is passed in")
 		}
 		var newPacketInfo proto_base.PacketInfo
 		newPacketInfo, found = LookupPacketInfoByNameProtocolVersionStateAndDirection(packetInfo.Name, versionInfo.Version, packetInfo.State, packetInfo.Direction)
 		if !found {
-			panic("packet not found")
+			panic("packet not found in future version")
 		}
 		newT := reflect.TypeOf(newPacketInfo.Type)
 		if !SmartConvertibleTo(newT, reflect.TypeOf(packetInfo.Type)) {
@@ -128,10 +127,6 @@ func (c *Conn) registerUntil(h any, until string, critical bool) {
 			}
 			return v.Interface().(error)
 		}
-		if critical {
-			c.RegisterDirect(newT, reflect.ValueOf(handleFunc))
-		} else {
-			c.RegisterCustomType(newT, reflect.ValueOf(handleFunc))
-		}
+		c.RegisterLow(newT, reflect.ValueOf(handleFunc), critical)
 	}
 }

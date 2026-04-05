@@ -67,8 +67,6 @@ func (e MainHandlerErr) Unwrap() error {
 // DontForwardErr will stop the event from being forwarded to other handlers, including anything handlers.
 var DontForwardErr = errors.New("dont forward")
 var WhileClosingErr = errors.New("error while closing")
-
-// CloseNonCriticalErr will close even when the event is non-critical
 var ContextDoneErr = errors.New("context done")
 var RecvNotOkErr = errors.New("recv not ok")
 
@@ -114,40 +112,37 @@ func (l *Loop) RegisterEventSource(ch <-chan any) {
 // Instead, it will log it to slog.Error
 // Warning: If a bad handler is passed in the program will panic.
 func (l *Loop) Register(h any) {
-	l.RegisterCustomType(ValidateHandler(h))
+	eventType, hv := ValidateHandler(h)
+	l.RegisterLow(eventType, hv, false)
 }
 
-// RegisterCustomType registers a handler that will not close the loop if it returns an error.
+// RegisterLow registers a handler that will not close the loop if it returns an error.
 // Instead, it will log it to slog.Error
+// This does not hold true for signaling errors like HandlerDoneErr or DontForwardErr
 // Warning: If a bad handler is passed in the program will panic.
-func (l *Loop) RegisterCustomType(eventType reflect.Type, hv reflect.Value) {
-	handleFunc := func(packet any) error {
-		v := hv.Call([]reflect.Value{reflect.ValueOf(packet)})[0]
-		if !v.IsNil() {
-			err := v.Interface().(error)
-			if errors.As(err, &HandlerDoneErr{}) || errors.Is(err, DontForwardErr) {
-				return err
+func (l *Loop) RegisterLow(eventType reflect.Type, hv reflect.Value, critical bool) {
+	handleFunc := hv
+	if !critical {
+		handleFunc = reflect.ValueOf(func(packet any) error {
+			v := hv.Call([]reflect.Value{reflect.ValueOf(packet)})[0]
+			if !v.IsNil() {
+				err := v.Interface().(error)
+				if errors.As(err, &HandlerDoneErr{}) || errors.Is(err, DontForwardErr) {
+					return err
+				}
+				slog.Error("handler failed", "err", err)
 			}
-			slog.Error("handler failed", "err", err)
-		}
-		return nil
+			return nil
+		})
 	}
-	l.RegisterDirect(eventType, reflect.ValueOf(handleFunc))
+	l.HandlerFunctions[eventType] = append(l.HandlerFunctions[eventType], handleFunc)
 }
 
 // RegisterCritical registers a handler that will close the loop if it returns an error.
 // Warning: If a bad handler is passed in the program will panic.
 func (l *Loop) RegisterCritical(h any) {
 	eventType, hv := ValidateHandler(h)
-	l.RegisterDirect(eventType, hv)
-}
-
-func (l *Loop) RegisterDirect(k reflect.Type, h reflect.Value) {
-	l.HandlerFunctions[k] = append(l.HandlerFunctions[k], h)
-}
-
-func (l *Loop) RegisterIgnore(t any) {
-	l.RegisterDirect(reflect.TypeOf(t), reflect.ValueOf(func(any) error { return nil }))
+	l.HandlerFunctions[eventType] = append(l.HandlerFunctions[eventType], hv)
 }
 
 // FireFound triggers all handlers registered for the specified event type and returns if handlers were found or an error occurred.
