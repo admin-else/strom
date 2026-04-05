@@ -37,7 +37,7 @@ var (
 type LoginTick struct{}
 
 var LatestVersion = proto_generated.SupportedVersions[len(proto_generated.SupportedVersions)-1]
-var EarliestVersion = proto_generated.SupportedVersions[len(proto_generated.SupportedVersions)-1]
+var EarliestVersion = proto_generated.SupportedVersions[0]
 
 // UnCodablePacket represents a packet that could not be decoded.
 type UnCodablePacket struct {
