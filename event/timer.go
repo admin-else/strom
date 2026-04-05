@@ -2,7 +2,6 @@ package event
 
 import (
 	"context"
-	"log/slog"
 	"reflect"
 	"slices"
 	"time"
