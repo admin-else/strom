@@ -58,12 +58,15 @@ func StartServerWithFactory(listenAddr string, factory Factory) (err error) {
 	}
 }
 
+var ShutDownServerErr = errors.New("server shutting down")
+
 func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err error)) (err error) {
 	l, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		return
 	}
-	for {
+	running := true
+	for running {
 		var cNet net.Conn
 		cNet, err = l.Accept()
 		if err != nil {
@@ -83,6 +86,11 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 					slog.Error("Error while kicking client", "error", connErr, "client", c.Conn.RemoteAddr())
 				}
 			}
+			if errors.Is(connErr, ShutDownServerErr) {
+				running = false
+			}
 		}()
 	}
+	err = ShutDownServerErr
+	return
 }
