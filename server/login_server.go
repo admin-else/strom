@@ -1,6 +1,9 @@
 package server
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +11,7 @@ import (
 	"slices"
 
 	"github.com/admin-else/strom/api"
+	"github.com/admin-else/strom/crypto"
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
@@ -34,14 +38,19 @@ func (u UnexpectedNextStateError) Error() string {
 
 type LoginServer struct {
 	*proto.Conn
-	//OnlineMode           bool FIXME: implement this
-	ServerHost           string
-	ServerPort           uint16
-	Requested            NameAndUUID
-	Given                *NameAndUUID
-	CompressionThreshold int32
-	Status               []byte
-	CompatibleVersions   []int32
+	DontEncrypt, OnlineMode bool
+	ServerHost              string
+	ServerPort              uint16
+	Requested               NameAndUUID
+	Given                   *NameAndUUID
+	CompressionThreshold    int32
+	Status                  []byte
+	CompatibleVersions      []int32
+
+	ServerId       string // always empty for now
+	VerifyToken    []byte
+	PrivateKey     *rsa.PrivateKey
+	PublicKeyBytes []byte
 }
 
 func (l *LoginServer) OnHandshake(packet *v1_21_8.HandshakingToServerPacketSetProtocol) (err error) {
@@ -90,10 +99,6 @@ func (l *LoginServer) SetCompressionThreshold(threshold int32) (err error) {
 }
 
 func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart) (err error) {
-	l.Requested = NameAndUUID{packet.Username, packet.PlayerUUID}
-	if l.Given == nil {
-		l.Given = &l.Requested
-	}
 	if l.CompressionThreshold < 0 {
 		err = l.SetCompressionThreshold(l.CompressionThreshold)
 		if err != nil {
@@ -101,12 +106,11 @@ func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart
 		}
 	}
 
-	err = l.Send(&v1_21_8.LoginToClientPacketSuccess{
-		Uuid:       l.Given.UUID,
-		Username:   l.Given.Name,
-		Properties: nil,
-	})
-	return
+	l.Requested = NameAndUUID{packet.Username, packet.PlayerUUID}
+	if !l.DontEncrypt {
+		return l.Encrypt()
+	}
+	return l.FinishLogin()
 }
 
 func (l *LoginServer) OnLoginAcknowledged(_ *v1_21_8.LoginToServerPacketLoginAcknowledged) (err error) {
@@ -120,6 +124,67 @@ func (l *LoginServer) OnDefault(event event.Unhandled) (err error) {
 		return
 	}
 	slog.Warn("unexpected packet during login serving", "packet", event.Val)
+	return
+}
+
+func (l *LoginServer) Encrypt() (err error) {
+	l.PrivateKey, err = rsa.GenerateKey(rand.Reader, 1024)
+	if err != nil {
+		return
+	}
+	l.VerifyToken = make([]byte, 4)
+	_, _ = rand.Read(l.VerifyToken)
+	l.PublicKeyBytes, err = x509.MarshalPKIXPublicKey(l.PrivateKey.Public())
+	if err != nil {
+		return
+	}
+
+	return l.Send(&v1_21_8.LoginToClientPacketEncryptionBegin{
+		ServerId:           "",
+		PublicKey:          l.PublicKeyBytes,
+		VerifyToken:        l.VerifyToken,
+		ShouldAuthenticate: l.OnlineMode,
+	})
+}
+
+var ErrEncryptionFailedVerifyToken = errors.New("clients verify token does not match server verify token")
+
+func (l *LoginServer) OnEncryptionResponse(packet *v1_21_8.LoginToServerPacketEncryptionBegin) (err error) {
+	plain, err := l.PrivateKey.Decrypt(rand.Reader, packet.VerifyToken, &rsa.PKCS1v15DecryptOptions{}) // Maybe supply 1024????
+	if err != nil {
+		return
+	}
+	if !slices.Equal(plain, l.VerifyToken) {
+		err = ErrEncryptionFailedVerifyToken
+		return
+	}
+	sharedSecret, err := l.PrivateKey.Decrypt(rand.Reader, packet.SharedSecret, &rsa.PKCS1v15DecryptOptions{}) // Maybe supply 1024????
+	if err != nil {
+		return
+	}
+
+	serverId := crypto.AuthDigest([]byte(l.ServerId), sharedSecret, l.PublicKeyBytes)
+	_, err = api.HasJoined(l.Requested.Name, serverId, "")
+	if err != nil {
+		return
+	}
+	err = l.SetSecret(sharedSecret)
+	if err != nil {
+		return
+	}
+	err = l.FinishLogin()
+	return
+}
+
+func (l *LoginServer) FinishLogin() (err error) {
+	if l.Given == nil {
+		l.Given = &l.Requested
+	}
+	err = l.Send(&v1_21_8.LoginToClientPacketSuccess{
+		Uuid:       l.Given.UUID,
+		Username:   l.Given.Name,
+		Properties: nil,
+	})
 	return
 }
 
