@@ -39,7 +39,7 @@ type LoginServer struct {
 	ServerPort           uint16
 	Requested            NameAndUUID
 	Given                *NameAndUUID
-	CompressionThreshold int32 //FIXME: implement this
+	CompressionThreshold int32
 	Status               []byte
 	CompatibleVersions   []int32
 }
@@ -85,7 +85,7 @@ func (l *LoginServer) SetCompressionThreshold(threshold int32) (err error) {
 	if err != nil {
 		return
 	}
-	l.CompressionThreshold = threshold
+	l.RawConn.SetCompressionThreshold(threshold)
 	return
 }
 
@@ -94,6 +94,13 @@ func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart
 	if l.Given == nil {
 		l.Given = &l.Requested
 	}
+	if l.CompressionThreshold < 0 {
+		err = l.SetCompressionThreshold(l.CompressionThreshold)
+		if err != nil {
+			return
+		}
+	}
+
 	err = l.Send(&v1_21_8.LoginToClientPacketSuccess{
 		Uuid:       l.Given.UUID,
 		Username:   l.Given.Name,
