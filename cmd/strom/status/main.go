@@ -3,6 +3,7 @@ package status
 import (
 	"flag"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/admin-else/strom/client"
@@ -86,6 +87,7 @@ func Run(args []string) (err error) {
 			return
 		}
 	}
+	slog.Debug("resolved address to ", "addr", *addrFlag)
 
 	status, err := StatusRaw(*addrFlag)
 	if err != nil {
