@@ -46,3 +46,23 @@ func TestRegisterUntilLatest(t *testing.T) {
 		t.Errorf("handler not called")
 	}
 }
+
+var TestData = []struct{ V, T, E any }{
+	{V: &v1_21_9.PlayToClientPacketPosition{Flags: v1_21_9.PlayToClientPositionUpdateRelatives{Val: 2}, X: 5}, T: &v1_21_8.PlayToClientPacketPosition{}},
+	{V: &v1_21_9.ConfigurationToClientPacketTags{}, T: &v1_21_8.ConfigurationToClientPacketTags{}},
+	{V: &v1_21_11.PlayToServerPacketChatMessage{Signature: &[256]byte{}}, T: &v1_21_8.PlayToServerPacketChatMessage{}},
+}
+
+func TestSmartConvert(t *testing.T) {
+	for _, d := range TestData {
+		can := proto.SmartConvertibleTo(reflect.TypeOf(d.V), reflect.TypeOf(d.T))
+		if !can {
+			t.Errorf("can't smart convert %#v to %#v", d.V, d.T)
+			continue
+		}
+		got := proto.SmartConvert(reflect.ValueOf(d.V), reflect.TypeOf(d.T))
+		if d.E != nil && !reflect.DeepEqual(got.Interface(), d.E) {
+			t.Errorf("got %#v, want %#v", got.Interface(), d.E)
+		}
+	}
+}

@@ -47,7 +47,8 @@ func SmartConvert(from reflect.Value, to reflect.Type) (ret reflect.Value) {
 		if from.IsNil() {
 			return reflect.Zero(to)
 		}
-		ret = SmartConvert(from.Elem(), to.Elem()).Addr()
+		ret = reflect.New(to.Elem())
+		ret.Elem().Set(SmartConvert(from.Elem(), to.Elem()))
 	case reflect.Slice:
 		l := from.Len()
 		ret = reflect.MakeSlice(to, l, l)
