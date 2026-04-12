@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-//go:embed minecraft-data/data
+//go:embed minecraft-data/data/pc minecraft-data/data/dataPaths.json
 var MinecraftData embed.FS
 
 func LoadJson(path string, data any) (err error) {
