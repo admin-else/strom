@@ -38,7 +38,7 @@ func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
 	//fmt.Println("send:", rawPacketBytes)
 	var packetBytes []byte
 	threshold := c.GetCompressionThreshold()
-	if threshold > 0 {
+	if threshold >= 0 {
 		packetBuffer := bytes.NewBuffer(nil)
 		if int32(len(rawPacketBytes)) >= threshold {
 			err = proto_base.EncodeVarInt(packetBuffer, int32(len(rawPacketBytes)))
@@ -95,7 +95,7 @@ func (c *RawConn) ReceiveRaw() (packetBytes []byte, err error) {
 		return
 	}
 	rawPacketBuffer := bytes.NewBuffer(rawPacketBytes)
-	if c.GetCompressionThreshold() > 0 {
+	if c.GetCompressionThreshold() >= 0 {
 		var packetLen int32
 		packetLen, err = proto_base.DecodeVarInt(rawPacketBuffer)
 		if err != nil {
