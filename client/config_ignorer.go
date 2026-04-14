@@ -3,7 +3,6 @@ package client
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 
 	"github.com/admin-else/strom/event"
 	"github.com/admin-else/strom/proto"
@@ -20,7 +19,7 @@ func (c *ConfigIgnorer) OnStart() (err error) {
 }
 
 func (c *ConfigIgnorer) Default(e event.Anything) (err error) {
-	slog.Debug("Config ignorer", "packet", fmt.Sprintf("%#v", e))
+	c.Log.Debug("Config ignorer", "packet", fmt.Sprintf("%#v", e))
 	return
 }
 

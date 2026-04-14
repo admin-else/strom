@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
-	"log/slog"
 
 	"github.com/admin-else/strom/api"
 	"github.com/admin-else/strom/crypto"
@@ -45,7 +44,7 @@ func (s *LoginClient) OnDefault(event event.Unhandled) (err error) {
 	if _, ok := event.Val.(proto_base.EncodeDecodeAble); !ok {
 		return
 	}
-	slog.Warn("unexpected packet during login client", "packet", event.Val)
+	s.Log.Warn("unexpected packet during login client", "packet", event.Val)
 	return
 }
 

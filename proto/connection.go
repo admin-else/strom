@@ -68,6 +68,8 @@ type Conn struct {
 
 	asyncPackets      bool
 	asyncPacketsMutex sync.RWMutex
+
+	Log *slog.Logger
 }
 
 func (c *Conn) StartConn() (err error) {
@@ -209,7 +211,7 @@ func (c *Conn) sendRegisteredPacket(packet proto_base.EncodeDecodeAble) (err err
 	debugPrint := slog.Default().Enabled(context.Background(), slog.LevelDebug) &&
 		slices.ContainsFunc(c.DebugPrintPackets, func(s string) bool { return strings.Contains(i.Name, s) })
 	if debugPrint {
-		slog.Debug("send", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
+		c.Log.Debug("send", "actor", c.Actor, "packet", fmt.Sprintf("%#v", packet))
 	}
 	return c.SendRaw(packetBuff.Bytes())
 }
@@ -263,7 +265,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		return
 	}
 	if debugPrint {
-		slog.Debug("recv", "packet", fmt.Sprintf("%#v", packet), "isListenerRegistered", isListenerRegistered)
+		c.Log.Debug("recv", "packet", fmt.Sprintf("%#v", packet), "isListenerRegistered", isListenerRegistered)
 	}
 	return
 }

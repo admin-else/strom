@@ -123,7 +123,7 @@ func (l *LoginServer) OnDefault(event event.Unhandled) (err error) {
 	if _, ok := event.Val.(proto_base.EncodeDecodeAble); !ok {
 		return
 	}
-	slog.Warn("unexpected packet during login serving", "packet", event.Val)
+	l.Log.Warn("unexpected packet during login serving", "packet", event.Val)
 	return
 }
 

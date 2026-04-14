@@ -16,6 +16,8 @@ func Servee(c net.Conn) (ret *proto.Conn) {
 	ret.Conn = c
 	ret.R = c
 	ret.W = c
+
+	ret.Log = slog.Default().With("conn", c.RemoteAddr())
 	return
 }
 
@@ -35,10 +37,10 @@ func ServeClient(cNet net.Conn, factory Factory) {
 		return
 	}
 	if err != nil {
-		slog.Error("Error while handling client", "error", err, "client", c.Conn.RemoteAddr())
+		c.Log.Error("Error while handling client", "error", err, "client", c.Conn.RemoteAddr())
 		err = Kick(c, text.Pretty(err.Error()))
 		if err != nil {
-			slog.Error("Error while kicking client", "error", err, "client", c.Conn.RemoteAddr())
+			c.Log.Error("Error while kicking client", "error", err, "client", c.Conn.RemoteAddr())
 		}
 	}
 }
@@ -65,6 +67,7 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 	if err != nil {
 		return
 	}
+	defer l.Close()
 	running := true
 	for running {
 		var cNet net.Conn
@@ -80,10 +83,10 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 				if c.State() == proto_base.Status || c.State() == proto_base.Handshaking {
 					return // we dont care about status packets
 				}
-				slog.Error("Error while handling client", "error", connErr, "client", c.Conn.RemoteAddr())
+				c.Log.Error("Error while handling client", "error", connErr, "client", c.Conn.RemoteAddr())
 				connErr = Kick(c, text.Pretty(connErr.Error()))
 				if connErr != nil {
-					slog.Error("Error while kicking client", "error", connErr, "client", c.Conn.RemoteAddr())
+					c.Log.Error("Error while kicking client", "error", connErr, "client", c.Conn.RemoteAddr())
 				}
 			}
 			if errors.Is(connErr, ShutDownServerErr) {
