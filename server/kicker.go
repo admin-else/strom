@@ -8,6 +8,8 @@ import (
 	"github.com/admin-else/strom/proto_base"
 	"github.com/admin-else/strom/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/text"
+
+	"fmt"
 )
 
 var (
@@ -21,8 +23,15 @@ func Kick(c *proto.Conn, reason *text.Component) (err error) {
 		return
 	}
 	switch c.State() {
-	case proto_base.Handshaking, proto_base.Status:
+	case proto_base.Handshaking:
 		err = CantKickInStateErr
+	case proto_base.Status:
+		var b []byte
+		b, err = reason.MarshalJSON()
+		if err != nil {
+			return
+		}
+		err = c.Send(&v1_21_8.StatusToClientPacketServerInfo{Response: fmt.Sprintf("{\"description\":%s}", string(b))})
 	case proto_base.Login:
 		var b []byte
 		b, err = reason.MarshalJSON()
