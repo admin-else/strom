@@ -14,7 +14,7 @@ package data
 //	},
 
 type Biome struct {
-	Id               int
+	Id               int32
 	Name             string
 	Category         string
 	Temperature      float64
@@ -24,22 +24,33 @@ type Biome struct {
 	Color            int
 }
 
-var BiomesCache = make(map[string][]Biome)
+var BiomesCache = make(map[string][]*Biome)
 
-func BiomesForVersion(v string) (ret []Biome) {
+func BiomesForVersion(v string) (ret []*Biome) {
 	var ok bool
 	if ret, ok = BiomesCache[v]; ok {
 		return
 	}
-	var b []Biome
+	var b []*Biome
 	must(LoadVersionedJson(v, "biomes", &b))
 	BiomesCache[v] = b
 	return b
 }
 
-func LookupBiomeById(version string, id int32) (biome Biome, ok bool) {
+func LookupBiomeById(version string, id int32) (biome *Biome, ok bool) {
 	for _, b := range BiomesForVersion(version) {
-		if b.Id == int(id) {
+		if b.Id == id {
+			biome = b
+			ok = true
+			return
+		}
+	}
+	return
+}
+
+func LookupBiomeByName(version string, name string) (biome *Biome, ok bool) {
+	for _, b := range BiomesForVersion(version) {
+		if b.Name == name {
 			biome = b
 			ok = true
 			return

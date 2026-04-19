@@ -1,8 +1,57 @@
 package util
 
-import "math/rand/v2"
+import (
+	"cmp"
+	"math/rand/v2"
+	"slices"
+)
 
 func ShuffleSlice[T any](s []T) (ret []T) {
 	rand.Shuffle(len(s), func(i, j int) { s[i], s[j] = s[j], s[i] })
 	return s
+}
+
+func CountSlice[T comparable](s []T, o T) (ret int) {
+	for _, v := range s {
+		if v == o {
+			ret++
+		}
+	}
+	return
+}
+
+func GetUniqueSlice[T comparable](s []T) (unique map[T]struct{}) {
+	unique = make(map[T]struct{})
+	for _, v := range s {
+		if _, ok := unique[v]; !ok {
+			unique[v] = struct{}{}
+		}
+	}
+	return
+}
+
+func CountUniqueSlice[T comparable](s []T) (ret int) {
+	return len(GetUniqueSlice(s))
+}
+
+func MakeSingleValuedSlice[T any](v T, n int) (ret []T) {
+	ret = make([]T, n)
+	for i := range ret {
+		ret[i] = v
+	}
+	return
+}
+
+func SetToSlice[T comparable](set map[T]struct{}) (slice []T) {
+	slice = make([]T, 0, len(set))
+	for k := range set {
+		slice = append(slice, k)
+	}
+	return
+}
+
+func SetToSliceOrdered[T cmp.Ordered](set map[T]struct{}) (slice []T) {
+	slice = SetToSlice(set)
+	slices.Sort(slice)
+	return
 }
