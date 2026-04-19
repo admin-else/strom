@@ -81,6 +81,8 @@ func LookupBlockByStateId(version string, stateId int32) (block *Block, ok bool)
 	return
 }
 
+var UnknownBlockNameErr = errors.New("unknown block Name")
+
 func LookupBlockByName(version string, name string) (block *Block, ok bool) {
 	for _, b := range BlocksForVersion(version) {
 		if b.Name == name {

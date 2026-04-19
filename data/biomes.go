@@ -1,5 +1,7 @@
 package data
 
+import "errors"
+
 // [
 //
 //	{
@@ -47,6 +49,8 @@ func LookupBiomeById(version string, id int32) (biome *Biome, ok bool) {
 	}
 	return
 }
+
+var UnknownBiomeNameErr = errors.New("unknown biome Name")
 
 func LookupBiomeByName(version string, name string) (biome *Biome, ok bool) {
 	for _, b := range BiomesForVersion(version) {

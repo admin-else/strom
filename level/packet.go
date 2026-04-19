@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	BlocksPerChunkSection = 16 * 16 * 16
+	ChunkWidth            = 16
+	BlocksPerChunkSection = ChunkWidth * ChunkWidth * ChunkWidth
 	BiomesPerChunkSection = 4 * 4 * 4
 )
 
