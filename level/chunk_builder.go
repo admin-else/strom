@@ -37,8 +37,16 @@ func (cb *ChunkBuilder) FillAllById(block, biome int32) {
 	cb.Blocks = make([][]int32, numSections)
 	cb.Biomes = make([][]int32, numSections)
 	for i := range cb.Blocks {
-		cb.Blocks[i] = blockSection
-		cb.Biomes[i] = biomeSection
+
+		// Otherwise setting one block will set it also in all other sections because the slice is the same
+		var blocks = make([]int32, BlocksPerChunkSection)
+		copy(blocks, blockSection)
+
+		var biomes = make([]int32, BiomesPerChunkSection)
+		copy(biomes, biomeSection)
+
+		cb.Blocks[i] = blocks
+		cb.Biomes[i] = biomes
 	}
 	return
 }
