@@ -36,15 +36,15 @@ func NewFormat(name string, opts ...Option) *Format {
 
 type Option func(*Format)
 
-func WithRequireAll(require bool) Option {
+func WithRequireAll() Option {
 	return func(f *Format) {
-		f.requireAll = require
+		f.requireAll = true
 	}
 }
 
-func WithErrorOnExtra(errorOnExtra bool) Option {
+func WithErrorOnExtra() Option {
 	return func(f *Format) {
-		f.errorOnExtra = errorOnExtra
+		f.errorOnExtra = true
 	}
 }
 

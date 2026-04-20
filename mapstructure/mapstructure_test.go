@@ -67,7 +67,7 @@ func TestRequireAll(t *testing.T) {
 		B int32 `nbt:"B,omitempty"`
 		C int32 `nbt:"C"`
 	}
-	f := NewFormat("nbt", WithRequireAll(true))
+	f := NewFormat("nbt", WithRequireAll())
 	data := map[string]any{"A": int32(1), "C": int32(3)}
 	var got Simple
 	if err := f.Decode(data, &got); err != nil {
@@ -83,7 +83,7 @@ func TestRequireAllMissing(t *testing.T) {
 		A int32 `nbt:"A"`
 		B int32 `nbt:"B"`
 	}
-	f := NewFormat("nbt", WithRequireAll(true))
+	f := NewFormat("nbt", WithRequireAll())
 	data := map[string]any{"A": int32(1)}
 	var got Simple
 	if err := f.Decode(data, &got); err == nil {
@@ -96,7 +96,7 @@ func TestRequireAllOmitEmptyWins(t *testing.T) {
 		A int32 `nbt:"A"`
 		B int32 `nbt:"B,omitempty"`
 	}
-	f := NewFormat("nbt", WithRequireAll(true))
+	f := NewFormat("nbt", WithRequireAll())
 	data := map[string]any{"A": int32(1)}
 	var got Simple
 	if err := f.Decode(data, &got); err != nil {
@@ -117,7 +117,7 @@ func TestSkipTag(t *testing.T) {
 }
 
 func TestErrorOnExtra(t *testing.T) {
-	f := NewFormat("nbt", WithErrorOnExtra(true))
+	f := NewFormat("nbt", WithErrorOnExtra())
 	data := map[string]any{"Name": "test", "Secret": "shh", "Unknown": "extra"}
 	var got Example
 	if err := f.Decode(data, &got); err == nil {
