@@ -415,10 +415,7 @@ func ptr[T any](v T) *T {
 func Pretty(s string) *Component {
 	parts := strings.Split(s, "§")
 
-	root := Component{}
-	if parts[0] != "" {
-		root.Text = parts[0]
-	}
+	root := Component{Text: parts[0]}
 
 	var current = &root
 	for i := 1; i < len(parts); i++ {
