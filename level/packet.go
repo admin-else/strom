@@ -167,7 +167,9 @@ func UnpackBlockData(r io.Reader) (blocks []int32, err error) {
 	switch bitsPerEntry {
 	case 0:
 		blocks, err = UnpackSingleValuePalette(r, BlocksPerChunkSection)
-	case 1, 2, 3, 4, 5, 6, 7, 8:
+	case 1, 2, 3, 4:
+		blocks, err = UnpackArrayPalette(r, 4, BlocksPerChunkSection)
+	case 5, 6, 7, 8:
 		blocks, err = UnpackArrayPalette(r, bitsPerEntry, BlocksPerChunkSection)
 	default:
 		blocks, err = UnpackLongData(r, bitsPerEntry, BlocksPerChunkSection)
@@ -194,7 +196,9 @@ func PackBlockData(blocks []int32, version string, w io.Writer) (err error) {
 	switch bpe {
 	case 0:
 		err = proto_base.EncodeVarInt(w, blocks[0])
-	case 1, 2, 3, 4, 5, 6, 7, 8:
+	case 1, 2, 3, 4:
+		err = PackArrayPallet(unique, 4, blocks, w) // MOJANK
+	case 5, 6, 7, 8:
 		err = PackArrayPallet(unique, bpe, blocks, w)
 	default:
 		// matches net.minecraft.world.chunk.PaletteProvider
