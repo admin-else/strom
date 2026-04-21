@@ -8,7 +8,7 @@ import (
 	"github.com/admin-else/strom/mapstructure"
 )
 
-var Format = mapstructure.NewFormat("nbt", mapstructure.WithRequireAll())
+var Format = mapstructure.NewFormat("nbt", mapstructure.WithRequireAll(), mapstructure.WithTrySnakeCase(), mapstructure.WithTryLowCase())
 
 func ReadFile(file io.Reader, data any) (err error) {
 	n, err := ReadUnstructuredFile(file)

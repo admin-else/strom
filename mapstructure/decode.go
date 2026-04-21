@@ -3,6 +3,8 @@ package mapstructure
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/admin-else/strom/util"
 )
 
 func (f *Format) decode(m map[string]any, target reflect.Value) error {
@@ -26,12 +28,19 @@ func (f *Format) decode(m map[string]any, target reflect.Value) error {
 		}
 
 		val, exists := m[key]
+		if !exists && f.trySnakeCase {
+			val, exists = m[util.SnakeCase(key)]
+		}
+		if !exists && f.tryLowCase {
+			val, exists = m[util.FirstLetterLower(key)]
+		}
 		if !exists {
 			if tag.Required || (f.requireAll && !tag.OmitEmpty) {
 				return fmt.Errorf("%w: %s", ErrMissingRequired, key)
 			}
 			continue
 		}
+
 		usedKeys[key] = true
 
 		fieldVal := target.Field(i)
@@ -106,6 +115,26 @@ func (f *Format) setField(target reflect.Value, value any, opts tagOptions) erro
 
 	if targetType.Kind() == reflect.Bool {
 		return f.setBool(target, value)
+	}
+
+	// this fixes this edge case
+	//     level_test.go:19: field Data: field Player: field Pos: cannot set [3]float64 from []interface {}
+	if targetType.Kind() == reflect.Array && src.Kind() == reflect.Slice {
+		if target.Len() != src.Len() {
+			return fmt.Errorf("cannot set %s from %T because lengths do not match", targetType, value)
+		}
+		for i := 0; i < src.Len(); i++ {
+			if src.Index(i).Type().AssignableTo(targetType.Elem()) {
+				target.Index(i).Set(src.Index(i))
+				continue
+			}
+			if src.Index(i).Elem().Type().AssignableTo(targetType.Elem()) {
+				target.Index(i).Set(src.Index(i).Elem())
+				continue
+			}
+			return fmt.Errorf("cannot set %s from %T because element %d cannot be converted to %s", targetType, value, i, targetType.Elem())
+		}
+		return nil
 	}
 
 	return fmt.Errorf("cannot set %s from %T", targetType, value)

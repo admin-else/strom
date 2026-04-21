@@ -1,6 +1,10 @@
-package main
+package util_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/admin-else/strom/util"
+)
 
 func TestCamelCase(t *testing.T) {
 	tests := []struct {
@@ -17,7 +21,7 @@ func TestCamelCase(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := CamelCase(test.input)
+		result := util.CamelCase(test.input)
 		if result != test.expected {
 			t.Errorf("CamelCase(%q) = %q; expected %q", test.input, result, test.expected)
 		}

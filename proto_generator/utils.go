@@ -4,27 +4,7 @@ import (
 	"cmp"
 	"maps"
 	"slices"
-	"unicode"
 )
-
-var boundaries = []rune{' ', '_', '-', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}'}
-
-func CamelCase(s string) string {
-	ret := ""
-	atWordBoundary := true
-	for _, c := range s {
-		if slices.Contains(boundaries, c) {
-			atWordBoundary = true
-			continue
-		}
-		if atWordBoundary && unicode.IsLower(c) {
-			c = unicode.ToUpper(c)
-		}
-		atWordBoundary = false
-		ret += string(c)
-	}
-	return ret
-}
 
 func OrderedKeys[Map map[K]V, K cmp.Ordered, V any](m Map) []K {
 	keysIter := maps.Keys(m)

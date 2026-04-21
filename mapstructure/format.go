@@ -18,8 +18,11 @@ type Format struct {
 	Name         string
 	requireAll   bool
 	errorOnExtra bool
-	decoders     map[reflect.Type]func(any, string) (any, error)
-	encoders     map[reflect.Type]func(any, string) (any, error)
+	trySnakeCase bool
+	tryLowCase   bool
+
+	decoders map[reflect.Type]func(any, string) (any, error)
+	encoders map[reflect.Type]func(any, string) (any, error)
 }
 
 func NewFormat(name string, opts ...Option) *Format {
@@ -45,6 +48,18 @@ func WithRequireAll() Option {
 func WithErrorOnExtra() Option {
 	return func(f *Format) {
 		f.errorOnExtra = true
+	}
+}
+
+func WithTrySnakeCase() Option {
+	return func(f *Format) {
+		f.trySnakeCase = true
+	}
+}
+
+func WithTryLowCase() Option {
+	return func(f *Format) {
+		f.tryLowCase = true
 	}
 }
 
