@@ -25,7 +25,7 @@ func Run(args []string) (err error) {
 		return
 	}
 	defer f.Close()
-	n, err := nbt.ReadFile(f)
+	n, err := nbt.ReadUnstructuredFile(f)
 	if err != nil {
 		return
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 func Load(fileName string) (s *Structure, err error) {
-	n, err := nbt.ReadFilePath(fileName)
+	n, err := nbt.ReadUnstructuredFilePath(fileName)
 	if err != nil {
 		return
 	}

@@ -4,16 +4,28 @@ import (
 	"compress/gzip"
 	"io"
 	"os"
+
+	"github.com/admin-else/strom/mapstructure"
 )
 
-func WriteFile(file io.Writer, n Tag) (err error) {
+var Format = mapstructure.NewFormat("nbt", mapstructure.WithRequireAll())
+
+func ReadFile(file io.Reader, data any) (err error) {
+	n, err := ReadUnstructuredFile(file)
+	if err != nil {
+		return
+	}
+	return Format.Decode(n.Value, data)
+}
+
+func WriteUnstructuredFile(file io.Writer, n Tag) (err error) {
 	gzw := gzip.NewWriter(file)
 	defer gzw.Close()
 	err = n.Encode(gzw)
 	return
 }
 
-func ReadFile(file io.Reader) (n *Tag, err error) {
+func ReadUnstructuredFile(file io.Reader) (n *Tag, err error) {
 	r, err := gzip.NewReader(file)
 	if err != nil {
 		return
@@ -24,11 +36,11 @@ func ReadFile(file io.Reader) (n *Tag, err error) {
 	return
 }
 
-func ReadFilePath(path string) (n *Tag, err error) {
+func ReadUnstructuredFilePath(path string) (n *Tag, err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return
 	}
 	defer f.Close()
-	return ReadFile(f)
+	return ReadUnstructuredFile(f)
 }

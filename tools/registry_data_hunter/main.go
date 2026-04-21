@@ -143,7 +143,7 @@ func handleClient(c *proto.Conn) (err error) {
 		return
 	}
 	defer f.Close()
-	err = nbt.WriteFile(f, p.Data)
+	err = nbt.WriteUnstructuredFile(f, p.Data)
 	slog.Info("saved", "file", SaveAs)
 	return
 }

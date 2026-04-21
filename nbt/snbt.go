@@ -37,7 +37,7 @@ func PrintSNBTAny(t any, w io.Writer) (err error) {
 	case map[string]any:
 		_, err = fmt.Fprintf(w, "{")
 		for k, v := range t {
-			_, err = fmt.Fprintf(w, "%q:,", k)
+			_, err = fmt.Fprintf(w, "%q:", k)
 			err = PrintSNBTAny(v, w)
 			if err != nil {
 				return

@@ -10,7 +10,7 @@ import (
 var topSNBT []byte
 
 func TestPrintSNBTAny(t *testing.T) {
-	n, err := ReadFile(bytes.NewReader(topSNBT))
+	n, err := ReadUnstructuredFile(bytes.NewReader(topSNBT))
 	if err != nil {
 		panic(err)
 	}

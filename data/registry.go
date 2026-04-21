@@ -15,6 +15,6 @@ func LoadRegistry(name string) (n *nbt.Tag, err error) {
 		return
 	}
 	defer r.Close()
-	n, err = nbt.ReadFile(r)
+	n, err = nbt.ReadUnstructuredFile(r)
 	return
 }

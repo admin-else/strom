@@ -97,7 +97,7 @@ func LoadFromPath(path string) (s *Structure, err error) {
 }
 
 func LoadFromFile(r io.Reader) (s *Structure, err error) {
-	n, err := nbt.ReadFile(r)
+	n, err := nbt.ReadUnstructuredFile(r)
 	if err != nil {
 		return
 	}
