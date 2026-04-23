@@ -60,7 +60,7 @@ func PackArrayPallet(unique map[int32]struct{}, bpe uint8, data []int32, w io.Wr
 			return
 		}
 	}
-	var palletedData = make([]int32, len(data))
+	palletedData := make([]int32, len(data))
 	for i, entry := range data {
 		palletedData[i] = palletMap[entry]
 	}

@@ -55,3 +55,13 @@ func SetToSliceOrdered[T cmp.Ordered](set map[T]struct{}) (slice []T) {
 	slices.Sort(slice)
 	return
 }
+
+func MinSlice[T cmp.Ordered](s []T) (ret T) {
+	ret = s[0]
+	for _, v := range s[1:] {
+		if v < ret {
+			ret = v
+		}
+	}
+	return
+}
