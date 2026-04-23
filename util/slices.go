@@ -65,3 +65,19 @@ func MinSlice[T cmp.Ordered](s []T) (ret T) {
 	}
 	return
 }
+
+type Numeric interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+		~float32 | ~float64
+}
+
+func SliceRange[T Numeric](s, e T) (ret []T) {
+	if s > e {
+		return
+	}
+	for v := s; v < e; v++ {
+		ret = append(ret, v)
+	}
+	return
+}

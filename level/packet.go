@@ -13,6 +13,7 @@ import (
 
 const (
 	ChunkWidth            = 16
+	ChunkColumns          = ChunkWidth * ChunkWidth
 	BlocksPerChunkSection = ChunkWidth * ChunkWidth * ChunkWidth
 	BiomesPerChunkSection = 4 * 4 * 4
 )
@@ -182,10 +183,10 @@ func UnpackBlockData(r io.Reader) (blocks []int32, err error) {
 
 func PackBlockData(blocks []int32, version string, w io.Writer) (err error) {
 	unique := util.GetUniqueSlice(blocks)
-	bpe := uint8(math.Ceil(math.Log2(float64(len(unique)))))
+	bpe := util.BpeByNum(float64(len(unique)))
 
 	if bpe > 8 {
-		bpe = uint8(math.Ceil(math.Log2(float64(len(data.BlocksForVersion(version))))))
+		bpe = util.BpeByNum(float64(len(data.BlocksForVersion(version))))
 	}
 
 	err = binary.Write(w, binary.BigEndian, bpe)

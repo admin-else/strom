@@ -18,6 +18,9 @@ type Storage[T comparable] struct {
 }
 
 var CannotGrowPalletErr = errors.New("cannot grow pallet")
+var CannotGrowPalletNoPossibleBpeErr = errors.New("cannot grow pallet, no possible bpe provided")
+var Bpe0ButNot1LenPaletteErr = errors.New("bpe 0 but not 1, len palette")
+var InvalidPaletteIndexErr = errors.New("invalid palette index")
 
 func NewStorage[T comparable](len int, possibleBpe []uint8) (s *Storage[T]) {
 	s = new(Storage[T])
@@ -27,6 +30,30 @@ func NewStorage[T comparable](len int, possibleBpe []uint8) (s *Storage[T]) {
 	return
 }
 
+func ImportStorage[T comparable](data []uint64, bpe uint8, palette []T, len int, possibleBpe []uint8) (s *Storage[T], err error) {
+	s = new(Storage[T])
+	s.Resize(bpe)
+	s.Data = data
+	s.Palette = palette
+	s.Len = len
+	s.PossibleBitsPerEntryValues = possibleBpe
+	err = s.CheckData()
+	return
+}
+
+func (s *Storage[T]) CheckData() (err error) {
+	if s.BitsPerEntry == 0 && len(s.Palette) != 1 {
+		err = Bpe0ButNot1LenPaletteErr
+		return
+	}
+	for i := range s.Len {
+		if s.GetLow(i) >= uint32(len(s.Palette)) {
+			err = InvalidPaletteIndexErr
+			return
+		}
+	}
+	return
+}
 func (s *Storage[T]) Resize(bpe uint8) {
 	if bpe == 0 {
 		s.Data = nil
@@ -62,6 +89,11 @@ func (s *Storage[T]) Resize(bpe uint8) {
 func (s *Storage[T]) GrowPallet(v T) (index int, err error) {
 	index = len(s.Palette)
 	if index+1 > s.MaxAtCurrentBpe {
+		if s.PossibleBitsPerEntryValues == nil {
+			err = CannotGrowPalletNoPossibleBpeErr
+			return
+		}
+
 		bpei := slices.Index(s.PossibleBitsPerEntryValues, s.BitsPerEntry)
 		if bpei == len(s.PossibleBitsPerEntryValues)-1 {
 			err = CannotGrowPalletErr
@@ -109,4 +141,12 @@ func (s *Storage[T]) GetLow(i int) (j uint32) {
 func (s *Storage[T]) SetLow(i int, v uint32) {
 	s.Data[i/s.ElementsPerLong] &= ^(s.Mask << ((i % s.ElementsPerLong) * int(s.BitsPerEntry)))
 	s.Data[i/s.ElementsPerLong] |= uint64(v) << ((i % s.ElementsPerLong) * int(s.BitsPerEntry))
+}
+
+func (s *Storage[T]) RealValues() []T {
+	ret := make([]T, s.Len)
+	for i := range s.Len {
+		ret[i] = s.Get(i)
+	}
+	return ret
 }
