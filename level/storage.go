@@ -6,8 +6,15 @@ import (
 	"slices"
 )
 
+type DynamicPalletLookup[T comparable] interface {
+	GetIndex(T) uint32
+	GetT(uint33 uint32) T
+	Resize(storage *Storage[T]) error
+}
+
 type Storage[T comparable] struct {
 	Palette                    []T
+	CustomPallet               DynamicPalletLookup[T]
 	Data                       []uint64
 	PossibleBitsPerEntryValues []uint8 // These should be sorted
 	BitsPerEntry               uint8
@@ -41,6 +48,17 @@ func ImportStorage[T comparable](data []uint64, bpe uint8, palette []T, len int,
 	return
 }
 
+func ImportStoragePaletteFunc[T comparable](data []uint64, bpe uint8, paletteF DynamicPalletLookup[T], len int, possibleBpe []uint8) (s *Storage[T], err error) {
+	s = new(Storage[T])
+	s.Resize(bpe)
+	s.Data = data
+	s.CustomPallet = paletteF
+	s.Len = len
+	s.PossibleBitsPerEntryValues = possibleBpe
+	err = s.CheckData()
+	return
+}
+
 func (s *Storage[T]) CheckData() (err error) {
 	if s.BitsPerEntry == 0 && len(s.Palette) != 1 {
 		err = Bpe0ButNot1LenPaletteErr
@@ -54,6 +72,7 @@ func (s *Storage[T]) CheckData() (err error) {
 	}
 	return
 }
+
 func (s *Storage[T]) Resize(bpe uint8) {
 	if bpe == 0 {
 		s.Data = nil
@@ -119,9 +138,6 @@ func (s *Storage[T]) Set(i int, v T) (err error) {
 	if err != nil {
 		return
 	}
-	if s.BitsPerEntry == 0 {
-		return
-	}
 	s.SetLow(i, uint32(pi))
 	return
 }
@@ -149,4 +165,55 @@ func (s *Storage[T]) RealValues() []T {
 		ret[i] = s.Get(i)
 	}
 	return ret
+}
+
+func (s *Storage[T]) SetMany(i, j int, v T) (err error) {
+	if i == 0 && j == s.Len-1 && slices.Contains(s.PossibleBitsPerEntryValues, 0) {
+		s.Resize(0)
+		s.Palette = []T{v}
+		return
+	}
+	pi := slices.Index(s.Palette, v)
+	if pi != -1 {
+		if s.BitsPerEntry == 0 {
+			return
+		}
+		s.SetLow(i, uint32(pi))
+		return
+	}
+	pi, err = s.GrowPallet(v)
+	if err != nil {
+		return
+	}
+	s.SetManyLow(i, j, uint32(pi))
+	return
+}
+
+func (s *Storage[T]) SetManyLow(i, j int, v uint32) {
+	n := j - i
+	if n > s.ElementsPerLong*2 {
+		for k := i; k < j; k++ {
+			s.SetLow(k, v)
+		}
+		return
+	}
+	for i%s.ElementsPerLong == 0 {
+		s.SetLow(i, v)
+		i++
+	}
+
+	var vFilled uint64
+	for k := range s.ElementsPerLong {
+		vFilled |= uint64(v) << (k * int(s.BitsPerEntry))
+	}
+
+	t := i / s.ElementsPerLong
+	for k := range (j - i) / s.ElementsPerLong {
+		s.Data[t+k] = vFilled
+	}
+
+	for j%s.ElementsPerLong != 0 {
+		s.SetLow(j, v)
+		j--
+	}
 }

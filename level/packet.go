@@ -11,13 +11,6 @@ import (
 	"github.com/admin-else/strom/util"
 )
 
-const (
-	ChunkWidth            = 16
-	ChunkColumns          = ChunkWidth * ChunkWidth
-	BlocksPerChunkSection = ChunkWidth * ChunkWidth * ChunkWidth
-	BiomesPerChunkSection = 4 * 4 * 4
-)
-
 var InvalidPalletIndexErr = errors.New("invalid palette index")
 
 func UnpackArrayPalette(r io.Reader, bitsPerEntry uint8, numberOfEntries int) (data []int32, err error) {
