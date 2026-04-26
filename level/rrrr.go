@@ -98,11 +98,11 @@ func (r *RealStorage) resize(bpe uint8) {
 	for i := range r.format.Len {
 		var v int32
 		if resizeDirect {
-			v = int32((r.data[i/r.elementsPerLong] >> ((i % r.elementsPerLong) * int32(r.bpe))) & r.mask)
+			v, _ = r.Get(i)
 		} else {
 			v = int32((r.data[i/r.elementsPerLong] >> ((i % r.elementsPerLong) * int32(r.bpe))) & r.mask)
 		}
-		r.data[i/r.elementsPerLong] |= uint64(v) << ((i % r.elementsPerLong) * int32(bpe))
+		newData[i/int32(numberOfElements)] |= uint64(v) << ((i % int32(numberOfElements)) * int32(bpe))
 	}
 	if resizeDirect {
 		r.palette = nil

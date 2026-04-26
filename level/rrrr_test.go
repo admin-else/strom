@@ -292,7 +292,7 @@ func TestRealStorageDirectModeNoPalette(t *testing.T) {
 	}
 
 	data := make([]uint64, 36)
-	data[0] = 0x1FFFF
+	data[0] = 0x1FF
 
 	s, err := format.ImportDataDirect(data)
 	if err != nil {
@@ -303,8 +303,8 @@ func TestRealStorageDirectModeNoPalette(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get(0) failed: %v", err)
 	}
-	if got != 0x1FFFF {
-		t.Errorf("Get(0) = %d, want %d", got, 0x1FFFF)
+	if got != 0x1FF {
+		t.Errorf("Get(0) = %d, want %d", got, 0x1FF)
 	}
 }
 
