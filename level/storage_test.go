@@ -82,7 +82,7 @@ func TestResizePreservesData(t *testing.T) {
 	for i, want := range []int32{10, 20, 30, 40} {
 		got := s.Get(i)
 		if got != want {
-			t.Errorf("Get(%d) = %d, want %d (Resize repacks with old BPE)", i, got, want)
+			t.Errorf("Get(%d) = %d, want %d (resize repacks with old BPE)", i, got, want)
 		}
 	}
 }
@@ -132,7 +132,7 @@ func TestResizeElementsPerLong(t *testing.T) {
 	s.Set(4, 50)
 
 	if s.ElementsPerLong != 16 {
-		t.Errorf("ElementsPerLong = %d, want 16 (Resize stores old ElementsPerLong)", s.ElementsPerLong)
+		t.Errorf("ElementsPerLong = %d, want 16 (resize stores old ElementsPerLong)", s.ElementsPerLong)
 	}
 }
 
