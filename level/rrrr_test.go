@@ -6,23 +6,23 @@ import (
 	"github.com/admin-else/strom/level"
 )
 
-func heightmapFormat() level.RealStorageFormat {
-	return level.RealStorageFormat{
+func heightmapFormat() level.StorageFormat {
+	return level.StorageFormat{
 		AvailableBpes: []uint8{9},
 		BiggestDirect: true,
 		Len:           256,
 	}
 }
 
-func blockStorageFormat() level.RealStorageFormat {
-	return level.RealStorageFormat{
+func blockStorageFormat() level.StorageFormat {
+	return level.StorageFormat{
 		AvailableBpes: []uint8{0, 4, 5, 6, 7, 8, 15},
 		BiggestDirect: true,
 		Len:           4096,
 	}
 }
 
-func TestRealStorageImportDataDirect(t *testing.T) {
+func TestStorageImportDataDirect(t *testing.T) {
 	format := heightmapFormat()
 	data := make([]uint64, 256)
 	data[0] = 42
@@ -41,8 +41,8 @@ func TestRealStorageImportDataDirect(t *testing.T) {
 	}
 }
 
-func TestRealStorageImportDataDirectMultipleBpe(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageImportDataDirectMultipleBpe(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4, 8},
 		BiggestDirect: true,
 		Len:           256,
@@ -54,8 +54,8 @@ func TestRealStorageImportDataDirectMultipleBpe(t *testing.T) {
 	}
 }
 
-func TestRealStorageImportUnsortedBpe(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageImportUnsortedBpe(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{9, 4},
 		BiggestDirect: true,
 		Len:           256,
@@ -67,7 +67,7 @@ func TestRealStorageImportUnsortedBpe(t *testing.T) {
 	}
 }
 
-func TestRealStorageImportBpeNotAvailable(t *testing.T) {
+func TestStorageImportBpeNotAvailable(t *testing.T) {
 	format := heightmapFormat()
 
 	_, err := format.Import([]uint64{1}, 4, nil)
@@ -76,7 +76,7 @@ func TestRealStorageImportBpeNotAvailable(t *testing.T) {
 	}
 }
 
-func TestRealStorageGetSet(t *testing.T) {
+func TestStorageGetSet(t *testing.T) {
 	format := blockStorageFormat()
 	s, err := format.Import(nil, 4, []int32{0, 1, 2, 3})
 	if err != nil {
@@ -98,7 +98,7 @@ func TestRealStorageGetSet(t *testing.T) {
 	}
 }
 
-func TestRealStorageOutOfBounds(t *testing.T) {
+func TestStorageOutOfBounds(t *testing.T) {
 	format := blockStorageFormat()
 	s, err := format.Import(nil, 4, []int32{0, 1})
 	if err != nil {
@@ -116,8 +116,8 @@ func TestRealStorageOutOfBounds(t *testing.T) {
 	}
 }
 
-func TestRealStorageBpeZero(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageBpeZero(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{0, 4, 8},
 		BiggestDirect: true,
 		Len:           64,
@@ -139,8 +139,8 @@ func TestRealStorageBpeZero(t *testing.T) {
 	}
 }
 
-func TestRealStorageBpeZeroPaletteLen(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageBpeZeroPaletteLen(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{0, 4, 8},
 		BiggestDirect: true,
 		Len:           64,
@@ -152,8 +152,8 @@ func TestRealStorageBpeZeroPaletteLen(t *testing.T) {
 	}
 }
 
-func TestRealStorageResize(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageResize(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4, 8},
 		BiggestDirect: false,
 		Len:           16,
@@ -179,8 +179,8 @@ func TestRealStorageResize(t *testing.T) {
 	}
 }
 
-func TestRealStorageResizePreservesData(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageResizePreservesData(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4, 5, 6, 8},
 		BiggestDirect: false,
 		Len:           8,
@@ -207,8 +207,8 @@ func TestRealStorageResizePreservesData(t *testing.T) {
 	}
 }
 
-func TestRealStoragePaletteGrowth(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStoragePaletteGrowth(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4, 5, 6, 8},
 		BiggestDirect: false,
 		Len:           16,
@@ -239,8 +239,8 @@ func TestRealStoragePaletteGrowth(t *testing.T) {
 	}
 }
 
-func TestRealStorageNoAvailableBpe(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageNoAvailableBpe(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4},
 		BiggestDirect: false,
 		Len:           16,
@@ -257,8 +257,8 @@ func TestRealStorageNoAvailableBpe(t *testing.T) {
 	}
 }
 
-func TestRealStorageBiggestDirect(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageBiggestDirect(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4, 8},
 		BiggestDirect: true,
 		Len:           64,
@@ -284,8 +284,8 @@ func TestRealStorageBiggestDirect(t *testing.T) {
 	}
 }
 
-func TestRealStorageDirectModeNoPalette(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageDirectModeNoPalette(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{9},
 		BiggestDirect: true,
 		Len:           256,
@@ -308,8 +308,8 @@ func TestRealStorageDirectModeNoPalette(t *testing.T) {
 	}
 }
 
-func TestRealStorageInvalidPaletteIndex(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageInvalidPaletteIndex(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4, 8},
 		BiggestDirect: false,
 		Len:           16,
@@ -327,7 +327,7 @@ func TestRealStorageInvalidPaletteIndex(t *testing.T) {
 	}
 }
 
-func TestRealStorageOverwrite(t *testing.T) {
+func TestStorageOverwrite(t *testing.T) {
 	format := blockStorageFormat()
 	s, err := format.Import(nil, 4, []int32{0, 1, 2})
 	if err != nil {
@@ -347,7 +347,7 @@ func TestRealStorageOverwrite(t *testing.T) {
 	}
 }
 
-func TestRealStorageSetOutOfBounds(t *testing.T) {
+func TestStorageSetOutOfBounds(t *testing.T) {
 	format := blockStorageFormat()
 	s, err := format.Import(nil, 4, []int32{0, 1})
 	if err != nil {
@@ -365,8 +365,8 @@ func TestRealStorageSetOutOfBounds(t *testing.T) {
 	}
 }
 
-func TestRealStorageGetAfterResize(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageGetAfterResize(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4, 5, 6, 8},
 		BiggestDirect: false,
 		Len:           32,
@@ -392,8 +392,8 @@ func TestRealStorageGetAfterResize(t *testing.T) {
 	}
 }
 
-func TestRealStorageResizeDirect(t *testing.T) {
-	format := level.RealStorageFormat{
+func TestStorageResizeDirect(t *testing.T) {
+	format := level.StorageFormat{
 		AvailableBpes: []uint8{4, 8},
 		BiggestDirect: true,
 		Len:           64,

@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-type RealStorageFormat struct {
+type StorageFormat struct {
 	AvailableBpes []uint8
 	BiggestDirect bool
 	Len           int32
@@ -21,7 +21,7 @@ var RealInvalidPaletteIndexErr = errors.New("invalid palette index")
 var AvailableBpeMustBeSortedErr = errors.New("available bpe must be sorted")
 var DirectModeCantResizeErr = errors.New("direct mode cannot resize")
 
-func (r RealStorageFormat) Import(data []uint64, bpe uint8, palette []int32) (s *RealStorage, err error) {
+func (r StorageFormat) Import(data []uint64, bpe uint8, palette []int32) (s *Storage, err error) {
 	if !slices.IsSorted(r.AvailableBpes) {
 		err = AvailableBpeMustBeSortedErr
 		return
@@ -31,7 +31,7 @@ func (r RealStorageFormat) Import(data []uint64, bpe uint8, palette []int32) (s 
 		err = BpeNotAvailableErr
 		return
 	}
-	s = new(RealStorage)
+	s = new(Storage)
 	s.format = r
 	s.resize(bpe)
 	if bpe == 0 && len(palette) != 1 {
@@ -45,7 +45,7 @@ func (r RealStorageFormat) Import(data []uint64, bpe uint8, palette []int32) (s 
 	return
 }
 
-func (r RealStorageFormat) ImportDataDirect(data []uint64) (s *RealStorage, err error) {
+func (r StorageFormat) ImportDataDirect(data []uint64) (s *Storage, err error) {
 	if len(r.AvailableBpes) != 1 {
 		err = AvailableBpeMustBeLenOneErr
 		return
@@ -53,8 +53,8 @@ func (r RealStorageFormat) ImportDataDirect(data []uint64) (s *RealStorage, err 
 	return r.Import(data, r.AvailableBpes[0], nil)
 }
 
-type RealStorage struct {
-	format  RealStorageFormat
+type Storage struct {
+	format  StorageFormat
 	data    []uint64
 	bpe     uint8
 	palette []int32
@@ -64,7 +64,7 @@ type RealStorage struct {
 	mask uint64
 }
 
-func (r *RealStorage) doWeResizeDirect(bpe uint8) bool {
+func (r *Storage) doWeResizeDirect(bpe uint8) bool {
 	if !r.format.BiggestDirect || r.format.AvailableBpes == nil {
 		return false
 	}
@@ -72,7 +72,7 @@ func (r *RealStorage) doWeResizeDirect(bpe uint8) bool {
 }
 
 // only resizes upwards
-func (r *RealStorage) resize(bpe uint8) {
+func (r *Storage) resize(bpe uint8) {
 	if bpe == 0 {
 		r.data = nil
 		r.bpe = 0
@@ -116,7 +116,7 @@ func (r *RealStorage) resize(bpe uint8) {
 	return
 }
 
-func (r *RealStorage) Get(i int32) (s int32, err error) {
+func (r *Storage) Get(i int32) (s int32, err error) {
 	if i < 0 || i >= r.format.Len {
 		err = OutOfBoundsErr
 		return
@@ -144,12 +144,12 @@ func (r *RealStorage) Get(i int32) (s int32, err error) {
 	return
 }
 
-func (r *RealStorage) set(i int32, v int32) {
+func (r *Storage) set(i int32, v int32) {
 	shift := (i % r.elementsPerLong) * int32(r.bpe)
 	r.data[i/r.elementsPerLong] = (r.data[i/r.elementsPerLong] & ^(r.mask << shift)) | (uint64(v) << shift)
 }
 
-func (r *RealStorage) Set(i int32, v int32) (err error) {
+func (r *Storage) Set(i int32, v int32) (err error) {
 	if i < 0 || i >= r.format.Len {
 		err = OutOfBoundsErr
 		return
@@ -165,7 +165,7 @@ func (r *RealStorage) Set(i int32, v int32) (err error) {
 	return
 }
 
-func (r *RealStorage) appendPalette(v int32) (i int, err error) {
+func (r *Storage) appendPalette(v int32) (i int, err error) {
 	i = len(r.palette)
 	if r.palette == nil {
 		err = DirectModeCantResizeErr
