@@ -1,7 +1,9 @@
 package level
 
 import (
+	"encoding/binary"
 	"errors"
+	"io"
 	"math"
 	"slices"
 )
@@ -53,6 +55,28 @@ func (r StorageFormat) ImportDataDirect(data []uint64) (s *Storage, err error) {
 	return r.Import(data, r.AvailableBpes[0], nil)
 }
 
+func (r StorageFormat) ImportFromReader(reader io.Reader, bpe uint8, palette []int32) (s *Storage, err error) {
+	if !slices.Contains(r.AvailableBpes, bpe) {
+		err = BpeNotAvailableErr
+		return
+	}
+	var longs []uint64
+	if bpe == 0 {
+		return r.Import(longs, bpe, palette)
+	}
+	elementsPerLong := int32(64 / int(bpe))
+	numberOfLongs := int(math.Ceil(float64(r.Len) / float64(elementsPerLong)))
+	for range numberOfLongs {
+		var long uint64
+		err = binary.Read(reader, binary.BigEndian, &long) // surely this works?
+		if err != nil {
+			return
+		}
+		longs = append(longs, long)
+	}
+	return r.Import(longs, bpe, palette)
+}
+
 type Storage struct {
 	format  StorageFormat
 	data    []uint64
@@ -81,14 +105,14 @@ func (r *Storage) resize(bpe uint8) {
 		r.maxAtCurrentBpe = 1
 		return
 	}
-	numberOfElements := int32(64 / int(bpe))
-	numberOfLongs := int(math.Ceil(float64(r.format.Len) / float64(numberOfElements)))
+	elementsPerLong := int32(64 / int(bpe))
+	numberOfLongs := int(math.Ceil(float64(r.format.Len) / float64(elementsPerLong)))
 	newData := make([]uint64, numberOfLongs)
 	mask := (uint64(1) << uint32(bpe)) - 1
 	maxAtCurrentBpe := int32(1 << bpe)
 	if r.bpe == 0 {
 		r.bpe = bpe
-		r.elementsPerLong = numberOfElements
+		r.elementsPerLong = elementsPerLong
 		r.data = newData
 		r.mask = mask
 		r.maxAtCurrentBpe = maxAtCurrentBpe
@@ -102,13 +126,13 @@ func (r *Storage) resize(bpe uint8) {
 		} else {
 			v = int32((r.data[i/r.elementsPerLong] >> ((i % r.elementsPerLong) * int32(r.bpe))) & r.mask)
 		}
-		newData[i/int32(numberOfElements)] |= uint64(v) << ((i % int32(numberOfElements)) * int32(bpe))
+		newData[i/int32(elementsPerLong)] |= uint64(v) << ((i % int32(elementsPerLong)) * int32(bpe))
 	}
 	if resizeDirect {
 		r.palette = nil
 	}
 	r.bpe = bpe
-	r.elementsPerLong = numberOfElements
+	r.elementsPerLong = elementsPerLong
 	r.data = newData
 	r.mask = mask
 	r.maxAtCurrentBpe = maxAtCurrentBpe
@@ -195,4 +219,22 @@ func (r *Storage) appendPalette(v int32) (i int, err error) {
 	r.palette = append(r.palette, v)
 	i = len(r.palette) - 1
 	return
+}
+
+func (r *Storage) Export() (data []uint64, bpe uint8, palette []int32, format StorageFormat) {
+	return r.data, r.bpe, r.palette, r.format
+}
+
+func CompareStorage(a, b *Storage) bool {
+	if a.format.Len != b.format.Len {
+		return false
+	}
+	for i := range a.format.Len {
+		av, _ := a.Get(i)
+		bv, _ := b.Get(i)
+		if av == bv {
+			return false
+		}
+	}
+	return true
 }

@@ -6,6 +6,7 @@ import (
 	"go/ast"
 
 	"github.com/admin-else/strom/proto_generator/protodef"
+	"github.com/admin-else/strom/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 
@@ -36,7 +37,7 @@ func VisitContainerType(g *Generator, dataRaw any) (ast.Expr, error) {
 		if field.Anon {
 			field.Name = "Anon" // lol
 		}
-		AddFieldToStruct(s, CamelCase(field.Name), t)
+		AddFieldToStruct(s, util.CamelCase(field.Name), t)
 	}
 	return s, nil
 }
@@ -137,7 +138,7 @@ func VisitBitFieldType(g *Generator, dataRaw any) (e ast.Expr, err error) {
 		if err != nil {
 			return
 		}
-		AddFieldToStruct(ret, CamelCase(field.Name), fieldType)
+		AddFieldToStruct(ret, util.CamelCase(field.Name), fieldType)
 	}
 	e = ret
 	return

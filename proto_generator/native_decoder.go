@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/admin-else/strom/proto_generator/protodef"
+	"github.com/admin-else/strom/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 
@@ -46,7 +47,7 @@ func ContainerDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string)
 
 	for _, field := range data {
 		var statements []ast.Stmt
-		cName := CamelCase(field.Name)
+		cName := util.CamelCase(field.Name)
 		if field.Anon {
 			cName = "Anon"
 		}
@@ -106,7 +107,7 @@ func OptionDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 
 func ArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
 	var data protodef.Array
-	lName := "l" + CamelCase(name)
+	lName := "l" + util.CamelCase(name)
 	err = mapstructure.Decode(dataRaw, &data)
 	if err != nil {
 		return
@@ -259,7 +260,7 @@ func SwitchDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 		if err != nil {
 			return
 		}
-		tName := name + CamelCase(fName) + "Tmp"
+		tName := name + util.CamelCase(fName) + "Tmp"
 		s1 := VarStmt(tName, tType)
 		s3 := Assign121(varToSet, Ident(tName))
 		var caseDecodeValueStmts []ast.Stmt
@@ -309,7 +310,7 @@ func MapperDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	if err != nil {
 		return
 	}
-	kName := CamelCase(name) + "Key"
+	kName := util.CamelCase(name) + "Key"
 	kType, err := g.VisitType(data.Type)
 	if err != nil {
 		return
@@ -346,7 +347,7 @@ func BufferDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	// 	rawString, err := io.ReadAll(io.LimitReader(r, int64(l)))
 
 	if data.CountType != nil {
-		lName := "l" + CamelCase(name)
+		lName := "l" + util.CamelCase(name)
 		var countType ast.Expr
 		countType, err = g.VisitType(data.CountType)
 		if err != nil {
@@ -411,7 +412,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 		}
 
 		rShiftBy := totalSize - field.Size
-		fieldToSet := SelectorExprAndStr(varToSet, CamelCase(field.Name))
+		fieldToSet := SelectorExprAndStr(varToSet, util.CamelCase(field.Name))
 
 		var getDataExpr ast.Expr
 		getDataExpr = RightShift(
@@ -470,7 +471,7 @@ func RegistryEntryHolderSetDecoder(g *Generator, varToSet ast.Expr, dataRaw any,
 	if err != nil {
 		return
 	}
-	lName := "l" + CamelCase(name)
+	lName := "l" + util.CamelCase(name)
 	s1 := VarStmt(lName, countType)
 	s2, err := g.VisitDecoder(Ident(lName), "varint", name)
 	if err != nil {

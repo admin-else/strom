@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/admin-else/strom/proto_generator/protodef"
+	"github.com/admin-else/strom/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 
@@ -37,11 +38,11 @@ func ContainerEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string)
 
 	for _, field := range data {
 		var statements []ast.Stmt
-		cName := CamelCase(field.Name)
+		cName := util.CamelCase(field.Name)
 		if field.Anon {
 			cName = "Anon"
 		}
-		statements, err = g.VisitEncoder(SelectorExprAndStr(varToSet, cName), field.Type, name+CamelCase(cName))
+		statements, err = g.VisitEncoder(SelectorExprAndStr(varToSet, cName), field.Type, name+util.CamelCase(cName))
 		if err != nil {
 			return
 		}
@@ -170,7 +171,7 @@ func BitFieldEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 							Ident(boolFix),
 							SelectorExprAndStr(
 								varToSet,
-								CamelCase(field.Name),
+								util.CamelCase(field.Name),
 							),
 						),
 						NumLitHex((1<<field.Size)-1),

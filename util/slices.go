@@ -81,3 +81,7 @@ func SliceRange[T Numeric](s, e T) (ret []T) {
 	}
 	return
 }
+
+func IsLastElement[T comparable](s []T, e T) bool {
+	return len(s) > 0 && s[len(s)-1] == e
+}

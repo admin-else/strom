@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/admin-else/strom/proto_generator/protodef"
+	"github.com/admin-else/strom/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 
@@ -52,7 +53,7 @@ func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw a
 	}
 	for _, field := range data {
 		if field.Name == name {
-			return g.VisitCompareTo(parts, SelectorExprAndStr(inExpr, CamelCase(field.Name)), field.Type)
+			return g.VisitCompareTo(parts, SelectorExprAndStr(inExpr, util.CamelCase(field.Name)), field.Type)
 		}
 	}
 	err = errors.New("field not found")
@@ -87,7 +88,7 @@ func BitfieldCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw an
 		cet = CaseExprTypeOnlyNumber
 	}
 
-	e = SelectorExprAndStr(inExpr, CamelCase(fieldName))
+	e = SelectorExprAndStr(inExpr, util.CamelCase(fieldName))
 	return
 }
 

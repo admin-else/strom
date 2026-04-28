@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/admin-else/strom/data"
+	"github.com/admin-else/strom/util"
 )
 
 var ToDoError = errors.New("to do")
@@ -126,11 +127,11 @@ func (g *Generator) VisitNameAndData(tName string, tData any) (e ast.Expr, err e
 	}
 	t, found := g.Protocol.Types.Types[tName]
 	if t != "native" && found {
-		return Ident(CamelCase(tName)), nil
+		return Ident(util.CamelCase(tName)), nil
 	}
 	t, found = g.CurrentlyGeneratingTypes.Types[tName]
 	if found {
-		return Ident(g.CurrentlyGeneratingTypesPrefix + CamelCase(tName)), nil
+		return Ident(g.CurrentlyGeneratingTypesPrefix + util.CamelCase(tName)), nil
 	}
 	err = fmt.Errorf("unknown type %s", tName)
 	return
@@ -212,7 +213,7 @@ func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 			continue
 		}
 
-		tName := prefix + CamelCase(k)
+		tName := prefix + util.CamelCase(k)
 		g.CurrentlyGeneratingTypeName = tName
 
 		e, retExpr := FixPointerReceivers(e)
@@ -293,7 +294,7 @@ func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err err
 			v := typeData.([]any)[1].([]any)[1].(map[string]any)["type"].([]any)[1].(map[string]any)["fields"].(map[string]any)
 			for _, k2 := range OrderedKeys(v) {
 				v2 := v[k2].(string)
-				typeName := prefix + CamelCase(v2)
+				typeName := prefix + util.CamelCase(v2)
 				g.packetInfos = append(g.packetInfos, PacketInfo{
 					PacketDef:        v2,
 					TName:            typeName,
