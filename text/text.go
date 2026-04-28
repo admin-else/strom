@@ -157,10 +157,6 @@ func (c *Component) UnmarshalJSON(data []byte) error {
 
 // ToNBT converts the component to a format suitable for the nbt package.
 func (c *Component) ToNBT() any {
-	if c.isSimpleText() {
-		return c.Text
-	}
-
 	m := make(map[string]any)
 	if c.Bold != nil {
 		m["bold"] = boolToByte(*c.Bold)
@@ -494,7 +490,8 @@ func Pretty(s string) *Component {
 
 // PrettyF returns a Component from a formatted string.
 func PrettyF(format string, args ...any) *Component {
-	return Pretty(fmt.Sprintf(format, args...))
+	s := fmt.Sprintf(format, args...)
+	return Pretty(s)
 }
 
 var colorToCode = map[string]byte{

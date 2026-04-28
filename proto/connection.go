@@ -279,5 +279,6 @@ func NewConn() (ret *Conn) {
 		panic(err)
 	}
 	ret.Loop = event.NewLoop()
+	ret.Log = slog.Default()
 	return
 }

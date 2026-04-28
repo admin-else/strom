@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"reflect"
 	"testing"
+
+	"github.com/admin-else/strom/nbt"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestComponent_JSON(t *testing.T) {
@@ -212,6 +215,34 @@ func TestComponent_String(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.comp.String(); got != tt.want {
 				t.Errorf("Component.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPrettyToNbt(t *testing.T) {
+	tests := []struct {
+		name string
+		f    string
+		want nbt.Anon
+	}{
+		{
+			name: "real data",
+			f:    `§dno gooning`,
+			want: nbt.Anon{Value: map[string]interface{}{"extra": []interface{}{map[string]interface{}{"color": "light_purple", "text": "no gooning"}}}},
+		},
+		{
+			name: "reset thing",
+			f:    "§3Any§bProtect§3 » §rffff",
+			want: nbt.Anon{Value: map[string]interface{}{"extra": []interface{}{map[string]interface{}{"color": "dark_aqua", "text": "Any"}, map[string]interface{}{"color": "aqua", "text": "Protect"}, map[string]interface{}{"color": "dark_aqua", "text": " » "}, map[string]interface{}{"text": "ffff"}}, "text": ""}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := Pretty(tt.f).AsNBT()
+			b := tt.want
+			if !cmp.Equal(a, b) {
+				t.Errorf("PrettyToNbt() = %v, want %v", a, b)
 			}
 		})
 	}
