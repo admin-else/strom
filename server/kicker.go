@@ -26,14 +26,15 @@ func Kick(c *proto.Conn, reason *text.Component, status string) (err error) {
 	case proto_base.Handshaking:
 		err = CantKickInStateErr
 	case proto_base.Status:
-		var b = []byte(status)
 		if status == "" {
+			var b []byte
 			b, err = reason.MarshalJSON()
 			if err != nil {
 				return
 			}
+			status = fmt.Sprintf("{\"description\":%s}", string(b))
 		}
-		err = c.Send(&v1_21_8.StatusToClientPacketServerInfo{Response: fmt.Sprintf("{\"description\":%s}", string(b))})
+		err = c.Send(&v1_21_8.StatusToClientPacketServerInfo{Response: status})
 	case proto_base.Login:
 		var b []byte
 		b, err = reason.MarshalJSON()
