@@ -17,7 +17,7 @@ var (
 	CantKickInStateErr = errors.New("cant kick in this state")
 )
 
-func Kick(c *proto.Conn, reason *text.Component) (err error) {
+func Kick(c *proto.Conn, reason *text.Component, status string) (err error) {
 	if c.Actor != proto_base.Servee {
 		err = NotClientErr
 		return
@@ -26,10 +26,12 @@ func Kick(c *proto.Conn, reason *text.Component) (err error) {
 	case proto_base.Handshaking:
 		err = CantKickInStateErr
 	case proto_base.Status:
-		var b []byte
-		b, err = reason.MarshalJSON()
-		if err != nil {
-			return
+		var b = []byte(status)
+		if status == "" {
+			b, err = reason.MarshalJSON()
+			if err != nil {
+				return
+			}
 		}
 		err = c.Send(&v1_21_8.StatusToClientPacketServerInfo{Response: fmt.Sprintf("{\"description\":%s}", string(b))})
 	case proto_base.Login:

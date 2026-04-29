@@ -37,7 +37,7 @@ func ServeClient(cNet net.Conn, factory Factory) {
 		return
 	}
 	if err != nil {
-		err = Kick(c, text.Pretty(err.Error()))
+		err = Kick(c, text.Pretty(err.Error()), "")
 	}
 }
 
@@ -79,7 +79,7 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 				running = false
 			}
 			if connErr != nil {
-				connErr = Kick(c, text.Pretty(connErr.Error()))
+				connErr = Kick(c, text.Pretty(connErr.Error()), "")
 			}
 		}()
 	}
