@@ -269,8 +269,11 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	}
 	return
 }
-
 func NewConn() (ret *Conn) {
+	return NewConnCtx(context.Background())
+}
+
+func NewConnCtx(ctx context.Context) (ret *Conn) {
 	ret = &Conn{}
 	ret.SetState(proto_base.Handshaking)
 	ret.SetCompressionThreshold(-1)
@@ -278,7 +281,7 @@ func NewConn() (ret *Conn) {
 	if err != nil {
 		panic(err)
 	}
-	ret.Loop = event.NewLoop()
+	ret.Loop = event.NewLoopCtx(ctx)
 	ret.Log = slog.Default()
 	return
 }

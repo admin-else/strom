@@ -236,8 +236,12 @@ func (l *Loop) StartLoop() (err error) {
 }
 
 func NewLoop() (l *Loop) {
+	return NewLoopCtx(context.Background())
+}
+
+func NewLoopCtx(ctx context.Context) (l *Loop) {
 	l = &Loop{}
-	l.Ctx, l.Cancel = context.WithCancel(context.Background())
+	l.Ctx, l.Cancel = context.WithCancel(ctx)
 	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
 	return
 }

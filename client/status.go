@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
@@ -39,7 +40,7 @@ func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
 // StatusRaw returns a StatusClient that is not connected to a server.
 // So ignore the resource leak warning. And maybe attach a warn ignore comment.
 // It does not resolve SRV records.
-func StatusRaw(addr string) (s *StatusClient, err error) {
+func StatusRaw(ctx context.Context, addr string) (s *StatusClient, err error) {
 	c, err := ConnectVersionLess(addr)
 	if err != nil {
 		return
@@ -72,7 +73,7 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 
 // StatusNoDns is like Status but does not resolve SRV records.
 func StatusNoDns(addr string) (status server.StatusResponse, err error) {
-	s, err := StatusRaw(addr)
+	s, err := StatusRaw(context.Background(), addr)
 	if err != nil {
 		return
 	}

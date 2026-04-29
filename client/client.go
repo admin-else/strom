@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"net"
 
 	"github.com/admin-else/strom/proto"
@@ -22,13 +23,17 @@ func Connect(addr string) (ret *proto.Conn, err error) {
 	return
 }
 
+func ConnectVersionLess(addr string) (ret *proto.Conn, err error) {
+	return ConnectVersionLessCtx(context.Background(), addr)
+}
+
 // ConnectVersionLess connects to the given address without setting the version you should set it
 // when using this function.
 // You must close the connection when you're done with it
-func ConnectVersionLess(addr string) (ret *proto.Conn, err error) {
-	ret = proto.NewConn()
+func ConnectVersionLessCtx(ctx context.Context, addr string) (ret *proto.Conn, err error) {
+	ret = proto.NewConnCtx(ctx)
 	ret.Actor = proto_base.Client
-	ret.Conn, err = net.Dial("tcp", addr)
+	ret.Conn, err = (&net.Dialer{}).DialContext(ctx, "tcp", addr)
 	if err != nil {
 		return
 	}
