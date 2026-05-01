@@ -78,6 +78,7 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 			if errors.Is(connErr, ShutDownServerErr) {
 				running = false
 			}
+			c.Log.Error("closing connection", "err", connErr)
 			if connErr != nil {
 				connErr = Kick(c, text.Pretty(connErr.Error()), "")
 			}

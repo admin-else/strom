@@ -163,12 +163,13 @@ func (l *LoginServer) OnEncryptionResponse(packet *v1_21_8.LoginToServerPacketEn
 		return
 	}
 
-	serverId := crypto.AuthDigest([]byte(l.ServerId), sharedSecret, l.PublicKeyBytes)
-	_, err = api.HasJoined(l.Requested.Name, serverId, "")
+	err = l.SetSecret(sharedSecret)
 	if err != nil {
 		return
 	}
-	err = l.SetSecret(sharedSecret)
+
+	serverId := crypto.AuthDigest([]byte(l.ServerId), sharedSecret, l.PublicKeyBytes)
+	_, err = api.HasJoined(l.Requested.Name, serverId, "")
 	if err != nil {
 		return
 	}
@@ -240,6 +241,7 @@ func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer
 	ret.RegisterCriticalUntilLatest(ret.OnLoginAcknowledged)
 	ret.RegisterCriticalUntilLatest(ret.OnStatusRequest)
 	ret.RegisterCriticalUntilLatest(ret.OnStatusPing)
+	ret.RegisterCriticalUntilLatest(ret.OnEncryptionResponse)
 	for _, s := range settings {
 		s(ret)
 	}

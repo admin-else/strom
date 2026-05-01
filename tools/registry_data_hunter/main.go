@@ -25,6 +25,8 @@ func wontFail[T any](v T, err error) T {
 	return v
 }
 
+// THIS IS REDUNDANT USE LOGIN PACKET IN MINECRAFT DATA
+
 var (
 	// Edit these two
 	Version = "1.21.11"
