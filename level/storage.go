@@ -29,13 +29,30 @@ func (r StorageFormat) Import(data []uint64, bpe uint8, palette []int32) (s *Sto
 		return
 	}
 
-	if !slices.Contains(r.AvailableBpes, bpe) {
-		err = BpeNotAvailableErr
-		return
-	}
 	s = new(Storage)
 	s.format = r
 	s.resize(bpe)
+
+	if !slices.Contains(r.AvailableBpes, bpe) {
+		var newBpe uint8
+		for _, newBpe = range r.AvailableBpes {
+			if bpe < newBpe {
+				continue
+			}
+		}
+		var tmps *Storage
+		tmps, err = StorageFormat{
+			AvailableBpes: []uint8{bpe},
+			BiggestDirect: false,
+			Len:           r.Len,
+		}.ImportDataDirect(data)
+		if err != nil {
+			return
+		}
+		tmps.resize(newBpe)
+		data = tmps.data
+		bpe = newBpe
+	}
 	if bpe == 0 && len(palette) != 1 {
 		err = Bpe0PalletMustBeLenOneErr
 		return
