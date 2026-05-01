@@ -1,2 +1,2 @@
-./**/*_test.go export-ignore
-./**/testdata export-ignore
+**/*_test.go export-ignore
+**/testdata export-ignore
