@@ -99,7 +99,12 @@ func StateIdFromBlocKAndStateMap(version string, name string, stateMap map[strin
 		err = BlockNotFoundErr
 		return
 	}
-	stateId, err = b.IdFromStateMap(stateMap)
+	if stateMap == nil {
+		stateId = b.DefaultState
+	} else {
+		stateId, err = b.IdFromStateMap(stateMap)
+	}
+
 	return
 }
 

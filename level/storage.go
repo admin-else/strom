@@ -255,3 +255,12 @@ func CompareStorage(a, b *Storage) bool {
 	}
 	return true
 }
+
+func CountStorage(s *Storage, v int32) (a int) {
+	for i := range s.format.Len {
+		if w, _ := s.Get(i); w == v {
+			a++
+		}
+	}
+	return
+}
