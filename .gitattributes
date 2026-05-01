@@ -1,4 +1,2 @@
 **/*_test.go export-ignore
 **/testdata export-ignore
-proto_generator/ export-ignore
-tools/ export-ignore
