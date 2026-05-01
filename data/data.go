@@ -6,7 +6,7 @@ import (
 	"errors"
 )
 
-//go:embed minecraft-data/data/pc minecraft-data/data/dataPaths.json
+//go:embed minecraft-data/pc minecraft-data/dataPaths.json
 var MinecraftData embed.FS
 
 func LoadJson(path string, data any) (err error) {
@@ -19,7 +19,7 @@ func LoadJson(path string, data any) (err error) {
 }
 
 func LoadVersionedJson(version, dataName string, data any) (err error) {
-	b, err := MinecraftData.ReadFile("minecraft-data/data/" + Paths.Data[version][dataName] + "/" + dataName + ".json")
+	b, err := MinecraftData.ReadFile("minecraft-data/" + Paths.Data[version][dataName] + "/" + dataName + ".json")
 	if err != nil {
 		return
 	}

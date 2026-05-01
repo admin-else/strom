@@ -54,5 +54,5 @@ func LookUpVersionByDataVersion(version int32) (ret VersionInfo, err error) {
 }
 
 func init() {
-	must(LoadJson("minecraft-data/data/pc/common/protocolVersions.json", &ProtocolVersions))
+	must(LoadJson("minecraft-data/pc/common/protocolVersions.json", &ProtocolVersions))
 }

@@ -9,5 +9,5 @@ var Paths struct {
 }
 
 func init() {
-	must(LoadJson("minecraft-data/data/dataPaths.json", &Paths))
+	must(LoadJson("minecraft-data/dataPaths.json", &Paths))
 }
