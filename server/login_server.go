@@ -169,9 +169,11 @@ func (l *LoginServer) OnEncryptionResponse(packet *v1_21_8.LoginToServerPacketEn
 	}
 
 	serverId := crypto.AuthDigest([]byte(l.ServerId), sharedSecret, l.PublicKeyBytes)
-	_, err = api.HasJoined(l.Requested.Name, serverId, "")
-	if err != nil {
-		return
+	if l.OnlineMode {
+		_, err = api.HasJoined(l.Requested.Name, serverId, "")
+		if err != nil {
+			return
+		}
 	}
 	err = l.FinishLogin()
 	return
@@ -235,6 +237,8 @@ func WithCompatibleVersions(versions ...int32) LoginServerSetting {
 
 func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
+	ret.OnlineMode = true
+
 	ret.RegisterCritical(ret.OnDefault)
 	ret.RegisterCriticalUntilLatest(ret.OnHandshake)
 	ret.RegisterCriticalUntilLatest(ret.OnLoginStart)
