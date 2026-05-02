@@ -116,7 +116,7 @@ func Run(args []string) (err error) {
 			return
 		}
 		c.DebugPrintPackets = []string{""}
-		err = client.LoginRaw(c, acc, *TargetAddr)
+		err = client.LoginRaw(c, acc)
 		if err != nil {
 			return
 		}

@@ -125,7 +125,7 @@ func (s *LoginClient) OnStart() (err error) {
 	return
 }
 
-func LoginRaw(c *proto.Conn, account *api.Account, addr string) (err error) {
+func LoginRaw(c *proto.Conn, account *api.Account) (err error) {
 	lc := &LoginClient{
 		Conn:    c,
 		Account: account,
@@ -161,7 +161,7 @@ func LoginNoSrv(connectTo string, account *api.Account) (c *proto.Conn, err erro
 	if err != nil {
 		return
 	}
-	err = LoginRaw(c, account, connectTo)
+	err = LoginRaw(c, account)
 	return
 }
 
@@ -174,6 +174,6 @@ func Login(connectTo string, account *api.Account) (c *proto.Conn, err error) {
 	if err != nil {
 		return
 	}
-	err = LoginRaw(c, account, connectTo)
+	err = LoginRaw(c, account)
 	return
 }

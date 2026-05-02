@@ -56,7 +56,7 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 		// this is probably fine
 		uintSlice := unsafe.Slice((*uint64)(unsafe.Pointer(unsafe.SliceData(s.Biomes.Data))), len(s.Biomes.Data))
 
-		toChunk.Sections[i].Biomes, err = f.Import(uintSlice, util.BpeByNum(float64(len(s.BlockStates.Palette))), pallete)
+		toChunk.Sections[i].Biomes, err = f.Import(uintSlice, util.BpeByNum(float64(len(pallete))), pallete)
 		if err != nil {
 			return
 		}

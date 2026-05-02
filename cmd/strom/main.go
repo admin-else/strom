@@ -39,7 +39,7 @@ func mainE() (err error) {
 
 	// Debug stuff
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	//args = []string{"TEST", "api", "-name", "Admin_Else"}
+	//args = []string{"TEST", "packet-spy"}
 
 	if len(args) < 2 {
 		err = ExpectedASubcommandErr
