@@ -235,6 +235,12 @@ func WithCompatibleVersions(versions ...int32) LoginServerSetting {
 	}
 }
 
+func WithoutOnlineMode() LoginServerSetting {
+	return func(s *LoginServer) {
+		s.OnlineMode = false
+	}
+}
+
 func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
 	ret.OnlineMode = true
