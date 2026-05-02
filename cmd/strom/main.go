@@ -1,6 +1,7 @@
 package main
 
 import (
+	"debug/buildinfo"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -18,12 +19,26 @@ import (
 var ExpectedASubcommandErr = errors.New("expected a subcommand")
 var UnknownSubcommandErr = errors.New("unknown subcommand try 'strom help' for a list of subcommands")
 
+func Version(args []string) (err error) {
+	selfPath, err := os.Executable()
+	if err != nil {
+		return
+	}
+	info, err := buildinfo.ReadFile(selfPath)
+	if err != nil {
+		return
+	}
+	fmt.Println("strom cli ", info.Main.Version, " (", info.Main.Sum, ")")
+	return
+}
+
 var subcommands = map[string]func(args []string) error{
 	"offline-uuid": offline_uuid.Run,
 	"print-nbt":    print_nbt.Run,
 	"status":       status.Run,
 	"packet-spy":   packet_inspector.Run,
 	"api":          api.Run,
+	"version":      Version,
 }
 
 func Help(args []string) (err error) {
@@ -39,7 +54,7 @@ func mainE() (err error) {
 
 	// Debug stuff
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	//args = []string{"TEST", "packet-spy"}
+	//args = []string{"TEST", "version"}
 
 	if len(args) < 2 {
 		err = ExpectedASubcommandErr
