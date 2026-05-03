@@ -42,5 +42,13 @@ func TestRegionFile(t *testing.T) {
 
 	fmt.Println(string(util.MustT(json.MarshalIndent(n, "", "  "))))
 	fmt.Println("Chunk loaded successfully")
+}
+
+func TestConverToPacket(t *testing.T) {
+	f, err := os.Open("./level/anvil/testdata/r.0.0.mca")
+	if err != nil {
+		return
+	}
+	defer f.Close()
 
 }
