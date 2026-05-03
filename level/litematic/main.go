@@ -3,7 +3,6 @@ package litematic
 import (
 	"errors"
 	"io"
-	"math"
 	"os"
 	"strings"
 	"unsafe"
@@ -11,11 +10,29 @@ import (
 	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/level"
 	"github.com/admin-else/strom/nbt"
+	"github.com/admin-else/strom/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 
+var OutOfBoundsErr = errors.New("out of bounds")
+
+const mcNamespaced = "minecraft:"
+
 type Position struct {
 	X, Y, Z int32
+}
+
+func (p Position) FixNegatives() Position {
+	if p.X < 0 {
+		p.X *= -1
+	}
+	if p.Y < 0 {
+		p.Y *= -1
+	}
+	if p.Z < 0 {
+		p.Z *= -1
+	}
+	return p
 }
 
 type MetaData struct {
@@ -40,12 +57,11 @@ type Region struct {
 	Size              Position
 	BlockStatePalette []BlockState
 	BlockStates       []int64
+	*level.Storage
 }
 
-func (r *Region) GetBlockAt(x, y, z int32) (name string, properties map[string]string, err error) {
-
-	// this is probably fine
-	uintSlice := unsafe.Slice((*uint64)(unsafe.Pointer(unsafe.SliceData(r.BlockStates))), len(r.BlockStates))
+func (s *Structure) GetBlockAt(region string, x, y, z int32) (stateId int32, err error) {
+	r := s.Regions[region]
 	if r.Size.X < 0 {
 		r.Size.X *= -1
 	}
@@ -61,15 +77,7 @@ func (r *Region) GetBlockAt(x, y, z int32) (name string, properties map[string]s
 		return
 	}
 	i := x + z*r.Size.X + y*r.Size.X*r.Size.Z
-	bpe := int32(math.Ceil(math.Log2(float64(len(r.BlockStatePalette)))))
-	i = level.GetEntryFromLongs(uintSlice, i, bpe)
-	if i >= int32(len(r.BlockStatePalette)) {
-		err = BlockStateNotInPalletErr
-		return
-	}
-	block := r.BlockStatePalette[i]
-	name = block.Name
-	properties = block.Properties
+	stateId, err = r.Get(i)
 	return
 }
 
@@ -83,7 +91,7 @@ type File struct {
 
 type Structure struct {
 	File
-	BlockStatePalletRealized map[string][]int32
+	Version string
 }
 
 func LoadFromPath(path string) (s *Structure, err error) {
@@ -114,57 +122,32 @@ func Load(v any) (s *Structure, err error) {
 	if err != nil {
 		return
 	}
-	s.BlockStatePalletRealized = make(map[string][]int32)
-	for k, r := range s.Regions {
-		s.BlockStatePalletRealized[k] = make([]int32, len(r.BlockStatePalette))
-		for i, b := range r.BlockStatePalette {
-			var stateId int32
-			stateId, err = data.StateIdFromBlocKAndStateMap(ret.MinecraftVersion, strings.TrimPrefix(b.Name, "minecraft:"), b.Properties)
+	s.Version = ret.MinecraftVersion
+	for k, region := range s.Regions {
+		palette := make([]int32, len(region.BlockStatePalette))
+		for i, b := range region.BlockStatePalette {
+			var paletteEntry int32
+			paletteEntry, err = data.StateIdFromBlocKAndStateMap(s.Version, strings.TrimPrefix(b.Name, mcNamespaced), b.Properties)
 			if err != nil {
 				return
 			}
-			s.BlockStatePalletRealized[k][i] = stateId
+			palette[i] = paletteEntry
 		}
-	}
-	return
-}
 
-var BlockStateNotInPalletErr = errors.New("block state not in pallet")
-var OutOfBoundsErr = errors.New("out of bounds")
-var RegionNotInFileErr = errors.New("region not in file")
-
-func (s *Structure) GetBlockAt(name string, x, y, z int32) (blockState int32, err error) {
-	r, ok := s.Regions[name]
-	if !ok {
-		err = RegionNotInFileErr
-		return
-	}
-	uintSlice := make([]uint64, len(r.BlockStates))
-	for i, v := range r.BlockStates {
-		uintSlice[i] = uint64(v)
-	}
-	if r.Size.X < 0 {
-		r.Size.X *= -1
-	}
-	if r.Size.Y < 0 {
-		r.Size.Y *= -1
-	}
-	if r.Size.Z < 0 {
-		r.Size.Z *= -1
+		sizeFixed := region.Size.FixNegatives()
+		l := sizeFixed.X * sizeFixed.Y * sizeFixed.Z
+		bpe := util.BpeByNum(float64(len(region.BlockStatePalette)))
+		uintSlice := unsafe.Slice((*uint64)(unsafe.Pointer(unsafe.SliceData(region.BlockStates))), len(region.BlockStates))
+		region.Storage, err = level.StorageFormat{
+			AvailableBpes: []uint8{bpe},
+			BiggestDirect: false,
+			Len:           l,
+		}.Import(uintSlice, bpe, palette)
+		if err != nil {
+			return
+		}
+		s.Regions[k] = region
 	}
 
-	if x >= r.Size.X || y >= r.Size.Y || z >= r.Size.Z {
-		err = OutOfBoundsErr
-		return
-	}
-	i := x + z*r.Size.X + y*r.Size.X*r.Size.Z
-	bpe := int32(math.Ceil(math.Log2(float64(len(r.BlockStatePalette)))))
-	i = level.GetEntryFromLongs(uintSlice, i, bpe)
-	mapSlice := s.BlockStatePalletRealized[name]
-	if i >= int32(len(mapSlice)) {
-		err = BlockStateNotInPalletErr
-		return
-	}
-	blockState = mapSlice[i]
 	return
 }
