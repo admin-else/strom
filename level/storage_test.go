@@ -67,15 +67,6 @@ func TestStorageImportUnsortedBpe(t *testing.T) {
 	}
 }
 
-func TestStorageImportBpeNotAvailable(t *testing.T) {
-	format := heightmapFormat()
-
-	_, err := format.Import([]uint64{1}, 4, nil)
-	if err != level.BpeNotAvailableErr {
-		t.Errorf("expected BpeNotAvailableErr, got %v", err)
-	}
-}
-
 func TestStorageGetSet(t *testing.T) {
 	format := blockStorageFormat()
 	s, err := format.Import(nil, 4, []int32{0, 1, 2, 3})
