@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/admin-else/strom/nbt"
@@ -19,6 +20,9 @@ func Run(args []string) (err error) {
 	err = cmd.Parse(args)
 	if err != nil {
 		return
+	}
+	if *FileFlag == "" {
+		return fmt.Errorf("no file specified")
 	}
 	f, err := os.Open(*FileFlag)
 	if err != nil {
