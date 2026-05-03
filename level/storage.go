@@ -253,7 +253,7 @@ func (r *Storage) Equals(other *Storage) bool {
 	for i := range r.format.Len {
 		av, _ := r.Get(i)
 		bv, _ := other.Get(i)
-		if av == bv {
+		if av != bv {
 			return false
 		}
 	}
