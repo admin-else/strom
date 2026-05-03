@@ -7,8 +7,8 @@ type Chunk struct {
 	version  string
 }
 
-func ReadChunkFromChunkPacketData(r io.Reader, version string, worldHeight int) (err error) {
-	c := &Chunk{}
+func ReadChunkFromChunkPacketData(r io.Reader, version string, worldHeight int) (c *Chunk, err error) {
+	c = &Chunk{}
 	c.version = version
 	nSections := worldHeight / ChunkWidth
 
@@ -30,4 +30,19 @@ func (c *Chunk) WriteChunkData(w io.Writer) (err error) {
 		}
 	}
 	return
+}
+
+func (c *Chunk) Equals(other *Chunk) bool {
+	if c.version != other.version {
+		return false
+	}
+	if len(c.Sections) != len(other.Sections) {
+		return false
+	}
+	for i, s := range c.Sections {
+		if !SectionEquals(s, other.Sections[i]) {
+			return false
+		}
+	}
+	return true
 }

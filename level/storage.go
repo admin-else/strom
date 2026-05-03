@@ -246,13 +246,13 @@ func (r *Storage) Export() (data []uint64, bpe uint8, palette []int32, format St
 	return r.data, r.bpe, r.palette, r.format
 }
 
-func CompareStorage(a, b *Storage) bool {
-	if a.format.Len != b.format.Len {
+func (r *Storage) Equals(other *Storage) bool {
+	if r.format.Len != other.format.Len {
 		return false
 	}
-	for i := range a.format.Len {
-		av, _ := a.Get(i)
-		bv, _ := b.Get(i)
+	for i := range r.format.Len {
+		av, _ := r.Get(i)
+		bv, _ := other.Get(i)
 		if av == bv {
 			return false
 		}

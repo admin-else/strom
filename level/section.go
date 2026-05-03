@@ -136,3 +136,16 @@ func SectionEncodePacket(w io.Writer, s Section) (err error) {
 	err = WriteSectionStorage(w, s.Biomes)
 	return
 }
+
+func SectionEquals(a, b Section) bool {
+	if a.BlockCount != b.BlockCount {
+		return false
+	}
+	if !a.Blocks.Equals(b.Blocks) {
+		return false
+	}
+	if !a.Biomes.Equals(b.Biomes) {
+		return false
+	}
+	return true
+}
