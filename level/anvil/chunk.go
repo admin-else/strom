@@ -50,7 +50,7 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 			toChunk.Sections[i].BlockCount = int16(f.Len)
 		}
 	}
-
+	f = level.MakeBiomeFormat(version)
 	for i, s := range c.Sections {
 		pallete := make([]int32, len(s.Biomes.Palette))
 		for j, p := range s.Biomes.Palette {

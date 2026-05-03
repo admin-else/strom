@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"testing"
 
@@ -48,7 +49,14 @@ func TestRegionFile(t *testing.T) {
 	fmt.Println("Chunk loaded successfully")
 }
 
+func loadPacketToChunk(b []byte) (chunk *level.Chunk, err error) {
+	buffer := bytes.NewBuffer(b)
+	chunk, err = level.ReadChunkFromChunkPacketData(buffer, "1.21.11", 384)
+	return
+}
+
 func TestConverToPacket(t *testing.T) {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	f, err := os.Open("./testdata/r.0.0.mca")
 	if err != nil {
 		t.Errorf("Failed to open file: %v", err)
@@ -90,4 +98,21 @@ func TestConverToPacket(t *testing.T) {
 		t.Errorf("Chunk data is different: %v", cmp.Diff(a, b))
 	}
 
+	aChunk, err := loadPacketToChunk(a)
+	if err != nil {
+		t.Errorf("Failed to load chunk from packet: %v", err)
+		return
+	}
+
+	bChunk, err := loadPacketToChunk(b)
+	if err != nil {
+		t.Errorf("Failed to load chunk from file: %v", err)
+		return
+	}
+	if !aChunk.Equals(packetChunk) {
+		t.Errorf("Chunk is different: %v", cmp.Diff(aChunk, packetChunk))
+	}
+	if !bChunk.Equals(aChunk) {
+		t.Errorf("Chunk is different: %v", cmp.Diff(bChunk, aChunk))
+	}
 }

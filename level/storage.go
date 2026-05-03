@@ -36,8 +36,8 @@ func (r StorageFormat) Import(data []uint64, bpe uint8, palette []int32) (s *Sto
 	if !slices.Contains(r.AvailableBpes, bpe) {
 		var newBpe uint8
 		for _, newBpe = range r.AvailableBpes {
-			if bpe < newBpe {
-				continue
+			if bpe <= newBpe {
+				break
 			}
 		}
 		var tmps *Storage

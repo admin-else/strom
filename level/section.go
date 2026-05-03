@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"log/slog"
 	"math"
 
 	"github.com/admin-else/strom/data"
@@ -43,7 +44,7 @@ func MakeBlockFormat(version string) StorageFormat {
 	return StorageFormat{
 		AvailableBpes: []uint8{0, 4, 5, 6, 7, 8, directBpe},
 		BiggestDirect: true,
-		Len:           BiomesPerChunkSection,
+		Len:           BlocksPerChunkSection,
 	}
 }
 
@@ -69,7 +70,7 @@ func ReadSectionStorage(r io.Reader, format StorageFormat) (s *Storage, err erro
 		if err != nil {
 			return
 		}
-		if paletteLen <= 0 {
+		if paletteLen < 0 {
 			err = BadPaletteLenErr
 			return
 		}
@@ -79,6 +80,16 @@ func ReadSectionStorage(r io.Reader, format StorageFormat) (s *Storage, err erro
 			if err != nil {
 				return
 			}
+			if slog.Default().Enabled(nil, slog.LevelDebug) {
+				b, _ := data.LookupBlockByStateId("1.21.11", v)
+				if b == nil {
+					slog.Debug("unknown palette block in chunk packet", "id", v)
+				} else {
+					slog.Debug("palette block in chunk packet", "id", v, "name", b.Name)
+				}
+
+			}
+
 			pallette = append(pallette, v)
 		}
 	}
