@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"github.com/admin-else/strom/cmd/strom/api"
+	"github.com/admin-else/strom/cmd/strom/extract_mca"
 	"github.com/admin-else/strom/cmd/strom/offline_uuid"
 	"github.com/admin-else/strom/cmd/strom/packet_inspector"
 	"github.com/admin-else/strom/cmd/strom/print_nbt"
@@ -39,10 +40,13 @@ var subcommands = map[string]func(args []string) error{
 	"packet-spy":   packet_inspector.Run,
 	"api":          api.Run,
 	"version":      Version,
+	"extract-mca":  extract_mca.Run,
 }
 
 func Help(args []string) (err error) {
-	fmt.Println("Available subcommands", slices.Collect(maps.Keys(subcommands)))
+	subcommandNames := slices.Collect(maps.Keys(subcommands))
+	slices.Sort(subcommandNames)
+	fmt.Println("Available subcommands", subcommandNames)
 	return
 }
 
