@@ -2,7 +2,6 @@ package server
 
 import (
 	"errors"
-	"log/slog"
 	"net"
 
 	"github.com/admin-else/strom/proto"
@@ -17,7 +16,7 @@ func Servee(c net.Conn) (ret *proto.Conn) {
 	ret.R = c
 	ret.W = c
 
-	ret.Log = slog.Default().With("conn", c.RemoteAddr())
+	ret.Log = ret.Log.With("conn", c.RemoteAddr())
 	return
 }
 

@@ -7,7 +7,6 @@ import (
 
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
-	"github.com/admin-else/strom/server"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
@@ -24,7 +23,7 @@ func NewStateFuzzer(state proto_base.State, actor proto_base.Actor) func(t *test
 	return func(t *testing.T, inbytes []byte) {
 		b1 := bytes.NewBuffer(inbytes)
 		b2 := bytes.NewBuffer(nil)
-		conn := server.Servee(nil)
+		conn := proto.NewConn()
 		conn.SetState(state)
 		conn.Actor = actor
 		conn.R = b1
