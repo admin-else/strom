@@ -18,7 +18,16 @@ func ReadFile(file io.Reader, data any) (err error) {
 	return Format.Decode(n.Value, data)
 }
 
-func WriteUnstructuredFile(file io.Writer, n Tag) (err error) {
+func WriteUnstructuredFilePath(path string, n *Tag) (err error) {
+	f, err := os.Create(path)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	return WriteUnstructuredFile(f, n)
+}
+
+func WriteUnstructuredFile(file io.Writer, n *Tag) (err error) {
 	gzw := gzip.NewWriter(file)
 	defer gzw.Close()
 	err = n.Encode(gzw)
