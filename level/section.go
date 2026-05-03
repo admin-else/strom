@@ -41,7 +41,7 @@ func MakeBiomeFormat(version string) StorageFormat {
 func MakeBlockFormat(version string) StorageFormat {
 	directBpe := uint8(math.Ceil(math.Log2(float64(len(data.BlocksForVersion(version))))))
 	return StorageFormat{
-		AvailableBpes: []uint8{0, 1, 2, 3, directBpe},
+		AvailableBpes: []uint8{0, 4, 5, 6, 7, 8, directBpe},
 		BiggestDirect: true,
 		Len:           BiomesPerChunkSection,
 	}
@@ -69,11 +69,11 @@ func ReadSectionStorage(r io.Reader, format StorageFormat) (s *Storage, err erro
 		if err != nil {
 			return
 		}
-		if paletteLen < 0 {
+		if paletteLen <= 0 {
 			err = BadPaletteLenErr
 			return
 		}
-		for range pallette {
+		for range paletteLen {
 			var v int32
 			v, err = proto_base.DecodeVarInt(r)
 			if err != nil {
