@@ -46,7 +46,7 @@ var Status = wontFail(json.Marshal(server.StatusResponse{
 
 type Proxy struct {
 	Client, Servee *proto.Conn
-	Data           nbt.Tag
+	Data           *nbt.Tag
 }
 
 func (p *Proxy) OnAnything(e event.Anything) (err error) {
