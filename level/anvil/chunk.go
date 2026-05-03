@@ -33,13 +33,22 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 			}
 		}
 		// this is probably fine
-		uintSlice := unsafe.Slice((*uint64)(unsafe.Pointer(unsafe.SliceData(s.BlockStates.Data))), len(s.BlockStates.Data))
 
-		toChunk.Sections[i].Blocks, err = f.Import(uintSlice, util.BpeByNum(float64(len(s.BlockStates.Palette))), pallete)
-		if err != nil {
-			return
+		if s.BlockStates.Data != nil {
+			uintSlice := unsafe.Slice((*uint64)(unsafe.Pointer(unsafe.SliceData(s.BlockStates.Data))), len(s.BlockStates.Data))
+			bpe := util.BpeByNum(float64(len(s.BlockStates.Palette)))
+			toChunk.Sections[i].Blocks, err = f.Import(uintSlice, bpe, pallete)
+			if err != nil {
+				return
+			}
+			toChunk.Sections[i].BlockCount = int16(level.CountStorage(toChunk.Sections[i].Blocks, 0))
+		} else {
+			toChunk.Sections[i].Blocks, err = f.FullWith(0) //TODO PALLETE index 0 if avial
+			if err != nil {
+				return
+			}
+			toChunk.Sections[i].BlockCount = int16(f.Len)
 		}
-		toChunk.Sections[i].BlockCount = int16(level.CountStorage(toChunk.Sections[i].Blocks, 0))
 	}
 
 	for i, s := range c.Sections {
@@ -53,12 +62,21 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 			}
 			pallete[j] = b.Id
 		}
-		// this is probably fine
-		uintSlice := unsafe.Slice((*uint64)(unsafe.Pointer(unsafe.SliceData(s.Biomes.Data))), len(s.Biomes.Data))
 
-		toChunk.Sections[i].Biomes, err = f.Import(uintSlice, util.BpeByNum(float64(len(pallete))), pallete)
-		if err != nil {
-			return
+		if s.Biomes.Data != nil {
+
+			// this is probably fine
+			uintSlice := unsafe.Slice((*uint64)(unsafe.Pointer(unsafe.SliceData(s.Biomes.Data))), len(s.Biomes.Data))
+			bpe := util.BpeByNum(float64(len(pallete)))
+			toChunk.Sections[i].Biomes, err = f.Import(uintSlice, bpe, pallete)
+			if err != nil {
+				return
+			}
+		} else {
+			toChunk.Sections[i].Biomes, err = f.FullWith(0) //TODO PALLETE index 0 if avial
+			if err != nil {
+				return
+			}
 		}
 	}
 	return
@@ -72,9 +90,9 @@ type Section struct {
 			Name       string
 			Properties map[string]string `nbt:"properties,omitempty"`
 		}
-	}
+	} `nbt:"block_states,omitempty"`
 	Biomes struct {
 		Data    []int64 `nbt:"data,omitempty"`
 		Palette []string
-	}
+	} `nbt:"biomes,omitempty"`
 }

@@ -94,6 +94,10 @@ func (r StorageFormat) ImportFromReader(reader io.Reader, bpe uint8, palette []i
 	return r.Import(longs, bpe, palette)
 }
 
+func (r StorageFormat) FullWith(v int32) (s *Storage, err error) {
+	return r.Import(nil, 0, []int32{v})
+}
+
 type Storage struct {
 	format  StorageFormat
 	data    []uint64
