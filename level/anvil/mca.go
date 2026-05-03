@@ -63,6 +63,10 @@ func ReadChunkHeader(r *os.File) (ch *ChunkHeader, err error) {
 }
 
 func (c *ChunkHeader) ChunkAt(f *os.File, x, z int32) (n *nbt.Tag, err error) {
+	if x < 0 || z < 0 || x >= ChunksWidthRegionFile || z >= ChunksWidthRegionFile {
+		err = fmt.Errorf("chunk out of bounds")
+		return
+	}
 	off, size := chunkLocation(c.Chunk[chunkXZtoIndex(x, z)])
 	_, err = f.Seek(int64(off), 0)
 	if err != nil {
@@ -91,6 +95,15 @@ func (c *ChunkHeader) ChunkAt(f *os.File, x, z int32) (n *nbt.Tag, err error) {
 	if err != nil {
 		return
 	}
+	return
+}
+
+func (c *ChunkHeader) TimeAt(f *os.File, x, z int32) (t int32, err error) {
+	if x < 0 || z < 0 || x >= ChunksWidthRegionFile || z >= ChunksWidthRegionFile {
+		err = fmt.Errorf("chunk out of bounds")
+		return
+	}
+	t = c.Time[chunkXZtoIndex(x, z)]
 	return
 }
 
