@@ -229,7 +229,7 @@ func TestPrettyToNbt(t *testing.T) {
 		{
 			name: "real data",
 			f:    `§dno gooning`,
-			want: nbt.Anon{Value: map[string]interface{}{"extra": []interface{}{map[string]interface{}{"color": "light_purple", "text": "no gooning"}}}},
+			want: nbt.Anon{Value: map[string]interface{}{"extra": []interface{}{map[string]interface{}{"color": "light_purple", "text": "no gooning"}}, "text": ""}},
 		},
 		{
 			name: "reset thing",
@@ -242,7 +242,7 @@ func TestPrettyToNbt(t *testing.T) {
 			a := Pretty(tt.f).AsNBT()
 			b := tt.want
 			if !cmp.Equal(a, b) {
-				t.Errorf("PrettyToNbt() = %v, want %v", a, b)
+				t.Errorf("PrettyToNbt() = %#v, want %#v", a, b)
 			}
 		})
 	}
