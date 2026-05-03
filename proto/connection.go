@@ -277,7 +277,7 @@ func NewConnCtx(ctx context.Context) (ret *Conn) {
 	ret = &Conn{}
 	ret.SetState(proto_base.Handshaking)
 	ret.SetCompressionThreshold(-1)
-	err := ret.SetVersion(EarliestVersion)
+	err := ret.SetVersion(LatestVersion)
 	if err != nil {
 		panic(err)
 	}
