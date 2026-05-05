@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"github.com/admin-else/strom/cmd/strom/api"
+	"github.com/admin-else/strom/cmd/strom/data"
 	"github.com/admin-else/strom/cmd/strom/extract_mca"
 	"github.com/admin-else/strom/cmd/strom/offline_uuid"
 	"github.com/admin-else/strom/cmd/strom/packet_inspector"
@@ -41,6 +42,7 @@ var subcommands = map[string]func(args []string) error{
 	"api":          api.Run,
 	"version":      Version,
 	"extract-mca":  extract_mca.Run,
+	"data":         data.Run,
 }
 
 func Help(args []string) (err error) {
