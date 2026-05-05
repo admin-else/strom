@@ -13,6 +13,7 @@ import (
 	"github.com/admin-else/strom/nbt"
 	"github.com/admin-else/strom/util"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestLevel(t *testing.T) {
@@ -109,10 +110,20 @@ func TestConverToPacket(t *testing.T) {
 		t.Errorf("Failed to load chunk from file: %v", err)
 		return
 	}
+	var storageComparer = cmp.Comparer(func(a, b *level.Storage) bool {
+		if a == nil && b == nil {
+			return true
+		}
+		if a == nil || b == nil {
+			return false
+		}
+		return a.Equals(b)
+	})
+
 	if !aChunk.Equals(packetChunk) {
-		t.Errorf("Chunk is different: %v", cmp.Diff(aChunk, packetChunk))
+		t.Errorf("Chunk is different: %v", cmp.Diff(aChunk, packetChunk, storageComparer, cmpopts.IgnoreUnexported(level.Chunk{}, level.Section{}, level.Storage{})))
 	}
 	if !bChunk.Equals(aChunk) {
-		t.Errorf("Chunk is different: %v", cmp.Diff(bChunk, aChunk))
+		t.Errorf("Chunk is different: %v", cmp.Diff(bChunk, aChunk, storageComparer, cmpopts.IgnoreUnexported(level.Chunk{}, level.Section{}, level.Storage{})))
 	}
 }
