@@ -22,6 +22,7 @@ const McPrefix = "minecraft:"
 func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 	f := level.MakeBlockFormat(version)
 	toChunk = new(level.Chunk)
+	toChunk.Version = version
 
 	toChunk.Sections = make([]level.Section, len(c.Sections))
 	for i, s := range c.Sections {

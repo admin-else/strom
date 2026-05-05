@@ -14,7 +14,6 @@ type StorageFormat struct {
 	Len           int32
 }
 
-var BpeNotAvailableErr = errors.New("bpe not available")
 var OutOfBoundsErr = errors.New("out of bounds")
 var AvailableBpeMustBeLenOneErr = errors.New("available bpe must be 1")
 var NoAvailableBpeErr = errors.New("no available bpe")
@@ -73,10 +72,6 @@ func (r StorageFormat) ImportDataDirect(data []uint64) (s *Storage, err error) {
 }
 
 func (r StorageFormat) ImportFromReader(reader io.Reader, bpe uint8, palette []int32) (s *Storage, err error) {
-	if !slices.Contains(r.AvailableBpes, bpe) {
-		err = BpeNotAvailableErr
-		return
-	}
 	var longs []uint64
 	if bpe == 0 {
 		return r.Import(longs, bpe, palette)
