@@ -75,20 +75,20 @@ func TestConverToPacket(t *testing.T) {
 		t.Errorf("Failed to read chunk: %v", err)
 		return
 	}
-	var chunk anvil.Chunk
-	err = nbt.Format.Decode(n.Value, &chunk)
+	var anvilChunk anvil.Chunk
+	err = nbt.Format.Decode(n.Value, &anvilChunk)
 	if err != nil {
 		t.Errorf("Failed to decode chunk: %v", err)
 		return
 	}
-	var packetChunk *level.Chunk
-	packetChunk, err = chunk.ToStorage("1.21.11")
+	var anvilPacketableChunk *level.Chunk
+	anvilPacketableChunk, err = anvilChunk.ToStorage("1.21.11")
 	if err != nil {
 		t.Errorf("Failed to convert chunk: %v", err)
 		return
 	}
 	buffer := bytes.NewBuffer(nil)
-	err = packetChunk.WriteChunkData(buffer)
+	err = anvilPacketableChunk.WriteChunkData(buffer)
 	if err != nil {
 		t.Errorf("Failed to write chunk data: %v", err)
 		return
@@ -120,8 +120,8 @@ func TestConverToPacket(t *testing.T) {
 		return a.Equals(b)
 	})
 
-	if !aChunk.Equals(packetChunk) {
-		t.Errorf("Chunk is different: %v", cmp.Diff(aChunk, packetChunk, storageComparer, cmpopts.IgnoreUnexported(level.Chunk{}, level.Section{}, level.Storage{})))
+	if !aChunk.Equals(anvilPacketableChunk) {
+		t.Errorf("Chunk is different: %v", cmp.Diff(aChunk, anvilPacketableChunk, storageComparer, cmpopts.IgnoreUnexported(level.Chunk{}, level.Section{}, level.Storage{})))
 	}
 	if !bChunk.Equals(aChunk) {
 		t.Errorf("Chunk is different: %v", cmp.Diff(bChunk, aChunk, storageComparer, cmpopts.IgnoreUnexported(level.Chunk{}, level.Section{}, level.Storage{})))

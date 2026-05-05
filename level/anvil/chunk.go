@@ -42,7 +42,7 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 			if err != nil {
 				return
 			}
-			toChunk.Sections[i].BlockCount = int16(level.CountStorage(toChunk.Sections[i].Blocks, 0))
+			toChunk.Sections[i].BlockCount = int16(level.BlocksPerChunkSection - level.CountStorage(toChunk.Sections[i].Blocks, 0))
 		} else {
 			toChunk.Sections[i].Blocks, err = f.FullWith(0) //TODO PALLETE index 0 if avial
 			if err != nil {
