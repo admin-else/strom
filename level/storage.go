@@ -6,12 +6,15 @@ import (
 	"io"
 	"math"
 	"slices"
+
+	"github.com/admin-else/strom/util"
 )
 
 type StorageFormat struct {
-	AvailableBpes []uint8
-	BiggestDirect bool
-	Len           int32
+	RedirectingBpes []uint8 // block bpe 1 2 3 redirect to 4
+	AvailableBpes   []uint8
+	BiggestDirect   bool
+	Len             int32
 }
 
 var OutOfBoundsErr = errors.New("out of bounds")
@@ -33,24 +36,16 @@ func (r StorageFormat) Import(data []uint64, bpe uint8, palette []int32) (s *Sto
 	s.resize(bpe)
 
 	if !slices.Contains(r.AvailableBpes, bpe) {
-		var newBpe uint8
-		for _, newBpe = range r.AvailableBpes {
-			if bpe <= newBpe {
-				break
-			}
-		}
-		var tmps *Storage
-		tmps, err = StorageFormat{
-			AvailableBpes: []uint8{bpe},
-			BiggestDirect: false,
-			Len:           r.Len,
-		}.ImportDataDirect(data)
-		if err != nil {
+		if !slices.Contains(r.RedirectingBpes, bpe) {
+			err = NoAvailableBpeErr
 			return
 		}
-		tmps.resize(newBpe)
-		data = tmps.data
-		bpe = newBpe
+		var found bool
+		bpe, found = util.GetNextLargestNumberSlice(bpe, r.AvailableBpes)
+		if !found {
+			err = NoAvailableBpeErr
+			return
+		}
 	}
 	if bpe == 0 && len(palette) != 1 {
 		err = Bpe0PalletMustBeLenOneErr

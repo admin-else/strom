@@ -85,3 +85,12 @@ func SliceRange[T Numeric](s, e T) (ret []T) {
 func IsLastElement[T comparable](s []T, e T) bool {
 	return len(s) > 0 && s[len(s)-1] == e
 }
+
+func GetNextLargestNumberSlice[T Numeric](a T, s []T) (ret T, found bool) {
+	for _, v := range s {
+		if v > a {
+			return v, true
+		}
+	}
+	return
+}

@@ -42,9 +42,10 @@ func MakeBiomeFormat(version string) StorageFormat {
 func MakeBlockFormat(version string) StorageFormat {
 	directBpe := uint8(math.Ceil(math.Log2(float64(len(data.BlocksForVersion(version))))))
 	return StorageFormat{
-		AvailableBpes: []uint8{0, 4, 5, 6, 7, 8, directBpe},
-		BiggestDirect: true,
-		Len:           BlocksPerChunkSection,
+		RedirectingBpes: []uint8{1, 2, 3},
+		AvailableBpes:   []uint8{0, 4, 5, 6, 7, 8, directBpe},
+		BiggestDirect:   true,
+		Len:             BlocksPerChunkSection,
 	}
 }
 
