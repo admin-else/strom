@@ -1,15 +1,18 @@
 package level
 
-import "io"
+import (
+	"io"
+	"log/slog"
+)
 
 type Chunk struct {
 	Sections []Section
-	version  string
+	Version  string
 }
 
-func ReadChunkFromChunkPacketData(r io.Reader, version string, worldHeight int) (err error) {
-	c := &Chunk{}
-	c.version = version
+func ReadChunkFromChunkPacketData(r io.Reader, version string, worldHeight int) (c *Chunk, err error) {
+	c = &Chunk{}
+	c.Version = version
 	nSections := worldHeight / ChunkWidth
 
 	c.Sections = make([]Section, nSections)
@@ -30,4 +33,21 @@ func (c *Chunk) WriteChunkData(w io.Writer) (err error) {
 		}
 	}
 	return
+}
+
+func (c *Chunk) Equals(other *Chunk) bool {
+	if c.Version != other.Version {
+		slog.Debug("Chunk versions don't match: ", "version 1", c.Version, "version2", other.Version)
+		return false
+	}
+	if len(c.Sections) != len(other.Sections) {
+		slog.Debug("Chunk section len does not match: ", "chunk1 len", len(c.Sections), "chunk 2 len", len(other.Sections))
+		return false
+	}
+	for i, s := range c.Sections {
+		if !SectionEquals(s, other.Sections[i]) {
+			return false
+		}
+	}
+	return true
 }

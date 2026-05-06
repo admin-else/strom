@@ -201,7 +201,7 @@ func SwitchEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	if err != nil {
 		return
 	}
-	for _, fName := range OrderedKeys(data.Fields) {
+	for _, fName := range util.OrderedKeys(data.Fields) {
 		fType := data.Fields[fName]
 		e := MultiTypeFix(fName, &cet)
 		if e == nil {
@@ -275,7 +275,7 @@ func MapperEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s
 	mName := name + "ReverseMap"
 
 	exprs := Exprs()
-	for _, k := range OrderedKeys(data.Mappings) {
+	for _, k := range util.OrderedKeys(data.Mappings) {
 		v := data.Mappings[k]
 		exprs = append(exprs, KeyValueExpr(StrLit(v), NumLitStr(k)))
 	}

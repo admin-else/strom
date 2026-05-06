@@ -6,15 +6,17 @@ import (
 	"io"
 	"math"
 	"slices"
+
+	"github.com/admin-else/strom/util"
 )
 
 type StorageFormat struct {
-	AvailableBpes []uint8
-	BiggestDirect bool
-	Len           int32
+	RedirectingBpes []uint8 // block bpe 1 2 3 redirect to 4
+	AvailableBpes   []uint8
+	BiggestDirect   bool
+	Len             int32
 }
 
-var BpeNotAvailableErr = errors.New("bpe not available")
 var OutOfBoundsErr = errors.New("out of bounds")
 var AvailableBpeMustBeLenOneErr = errors.New("available bpe must be 1")
 var NoAvailableBpeErr = errors.New("no available bpe")
@@ -34,24 +36,16 @@ func (r StorageFormat) Import(data []uint64, bpe uint8, palette []int32) (s *Sto
 	s.resize(bpe)
 
 	if !slices.Contains(r.AvailableBpes, bpe) {
-		var newBpe uint8
-		for _, newBpe = range r.AvailableBpes {
-			if bpe < newBpe {
-				continue
-			}
-		}
-		var tmps *Storage
-		tmps, err = StorageFormat{
-			AvailableBpes: []uint8{bpe},
-			BiggestDirect: false,
-			Len:           r.Len,
-		}.ImportDataDirect(data)
-		if err != nil {
+		if !slices.Contains(r.RedirectingBpes, bpe) {
+			err = NoAvailableBpeErr
 			return
 		}
-		tmps.resize(newBpe)
-		data = tmps.data
-		bpe = newBpe
+		var found bool
+		bpe, found = util.GetNextLargestNumberSlice(bpe, r.AvailableBpes)
+		if !found {
+			err = NoAvailableBpeErr
+			return
+		}
 	}
 	if bpe == 0 && len(palette) != 1 {
 		err = Bpe0PalletMustBeLenOneErr
@@ -73,10 +67,6 @@ func (r StorageFormat) ImportDataDirect(data []uint64) (s *Storage, err error) {
 }
 
 func (r StorageFormat) ImportFromReader(reader io.Reader, bpe uint8, palette []int32) (s *Storage, err error) {
-	if !slices.Contains(r.AvailableBpes, bpe) {
-		err = BpeNotAvailableErr
-		return
-	}
 	var longs []uint64
 	if bpe == 0 {
 		return r.Import(longs, bpe, palette)
@@ -92,6 +82,10 @@ func (r StorageFormat) ImportFromReader(reader io.Reader, bpe uint8, palette []i
 		longs = append(longs, long)
 	}
 	return r.Import(longs, bpe, palette)
+}
+
+func (r StorageFormat) FullWith(v int32) (s *Storage, err error) {
+	return r.Import(nil, 0, []int32{v})
 }
 
 type Storage struct {
@@ -242,14 +236,14 @@ func (r *Storage) Export() (data []uint64, bpe uint8, palette []int32, format St
 	return r.data, r.bpe, r.palette, r.format
 }
 
-func CompareStorage(a, b *Storage) bool {
-	if a.format.Len != b.format.Len {
+func (r *Storage) Equals(other *Storage) bool {
+	if r.format.Len != other.format.Len {
 		return false
 	}
-	for i := range a.format.Len {
-		av, _ := a.Get(i)
-		bv, _ := b.Get(i)
-		if av == bv {
+	for i := range r.format.Len {
+		av, _ := r.Get(i)
+		bv, _ := other.Get(i)
+		if av != bv {
 			return false
 		}
 	}

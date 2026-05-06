@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"log/slog"
 	"math"
 
 	"github.com/admin-else/strom/data"
@@ -41,9 +42,10 @@ func MakeBiomeFormat(version string) StorageFormat {
 func MakeBlockFormat(version string) StorageFormat {
 	directBpe := uint8(math.Ceil(math.Log2(float64(len(data.BlocksForVersion(version))))))
 	return StorageFormat{
-		AvailableBpes: []uint8{0, 1, 2, 3, directBpe},
-		BiggestDirect: true,
-		Len:           BiomesPerChunkSection,
+		RedirectingBpes: []uint8{1, 2, 3},
+		AvailableBpes:   []uint8{0, 4, 5, 6, 7, 8, directBpe},
+		BiggestDirect:   true,
+		Len:             BlocksPerChunkSection,
 	}
 }
 
@@ -73,12 +75,22 @@ func ReadSectionStorage(r io.Reader, format StorageFormat) (s *Storage, err erro
 			err = BadPaletteLenErr
 			return
 		}
-		for range pallette {
+		for range paletteLen {
 			var v int32
 			v, err = proto_base.DecodeVarInt(r)
 			if err != nil {
 				return
 			}
+			if slog.Default().Enabled(nil, slog.LevelDebug) {
+				b, _ := data.LookupBlockByStateId("1.21.11", v)
+				if b == nil {
+					slog.Debug("unknown palette block in chunk packet", "id", v)
+				} else {
+					slog.Debug("palette block in chunk packet", "id", v, "name", b.Name)
+				}
+
+			}
+
 			pallette = append(pallette, v)
 		}
 	}
@@ -135,4 +147,17 @@ func SectionEncodePacket(w io.Writer, s Section) (err error) {
 	}
 	err = WriteSectionStorage(w, s.Biomes)
 	return
+}
+
+func SectionEquals(a, b Section) bool {
+	if a.BlockCount != b.BlockCount {
+		return false
+	}
+	if !a.Blocks.Equals(b.Blocks) {
+		return false
+	}
+	if !a.Biomes.Equals(b.Biomes) {
+		return false
+	}
+	return true
 }

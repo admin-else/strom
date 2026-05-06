@@ -1,11 +1,13 @@
 package anvil_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
 
+	"github.com/admin-else/strom/level"
 	"github.com/admin-else/strom/level/anvil"
 	"github.com/admin-else/strom/util"
 )
@@ -44,11 +46,8 @@ func TestRegionFile(t *testing.T) {
 	fmt.Println("Chunk loaded successfully")
 }
 
-func TestConverToPacket(t *testing.T) {
-	f, err := os.Open("./level/anvil/testdata/r.0.0.mca")
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
+func loadPacketToChunk(b []byte) (chunk *level.Chunk, err error) {
+	buffer := bytes.NewBuffer(b)
+	chunk, err = level.ReadChunkFromChunkPacketData(buffer, "1.21.11", 384)
+	return
 }

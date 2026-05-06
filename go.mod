@@ -1,6 +1,6 @@
 module github.com/admin-else/strom
 
-go 1.25
+go 1.26.2
 
 require (
 	github.com/go-viper/mapstructure/v2 v2.4.0
