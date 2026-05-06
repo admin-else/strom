@@ -62,12 +62,17 @@ func ReadChunkHeader(r *os.File) (ch *ChunkHeader, err error) {
 	return
 }
 
+// ChunkAt returns the chunk at the given position, or nil if it is empty.
 func (c *ChunkHeader) ChunkAt(f *os.File, x, z int32) (n *nbt.Tag, err error) {
 	if x < 0 || z < 0 || x >= ChunksWidthRegionFile || z >= ChunksWidthRegionFile {
 		err = fmt.Errorf("chunk out of bounds")
 		return
 	}
 	off, size := chunkLocation(c.Chunk[chunkXZtoIndex(x, z)])
+	if off == 0 {
+		return nil, nil
+	}
+
 	_, err = f.Seek(int64(off), 0)
 	if err != nil {
 		return
