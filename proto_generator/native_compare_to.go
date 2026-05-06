@@ -21,7 +21,7 @@ func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, cet CaseExprTy
 	}
 	parts = parts[downPrefixCount:]
 	startingPoint := g.ContainerStack[len(g.ContainerStack)-downPrefixCount-1]
-	e, cet, err = g.VisitCompareTo(parts, startingPoint.VarToSet, CombineNamAndData("container", startingPoint.Data))
+	e, cet, err = g.VisitCompareTo(parts, startingPoint.VarToSet, util.CombineNamAndData("container", startingPoint.Data))
 	//	return ParseCompareToLegacy(compareTo, varToSet)
 	return
 }
@@ -46,7 +46,7 @@ func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw a
 		return
 	}
 
-	name, parts, ok := PopFront(parts)
+	name, parts, ok := util.PopFront(parts)
 	if !ok {
 		err = errors.New("expected name part")
 		return
@@ -70,7 +70,7 @@ func BitfieldCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw an
 	if err != nil {
 		return
 	}
-	fieldName, parts, found := PopFront(parts)
+	fieldName, parts, found := util.PopFront(parts)
 	if !found {
 		err = errors.New("expected name part")
 		return
@@ -98,7 +98,7 @@ func BitflagsCompareTo(_ *Generator, parts []string, inExpr ast.Expr, dataRaw an
 	if err != nil {
 		return
 	}
-	name, parts, ok := PopFront(parts)
+	name, parts, ok := util.PopFront(parts)
 	if !ok {
 		err = errors.New("expected name part")
 		return
