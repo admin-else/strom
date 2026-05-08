@@ -3,3 +3,4 @@
 *.zip filter=lfs diff=lfs merge=lfs -text
 *.tmcpr filter=lfs diff=lfs merge=lfs -text
 *.mcpr filter=lfs diff=lfs merge=lfs -text
+*.mca filter=lfs diff=lfs merge=lfs -text
