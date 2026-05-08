@@ -48,7 +48,7 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 			if err != nil {
 				return
 			}
-			toChunk.Sections[i].BlockCount = int16(f.Len)
+			toChunk.Sections[i].BlockCount = 0
 		}
 	}
 	f = level.MakeBiomeFormat(version)
@@ -89,7 +89,7 @@ type Section struct {
 		Data    []int64 `nbt:"data,omitempty"`
 		Palette []struct {
 			Name       string
-			Properties map[string]string `nbt:"properties,omitempty"`
+			Properties map[string]string `nbt:"Properties,omitempty"`
 		}
 	} `nbt:"block_states,omitempty"`
 	Biomes struct {
