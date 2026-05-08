@@ -8,6 +8,8 @@ import (
 	"github.com/admin-else/strom/nbt"
 )
 
+// FIXME: this should use the mapstruct thing
+
 // Component represents a Minecraft text component.
 // https://minecraft.wiki/w/Text_component_format
 type Component struct {
