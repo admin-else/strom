@@ -2,7 +2,10 @@ package data
 
 import (
 	"errors"
+	"slices"
 	"strconv"
+
+	"github.com/admin-else/strom/util"
 )
 
 //  {
@@ -48,6 +51,7 @@ type Block struct {
 type BlockState struct {
 	Name      string
 	Type      string
+	MinValue  int32 // this is generated on load and used for state value calculations
 	NumValues int32 `json:"num_values"`
 	Values    []string
 }
@@ -63,6 +67,20 @@ func BlocksForVersion(v string) (ret []*Block) {
 	var b []*Block
 	must(LoadVersionedJson(v, "blocks", &b))
 	BlocksCache[v] = b
+	for _, block := range b {
+		for i, state := range block.States {
+			if state.Type != "int" {
+				continue
+			}
+			values := make([]int32, state.NumValues)
+			for j, stateValue := range state.Values {
+				n := util.MustT(strconv.Atoi(stateValue))
+				values[j] = int32(n)
+			}
+			block.States[i].MinValue = slices.Min(values)
+		}
+	}
+
 	return b
 }
 
@@ -104,7 +122,9 @@ func StateIdFromBlocKAndStateMap(version string, name string, stateMap map[strin
 	} else {
 		stateId, err = b.IdFromStateMap(stateMap)
 	}
-
+	if b.MinStateId > stateId || b.MaxStateId < stateId {
+		err = BlockStateOutOfRangeErr
+	}
 	return
 }
 
@@ -153,7 +173,7 @@ func mcDataBlockStateTypeSerialize(v string, s *BlockState) (n int32, err error)
 	}
 	n1, errMabye := strconv.Atoi(v)
 	if errMabye == nil {
-		return int32(n1), nil
+		return int32(n1) - s.MinValue, nil
 	}
 	for i, enumValue := range s.Values {
 		if enumValue == v {

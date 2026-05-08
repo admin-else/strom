@@ -32,3 +32,11 @@ func TestBlockStates(t *testing.T) {
 		t.Fatal("state id mismatch")
 	}
 }
+
+func TestBlockStateOutOfRangeBug(t *testing.T) {
+	id, err := data.StateIdFromBlocKAndStateMap("1.21.11", "wildflowers", map[string]string{"facing": "east", "flower_amount": "4"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("State id: %d", id)
+}
