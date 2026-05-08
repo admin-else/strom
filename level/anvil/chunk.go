@@ -74,7 +74,11 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 				return
 			}
 		} else {
-			toChunk.Sections[i].Biomes, err = f.FullWith(0) //TODO PALLETE index 0 if avial
+			var fillerId = int32(0)
+			if len(pallete) == 1 {
+				fillerId = pallete[0]
+			}
+			toChunk.Sections[i].Biomes, err = f.FullWith(fillerId) //TODO PALLETE index 0 if avial
 			if err != nil {
 				return
 			}
