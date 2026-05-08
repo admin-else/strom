@@ -15,6 +15,7 @@ import (
 	"github.com/admin-else/strom/cmd/strom/offline_uuid"
 	"github.com/admin-else/strom/cmd/strom/packet_inspector"
 	"github.com/admin-else/strom/cmd/strom/print_nbt"
+	"github.com/admin-else/strom/cmd/strom/print_replay"
 	"github.com/admin-else/strom/cmd/strom/status"
 )
 
@@ -43,6 +44,7 @@ var subcommands = map[string]func(args []string) error{
 	"version":      Version,
 	"extract-mca":  extract_mca.Run,
 	"data":         data.Run,
+	"print-replay": print_replay.Run,
 }
 
 func Help(args []string) (err error) {
@@ -60,7 +62,7 @@ func mainE() (err error) {
 
 	// Debug stuff
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	//args = []string{"TEST", "version"}
+	args = []string{"TEST", "print-replay", "-protocol", "774", "-file", "./cmd/strom/print_replay/testdata/recording.tmcpr"}
 
 	if len(args) < 2 {
 		err = ExpectedASubcommandErr
