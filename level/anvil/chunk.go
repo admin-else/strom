@@ -44,11 +44,17 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 			}
 			toChunk.Sections[i].BlockCount = int16(level.BlocksPerChunkSection - level.CountStorage(toChunk.Sections[i].Blocks, 0))
 		} else {
-			toChunk.Sections[i].Blocks, err = f.FullWith(0) //TODO PALLETE index 0 if avial
+			var fillerId = int32(0)
+			if len(pallete) == 1 {
+				fillerId = pallete[0]
+				if fillerId != 0 {
+					toChunk.Sections[i].BlockCount = level.BlocksPerChunkSection
+				}
+			}
+			toChunk.Sections[i].Blocks, err = f.FullWith(fillerId)
 			if err != nil {
 				return
 			}
-			toChunk.Sections[i].BlockCount = 0
 		}
 	}
 	f = level.MakeBiomeFormat(version)
@@ -78,7 +84,7 @@ func (c Chunk) ToStorage(version string) (toChunk *level.Chunk, err error) {
 			if len(pallete) == 1 {
 				fillerId = pallete[0]
 			}
-			toChunk.Sections[i].Biomes, err = f.FullWith(fillerId) //TODO PALLETE index 0 if avial
+			toChunk.Sections[i].Biomes, err = f.FullWith(fillerId)
 			if err != nil {
 				return
 			}

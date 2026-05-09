@@ -113,9 +113,9 @@ func Limbo(c *proto.Conn) (err error) {
 	}
 	err = s.Send(&v1_21_8.PlayToClientPacketPosition{
 		TeleportId: 0,
-		X:          0,
+		X:          0.5,
 		Y:          100,
-		Z:          0,
+		Z:          0.5,
 		Dx:         0,
 		Dy:         0,
 		Dz:         0,
