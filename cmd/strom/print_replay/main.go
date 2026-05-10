@@ -24,6 +24,7 @@ var (
 	FileFlag        = cmd.String("file", "", "The tmcpr file to print")
 	ProtocolVersion = cmd.Int("protocol", -1, "The protocol version")
 	CreateTestsPath = cmd.String("create-tests", "", "")
+	StateFlag       = cmd.String("state", "login", "Initial state: login, config, play")
 )
 
 //go:embed failed_packet.go.tmpl
@@ -114,6 +115,16 @@ func Run(args []string) (err error) {
 	}
 	if *FileFlag == "" {
 		return fmt.Errorf("no file specified")
+	}
+	switch *StateFlag {
+	case "login":
+		state = proto_base.Login
+	case "config":
+		state = proto_base.Configuration
+	case "play":
+		state = proto_base.Play
+	default:
+		return fmt.Errorf("unknown state: %s", *StateFlag)
 	}
 	f, err := os.Open(*FileFlag)
 	if err != nil {
