@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"io"
 
+	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 )
 
@@ -13,7 +14,7 @@ type Writer struct {
 }
 
 func NewWriter(w io.Writer) *Writer {
-	return &Writer{w}
+	return &Writer{w: w}
 }
 
 func (w *Writer) WriteRaw(p []byte, timestamp uint32) (err error) {
@@ -31,6 +32,17 @@ func (w *Writer) WriteRaw(p []byte, timestamp uint32) (err error) {
 
 func (w *Writer) WritePacket(packet proto_base.EncodeDecodeAble, timestamp uint32) (err error) {
 	b := bytes.NewBuffer(nil)
+
+	info, ok := proto.LookupPacketInfoByType(packet)
+	if !ok {
+		return proto.BadPacketIdErr
+	}
+
+	err = proto_base.EncodeVarInt(b, info.PacketId)
+	if err != nil {
+		return
+	}
+
 	err = packet.Encode(b)
 	if err != nil {
 		return
