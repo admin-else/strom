@@ -82,7 +82,7 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 
 	// Calculate position after reading the packet ID
 	// indexafterid represents how many bytes we've read so far
-	indexafterid := int(b.Size()) - int(b.Len())
+	indexafterid := int(b.Size()) - b.Len()
 
 	i, ok := proto.LookUpTypeByPacketInfo(proto_base.ToClient, state, packetId, int32(*ProtocolVersion))
 	if !ok {
@@ -103,6 +103,7 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 	}
 	return
 }
+
 func Run(args []string) (err error) {
 	err = cmd.Parse(args)
 	if err != nil {
