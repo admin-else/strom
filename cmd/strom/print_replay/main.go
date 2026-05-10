@@ -19,6 +19,8 @@ var (
 	ProtocolVersion = cmd.Int("protocol", -1, "The protocol version")
 )
 
+var state = proto_base.Login
+
 func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 	var timestamp, length uint32
 	err = binary.Read(r, binary.BigEndian, &timestamp)
@@ -40,7 +42,7 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 		return
 	}
 
-	i, ok := proto.LookUpTypeByPacketInfo(proto_base.ToClient, proto_base.Login, packetId, int32(*ProtocolVersion))
+	i, ok := proto.LookUpTypeByPacketInfo(proto_base.ToClient, state, packetId, int32(*ProtocolVersion))
 	if !ok {
 		packet = &proto.UnCodablePacket{Err: proto.BadPacketIdErr, Data: b.Bytes(), Direction: proto_base.ToClient}
 		return
@@ -50,6 +52,12 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 	if err != nil {
 		packet = &proto.UnCodablePacket{Err: err, Data: b.Bytes(), Direction: proto_base.ToClient}
 		err = nil
+	}
+	switch i.Name {
+	case "success":
+		state = proto_base.Configuration
+	case "finish_configuration":
+		state = proto_base.Play
 	}
 	return
 }
@@ -78,6 +86,5 @@ func Run(args []string) (err error) {
 			return
 		}
 		fmt.Printf("Packet: %#v\n", packet)
-		fmt.Printf("Packet lllll: %v\n", packet)
 	}
 }
