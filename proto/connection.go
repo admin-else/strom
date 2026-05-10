@@ -41,9 +41,9 @@ var EarliestVersion = proto_generated.SupportedVersions[0]
 
 // UnCodablePacket represents a packet that could not be decoded.
 type UnCodablePacket struct {
-	Err       error
-	Data      []byte
-	Direction proto_base.Direction
+	Err  error
+	Data []byte
+	Info proto_base.PacketInfo
 }
 
 func (u *UnCodablePacket) Encode(w io.Writer) (err error) {
@@ -242,7 +242,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 
 	i, ok := LookUpTypeByPacketInfo(c.Actor.ReceiveDirection(), c.State(), id, c.ProtocolVersion)
 	if !ok {
-		packet = &UnCodablePacket{Err: BadPacketIdErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
+		packet = &UnCodablePacket{Err: BadPacketIdErr, Data: packetBytes, Info: i}
 		return
 	}
 	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
@@ -250,18 +250,18 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		slices.ContainsFunc(c.DebugPrintPackets, func(s string) bool { return strings.Contains(i.Name, s) })
 	isListenerRegistered := c.IsTypeRegistered(reflect.TypeOf(packet))
 	if !isListenerRegistered && !debugPrint {
-		packet = &UnCodablePacket{Err: NoHandlerRegisteredErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
+		packet = &UnCodablePacket{Err: NoHandlerRegisteredErr, Data: packetBytes, Info: i}
 		return
 	}
 	err = packet.Decode(b)
 	if err != nil {
-		packet = &UnCodablePacket{Err: err, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
+		packet = &UnCodablePacket{Err: err, Data: packetBytes, Info: i}
 		err = nil
 		return
 	}
 	if b.Len() != 0 {
 		err = nil
-		packet = &UnCodablePacket{Err: PacketNotFullyDecodedErr, Data: packetBytes, Direction: c.Actor.ReceiveDirection()}
+		packet = &UnCodablePacket{Err: PacketNotFullyDecodedErr, Data: packetBytes, Info: i}
 		return
 	}
 	if debugPrint {

@@ -25,6 +25,14 @@ func init() {
 func LookUpTypeByPacketInfo(direction proto_base.Direction, state proto_base.State, pid, version int32) (p proto_base.PacketInfo, ok bool) {
 	pP, ok := pidMap[PidEtc{direction, state, pid, version}]
 	if !ok {
+		p = proto_base.PacketInfo{
+			Type:            nil,
+			Name:            "",
+			Direction:       direction,
+			State:           state,
+			PacketId:        pid,
+			ProtocolVersion: version,
+		}
 		return
 	}
 	p = *pP
@@ -43,7 +51,7 @@ func LookUpTypeByPacketInfoAndCopyType(direction proto_base.Direction, state pro
 func LookupPacketInfoByType(packet proto_base.EncodeDecodeAble) (p proto_base.PacketInfo, ok bool) {
 	undecodedPacket, isUndecoable := packet.(*UnCodablePacket)
 	if isUndecoable {
-		p = proto_base.PacketInfo{Type: &UnCodablePacket{}, Name: "un_codable", Direction: undecodedPacket.Direction, State: proto_base.Handshaking, PacketId: -1, ProtocolVersion: -1}
+		p = undecodedPacket.Info
 		ok = true
 		return
 	}

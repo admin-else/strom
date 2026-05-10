@@ -5,13 +5,16 @@ import (
 	"crypto/sha256"
 	_ "embed"
 	"encoding/binary"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"reflect"
+	"strings"
 
+	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 )
@@ -20,13 +23,13 @@ var (
 	cmd             = flag.NewFlagSet("print-replay", flag.ContinueOnError)
 	FileFlag        = cmd.String("file", "", "The tmcpr file to print")
 	ProtocolVersion = cmd.Int("protocol", -1, "The protocol version")
-	CreateTestsPath = cmd.String("create-tests", "", "The path to create tests from failed packets, if empty no tests will be created")
+	CreateTestsPath = cmd.String("create-tests", "", "")
 )
 
 //go:embed failed_packet.go.tmpl
 var TestSrcF string
 
-func SaveUnCodeAbleAsTest(d proto_base.Direction, packet *proto.UnCodablePacket) {
+func SaveUnCodeAbleAsTest(packet *proto.UnCodablePacket) {
 	hUntrimmed := sha256.Sum256(packet.Data)
 	h := hUntrimmed[:8]
 	f, err := os.Create(fmt.Sprintf(*CreateTestsPath+"/%v_%10x_test.go", len(packet.Data), h))
@@ -34,9 +37,15 @@ func SaveUnCodeAbleAsTest(d proto_base.Direction, packet *proto.UnCodablePacket)
 		panic(err)
 	}
 
+	ret, err := data.LookUpVersionByProtocolVersion(packet.Info.ProtocolVersion)
+	if err != nil {
+		panic(err)
+	}
+	goPackage := "v" + strings.ReplaceAll(ret.MinecraftVersion, ".", "_")
+
 	//goland:noinspection GoUnhandledErrorResult
 	defer f.Close()
-	_, err = fmt.Fprintf(f, TestSrcF, packet.Err, h, d.Opposite(), packet.Data)
+	_, err = fmt.Fprintf(f, TestSrcF, goPackage, packet.Err, h, reflect.TypeOf(packet.Info.Type).Elem().Name(), packet.Data)
 	if err != nil {
 		panic(err)
 	}
@@ -55,26 +64,35 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 	if err != nil {
 		return
 	}
-	b := bytes.NewBuffer(nil)
-	_, err = io.CopyN(b, r, int64(length))
+
+	// Read the packet data into a byte slice
+	packetData := make([]byte, length)
+	_, err = io.ReadFull(r, packetData)
 	if err != nil {
 		return
 	}
+
+	// Use bytes.Reader instead of bytes.Buffer
+	b := bytes.NewReader(packetData)
 
 	packetId, err := proto_base.DecodeVarInt(b)
 	if err != nil {
 		return
 	}
 
+	// Calculate position after reading the packet ID
+	// indexafterid represents how many bytes we've read so far
+	indexafterid := int(b.Size()) - int(b.Len())
+
 	i, ok := proto.LookUpTypeByPacketInfo(proto_base.ToClient, state, packetId, int32(*ProtocolVersion))
 	if !ok {
-		packet = &proto.UnCodablePacket{Err: proto.BadPacketIdErr, Data: b.Bytes(), Direction: proto_base.ToClient}
+		packet = &proto.UnCodablePacket{Err: proto.BadPacketIdErr, Data: packetData, Info: i}
 		return
 	}
 	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
 	err = packet.Decode(b)
 	if err != nil {
-		packet = &proto.UnCodablePacket{Err: err, Data: b.Bytes(), Direction: proto_base.ToClient}
+		packet = &proto.UnCodablePacket{Err: err, Data: packetData[indexafterid:], Info: i}
 		return
 	}
 	switch i.Name {
@@ -85,7 +103,6 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 	}
 	return
 }
-
 func Run(args []string) (err error) {
 	err = cmd.Parse(args)
 	if err != nil {
@@ -103,17 +120,28 @@ func Run(args []string) (err error) {
 	}
 	defer f.Close()
 
+	var totalPackets, failedPackets int
 	for {
 		var packet proto_base.EncodeDecodeAble
 		packet, err = UnpackPacket(f)
 		unCodablePacket, ok := packet.(*proto.UnCodablePacket)
-		if ok && *CreateTestsPath != "" {
-			SaveUnCodeAbleAsTest(proto_base.ToClient, unCodablePacket)
+		if ok {
+			if *CreateTestsPath != "" {
+				SaveUnCodeAbleAsTest(unCodablePacket)
+			}
+			failedPackets++
 		}
 
 		if err != nil {
-			return
+			fmt.Println(err)
+		} else {
+			fmt.Printf("Packet: %#v\n", packet)
 		}
-		fmt.Printf("Packet: %#v\n", packet)
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		totalPackets++
 	}
+	fmt.Printf("Total packets: %d, failed packets: %d, %%failed: %.2f%%\n", totalPackets, failedPackets, float64(failedPackets)/float64(totalPackets)*100)
+	return
 }

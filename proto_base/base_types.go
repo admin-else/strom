@@ -42,6 +42,23 @@ const (
 	Play
 )
 
+func (s State) String() string {
+	switch s {
+	case Handshaking:
+		return "Handshaking"
+	case Status:
+		return "Status"
+	case Login:
+		return "Login"
+	case Configuration:
+		return "Configuration"
+	case Play:
+		return "Play"
+	default:
+		return "Unknown"
+	}
+}
+
 type Actor int
 
 const (
