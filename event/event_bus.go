@@ -240,6 +240,9 @@ func NewLoop() (l *Loop) {
 }
 
 func NewLoopCtx(ctx context.Context) (l *Loop) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	l = &Loop{}
 	l.Ctx, l.Cancel = context.WithCancel(ctx)
 	l.HandlerFunctions = make(map[reflect.Type][]reflect.Value)
