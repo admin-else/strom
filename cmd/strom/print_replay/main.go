@@ -2,10 +2,13 @@ package print_replay
 
 import (
 	"bytes"
+	"crypto/sha256"
+	_ "embed"
 	"encoding/binary"
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"reflect"
 
@@ -17,7 +20,28 @@ var (
 	cmd             = flag.NewFlagSet("print-replay", flag.ContinueOnError)
 	FileFlag        = cmd.String("file", "", "The tmcpr file to print")
 	ProtocolVersion = cmd.Int("protocol", -1, "The protocol version")
+	CreateTestsPath = cmd.String("create-tests", "", "The path to create tests from failed packets, if empty no tests will be created")
 )
+
+//go:embed failed_packet.go.tmpl
+var TestSrcF string
+
+func SaveUnCodeAbleAsTest(d proto_base.Direction, packet *proto.UnCodablePacket) {
+	hUntrimmed := sha256.Sum256(packet.Data)
+	h := hUntrimmed[:8]
+	f, err := os.Create(fmt.Sprintf(*CreateTestsPath+"/%v_%10x_test.go", len(packet.Data), h))
+	if err != nil {
+		panic(err)
+	}
+
+	//goland:noinspection GoUnhandledErrorResult
+	defer f.Close()
+	_, err = fmt.Fprintf(f, TestSrcF, packet.Err, h, d.Opposite(), packet.Data)
+	if err != nil {
+		panic(err)
+	}
+	slog.Info("Packet failed to parse", "error", packet.Err, "saved", f.Name(), "data", fmt.Sprintf("%q", packet.Data))
+}
 
 var state = proto_base.Login
 
@@ -51,7 +75,7 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 	err = packet.Decode(b)
 	if err != nil {
 		packet = &proto.UnCodablePacket{Err: err, Data: b.Bytes(), Direction: proto_base.ToClient}
-		err = nil
+		return
 	}
 	switch i.Name {
 	case "success":
@@ -82,6 +106,11 @@ func Run(args []string) (err error) {
 	for {
 		var packet proto_base.EncodeDecodeAble
 		packet, err = UnpackPacket(f)
+		unCodablePacket, ok := packet.(*proto.UnCodablePacket)
+		if ok && *CreateTestsPath != "" {
+			SaveUnCodeAbleAsTest(proto_base.ToClient, unCodablePacket)
+		}
+
 		if err != nil {
 			return
 		}
