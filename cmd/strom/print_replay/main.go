@@ -27,6 +27,8 @@ var (
 	StateFlag       = cmd.String("state", "login", "Initial state: login, config, play")
 )
 
+// TODO: maybe use the proto replay api
+
 //go:embed failed_packet.go.tmpl
 var TestSrcF string
 

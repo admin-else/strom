@@ -28,6 +28,7 @@ package crypto
 import (
 	"crypto/cipher"
 	"crypto/subtle"
+	"sync"
 	"unsafe"
 )
 
@@ -37,6 +38,7 @@ type CFB8 struct {
 	ivPos     int
 	iv        []byte
 	de        bool
+	mutex     sync.Mutex
 }
 
 func NewCFB8Decrypt(c cipher.Block, iv []byte) *CFB8 {
@@ -59,6 +61,8 @@ func newCFB8(c cipher.Block, iv []byte, de bool) *CFB8 {
 }
 
 func (cf *CFB8) XORKeyStream(dst, src []byte) {
+	cf.mutex.Lock()
+	defer cf.mutex.Unlock()
 	if len(src) == 0 {
 		return
 	}
