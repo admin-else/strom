@@ -496,6 +496,41 @@ func PrettyF(format string, args ...any) *Component {
 	return Pretty(s)
 }
 
+func replacePlaceholders(s string, values map[string]any) string {
+	result := s
+	for key, val := range values {
+		formattedPrefix := "§%" + key + ":"
+		for {
+			idxFormatted := strings.Index(result, formattedPrefix)
+			if idxFormatted == -1 {
+				break
+			}
+			endIdx := strings.Index(result[idxFormatted+len(formattedPrefix):], "%")
+			if endIdx == -1 {
+				break
+			}
+			formatStr := result[idxFormatted+len(formattedPrefix) : idxFormatted+len(formattedPrefix)+endIdx]
+			replaceWith := fmt.Sprintf("%"+formatStr, val)
+			result = result[:idxFormatted] + replaceWith + result[idxFormatted+len(formattedPrefix)+endIdx+1:]
+		}
+		placeholder := "§%" + key + "%"
+		for {
+			idx := strings.Index(result, placeholder)
+			if idx == -1 {
+				break
+			}
+			replaceWith := fmt.Sprintf("%v", val)
+			result = result[:idx] + replaceWith + result[idx+len(placeholder):]
+		}
+	}
+	return result
+}
+
+func PrettyPlaceholders(format string, placeholders map[string]any) *Component {
+	s := replacePlaceholders(format, placeholders)
+	return Pretty(s)
+}
+
 var colorToCode = map[string]byte{
 	"black":        '0',
 	"dark_blue":    '1',
