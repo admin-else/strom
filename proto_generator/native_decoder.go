@@ -578,6 +578,9 @@ func EntityMetadataLoopDecoder(g *Generator, varToSet ast.Expr, dataRaw any, nam
 
 	decodeIdStatements, err := g.VisitDecoder(Ident("id"), "u8", name)
 	endCheck := If(Equals(Ident("id"), NumLit(data.EndVal)), NewBlockEllipsis(Break()))
+	// 		r.Seek(-1, io.SeekCurrent)
+	seekBack := Assign(Exprs(Ident("_"), Ident("err")), Exprs(Call(Selector("r", "Seek"), NumLit(-1), Selector("io", "SeekCurrent"))))
+
 	declEntry := VarStmt("entry", innerType)
 	decodingEntryStmts, err := g.VisitDecoder(Ident("entry"), data.Type, name+"Inner")
 	if err != nil {
@@ -588,6 +591,8 @@ func EntityMetadataLoopDecoder(g *Generator, varToSet ast.Expr, dataRaw any, nam
 	var loopStmts []ast.Stmt
 	loopStmts = append(loopStmts, decodeIdStatements...)
 	loopStmts = append(loopStmts, endCheck)
+	loopStmts = append(loopStmts, seekBack)
+	loopStmts = append(loopStmts, IfErrNil())
 	loopStmts = append(loopStmts, declEntry)
 	loopStmts = append(loopStmts, decodingEntryStmts...)
 	loopStmts = append(loopStmts, assignEntry)

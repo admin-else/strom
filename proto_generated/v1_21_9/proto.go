@@ -2,11 +2,10 @@ package v1_21_9
 
 import (
 	"encoding/binary"
-	"io"
-
 	"github.com/admin-else/strom/nbt"
 	"github.com/admin-else/strom/proto_base"
 	"github.com/google/uuid"
+	"io"
 )
 
 type ArmorTrimMaterial struct {
@@ -3380,6 +3379,10 @@ func (ret *EntityMetadata) Decode(r io.ReadSeeker) (err error) {
 		}
 		if id == 255 {
 			break
+		}
+		_, err = r.Seek(-1, io.SeekCurrent)
+		if err != nil {
+			return
 		}
 		var entry EntityMetadataEntry
 		err = entry.Decode(r)
