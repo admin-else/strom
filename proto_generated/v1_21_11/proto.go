@@ -18,7 +18,7 @@ type ArmorTrimMaterial struct {
 	Description nbt.Anon
 }
 
-func (ret *ArmorTrimMaterial) Decode(r io.Reader) (err error) {
+func (ret *ArmorTrimMaterial) Decode(r io.ReadSeeker) (err error) {
 	ret.AssetBase, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -85,7 +85,7 @@ type ArmorTrimPattern struct {
 	Decal       bool
 }
 
-func (ret *ArmorTrimPattern) Decode(r io.Reader) (err error) {
+func (ret *ArmorTrimPattern) Decode(r io.ReadSeeker) (err error) {
 	ret.AssetId, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -121,7 +121,7 @@ type BannerPattern struct {
 	TranslationKey string
 }
 
-func (ret *BannerPattern) Decode(r io.Reader) (err error) {
+func (ret *BannerPattern) Decode(r io.ReadSeeker) (err error) {
 	ret.AssetId, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -149,7 +149,7 @@ type BannerPatternLayer struct {
 	ColorId int32
 }
 
-func (ret *BannerPatternLayer) Decode(r io.Reader) (err error) {
+func (ret *BannerPatternLayer) Decode(r io.ReadSeeker) (err error) {
 	var BannerPatternLayerPatternId int32
 	BannerPatternLayerPatternId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -201,7 +201,7 @@ type ByteArray struct {
 	Val []byte
 }
 
-func (ret *ByteArray) Decode(r io.Reader) (err error) {
+func (ret *ByteArray) Decode(r io.ReadSeeker) (err error) {
 	var lByteArray int32
 	lByteArray, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -229,7 +229,7 @@ type ContainerID struct {
 	Val int32
 }
 
-func (ret *ContainerID) Decode(r io.Reader) (err error) {
+func (ret *ContainerID) Decode(r io.ReadSeeker) (err error) {
 	ret.Val, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -256,7 +256,7 @@ var DamageTypeDataScalingMap = map[int32]string{0: "never", 1: "when_caused_by_l
 var DamageTypeDataEffectsMap = map[int32]string{0: "hurt", 1: "thorns", 2: "drowning", 3: "burning", 4: "poking", 5: "freezing"}
 var DamageTypeDataDeathMessageTypeMap = map[int32]string{0: "default", 1: "fall_variants", 2: "intentional_game_design"}
 
-func (ret *DamageTypeData) Decode(r io.Reader) (err error) {
+func (ret *DamageTypeData) Decode(r io.ReadSeeker) (err error) {
 	ret.MsgId, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -343,7 +343,7 @@ type DataComponentMatchers struct {
 	PartialMatchers []int32
 }
 
-func (ret *DataComponentMatchers) Decode(r io.Reader) (err error) {
+func (ret *DataComponentMatchers) Decode(r io.ReadSeeker) (err error) {
 	err = ret.ExactMatchers.Decode(r)
 	if err != nil {
 		return
@@ -392,7 +392,7 @@ type DebugStructureInfo struct {
 	}
 }
 
-func (ret *DebugStructureInfo) Decode(r io.Reader) (err error) {
+func (ret *DebugStructureInfo) Decode(r io.ReadSeeker) (err error) {
 	err = ret.BoundingBoxMin.Decode(r)
 	if err != nil {
 		return
@@ -469,7 +469,7 @@ type DebugSubscriptionDataType struct {
 
 var DebugSubscriptionDataTypeMap = map[int32]string{0: "DedicatedServerTickTime", 1: "Bees", 10: "VillageSections", 11: "Raids", 12: "Structures", 13: "GameEventListeners", 14: "NeighborUpdates", 15: "GameEvents", 2: "Brains", 3: "Breezes", 4: "GoalSelectors", 5: "EntityPaths", 6: "EntityBlockIntersections", 7: "BeeHives", 8: "Pois", 9: "RedstoneWireOrientations"}
 
-func (ret *DebugSubscriptionDataType) Decode(r io.Reader) (err error) {
+func (ret *DebugSubscriptionDataType) Decode(r io.ReadSeeker) (err error) {
 	var DebugSubscriptionDataTypeKey int32
 	DebugSubscriptionDataTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -502,7 +502,7 @@ type DebugSubscriptionEvent struct {
 	Value any
 }
 
-func (ret *DebugSubscriptionEvent) Decode(r io.Reader) (err error) {
+func (ret *DebugSubscriptionEvent) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -516,7 +516,7 @@ type DebugSubscriptionUpdate struct {
 	Anon any
 }
 
-func (ret *DebugSubscriptionUpdate) Decode(r io.Reader) (err error) {
+func (ret *DebugSubscriptionUpdate) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -533,7 +533,7 @@ type EntityMetadataPaintingVariant struct {
 	Author  *nbt.Anon
 }
 
-func (ret *EntityMetadataPaintingVariant) Decode(r io.Reader) (err error) {
+func (ret *EntityMetadataPaintingVariant) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Width)
 	if err != nil {
 		return
@@ -614,7 +614,7 @@ type ExactComponentMatcher struct {
 	Val []SlotComponent
 }
 
-func (ret *ExactComponentMatcher) Decode(r io.Reader) (err error) {
+func (ret *ExactComponentMatcher) Decode(r io.ReadSeeker) (err error) {
 	var lExactComponentMatcher int32
 	lExactComponentMatcher, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -651,7 +651,7 @@ type GameProfile struct {
 	Properties []GameProfileProperty
 }
 
-func (ret *GameProfile) Decode(r io.Reader) (err error) {
+func (ret *GameProfile) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -704,7 +704,7 @@ type GameProfileProperty struct {
 	Signature *string
 }
 
-func (ret *GameProfileProperty) Decode(r io.Reader) (err error) {
+func (ret *GameProfileProperty) Decode(r io.ReadSeeker) (err error) {
 	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -755,7 +755,7 @@ type GlobalPos struct {
 	Location      Position
 }
 
-func (ret *GlobalPos) Decode(r io.Reader) (err error) {
+func (ret *GlobalPos) Decode(r io.ReadSeeker) (err error) {
 	ret.DimensionName, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -790,7 +790,7 @@ type HashedSlot struct {
 	}
 }
 
-func (ret *HashedSlot) Decode(r io.Reader) (err error) {
+func (ret *HashedSlot) Decode(r io.ReadSeeker) (err error) {
 	ret.ItemId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -883,7 +883,7 @@ type IDSet struct {
 	Val any
 }
 
-func (ret *IDSet) Decode(r io.Reader) (err error) {
+func (ret *IDSet) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -899,7 +899,7 @@ type InstrumentData struct {
 	Description nbt.Anon
 }
 
-func (ret *InstrumentData) Decode(r io.Reader) (err error) {
+func (ret *InstrumentData) Decode(r io.ReadSeeker) (err error) {
 	err = ret.SoundEvent.Decode(r)
 	if err != nil {
 		return
@@ -945,7 +945,7 @@ type ItemBlockPredicate struct {
 	Components DataComponentMatchers
 }
 
-func (ret *ItemBlockPredicate) Decode(r io.Reader) (err error) {
+func (ret *ItemBlockPredicate) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -960,7 +960,7 @@ type ItemBlockProperty struct {
 	Value        any
 }
 
-func (ret *ItemBlockProperty) Decode(r io.Reader) (err error) {
+func (ret *ItemBlockProperty) Decode(r io.ReadSeeker) (err error) {
 	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -1044,7 +1044,7 @@ type ItemBookPage struct {
 	FilteredContent *string
 }
 
-func (ret *ItemBookPage) Decode(r io.Reader) (err error) {
+func (ret *ItemBookPage) Decode(r io.ReadSeeker) (err error) {
 	ret.Content, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -1089,7 +1089,7 @@ type ItemConsumeEffect struct {
 
 var ItemConsumeEffectTypeMap = map[int32]string{0: "apply_effects", 1: "remove_effects", 2: "clear_all_effects", 3: "teleport_randomly", 4: "play_sound"}
 
-func (ret *ItemConsumeEffect) Decode(r io.Reader) (err error) {
+func (ret *ItemConsumeEffect) Decode(r io.ReadSeeker) (err error) {
 	var ItemConsumeEffectTypeKey int32
 	ItemConsumeEffectTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -1251,7 +1251,7 @@ type ItemEffectDetail struct {
 	HiddenEffect  *ItemEffectDetail
 }
 
-func (ret *ItemEffectDetail) Decode(r io.Reader) (err error) {
+func (ret *ItemEffectDetail) Decode(r io.ReadSeeker) (err error) {
 	ret.Amplifier, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -1331,7 +1331,7 @@ type ItemFireworkExplosion struct {
 
 var ItemFireworkExplosionShapeMap = map[int32]string{0: "small_ball", 1: "large_ball", 2: "star", 3: "creeper", 4: "burst"}
 
-func (ret *ItemFireworkExplosion) Decode(r io.Reader) (err error) {
+func (ret *ItemFireworkExplosion) Decode(r io.ReadSeeker) (err error) {
 	var ItemFireworkExplosionShapeKey int32
 	ItemFireworkExplosionShapeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -1428,7 +1428,7 @@ type ItemPotionEffect struct {
 	Details ItemEffectDetail
 }
 
-func (ret *ItemPotionEffect) Decode(r io.Reader) (err error) {
+func (ret *ItemPotionEffect) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -1456,7 +1456,7 @@ type ItemSoundEvent struct {
 	FixedRange *float32
 }
 
-func (ret *ItemSoundEvent) Decode(r io.Reader) (err error) {
+func (ret *ItemSoundEvent) Decode(r io.ReadSeeker) (err error) {
 	ret.SoundName, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -1498,7 +1498,7 @@ type ItemSoundHolder struct {
 	Val any
 }
 
-func (ret *ItemSoundHolder) Decode(r io.Reader) (err error) {
+func (ret *ItemSoundHolder) Decode(r io.ReadSeeker) (err error) {
 	var ItemSoundHolderId int32
 	ItemSoundHolderId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -1543,7 +1543,7 @@ type ItemWrittenBookPage struct {
 	FilteredContent nbt.Anon
 }
 
-func (ret *ItemWrittenBookPage) Decode(r io.Reader) (err error) {
+func (ret *ItemWrittenBookPage) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Content.Decode(r)
 	if err != nil {
 		return
@@ -1573,7 +1573,7 @@ type JukeboxSongData struct {
 	ComparatorOutput int32
 }
 
-func (ret *JukeboxSongData) Decode(r io.Reader) (err error) {
+func (ret *JukeboxSongData) Decode(r io.ReadSeeker) (err error) {
 	err = ret.SoundEvent.Decode(r)
 	if err != nil {
 		return
@@ -1618,7 +1618,7 @@ type KineticWeaponCondition struct {
 	MinRelativeSpeed float32
 }
 
-func (ret *KineticWeaponCondition) Decode(r io.Reader) (err error) {
+func (ret *KineticWeaponCondition) Decode(r io.ReadSeeker) (err error) {
 	ret.MaxDurationTicks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -1660,7 +1660,7 @@ type Node struct {
 
 var NodeTypeMap = map[int32]string{0: "blocked", 1: "open", 10: "water_border", 11: "rail", 12: "unpassable_rail", 13: "danger_fire", 14: "damage_fire", 15: "danger_other", 16: "damage_other", 17: "door_open", 18: "door_wood_closed", 19: "door_iron_closed", 2: "walkable", 20: "breach", 21: "leaves", 22: "sticky_honey", 23: "cocoa", 24: "damage_cautious", 25: "danger_trapdoor", 3: "walkable_door", 4: "trapdoor", 5: "powder_snow", 6: "danger_powder_snow", 7: "fence", 8: "lava", 9: "water"}
 
-func (ret *Node) Decode(r io.Reader) (err error) {
+func (ret *Node) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Position.Decode(r)
 	if err != nil {
 		return
@@ -1734,7 +1734,7 @@ type PartialResolvableProfile struct {
 	Properties []GameProfileProperty
 }
 
-func (ret *PartialResolvableProfile) Decode(r io.Reader) (err error) {
+func (ret *PartialResolvableProfile) Decode(r io.ReadSeeker) (err error) {
 	var PartialResolvableProfileNamePresent bool
 	err = binary.Read(r, binary.BigEndian, &PartialResolvableProfileNamePresent)
 	if err != nil {
@@ -1819,7 +1819,7 @@ type Particle struct {
 var ParticleTypeMap = map[int32]string{0: "angry_villager", 1: "block", 10: "falling_lava", 100: "wax_off", 101: "electric_spark", 102: "scrape", 103: "shriek", 104: "egg_crack", 105: "dust_plume", 106: "trial_spawner_detected_player", 107: "trial_spawner_detected_player_ominous", 108: "vault_connection", 109: "dust_pillar", 11: "landing_lava", 110: "ominous_spawning", 111: "raid_omen", 112: "trial_omen", 113: "block_crumble", 114: "firefly", 12: "dripping_water", 13: "falling_water", 14: "dust", 15: "dust_color_transition", 16: "effect", 17: "elder_guardian", 18: "enchanted_hit", 19: "enchant", 2: "block_marker", 20: "end_rod", 21: "entity_effect", 22: "explosion_emitter", 23: "explosion", 24: "gust", 25: "small_gust", 26: "gust_emitter_large", 27: "gust_emitter_small", 28: "sonic_boom", 29: "falling_dust", 3: "bubble", 30: "firework", 31: "fishing", 32: "flame", 33: "infested", 34: "cherry_leaves", 35: "pale_oak_leaves", 36: "tinted_leaves", 37: "sculk_soul", 38: "sculk_charge", 39: "sculk_charge_pop", 4: "cloud", 40: "soul_fire_flame", 41: "soul", 42: "flash", 43: "happy_villager", 44: "composter", 45: "heart", 46: "instant_effect", 47: "item", 48: "vibration", 49: "trail", 5: "copper_fire_flame", 50: "item_slime", 51: "item_cobweb", 52: "item_snowball", 53: "large_smoke", 54: "lava", 55: "mycelium", 56: "note", 57: "poof", 58: "portal", 59: "rain", 6: "crit", 60: "smoke", 61: "white_smoke", 62: "sneeze", 63: "spit", 64: "squid_ink", 65: "sweep_attack", 66: "totem_of_undying", 67: "underwater", 68: "splash", 69: "witch", 7: "damage_indicator", 70: "bubble_pop", 71: "current_down", 72: "bubble_column_up", 73: "nautilus", 74: "dolphin", 75: "campfire_cosy_smoke", 76: "campfire_signal_smoke", 77: "dripping_honey", 78: "falling_honey", 79: "landing_honey", 8: "dragon_breath", 80: "falling_nectar", 81: "falling_spore_blossom", 82: "ash", 83: "crimson_spore", 84: "warped_spore", 85: "spore_blossom_air", 86: "dripping_obsidian_tear", 87: "falling_obsidian_tear", 88: "landing_obsidian_tear", 89: "reverse_portal", 9: "dripping_lava", 90: "white_ash", 91: "small_flame", 92: "snowflake", 93: "dripping_dripstone_lava", 94: "falling_dripstone_lava", 95: "dripping_dripstone_water", 96: "falling_dripstone_water", 97: "glow_squid_ink", 98: "glow", 99: "wax_on"}
 var ParticleDataVibrationTmpPositionTypeMap = map[int32]string{0: "block", 1: "entity"}
 
-func (ret *Particle) Decode(r io.Reader) (err error) {
+func (ret *Particle) Decode(r io.ReadSeeker) (err error) {
 	var ParticleTypeKey int32
 	ParticleTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -2399,7 +2399,7 @@ type Path struct {
 	DebugData     PathDebugData
 }
 
-func (ret *Path) Decode(r io.Reader) (err error) {
+func (ret *Path) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Reached)
 	if err != nil {
 		return
@@ -2468,7 +2468,7 @@ type PathDebugData struct {
 	TargetNodes []Node
 }
 
-func (ret *PathDebugData) Decode(r io.Reader) (err error) {
+func (ret *PathDebugData) Decode(r io.ReadSeeker) (err error) {
 	var lPathDebugDataOpenSet int32
 	lPathDebugDataOpenSet, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -2556,7 +2556,7 @@ type PlayerSkinPatch struct {
 
 var PlayerSkinPatchModelMap = map[int32]string{0: "wide", 1: "slim"}
 
-func (ret *PlayerSkinPatch) Decode(r io.Reader) (err error) {
+func (ret *PlayerSkinPatch) Decode(r io.ReadSeeker) (err error) {
 	var PlayerSkinPatchBodyPresent bool
 	err = binary.Read(r, binary.BigEndian, &PlayerSkinPatchBodyPresent)
 	if err != nil {
@@ -2676,7 +2676,7 @@ type ResolvableProfile struct {
 
 var ResolvableProfileTypeMap = map[int32]string{0: "partial", 1: "complete"}
 
-func (ret *ResolvableProfile) Decode(r io.Reader) (err error) {
+func (ret *ResolvableProfile) Decode(r io.ReadSeeker) (err error) {
 	var ResolvableProfileTypeKey int32
 	ResolvableProfileTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -2756,7 +2756,7 @@ type RespawnData struct {
 	Pitch     float32
 }
 
-func (ret *RespawnData) Decode(r io.Reader) (err error) {
+func (ret *RespawnData) Decode(r io.ReadSeeker) (err error) {
 	err = ret.GlobalPos.Decode(r)
 	if err != nil {
 		return
@@ -2793,7 +2793,7 @@ type ServerLinkType struct {
 
 var ServerLinkTypeMap = map[int32]string{0: "bug_report", 1: "community_guidelines", 2: "support", 3: "status", 4: "feedback", 5: "community", 6: "website", 7: "forums", 8: "news", 9: "announcements"}
 
-func (ret *ServerLinkType) Decode(r io.Reader) (err error) {
+func (ret *ServerLinkType) Decode(r io.ReadSeeker) (err error) {
 	var ServerLinkTypeKey int32
 	ServerLinkTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -2826,7 +2826,7 @@ type Slot struct {
 	Anon      any
 }
 
-func (ret *Slot) Decode(r io.Reader) (err error) {
+func (ret *Slot) Decode(r io.ReadSeeker) (err error) {
 	ret.ItemCount, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -3004,7 +3004,7 @@ type SlotComponent struct {
 	Data any
 }
 
-func (ret *SlotComponent) Decode(r io.Reader) (err error) {
+func (ret *SlotComponent) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -3019,7 +3019,7 @@ type SlotComponentType struct {
 
 var SlotComponentTypeMap = map[int32]string{0: "custom_data", 1: "max_stack_size", 10: "item_model", 100: "cat/variant", 101: "cat/collar", 102: "sheep/color", 103: "shulker/color", 11: "lore", 12: "rarity", 13: "enchantments", 14: "can_place_on", 15: "can_break", 16: "attribute_modifiers", 17: "custom_model_data", 18: "tooltip_display", 19: "repair_cost", 2: "max_damage", 20: "creative_slot_lock", 21: "enchantment_glint_override", 22: "intangible_projectile", 23: "food", 24: "consumable", 25: "use_remainder", 26: "use_cooldown", 27: "damage_resistant", 28: "tool", 29: "weapon", 3: "damage", 30: "attack_range", 31: "enchantable", 32: "equippable", 33: "repairable", 34: "glider", 35: "tooltip_style", 36: "death_protection", 37: "blocks_attacks", 38: "piercing_weapon", 39: "kinetic_weapon", 4: "unbreakable", 40: "swing_animation", 41: "stored_enchantments", 42: "dyed_color", 43: "map_color", 44: "map_id", 45: "map_decorations", 46: "map_post_processing", 47: "charged_projectiles", 48: "bundle_contents", 49: "potion_contents", 5: "use_effects", 50: "potion_duration_scale", 51: "suspicious_stew_effects", 52: "writable_book_content", 53: "written_book_content", 54: "trim", 55: "debug_stick_state", 56: "entity_data", 57: "bucket_entity_data", 58: "block_entity_data", 59: "instrument", 6: "custom_name", 60: "provides_trim_material", 61: "ominous_bottle_amplifier", 62: "jukebox_playable", 63: "provides_banner_patterns", 64: "recipes", 65: "lodestone_tracker", 66: "firework_explosion", 67: "fireworks", 68: "profile", 69: "note_block_sound", 7: "minimum_attack_charge", 70: "banner_patterns", 71: "base_color", 72: "pot_decorations", 73: "container", 74: "block_state", 75: "bees", 76: "lock", 77: "container_loot", 78: "break_sound", 79: "villager/variant", 8: "damage_type", 80: "wolf/variant", 81: "wolf/sound_variant", 82: "wolf/collar", 83: "fox/variant", 84: "salmon/size", 85: "parrot/variant", 86: "tropical_fish/pattern", 87: "tropical_fish/base_color", 88: "tropical_fish/pattern_color", 89: "mooshroom/variant", 9: "item_name", 90: "rabbit/variant", 91: "pig/variant", 92: "cow/variant", 93: "chicken/variant", 94: "zombie_nautilus/variant", 95: "frog/variant", 96: "horse/variant", 97: "painting/variant", 98: "llama/variant", 99: "axolotl/variant"}
 
-func (ret *SlotComponentType) Decode(r io.Reader) (err error) {
+func (ret *SlotComponentType) Decode(r io.ReadSeeker) (err error) {
 	var SlotComponentTypeKey int32
 	SlotComponentTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -3052,7 +3052,7 @@ type UntrustedSlot struct {
 	Anon      any
 }
 
-func (ret *UntrustedSlot) Decode(r io.Reader) (err error) {
+func (ret *UntrustedSlot) Decode(r io.ReadSeeker) (err error) {
 	ret.ItemCount, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -3230,7 +3230,7 @@ type UntrustedSlotComponent struct {
 	Data ByteArray
 }
 
-func (ret *UntrustedSlotComponent) Decode(r io.Reader) (err error) {
+func (ret *UntrustedSlotComponent) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Type.Decode(r)
 	if err != nil {
 		return
@@ -3264,7 +3264,7 @@ type ChatSession struct {
 	}
 }
 
-func (ret *ChatSession) Decode(r io.Reader) (err error) {
+func (ret *ChatSession) Decode(r io.ReadSeeker) (err error) {
 	var ChatSessionPresent bool
 	err = binary.Read(r, binary.BigEndian, &ChatSessionPresent)
 	if err != nil {
@@ -3353,7 +3353,7 @@ type ChunkBlockEntity struct {
 	NbtData nbt.Anon
 }
 
-func (ret *ChunkBlockEntity) Decode(r io.Reader) (err error) {
+func (ret *ChunkBlockEntity) Decode(r io.ReadSeeker) (err error) {
 	var ChunkBlockEntityAnonPacked uint8
 	err = binary.Read(r, binary.BigEndian, &ChunkBlockEntityAnonPacked)
 	if err != nil {
@@ -3412,7 +3412,7 @@ type CommandNode struct {
 	ExtraNodeData any
 }
 
-func (ret *CommandNode) Decode(r io.Reader) (err error) {
+func (ret *CommandNode) Decode(r io.ReadSeeker) (err error) {
 	var CommandNodeFlagsPacked uint8
 	err = binary.Read(r, binary.BigEndian, &CommandNodeFlagsPacked)
 	if err != nil {
@@ -3501,7 +3501,7 @@ type EntityMetadata struct {
 	Val map[byte]EntityMetadataEntry
 }
 
-func (ret *EntityMetadata) Decode(r io.Reader) (err error) {
+func (ret *EntityMetadata) Decode(r io.ReadSeeker) (err error) {
 	ret.Val = make(map[uint8]EntityMetadataEntry)
 	var id uint8
 	for {
@@ -3548,7 +3548,7 @@ type EntityMetadataEntry struct {
 var EntityMetadataEntryTypeMap = map[int32]string{0: "byte", 1: "int", 10: "block_pos", 11: "optional_block_pos", 12: "direction", 13: "optional_uuid", 14: "block_state", 15: "optional_block_state", 16: "particle", 17: "particles", 18: "villager_data", 19: "optional_unsigned_int", 2: "long", 20: "pose", 21: "cat_variant", 22: "cow_variant", 23: "wolf_variant", 24: "wolf_sound_variant", 25: "frog_variant", 26: "pig_variant", 27: "chicken_variant", 28: "zombie_nautilus_variant", 29: "optional_global_pos", 3: "float", 30: "painting_variant", 31: "sniffer_state", 32: "armadillo_state", 33: "copper_golem_state", 34: "weathering_copper_golem_state", 35: "vector3", 36: "quaternion", 37: "resolvable_profile", 38: "humanoid_arm", 4: "string", 5: "component", 6: "optional_component", 7: "item_stack", 8: "boolean", 9: "rotations"}
 var EntityMetadataEntryValueHumanoidArmTmpMap = map[int32]string{0: "left", 1: "right"}
 
-func (ret *EntityMetadataEntry) Decode(r io.Reader) (err error) {
+func (ret *EntityMetadataEntry) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Key)
 	if err != nil {
 		return
@@ -4416,7 +4416,7 @@ type GameProfileNameProp struct {
 	Properties []GameProfileProperty
 }
 
-func (ret *GameProfileNameProp) Decode(r io.Reader) (err error) {
+func (ret *GameProfileNameProp) Decode(r io.ReadSeeker) (err error) {
 	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -4459,7 +4459,7 @@ type Ingredient struct {
 	Val []Slot
 }
 
-func (ret *Ingredient) Decode(r io.Reader) (err error) {
+func (ret *Ingredient) Decode(r io.ReadSeeker) (err error) {
 	var lIngredient int32
 	lIngredient, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -4494,7 +4494,7 @@ type Optvarint struct {
 	Val int32
 }
 
-func (ret *Optvarint) Decode(r io.Reader) (err error) {
+func (ret *Optvarint) Decode(r io.ReadSeeker) (err error) {
 	ret.Val, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -4514,7 +4514,7 @@ type PackedChunkPos struct {
 	X int32
 }
 
-func (ret *PackedChunkPos) Decode(r io.Reader) (err error) {
+func (ret *PackedChunkPos) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Z)
 	if err != nil {
 		return
@@ -4543,7 +4543,7 @@ type Position struct {
 	Y int16
 }
 
-func (ret *Position) Decode(r io.Reader) (err error) {
+func (ret *Position) Decode(r io.ReadSeeker) (err error) {
 	var PositionPacked uint64
 	err = binary.Read(r, binary.BigEndian, &PositionPacked)
 	if err != nil {
@@ -4582,7 +4582,7 @@ type PreviousMessages struct {
 	}
 }
 
-func (ret *PreviousMessages) Decode(r io.Reader) (err error) {
+func (ret *PreviousMessages) Decode(r io.ReadSeeker) (err error) {
 	var lPreviousMessages int32
 	lPreviousMessages, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -4658,7 +4658,7 @@ type SoundSource struct {
 
 var SoundSourceMap = map[int32]string{0: "master", 1: "music", 10: "ui", 2: "record", 3: "weather", 4: "block", 5: "hostile", 6: "neutral", 7: "player", 8: "ambient", 9: "voice"}
 
-func (ret *SoundSource) Decode(r io.Reader) (err error) {
+func (ret *SoundSource) Decode(r io.ReadSeeker) (err error) {
 	var SoundSourceKey int32
 	SoundSourceKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -4693,7 +4693,7 @@ type Tags struct {
 	}
 }
 
-func (ret *Tags) Decode(r io.Reader) (err error) {
+func (ret *Tags) Decode(r io.ReadSeeker) (err error) {
 	var lTags int32
 	lTags, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -4759,7 +4759,7 @@ type Vec2f struct {
 	Y float32
 }
 
-func (ret *Vec2f) Decode(r io.Reader) (err error) {
+func (ret *Vec2f) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -4788,7 +4788,7 @@ type Vec3f struct {
 	Z float32
 }
 
-func (ret *Vec3f) Decode(r io.Reader) (err error) {
+func (ret *Vec3f) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -4825,7 +4825,7 @@ type Vec3f64 struct {
 	Z float64
 }
 
-func (ret *Vec3f64) Decode(r io.Reader) (err error) {
+func (ret *Vec3f64) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -4862,7 +4862,7 @@ type Vec3i struct {
 	Z int32
 }
 
-func (ret *Vec3i) Decode(r io.Reader) (err error) {
+func (ret *Vec3i) Decode(r io.ReadSeeker) (err error) {
 	ret.X, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -4899,7 +4899,7 @@ type Vec3i32 struct {
 	Z int32
 }
 
-func (ret *Vec3i32) Decode(r io.Reader) (err error) {
+func (ret *Vec3i32) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -4937,7 +4937,7 @@ type Vec4f struct {
 	W float32
 }
 
-func (ret *Vec4f) Decode(r io.Reader) (err error) {
+func (ret *Vec4f) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -4983,7 +4983,7 @@ type ConfigurationToClientPacket struct {
 
 var ConfigurationToClientPacketNameMap = map[int32]string{0x00: "cookie_request", 0x01: "custom_payload", 0x02: "disconnect", 0x03: "finish_configuration", 0x04: "keep_alive", 0x05: "ping", 0x06: "reset_chat", 0x07: "registry_data", 0x08: "remove_resource_pack", 0x09: "add_resource_pack", 0x0a: "store_cookie", 0x0b: "transfer", 0x0c: "feature_flags", 0x0d: "tags", 0x0e: "select_known_packs", 0x0f: "custom_report_details", 0x10: "server_links", 0x11: "clear_dialog", 0x12: "show_dialog", 0x13: "code_of_conduct"}
 
-func (ret *ConfigurationToClientPacket) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacket) Decode(r io.ReadSeeker) (err error) {
 	var ConfigurationToClientPacketNameKey int32
 	ConfigurationToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -5359,7 +5359,7 @@ type ConfigurationToClientPacketCodeOfConduct struct {
 	Contents string
 }
 
-func (ret *ConfigurationToClientPacketCodeOfConduct) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCodeOfConduct) Decode(r io.ReadSeeker) (err error) {
 	ret.Contents, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -5382,7 +5382,7 @@ type ConfigurationToClientPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *ConfigurationToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -5447,7 +5447,7 @@ func (ret *ConfigurationToClientPacketCommonAddResourcePack) Encode(w io.Writer)
 type ConfigurationToClientPacketCommonClearDialog struct {
 }
 
-func (ret *ConfigurationToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *ConfigurationToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -5458,7 +5458,7 @@ type ConfigurationToClientPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *ConfigurationToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -5478,7 +5478,7 @@ type ConfigurationToClientPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *ConfigurationToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -5521,7 +5521,7 @@ type ConfigurationToClientPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *ConfigurationToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -5566,7 +5566,7 @@ type ConfigurationToClientPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *ConfigurationToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lConfigurationToClientPacketCommonCustomReportDetailsDetails int32
 	lConfigurationToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -5615,7 +5615,7 @@ type ConfigurationToClientPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *ConfigurationToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var ConfigurationToClientPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &ConfigurationToClientPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -5653,7 +5653,7 @@ type ConfigurationToClientPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *ConfigurationToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lConfigurationToClientPacketCommonSelectKnownPacksPacks int32
 	lConfigurationToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -5717,7 +5717,7 @@ type ConfigurationToClientPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *ConfigurationToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lConfigurationToClientPacketCommonServerLinksLinks int32
 	lConfigurationToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -5822,7 +5822,7 @@ type ConfigurationToClientPacketCommonSettings struct {
 
 var ConfigurationToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *ConfigurationToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -5919,7 +5919,7 @@ type ConfigurationToClientPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *ConfigurationToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -5947,7 +5947,7 @@ type ConfigurationToClientPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *ConfigurationToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -5975,7 +5975,7 @@ type ConfigurationToClientPacketCustomPayload struct {
 	Data    proto_base.RestBuffer
 }
 
-func (ret *ConfigurationToClientPacketCustomPayload) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketCustomPayload) Decode(r io.ReadSeeker) (err error) {
 	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -6002,7 +6002,7 @@ type ConfigurationToClientPacketDisconnect struct {
 	Reason nbt.Anon
 }
 
-func (ret *ConfigurationToClientPacketDisconnect) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketDisconnect) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Reason.Decode(r)
 	if err != nil {
 		return
@@ -6021,7 +6021,7 @@ type ConfigurationToClientPacketFeatureFlags struct {
 	Features []string
 }
 
-func (ret *ConfigurationToClientPacketFeatureFlags) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketFeatureFlags) Decode(r io.ReadSeeker) (err error) {
 	var lConfigurationToClientPacketFeatureFlagsFeatures int32
 	lConfigurationToClientPacketFeatureFlagsFeatures, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -6055,7 +6055,7 @@ func (ret *ConfigurationToClientPacketFeatureFlags) Encode(w io.Writer) (err err
 type ConfigurationToClientPacketFinishConfiguration struct {
 }
 
-func (ret *ConfigurationToClientPacketFinishConfiguration) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketFinishConfiguration) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *ConfigurationToClientPacketFinishConfiguration) Encode(w io.Writer) (err error) {
@@ -6066,7 +6066,7 @@ type ConfigurationToClientPacketKeepAlive struct {
 	KeepAliveId int64
 }
 
-func (ret *ConfigurationToClientPacketKeepAlive) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketKeepAlive) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.KeepAliveId)
 	if err != nil {
 		return
@@ -6085,7 +6085,7 @@ type ConfigurationToClientPacketPing struct {
 	Id int32
 }
 
-func (ret *ConfigurationToClientPacketPing) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketPing) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Id)
 	if err != nil {
 		return
@@ -6108,7 +6108,7 @@ type ConfigurationToClientPacketRegistryData struct {
 	}
 }
 
-func (ret *ConfigurationToClientPacketRegistryData) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketRegistryData) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -6179,7 +6179,7 @@ func (ret *ConfigurationToClientPacketRegistryData) Encode(w io.Writer) (err err
 type ConfigurationToClientPacketResetChat struct {
 }
 
-func (ret *ConfigurationToClientPacketResetChat) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketResetChat) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *ConfigurationToClientPacketResetChat) Encode(w io.Writer) (err error) {
@@ -6190,7 +6190,7 @@ type ConfigurationToClientPacketShowDialog struct {
 	Dialog nbt.Anon
 }
 
-func (ret *ConfigurationToClientPacketShowDialog) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketShowDialog) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Dialog.Decode(r)
 	if err != nil {
 		return
@@ -6212,7 +6212,7 @@ type ConfigurationToClientPacketTags struct {
 	}
 }
 
-func (ret *ConfigurationToClientPacketTags) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToClientPacketTags) Decode(r io.ReadSeeker) (err error) {
 	var lConfigurationToClientPacketTagsTags int32
 	lConfigurationToClientPacketTagsTags, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -6264,7 +6264,7 @@ type ConfigurationToServerPacket struct {
 
 var ConfigurationToServerPacketNameMap = map[int32]string{0x00: "settings", 0x01: "cookie_response", 0x02: "custom_payload", 0x03: "finish_configuration", 0x04: "keep_alive", 0x05: "pong", 0x06: "resource_pack_receive", 0x07: "select_known_packs", 0x08: "custom_click_action", 0x09: "accept_code_of_conduct"}
 
-func (ret *ConfigurationToServerPacket) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacket) Decode(r io.ReadSeeker) (err error) {
 	var ConfigurationToServerPacketNameKey int32
 	ConfigurationToServerPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -6469,7 +6469,7 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 type ConfigurationToServerPacketAcceptCodeOfConduct struct {
 }
 
-func (ret *ConfigurationToServerPacketAcceptCodeOfConduct) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketAcceptCodeOfConduct) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *ConfigurationToServerPacketAcceptCodeOfConduct) Encode(w io.Writer) (err error) {
@@ -6484,7 +6484,7 @@ type ConfigurationToServerPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *ConfigurationToServerPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -6549,7 +6549,7 @@ func (ret *ConfigurationToServerPacketCommonAddResourcePack) Encode(w io.Writer)
 type ConfigurationToServerPacketCommonClearDialog struct {
 }
 
-func (ret *ConfigurationToServerPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *ConfigurationToServerPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -6560,7 +6560,7 @@ type ConfigurationToServerPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *ConfigurationToServerPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -6580,7 +6580,7 @@ type ConfigurationToServerPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *ConfigurationToServerPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -6623,7 +6623,7 @@ type ConfigurationToServerPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *ConfigurationToServerPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -6668,7 +6668,7 @@ type ConfigurationToServerPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *ConfigurationToServerPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lConfigurationToServerPacketCommonCustomReportDetailsDetails int32
 	lConfigurationToServerPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -6717,7 +6717,7 @@ type ConfigurationToServerPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *ConfigurationToServerPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var ConfigurationToServerPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &ConfigurationToServerPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -6755,7 +6755,7 @@ type ConfigurationToServerPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *ConfigurationToServerPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lConfigurationToServerPacketCommonSelectKnownPacksPacks int32
 	lConfigurationToServerPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -6819,7 +6819,7 @@ type ConfigurationToServerPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *ConfigurationToServerPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lConfigurationToServerPacketCommonServerLinksLinks int32
 	lConfigurationToServerPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -6924,7 +6924,7 @@ type ConfigurationToServerPacketCommonSettings struct {
 
 var ConfigurationToServerPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *ConfigurationToServerPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7021,7 +7021,7 @@ type ConfigurationToServerPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *ConfigurationToServerPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7049,7 +7049,7 @@ type ConfigurationToServerPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *ConfigurationToServerPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7077,7 +7077,7 @@ type ConfigurationToServerPacketCustomPayload struct {
 	Data    proto_base.RestBuffer
 }
 
-func (ret *ConfigurationToServerPacketCustomPayload) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketCustomPayload) Decode(r io.ReadSeeker) (err error) {
 	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7103,7 +7103,7 @@ func (ret *ConfigurationToServerPacketCustomPayload) Encode(w io.Writer) (err er
 type ConfigurationToServerPacketFinishConfiguration struct {
 }
 
-func (ret *ConfigurationToServerPacketFinishConfiguration) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketFinishConfiguration) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *ConfigurationToServerPacketFinishConfiguration) Encode(w io.Writer) (err error) {
@@ -7114,7 +7114,7 @@ type ConfigurationToServerPacketKeepAlive struct {
 	KeepAliveId int64
 }
 
-func (ret *ConfigurationToServerPacketKeepAlive) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketKeepAlive) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.KeepAliveId)
 	if err != nil {
 		return
@@ -7133,7 +7133,7 @@ type ConfigurationToServerPacketPong struct {
 	Id int32
 }
 
-func (ret *ConfigurationToServerPacketPong) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketPong) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Id)
 	if err != nil {
 		return
@@ -7153,7 +7153,7 @@ type ConfigurationToServerPacketResourcePackReceive struct {
 	Result int32
 }
 
-func (ret *ConfigurationToServerPacketResourcePackReceive) Decode(r io.Reader) (err error) {
+func (ret *ConfigurationToServerPacketResourcePackReceive) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -7183,7 +7183,7 @@ type HandshakingToClientPacket struct {
 
 var HandshakingToClientPacketNameMap = map[int32]string{}
 
-func (ret *HandshakingToClientPacket) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacket) Decode(r io.ReadSeeker) (err error) {
 	var HandshakingToClientPacketNameKey int32
 	HandshakingToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -7219,7 +7219,7 @@ type HandshakingToClientPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *HandshakingToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -7284,7 +7284,7 @@ func (ret *HandshakingToClientPacketCommonAddResourcePack) Encode(w io.Writer) (
 type HandshakingToClientPacketCommonClearDialog struct {
 }
 
-func (ret *HandshakingToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *HandshakingToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -7295,7 +7295,7 @@ type HandshakingToClientPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *HandshakingToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7315,7 +7315,7 @@ type HandshakingToClientPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *HandshakingToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7358,7 +7358,7 @@ type HandshakingToClientPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *HandshakingToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7403,7 +7403,7 @@ type HandshakingToClientPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *HandshakingToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lHandshakingToClientPacketCommonCustomReportDetailsDetails int32
 	lHandshakingToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -7452,7 +7452,7 @@ type HandshakingToClientPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *HandshakingToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var HandshakingToClientPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &HandshakingToClientPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -7490,7 +7490,7 @@ type HandshakingToClientPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *HandshakingToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lHandshakingToClientPacketCommonSelectKnownPacksPacks int32
 	lHandshakingToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -7554,7 +7554,7 @@ type HandshakingToClientPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *HandshakingToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lHandshakingToClientPacketCommonServerLinksLinks int32
 	lHandshakingToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -7659,7 +7659,7 @@ type HandshakingToClientPacketCommonSettings struct {
 
 var HandshakingToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *HandshakingToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7756,7 +7756,7 @@ type HandshakingToClientPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *HandshakingToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7784,7 +7784,7 @@ type HandshakingToClientPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *HandshakingToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToClientPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7814,7 +7814,7 @@ type HandshakingToServerPacket struct {
 
 var HandshakingToServerPacketNameMap = map[int32]string{0x00: "set_protocol", 0xfe: "legacy_server_list_ping"}
 
-func (ret *HandshakingToServerPacket) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacket) Decode(r io.ReadSeeker) (err error) {
 	var HandshakingToServerPacketNameKey int32
 	HandshakingToServerPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -7888,7 +7888,7 @@ type HandshakingToServerPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *HandshakingToServerPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -7953,7 +7953,7 @@ func (ret *HandshakingToServerPacketCommonAddResourcePack) Encode(w io.Writer) (
 type HandshakingToServerPacketCommonClearDialog struct {
 }
 
-func (ret *HandshakingToServerPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *HandshakingToServerPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -7964,7 +7964,7 @@ type HandshakingToServerPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *HandshakingToServerPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -7984,7 +7984,7 @@ type HandshakingToServerPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *HandshakingToServerPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -8027,7 +8027,7 @@ type HandshakingToServerPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *HandshakingToServerPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -8072,7 +8072,7 @@ type HandshakingToServerPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *HandshakingToServerPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lHandshakingToServerPacketCommonCustomReportDetailsDetails int32
 	lHandshakingToServerPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -8121,7 +8121,7 @@ type HandshakingToServerPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *HandshakingToServerPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var HandshakingToServerPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &HandshakingToServerPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -8159,7 +8159,7 @@ type HandshakingToServerPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *HandshakingToServerPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lHandshakingToServerPacketCommonSelectKnownPacksPacks int32
 	lHandshakingToServerPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -8223,7 +8223,7 @@ type HandshakingToServerPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *HandshakingToServerPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lHandshakingToServerPacketCommonServerLinksLinks int32
 	lHandshakingToServerPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -8328,7 +8328,7 @@ type HandshakingToServerPacketCommonSettings struct {
 
 var HandshakingToServerPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *HandshakingToServerPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -8425,7 +8425,7 @@ type HandshakingToServerPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *HandshakingToServerPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -8453,7 +8453,7 @@ type HandshakingToServerPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *HandshakingToServerPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -8480,7 +8480,7 @@ type HandshakingToServerPacketLegacyServerListPing struct {
 	Payload uint8
 }
 
-func (ret *HandshakingToServerPacketLegacyServerListPing) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketLegacyServerListPing) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Payload)
 	if err != nil {
 		return
@@ -8502,7 +8502,7 @@ type HandshakingToServerPacketSetProtocol struct {
 	NextState       int32
 }
 
-func (ret *HandshakingToServerPacketSetProtocol) Decode(r io.Reader) (err error) {
+func (ret *HandshakingToServerPacketSetProtocol) Decode(r io.ReadSeeker) (err error) {
 	ret.ProtocolVersion, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -8548,7 +8548,7 @@ type LoginToClientPacket struct {
 
 var LoginToClientPacketNameMap = map[int32]string{0x00: "disconnect", 0x01: "encryption_begin", 0x02: "success", 0x03: "compress", 0x04: "login_plugin_request", 0x05: "cookie_request"}
 
-func (ret *LoginToClientPacket) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacket) Decode(r io.ReadSeeker) (err error) {
 	var LoginToClientPacketNameKey int32
 	LoginToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -8690,7 +8690,7 @@ type LoginToClientPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *LoginToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -8755,7 +8755,7 @@ func (ret *LoginToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err er
 type LoginToClientPacketCommonClearDialog struct {
 }
 
-func (ret *LoginToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *LoginToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -8766,7 +8766,7 @@ type LoginToClientPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *LoginToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -8786,7 +8786,7 @@ type LoginToClientPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *LoginToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -8829,7 +8829,7 @@ type LoginToClientPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *LoginToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -8874,7 +8874,7 @@ type LoginToClientPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *LoginToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lLoginToClientPacketCommonCustomReportDetailsDetails int32
 	lLoginToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -8923,7 +8923,7 @@ type LoginToClientPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *LoginToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var LoginToClientPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &LoginToClientPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -8961,7 +8961,7 @@ type LoginToClientPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *LoginToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lLoginToClientPacketCommonSelectKnownPacksPacks int32
 	lLoginToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -9025,7 +9025,7 @@ type LoginToClientPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *LoginToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lLoginToClientPacketCommonServerLinksLinks int32
 	lLoginToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -9130,7 +9130,7 @@ type LoginToClientPacketCommonSettings struct {
 
 var LoginToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *LoginToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -9227,7 +9227,7 @@ type LoginToClientPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *LoginToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -9255,7 +9255,7 @@ type LoginToClientPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *LoginToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -9282,7 +9282,7 @@ type LoginToClientPacketCompress struct {
 	Threshold int32
 }
 
-func (ret *LoginToClientPacketCompress) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketCompress) Decode(r io.ReadSeeker) (err error) {
 	ret.Threshold, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -9301,7 +9301,7 @@ type LoginToClientPacketDisconnect struct {
 	Reason string
 }
 
-func (ret *LoginToClientPacketDisconnect) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketDisconnect) Decode(r io.ReadSeeker) (err error) {
 	ret.Reason, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -9323,7 +9323,7 @@ type LoginToClientPacketEncryptionBegin struct {
 	ShouldAuthenticate bool
 }
 
-func (ret *LoginToClientPacketEncryptionBegin) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketEncryptionBegin) Decode(r io.ReadSeeker) (err error) {
 	ret.ServerId, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -9386,7 +9386,7 @@ type LoginToClientPacketLoginPluginRequest struct {
 	Data      proto_base.RestBuffer
 }
 
-func (ret *LoginToClientPacketLoginPluginRequest) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketLoginPluginRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.MessageId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -9427,7 +9427,7 @@ type LoginToClientPacketSuccess struct {
 	}
 }
 
-func (ret *LoginToClientPacketSuccess) Decode(r io.Reader) (err error) {
+func (ret *LoginToClientPacketSuccess) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -9520,7 +9520,7 @@ type LoginToServerPacket struct {
 
 var LoginToServerPacketNameMap = map[int32]string{0x00: "login_start", 0x01: "encryption_begin", 0x02: "login_plugin_response", 0x03: "login_acknowledged", 0x04: "cookie_response"}
 
-func (ret *LoginToServerPacket) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacket) Decode(r io.ReadSeeker) (err error) {
 	var LoginToServerPacketNameKey int32
 	LoginToServerPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -9645,7 +9645,7 @@ type LoginToServerPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *LoginToServerPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -9710,7 +9710,7 @@ func (ret *LoginToServerPacketCommonAddResourcePack) Encode(w io.Writer) (err er
 type LoginToServerPacketCommonClearDialog struct {
 }
 
-func (ret *LoginToServerPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *LoginToServerPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -9721,7 +9721,7 @@ type LoginToServerPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *LoginToServerPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -9741,7 +9741,7 @@ type LoginToServerPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *LoginToServerPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -9784,7 +9784,7 @@ type LoginToServerPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *LoginToServerPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -9829,7 +9829,7 @@ type LoginToServerPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *LoginToServerPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lLoginToServerPacketCommonCustomReportDetailsDetails int32
 	lLoginToServerPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -9878,7 +9878,7 @@ type LoginToServerPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *LoginToServerPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var LoginToServerPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &LoginToServerPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -9916,7 +9916,7 @@ type LoginToServerPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *LoginToServerPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lLoginToServerPacketCommonSelectKnownPacksPacks int32
 	lLoginToServerPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -9980,7 +9980,7 @@ type LoginToServerPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *LoginToServerPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lLoginToServerPacketCommonServerLinksLinks int32
 	lLoginToServerPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -10085,7 +10085,7 @@ type LoginToServerPacketCommonSettings struct {
 
 var LoginToServerPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *LoginToServerPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -10182,7 +10182,7 @@ type LoginToServerPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *LoginToServerPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -10210,7 +10210,7 @@ type LoginToServerPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *LoginToServerPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -10238,7 +10238,7 @@ type LoginToServerPacketEncryptionBegin struct {
 	VerifyToken  []byte
 }
 
-func (ret *LoginToServerPacketEncryptionBegin) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketEncryptionBegin) Decode(r io.ReadSeeker) (err error) {
 	var lLoginToServerPacketEncryptionBeginSharedSecret int32
 	lLoginToServerPacketEncryptionBeginSharedSecret, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -10282,7 +10282,7 @@ func (ret *LoginToServerPacketEncryptionBegin) Encode(w io.Writer) (err error) {
 type LoginToServerPacketLoginAcknowledged struct {
 }
 
-func (ret *LoginToServerPacketLoginAcknowledged) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketLoginAcknowledged) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *LoginToServerPacketLoginAcknowledged) Encode(w io.Writer) (err error) {
@@ -10294,7 +10294,7 @@ type LoginToServerPacketLoginPluginResponse struct {
 	Data      *proto_base.RestBuffer
 }
 
-func (ret *LoginToServerPacketLoginPluginResponse) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketLoginPluginResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.MessageId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -10337,7 +10337,7 @@ type LoginToServerPacketLoginStart struct {
 	PlayerUUID uuid.UUID
 }
 
-func (ret *LoginToServerPacketLoginStart) Decode(r io.Reader) (err error) {
+func (ret *LoginToServerPacketLoginStart) Decode(r io.ReadSeeker) (err error) {
 	ret.Username, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -10366,7 +10366,7 @@ type PlayToClientChatType struct {
 	Style          nbt.Anon
 }
 
-func (ret *PlayToClientChatType) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientChatType) Decode(r io.ReadSeeker) (err error) {
 	ret.TranslationKey, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -10419,7 +10419,7 @@ type PlayToClientChatTypeParameterType struct {
 
 var PlayToClientChatTypeParameterTypeMap = map[int32]string{0: "content", 1: "sender", 2: "target"}
 
-func (ret *PlayToClientChatTypeParameterType) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientChatTypeParameterType) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientChatTypeParameterTypeKey int32
 	PlayToClientChatTypeParameterTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -10452,7 +10452,7 @@ type PlayToClientChatTypes struct {
 	Narration PlayToClientChatType
 }
 
-func (ret *PlayToClientChatTypes) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientChatTypes) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Chat.Decode(r)
 	if err != nil {
 		return
@@ -10479,7 +10479,7 @@ type PlayToClientChatTypesHolder struct {
 	Val any
 }
 
-func (ret *PlayToClientChatTypesHolder) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientChatTypesHolder) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientChatTypesHolderId int32
 	PlayToClientChatTypesHolderId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -10524,7 +10524,7 @@ type PlayToClientExplosionParticleEntry struct {
 	Weight int32
 }
 
-func (ret *PlayToClientExplosionParticleEntry) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientExplosionParticleEntry) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Data.Decode(r)
 	if err != nil {
 		return
@@ -10553,7 +10553,7 @@ type PlayToClientExplosionParticleInfo struct {
 	Speed    float32
 }
 
-func (ret *PlayToClientExplosionParticleInfo) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientExplosionParticleInfo) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Particle.Decode(r)
 	if err != nil {
 		return
@@ -10588,7 +10588,7 @@ type PlayToClientPositionUpdateRelatives struct {
 	Val uint32
 }
 
-func (ret *PlayToClientPositionUpdateRelatives) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPositionUpdateRelatives) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Val)
 	if err != nil {
 		return
@@ -10608,7 +10608,7 @@ type PlayToClientRecipeBookSetting struct {
 	Filtering bool
 }
 
-func (ret *PlayToClientRecipeBookSetting) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientRecipeBookSetting) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Open)
 	if err != nil {
 		return
@@ -10638,7 +10638,7 @@ type PlayToClientRecipeDisplay struct {
 
 var PlayToClientRecipeDisplayTypeMap = map[int32]string{0: "crafting_shapeless", 1: "crafting_shaped", 2: "furnace", 3: "stonecutter", 4: "smithing"}
 
-func (ret *PlayToClientRecipeDisplay) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientRecipeDisplay) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientRecipeDisplayTypeKey int32
 	PlayToClientRecipeDisplayTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -10984,7 +10984,7 @@ type PlayToClientSlotDisplay struct {
 
 var PlayToClientSlotDisplayTypeMap = map[int32]string{0: "empty", 1: "any_fuel", 2: "item", 3: "item_stack", 4: "tag", 5: "smithing_trim", 6: "with_remainder", 7: "composite"}
 
-func (ret *PlayToClientSlotDisplay) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientSlotDisplay) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientSlotDisplayTypeKey int32
 	PlayToClientSlotDisplayTypeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -11234,7 +11234,7 @@ type PlayToClientSpawnInfo struct {
 
 var PlayToClientSpawnInfoGamemodeMap = map[int8]string{0: "survival", 1: "creative", 2: "adventure", 3: "spectator"}
 
-func (ret *PlayToClientSpawnInfo) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientSpawnInfo) Decode(r io.ReadSeeker) (err error) {
 	ret.Dimension, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -11356,7 +11356,7 @@ type PlayToClientPacket struct {
 
 var PlayToClientPacketNameMap = map[int32]string{0x00: "bundle_delimiter", 0x01: "spawn_entity", 0x02: "animation", 0x03: "statistics", 0x04: "acknowledge_player_digging", 0x05: "block_break_animation", 0x06: "tile_entity_data", 0x07: "block_action", 0x08: "block_change", 0x09: "boss_bar", 0x0a: "difficulty", 0x0b: "chunk_batch_finished", 0x0c: "chunk_batch_start", 0x0d: "chunk_biomes", 0x0e: "clear_titles", 0x0f: "tab_complete", 0x10: "declare_commands", 0x11: "close_window", 0x12: "window_items", 0x13: "craft_progress_bar", 0x14: "set_slot", 0x15: "cookie_request", 0x16: "set_cooldown", 0x17: "chat_suggestions", 0x18: "custom_payload", 0x19: "damage_event", 0x1a: "debug_block_value", 0x1b: "debug_chunk_value", 0x1c: "debug_entity_value", 0x1d: "debug_event", 0x1e: "debug_sample", 0x1f: "hide_message", 0x20: "kick_disconnect", 0x21: "profileless_chat", 0x22: "entity_status", 0x23: "sync_entity_position", 0x24: "explosion", 0x25: "unload_chunk", 0x26: "game_state_change", 0x27: "game_test_highlight_pos", 0x28: "open_horse_window", 0x29: "hurt_animation", 0x2a: "initialize_world_border", 0x2b: "keep_alive", 0x2c: "map_chunk", 0x2d: "world_event", 0x2e: "world_particles", 0x2f: "update_light", 0x30: "login", 0x31: "map", 0x32: "trade_list", 0x33: "rel_entity_move", 0x34: "entity_move_look", 0x35: "move_minecart", 0x36: "entity_look", 0x37: "vehicle_move", 0x38: "open_book", 0x39: "open_window", 0x3a: "open_sign_entity", 0x3b: "ping", 0x3c: "ping_response", 0x3d: "craft_recipe_response", 0x3e: "abilities", 0x3f: "player_chat", 0x40: "end_combat_event", 0x41: "enter_combat_event", 0x42: "death_combat_event", 0x43: "player_remove", 0x44: "player_info", 0x45: "face_player", 0x46: "position", 0x47: "player_rotation", 0x48: "recipe_book_add", 0x49: "recipe_book_remove", 0x4a: "recipe_book_settings", 0x4b: "entity_destroy", 0x4c: "remove_entity_effect", 0x4d: "reset_score", 0x4e: "remove_resource_pack", 0x4f: "add_resource_pack", 0x50: "respawn", 0x51: "entity_head_rotation", 0x52: "multi_block_change", 0x53: "select_advancement_tab", 0x54: "server_data", 0x55: "action_bar", 0x56: "world_border_center", 0x57: "world_border_lerp_size", 0x58: "world_border_size", 0x59: "world_border_warning_delay", 0x5a: "world_border_warning_reach", 0x5b: "camera", 0x5c: "update_view_position", 0x5d: "update_view_distance", 0x5e: "set_cursor_item", 0x5f: "spawn_position", 0x60: "scoreboard_display_objective", 0x61: "entity_metadata", 0x62: "attach_entity", 0x63: "entity_velocity", 0x64: "entity_equipment", 0x65: "experience", 0x66: "update_health", 0x67: "held_item_slot", 0x68: "scoreboard_objective", 0x69: "set_passengers", 0x6a: "set_player_inventory", 0x6b: "teams", 0x6c: "scoreboard_score", 0x6d: "simulation_distance", 0x6e: "set_title_subtitle", 0x6f: "update_time", 0x70: "set_title_text", 0x71: "set_title_time", 0x72: "entity_sound_effect", 0x73: "sound_effect", 0x74: "start_configuration", 0x75: "stop_sound", 0x76: "store_cookie", 0x77: "system_chat", 0x78: "playerlist_header", 0x79: "nbt_query_response", 0x7a: "collect", 0x7b: "entity_teleport", 0x7c: "test_instance_block_status", 0x7d: "set_ticking_state", 0x7e: "step_tick", 0x7f: "transfer", 0x80: "advancements", 0x81: "entity_update_attributes", 0x82: "entity_effect", 0x83: "declare_recipes", 0x84: "tags", 0x85: "set_projectile_power", 0x86: "custom_report_details", 0x87: "server_links", 0x88: "tracked_waypoint", 0x89: "clear_dialog", 0x8a: "show_dialog"}
 
-func (ret *PlayToClientPacket) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacket) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientPacketNameKey int32
 	PlayToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -13751,7 +13751,7 @@ type PlayToClientPacketAbilities struct {
 	WalkingSpeed float32
 }
 
-func (ret *PlayToClientPacketAbilities) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketAbilities) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Flags)
 	if err != nil {
 		return
@@ -13786,7 +13786,7 @@ type PlayToClientPacketAcknowledgePlayerDigging struct {
 	SequenceId int32
 }
 
-func (ret *PlayToClientPacketAcknowledgePlayerDigging) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketAcknowledgePlayerDigging) Decode(r io.ReadSeeker) (err error) {
 	ret.SequenceId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -13805,7 +13805,7 @@ type PlayToClientPacketActionBar struct {
 	Text nbt.Anon
 }
 
-func (ret *PlayToClientPacketActionBar) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketActionBar) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Text.Decode(r)
 	if err != nil {
 		return
@@ -13856,7 +13856,7 @@ type PlayToClientPacketAdvancements struct {
 	ShowAdvancements bool
 }
 
-func (ret *PlayToClientPacketAdvancements) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketAdvancements) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Reset)
 	if err != nil {
 		return
@@ -14263,7 +14263,7 @@ type PlayToClientPacketAnimation struct {
 	Animation uint8
 }
 
-func (ret *PlayToClientPacketAnimation) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketAnimation) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -14291,7 +14291,7 @@ type PlayToClientPacketAttachEntity struct {
 	VehicleId int32
 }
 
-func (ret *PlayToClientPacketAttachEntity) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketAttachEntity) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
 	if err != nil {
 		return
@@ -14321,7 +14321,7 @@ type PlayToClientPacketBlockAction struct {
 	BlockId  int32
 }
 
-func (ret *PlayToClientPacketBlockAction) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketBlockAction) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -14366,7 +14366,7 @@ type PlayToClientPacketBlockBreakAnimation struct {
 	DestroyStage int8
 }
 
-func (ret *PlayToClientPacketBlockBreakAnimation) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketBlockBreakAnimation) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -14402,7 +14402,7 @@ type PlayToClientPacketBlockChange struct {
 	Type     int32
 }
 
-func (ret *PlayToClientPacketBlockChange) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketBlockChange) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -14435,7 +14435,7 @@ type PlayToClientPacketBossBar struct {
 	Flags      any
 }
 
-func (ret *PlayToClientPacketBossBar) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketBossBar) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.EntityUUID[:])
 	if err != nil {
 		return
@@ -14707,7 +14707,7 @@ type PlayToClientPacketCamera struct {
 	CameraId int32
 }
 
-func (ret *PlayToClientPacketCamera) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCamera) Decode(r io.ReadSeeker) (err error) {
 	ret.CameraId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -14727,7 +14727,7 @@ type PlayToClientPacketChatSuggestions struct {
 	Entries []string
 }
 
-func (ret *PlayToClientPacketChatSuggestions) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketChatSuggestions) Decode(r io.ReadSeeker) (err error) {
 	ret.Action, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -14770,7 +14770,7 @@ type PlayToClientPacketChunkBatchFinished struct {
 	BatchSize int32
 }
 
-func (ret *PlayToClientPacketChunkBatchFinished) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketChunkBatchFinished) Decode(r io.ReadSeeker) (err error) {
 	ret.BatchSize, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -14788,7 +14788,7 @@ func (ret *PlayToClientPacketChunkBatchFinished) Encode(w io.Writer) (err error)
 type PlayToClientPacketChunkBatchStart struct {
 }
 
-func (ret *PlayToClientPacketChunkBatchStart) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketChunkBatchStart) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketChunkBatchStart) Encode(w io.Writer) (err error) {
@@ -14802,7 +14802,7 @@ type PlayToClientPacketChunkBiomes struct {
 	}
 }
 
-func (ret *PlayToClientPacketChunkBiomes) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketChunkBiomes) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketChunkBiomesBiomes int32
 	lPlayToClientPacketChunkBiomesBiomes, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -14851,7 +14851,7 @@ type PlayToClientPacketClearTitles struct {
 	Reset bool
 }
 
-func (ret *PlayToClientPacketClearTitles) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketClearTitles) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Reset)
 	if err != nil {
 		return
@@ -14870,7 +14870,7 @@ type PlayToClientPacketCloseWindow struct {
 	WindowId ContainerID
 }
 
-func (ret *PlayToClientPacketCloseWindow) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCloseWindow) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -14891,7 +14891,7 @@ type PlayToClientPacketCollect struct {
 	PickupItemCount   int32
 }
 
-func (ret *PlayToClientPacketCollect) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCollect) Decode(r io.ReadSeeker) (err error) {
 	ret.CollectedEntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -14930,7 +14930,7 @@ type PlayToClientPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *PlayToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -14995,7 +14995,7 @@ func (ret *PlayToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err err
 type PlayToClientPacketCommonClearDialog struct {
 }
 
-func (ret *PlayToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -15006,7 +15006,7 @@ type PlayToClientPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *PlayToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -15026,7 +15026,7 @@ type PlayToClientPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *PlayToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -15069,7 +15069,7 @@ type PlayToClientPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *PlayToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -15114,7 +15114,7 @@ type PlayToClientPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *PlayToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketCommonCustomReportDetailsDetails int32
 	lPlayToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -15163,7 +15163,7 @@ type PlayToClientPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *PlayToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -15201,7 +15201,7 @@ type PlayToClientPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *PlayToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketCommonSelectKnownPacksPacks int32
 	lPlayToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -15265,7 +15265,7 @@ type PlayToClientPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *PlayToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketCommonServerLinksLinks int32
 	lPlayToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -15370,7 +15370,7 @@ type PlayToClientPacketCommonSettings struct {
 
 var PlayToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *PlayToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -15467,7 +15467,7 @@ type PlayToClientPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *PlayToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -15495,7 +15495,7 @@ type PlayToClientPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *PlayToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -15524,7 +15524,7 @@ type PlayToClientPacketCraftProgressBar struct {
 	Value    int16
 }
 
-func (ret *PlayToClientPacketCraftProgressBar) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCraftProgressBar) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -15560,7 +15560,7 @@ type PlayToClientPacketCraftRecipeResponse struct {
 	RecipeDisplay PlayToClientRecipeDisplay
 }
 
-func (ret *PlayToClientPacketCraftRecipeResponse) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCraftRecipeResponse) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -15588,7 +15588,7 @@ type PlayToClientPacketCustomPayload struct {
 	Data    proto_base.RestBuffer
 }
 
-func (ret *PlayToClientPacketCustomPayload) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketCustomPayload) Decode(r io.ReadSeeker) (err error) {
 	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -15619,7 +15619,7 @@ type PlayToClientPacketDamageEvent struct {
 	SourcePosition *Vec3f64
 }
 
-func (ret *PlayToClientPacketDamageEvent) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDamageEvent) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -15686,7 +15686,7 @@ type PlayToClientPacketDeathCombatEvent struct {
 	Message  nbt.Anon
 }
 
-func (ret *PlayToClientPacketDeathCombatEvent) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDeathCombatEvent) Decode(r io.ReadSeeker) (err error) {
 	ret.PlayerId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -15714,7 +15714,7 @@ type PlayToClientPacketDebugBlockValue struct {
 	Update   DebugSubscriptionUpdate
 }
 
-func (ret *PlayToClientPacketDebugBlockValue) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDebugBlockValue) Decode(r io.ReadSeeker) (err error) {
 	err = ret.BlockPos.Decode(r)
 	if err != nil {
 		return
@@ -15742,7 +15742,7 @@ type PlayToClientPacketDebugChunkValue struct {
 	Update   DebugSubscriptionUpdate
 }
 
-func (ret *PlayToClientPacketDebugChunkValue) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDebugChunkValue) Decode(r io.ReadSeeker) (err error) {
 	err = ret.ChunkPos.Decode(r)
 	if err != nil {
 		return
@@ -15770,7 +15770,7 @@ type PlayToClientPacketDebugEntityValue struct {
 	Update   DebugSubscriptionUpdate
 }
 
-func (ret *PlayToClientPacketDebugEntityValue) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDebugEntityValue) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -15797,7 +15797,7 @@ type PlayToClientPacketDebugEvent struct {
 	Event DebugSubscriptionEvent
 }
 
-func (ret *PlayToClientPacketDebugEvent) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDebugEvent) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Event.Decode(r)
 	if err != nil {
 		return
@@ -15817,7 +15817,7 @@ type PlayToClientPacketDebugSample struct {
 	Type   int32
 }
 
-func (ret *PlayToClientPacketDebugSample) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDebugSample) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketDebugSampleSample int32
 	lPlayToClientPacketDebugSampleSample, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -15861,7 +15861,7 @@ type PlayToClientPacketDeclareCommands struct {
 	RootIndex int32
 }
 
-func (ret *PlayToClientPacketDeclareCommands) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDeclareCommands) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketDeclareCommandsNodes int32
 	lPlayToClientPacketDeclareCommandsNodes, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -15911,7 +15911,7 @@ type PlayToClientPacketDeclareRecipes struct {
 	}
 }
 
-func (ret *PlayToClientPacketDeclareRecipes) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDeclareRecipes) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketDeclareRecipesRecipes int32
 	lPlayToClientPacketDeclareRecipesRecipes, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -16017,7 +16017,7 @@ type PlayToClientPacketDifficulty struct {
 
 var PlayToClientPacketDifficultyDifficultyMap = map[int32]string{0: "peaceful", 1: "easy", 2: "normal", 3: "hard"}
 
-func (ret *PlayToClientPacketDifficulty) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketDifficulty) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientPacketDifficultyDifficultyKey int32
 	PlayToClientPacketDifficultyDifficultyKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -16057,7 +16057,7 @@ type PlayToClientPacketEndCombatEvent struct {
 	Duration int32
 }
 
-func (ret *PlayToClientPacketEndCombatEvent) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEndCombatEvent) Decode(r io.ReadSeeker) (err error) {
 	ret.Duration, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16075,7 +16075,7 @@ func (ret *PlayToClientPacketEndCombatEvent) Encode(w io.Writer) (err error) {
 type PlayToClientPacketEnterCombatEvent struct {
 }
 
-func (ret *PlayToClientPacketEnterCombatEvent) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEnterCombatEvent) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketEnterCombatEvent) Encode(w io.Writer) (err error) {
@@ -16086,7 +16086,7 @@ type PlayToClientPacketEntityDestroy struct {
 	EntityIds []int32
 }
 
-func (ret *PlayToClientPacketEntityDestroy) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityDestroy) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketEntityDestroyEntityIds int32
 	lPlayToClientPacketEntityDestroyEntityIds, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -16125,7 +16125,7 @@ type PlayToClientPacketEntityEffect struct {
 	Flags     uint8
 }
 
-func (ret *PlayToClientPacketEntityEffect) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityEffect) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16176,7 +16176,7 @@ type PlayToClientPacketEntityEquipment struct {
 	Val proto_base.ToDo
 }
 
-func (ret *PlayToClientPacketEntityEquipment) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityEquipment) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -16190,7 +16190,7 @@ type PlayToClientPacketEntityHeadRotation struct {
 	HeadYaw  int8
 }
 
-func (ret *PlayToClientPacketEntityHeadRotation) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityHeadRotation) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16220,7 +16220,7 @@ type PlayToClientPacketEntityLook struct {
 	OnGround bool
 }
 
-func (ret *PlayToClientPacketEntityLook) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityLook) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16264,7 +16264,7 @@ type PlayToClientPacketEntityMetadata struct {
 	Metadata EntityMetadata
 }
 
-func (ret *PlayToClientPacketEntityMetadata) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityMetadata) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16297,7 +16297,7 @@ type PlayToClientPacketEntityMoveLook struct {
 	OnGround bool
 }
 
-func (ret *PlayToClientPacketEntityMoveLook) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityMoveLook) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16369,7 +16369,7 @@ type PlayToClientPacketEntitySoundEffect struct {
 	Seed          int64
 }
 
-func (ret *PlayToClientPacketEntitySoundEffect) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntitySoundEffect) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Sound.Decode(r)
 	if err != nil {
 		return
@@ -16429,7 +16429,7 @@ type PlayToClientPacketEntityStatus struct {
 	EntityStatus int8
 }
 
-func (ret *PlayToClientPacketEntityStatus) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityStatus) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
 	if err != nil {
 		return
@@ -16462,7 +16462,7 @@ type PlayToClientPacketEntityTeleport struct {
 	OnGround bool
 }
 
-func (ret *PlayToClientPacketEntityTeleport) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityTeleport) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16540,7 +16540,7 @@ type PlayToClientPacketEntityUpdateAttributes struct {
 
 var PlayToClientPacketEntityUpdateAttributesPropertiesElementKeyMap = map[int32]string{0: "generic.armor", 1: "generic.armor_toughness", 10: "player.entity_interaction_range", 11: "generic.fall_damage_multiplier", 12: "generic.flying_speed", 13: "generic.follow_range", 14: "generic.gravity", 15: "generic.jump_strength", 16: "generic.knockback_resistance", 17: "generic.luck", 18: "generic.max_absorption", 19: "generic.max_health", 2: "generic.attack_damage", 20: "generic.movement_speed", 21: "generic.safe_fall_distance", 22: "generic.scale", 23: "zombie.spawn_reinforcements", 24: "generic.step_height", 25: "submerged_mining_speed", 26: "sweeping_damage_ratio", 27: "tempt_range", 28: "water_movement_efficiency", 29: "waypoint_transmit_range", 3: "generic.attack_knockback", 30: "waypoint_receive_range", 4: "generic.attack_speed", 5: "player.block_break_speed", 6: "player.block_interaction_range", 7: "burning_time", 8: "camera_distance", 9: "explosion_knockback_resistance"}
 
-func (ret *PlayToClientPacketEntityUpdateAttributes) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityUpdateAttributes) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16668,7 +16668,7 @@ type PlayToClientPacketEntityVelocity struct {
 	Val proto_base.ToDo
 }
 
-func (ret *PlayToClientPacketEntityVelocity) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketEntityVelocity) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -16683,7 +16683,7 @@ type PlayToClientPacketExperience struct {
 	TotalExperience int32
 }
 
-func (ret *PlayToClientPacketExperience) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketExperience) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.ExperienceBar)
 	if err != nil {
 		return
@@ -16724,7 +16724,7 @@ type PlayToClientPacketExplosion struct {
 	BlockParticles    []PlayToClientExplosionParticleEntry
 }
 
-func (ret *PlayToClientPacketExplosion) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketExplosion) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Center.Decode(r)
 	if err != nil {
 		return
@@ -16828,7 +16828,7 @@ type PlayToClientPacketFacePlayer struct {
 	EntityFeetEyes any
 }
 
-func (ret *PlayToClientPacketFacePlayer) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketFacePlayer) Decode(r io.ReadSeeker) (err error) {
 	ret.FeetEyes, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -16946,7 +16946,7 @@ type PlayToClientPacketGameStateChange struct {
 
 var PlayToClientPacketGameStateChangeReasonMap = map[uint8]string{0: "no_respawn_block_available", 1: "start_raining", 10: "guardian_elder_effect", 11: "immediate_respawn", 12: "limited_crafting", 13: "level_chunks_load_start", 2: "stop_raining", 3: "change_game_mode", 4: "win_game", 5: "demo_event", 6: "play_arrow_hit_sound", 7: "rain_level_change", 8: "thunder_level_change", 9: "puffer_fish_sting"}
 
-func (ret *PlayToClientPacketGameStateChange) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketGameStateChange) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientPacketGameStateChangeReasonKey uint8
 	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketGameStateChangeReasonKey)
 	if err != nil {
@@ -16987,7 +16987,7 @@ type PlayToClientPacketGameTestHighlightPos struct {
 	RelativePos Position
 }
 
-func (ret *PlayToClientPacketGameTestHighlightPos) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketGameTestHighlightPos) Decode(r io.ReadSeeker) (err error) {
 	err = ret.AbsolutePos.Decode(r)
 	if err != nil {
 		return
@@ -17014,7 +17014,7 @@ type PlayToClientPacketHeldItemSlot struct {
 	Slot int32
 }
 
-func (ret *PlayToClientPacketHeldItemSlot) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketHeldItemSlot) Decode(r io.ReadSeeker) (err error) {
 	ret.Slot, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -17034,7 +17034,7 @@ type PlayToClientPacketHideMessage struct {
 	Signature any
 }
 
-func (ret *PlayToClientPacketHideMessage) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketHideMessage) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -17087,7 +17087,7 @@ type PlayToClientPacketHurtAnimation struct {
 	Yaw      float32
 }
 
-func (ret *PlayToClientPacketHurtAnimation) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketHurtAnimation) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -17121,7 +17121,7 @@ type PlayToClientPacketInitializeWorldBorder struct {
 	WarningTime            int32
 }
 
-func (ret *PlayToClientPacketInitializeWorldBorder) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketInitializeWorldBorder) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -17196,7 +17196,7 @@ type PlayToClientPacketKeepAlive struct {
 	KeepAliveId int64
 }
 
-func (ret *PlayToClientPacketKeepAlive) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketKeepAlive) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.KeepAliveId)
 	if err != nil {
 		return
@@ -17215,7 +17215,7 @@ type PlayToClientPacketKickDisconnect struct {
 	Reason nbt.Anon
 }
 
-func (ret *PlayToClientPacketKickDisconnect) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketKickDisconnect) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Reason.Decode(r)
 	if err != nil {
 		return
@@ -17244,7 +17244,7 @@ type PlayToClientPacketLogin struct {
 	EnforcesSecureChat  bool
 }
 
-func (ret *PlayToClientPacketLogin) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketLogin) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.EntityId)
 	if err != nil {
 		return
@@ -17373,7 +17373,7 @@ type PlayToClientPacketMap struct {
 	Data    any
 }
 
-func (ret *PlayToClientPacketMap) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketMap) Decode(r io.ReadSeeker) (err error) {
 	ret.ItemDamage, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -17672,7 +17672,7 @@ type PlayToClientPacketMapChunk struct {
 
 var PlayToClientPacketMapChunkHeightmapsElementTypeMap = map[int32]string{0: "world_surface_wg", 1: "world_surface", 2: "ocean_floor_wg", 3: "ocean_floor", 4: "motion_blocking", 5: "motion_blocking_no_leaves"}
 
-func (ret *PlayToClientPacketMapChunk) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketMapChunk) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -17981,7 +17981,7 @@ type PlayToClientPacketMoveMinecart struct {
 	}
 }
 
-func (ret *PlayToClientPacketMoveMinecart) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketMoveMinecart) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -18073,7 +18073,7 @@ type PlayToClientPacketMultiBlockChange struct {
 	Records []int32
 }
 
-func (ret *PlayToClientPacketMultiBlockChange) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketMultiBlockChange) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked uint64
 	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketMultiBlockChangeChunkCoordinatesPacked)
 	if err != nil {
@@ -18134,7 +18134,7 @@ type PlayToClientPacketNbtQueryResponse struct {
 	Nbt           nbt.Anon
 }
 
-func (ret *PlayToClientPacketNbtQueryResponse) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketNbtQueryResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.TransactionId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -18161,7 +18161,7 @@ type PlayToClientPacketOpenBook struct {
 	Hand int32
 }
 
-func (ret *PlayToClientPacketOpenBook) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketOpenBook) Decode(r io.ReadSeeker) (err error) {
 	ret.Hand, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -18182,7 +18182,7 @@ type PlayToClientPacketOpenHorseWindow struct {
 	EntityId int32
 }
 
-func (ret *PlayToClientPacketOpenHorseWindow) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketOpenHorseWindow) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -18218,7 +18218,7 @@ type PlayToClientPacketOpenSignEntity struct {
 	IsFrontText bool
 }
 
-func (ret *PlayToClientPacketOpenSignEntity) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketOpenSignEntity) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -18247,7 +18247,7 @@ type PlayToClientPacketOpenWindow struct {
 	WindowTitle   nbt.Anon
 }
 
-func (ret *PlayToClientPacketOpenWindow) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketOpenWindow) Decode(r io.ReadSeeker) (err error) {
 	ret.WindowId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -18282,7 +18282,7 @@ type PlayToClientPacketPing struct {
 	Id int32
 }
 
-func (ret *PlayToClientPacketPing) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketPing) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Id)
 	if err != nil {
 		return
@@ -18301,7 +18301,7 @@ type PlayToClientPacketPingResponse struct {
 	Id int64
 }
 
-func (ret *PlayToClientPacketPingResponse) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketPingResponse) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Id)
 	if err != nil {
 		return
@@ -18333,7 +18333,7 @@ type PlayToClientPacketPlayerChat struct {
 	NetworkTargetName   *nbt.Anon
 }
 
-func (ret *PlayToClientPacketPlayerChat) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketPlayerChat) Decode(r io.ReadSeeker) (err error) {
 	ret.GlobalIndex, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -18553,7 +18553,7 @@ type PlayToClientPacketPlayerInfo struct {
 	}
 }
 
-func (ret *PlayToClientPacketPlayerInfo) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketPlayerInfo) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Action)
 	if err != nil {
 		return
@@ -18887,7 +18887,7 @@ type PlayToClientPacketPlayerRemove struct {
 	Players []uuid.UUID
 }
 
-func (ret *PlayToClientPacketPlayerRemove) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketPlayerRemove) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketPlayerRemovePlayers int32
 	lPlayToClientPacketPlayerRemovePlayers, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -18925,7 +18925,7 @@ type PlayToClientPacketPlayerRotation struct {
 	RelativePitch bool
 }
 
-func (ret *PlayToClientPacketPlayerRotation) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketPlayerRotation) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
 	if err != nil {
 		return
@@ -18969,7 +18969,7 @@ type PlayToClientPacketPlayerlistHeader struct {
 	Footer nbt.Anon
 }
 
-func (ret *PlayToClientPacketPlayerlistHeader) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketPlayerlistHeader) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Header.Decode(r)
 	if err != nil {
 		return
@@ -19005,7 +19005,7 @@ type PlayToClientPacketPosition struct {
 	Flags      PlayToClientPositionUpdateRelatives
 }
 
-func (ret *PlayToClientPacketPosition) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketPosition) Decode(r io.ReadSeeker) (err error) {
 	ret.TeleportId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -19099,7 +19099,7 @@ type PlayToClientPacketProfilelessChat struct {
 	Target  *nbt.Anon
 }
 
-func (ret *PlayToClientPacketProfilelessChat) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketProfilelessChat) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Message.Decode(r)
 	if err != nil {
 		return
@@ -19169,7 +19169,7 @@ type PlayToClientPacketRecipeBookAdd struct {
 
 var PlayToClientPacketRecipeBookAddEntriesElementRecipeCategoryMap = map[int32]string{0: "crafting_building_blocks", 1: "crafting_redstone", 10: "stonecutter", 11: "smithing", 12: "campfire", 2: "crafting_equipment", 3: "crafting_misc", 4: "furnace_food", 5: "furnace_blocks", 6: "furnace_misc", 7: "blast_furnace_blocks", 8: "blast_furnace_misc", 9: "smoker_food"}
 
-func (ret *PlayToClientPacketRecipeBookAdd) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketRecipeBookAdd) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketRecipeBookAddEntries int32
 	lPlayToClientPacketRecipeBookAddEntries, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -19314,7 +19314,7 @@ type PlayToClientPacketRecipeBookRemove struct {
 	RecipeIds []int32
 }
 
-func (ret *PlayToClientPacketRecipeBookRemove) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketRecipeBookRemove) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketRecipeBookRemoveRecipeIds int32
 	lPlayToClientPacketRecipeBookRemoveRecipeIds, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -19352,7 +19352,7 @@ type PlayToClientPacketRecipeBookSettings struct {
 	Smoker   PlayToClientRecipeBookSetting
 }
 
-func (ret *PlayToClientPacketRecipeBookSettings) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketRecipeBookSettings) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Crafting.Decode(r)
 	if err != nil {
 		return
@@ -19399,7 +19399,7 @@ type PlayToClientPacketRelEntityMove struct {
 	OnGround bool
 }
 
-func (ret *PlayToClientPacketRelEntityMove) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketRelEntityMove) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -19451,7 +19451,7 @@ type PlayToClientPacketRemoveEntityEffect struct {
 	EffectId int32
 }
 
-func (ret *PlayToClientPacketRemoveEntityEffect) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketRemoveEntityEffect) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -19479,7 +19479,7 @@ type PlayToClientPacketResetScore struct {
 	ObjectiveName *string
 }
 
-func (ret *PlayToClientPacketResetScore) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketResetScore) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityName, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -19522,7 +19522,7 @@ type PlayToClientPacketRespawn struct {
 	CopyMetadata uint8
 }
 
-func (ret *PlayToClientPacketRespawn) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketRespawn) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WorldState.Decode(r)
 	if err != nil {
 		return
@@ -19550,7 +19550,7 @@ type PlayToClientPacketScoreboardDisplayObjective struct {
 	Name     string
 }
 
-func (ret *PlayToClientPacketScoreboardDisplayObjective) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketScoreboardDisplayObjective) Decode(r io.ReadSeeker) (err error) {
 	ret.Position, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -19582,7 +19582,7 @@ type PlayToClientPacketScoreboardObjective struct {
 	Styling      any
 }
 
-func (ret *PlayToClientPacketScoreboardObjective) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketScoreboardObjective) Decode(r io.ReadSeeker) (err error) {
 	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -19922,7 +19922,7 @@ type PlayToClientPacketScoreboardScore struct {
 	Styling      any
 }
 
-func (ret *PlayToClientPacketScoreboardScore) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketScoreboardScore) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -19935,7 +19935,7 @@ type PlayToClientPacketSelectAdvancementTab struct {
 	Id *string
 }
 
-func (ret *PlayToClientPacketSelectAdvancementTab) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSelectAdvancementTab) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientPacketSelectAdvancementTabIdPresent bool
 	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketSelectAdvancementTabIdPresent)
 	if err != nil {
@@ -19970,7 +19970,7 @@ type PlayToClientPacketServerData struct {
 	IconBytes *ByteArray
 }
 
-func (ret *PlayToClientPacketServerData) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketServerData) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Motd.Decode(r)
 	if err != nil {
 		return
@@ -20013,7 +20013,7 @@ type PlayToClientPacketSetCooldown struct {
 	CooldownTicks int32
 }
 
-func (ret *PlayToClientPacketSetCooldown) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetCooldown) Decode(r io.ReadSeeker) (err error) {
 	ret.CooldownGroup, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -20040,7 +20040,7 @@ type PlayToClientPacketSetCursorItem struct {
 	Contents Slot
 }
 
-func (ret *PlayToClientPacketSetCursorItem) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetCursorItem) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Contents.Decode(r)
 	if err != nil {
 		return
@@ -20060,7 +20060,7 @@ type PlayToClientPacketSetPassengers struct {
 	Passengers []int32
 }
 
-func (ret *PlayToClientPacketSetPassengers) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetPassengers) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -20104,7 +20104,7 @@ type PlayToClientPacketSetPlayerInventory struct {
 	Contents Slot
 }
 
-func (ret *PlayToClientPacketSetPlayerInventory) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetPlayerInventory) Decode(r io.ReadSeeker) (err error) {
 	ret.SlotId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -20132,7 +20132,7 @@ type PlayToClientPacketSetProjectilePower struct {
 	AccelerationPower float64
 }
 
-func (ret *PlayToClientPacketSetProjectilePower) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetProjectilePower) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -20162,7 +20162,7 @@ type PlayToClientPacketSetSlot struct {
 	Item     Slot
 }
 
-func (ret *PlayToClientPacketSetSlot) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetSlot) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -20206,7 +20206,7 @@ type PlayToClientPacketSetTickingState struct {
 	IsFrozen bool
 }
 
-func (ret *PlayToClientPacketSetTickingState) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetTickingState) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.TickRate)
 	if err != nil {
 		return
@@ -20233,7 +20233,7 @@ type PlayToClientPacketSetTitleSubtitle struct {
 	Text nbt.Anon
 }
 
-func (ret *PlayToClientPacketSetTitleSubtitle) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetTitleSubtitle) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Text.Decode(r)
 	if err != nil {
 		return
@@ -20252,7 +20252,7 @@ type PlayToClientPacketSetTitleText struct {
 	Text nbt.Anon
 }
 
-func (ret *PlayToClientPacketSetTitleText) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetTitleText) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Text.Decode(r)
 	if err != nil {
 		return
@@ -20273,7 +20273,7 @@ type PlayToClientPacketSetTitleTime struct {
 	FadeOut int32
 }
 
-func (ret *PlayToClientPacketSetTitleTime) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSetTitleTime) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.FadeIn)
 	if err != nil {
 		return
@@ -20308,7 +20308,7 @@ type PlayToClientPacketShowDialog struct {
 	Dialog any
 }
 
-func (ret *PlayToClientPacketShowDialog) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketShowDialog) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientPacketShowDialogDialogId int32
 	PlayToClientPacketShowDialogDialogId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -20352,7 +20352,7 @@ type PlayToClientPacketSimulationDistance struct {
 	Distance int32
 }
 
-func (ret *PlayToClientPacketSimulationDistance) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSimulationDistance) Decode(r io.ReadSeeker) (err error) {
 	ret.Distance, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -20378,7 +20378,7 @@ type PlayToClientPacketSoundEffect struct {
 	Seed          int64
 }
 
-func (ret *PlayToClientPacketSoundEffect) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSoundEffect) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Sound.Decode(r)
 	if err != nil {
 		return
@@ -20453,7 +20453,7 @@ type PlayToClientPacketSpawnEntity struct {
 	Val proto_base.ToDo
 }
 
-func (ret *PlayToClientPacketSpawnEntity) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSpawnEntity) Decode(r io.ReadSeeker) (err error) {
 	err = proto_base.ToDoError
 	return
 }
@@ -20466,7 +20466,7 @@ type PlayToClientPacketSpawnPosition struct {
 	Val RespawnData
 }
 
-func (ret *PlayToClientPacketSpawnPosition) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSpawnPosition) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Val.Decode(r)
 	if err != nil {
 		return
@@ -20484,7 +20484,7 @@ func (ret *PlayToClientPacketSpawnPosition) Encode(w io.Writer) (err error) {
 type PlayToClientPacketStartConfiguration struct {
 }
 
-func (ret *PlayToClientPacketStartConfiguration) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketStartConfiguration) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketStartConfiguration) Encode(w io.Writer) (err error) {
@@ -20499,7 +20499,7 @@ type PlayToClientPacketStatistics struct {
 	}
 }
 
-func (ret *PlayToClientPacketStatistics) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketStatistics) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketStatisticsEntries int32
 	lPlayToClientPacketStatisticsEntries, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -20558,7 +20558,7 @@ type PlayToClientPacketStepTick struct {
 	TickSteps int32
 }
 
-func (ret *PlayToClientPacketStepTick) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketStepTick) Decode(r io.ReadSeeker) (err error) {
 	ret.TickSteps, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -20579,7 +20579,7 @@ type PlayToClientPacketStopSound struct {
 	Sound  any
 }
 
-func (ret *PlayToClientPacketStopSound) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketStopSound) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Flags)
 	if err != nil {
 		return
@@ -20705,7 +20705,7 @@ type PlayToClientPacketSyncEntityPosition struct {
 	OnGround bool
 }
 
-func (ret *PlayToClientPacketSyncEntityPosition) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSyncEntityPosition) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -20797,7 +20797,7 @@ type PlayToClientPacketSystemChat struct {
 	IsActionBar bool
 }
 
-func (ret *PlayToClientPacketSystemChat) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketSystemChat) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Content.Decode(r)
 	if err != nil {
 		return
@@ -20830,7 +20830,7 @@ type PlayToClientPacketTabComplete struct {
 	}
 }
 
-func (ret *PlayToClientPacketTabComplete) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketTabComplete) Decode(r io.ReadSeeker) (err error) {
 	ret.TransactionId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -20921,7 +20921,7 @@ type PlayToClientPacketTags struct {
 	}
 }
 
-func (ret *PlayToClientPacketTags) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketTags) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToClientPacketTagsTags int32
 	lPlayToClientPacketTagsTags, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -20979,7 +20979,7 @@ var PlayToClientPacketTeamsAnonAddTmpCollisionRuleMap = map[int32]string{0: "alw
 var PlayToClientPacketTeamsAnonChangeTmpNameTagVisibilityMap = map[int32]string{0: "always", 1: "never", 2: "hide_for_other_teams", 3: "hide_for_own_team"}
 var PlayToClientPacketTeamsAnonChangeTmpCollisionRuleMap = map[int32]string{0: "always", 1: "never", 2: "push_other_teams", 3: "push_own_team"}
 
-func (ret *PlayToClientPacketTeams) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketTeams) Decode(r io.ReadSeeker) (err error) {
 	ret.Team, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -21353,7 +21353,7 @@ type PlayToClientPacketTestInstanceBlockStatus struct {
 	Size   *Vec3i
 }
 
-func (ret *PlayToClientPacketTestInstanceBlockStatus) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketTestInstanceBlockStatus) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Status.Decode(r)
 	if err != nil {
 		return
@@ -21397,7 +21397,7 @@ type PlayToClientPacketTileEntityData struct {
 	NbtData  nbt.Anon
 }
 
-func (ret *PlayToClientPacketTileEntityData) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketTileEntityData) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -21449,7 +21449,7 @@ type PlayToClientPacketTrackedWaypoint struct {
 var PlayToClientPacketTrackedWaypointOperationMap = map[int32]string{0: "track", 1: "untrack", 2: "update"}
 var PlayToClientPacketTrackedWaypointWaypointTypeMap = map[int32]string{0: "empty", 1: "vec3i", 2: "chunk", 3: "azimuth"}
 
-func (ret *PlayToClientPacketTrackedWaypoint) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketTrackedWaypoint) Decode(r io.ReadSeeker) (err error) {
 	var PlayToClientPacketTrackedWaypointOperationKey int32
 	PlayToClientPacketTrackedWaypointOperationKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -21698,7 +21698,7 @@ type PlayToClientPacketTradeList struct {
 	CanRestock        bool
 }
 
-func (ret *PlayToClientPacketTradeList) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketTradeList) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -21935,7 +21935,7 @@ type PlayToClientPacketUnloadChunk struct {
 	ChunkX int32
 }
 
-func (ret *PlayToClientPacketUnloadChunk) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketUnloadChunk) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.ChunkZ)
 	if err != nil {
 		return
@@ -21964,7 +21964,7 @@ type PlayToClientPacketUpdateHealth struct {
 	FoodSaturation float32
 }
 
-func (ret *PlayToClientPacketUpdateHealth) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketUpdateHealth) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Health)
 	if err != nil {
 		return
@@ -22006,7 +22006,7 @@ type PlayToClientPacketUpdateLight struct {
 	BlockLight          [][]uint8
 }
 
-func (ret *PlayToClientPacketUpdateLight) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketUpdateLight) Decode(r io.ReadSeeker) (err error) {
 	ret.ChunkX, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -22211,7 +22211,7 @@ type PlayToClientPacketUpdateTime struct {
 	TickDayTime bool
 }
 
-func (ret *PlayToClientPacketUpdateTime) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketUpdateTime) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Age)
 	if err != nil {
 		return
@@ -22246,7 +22246,7 @@ type PlayToClientPacketUpdateViewDistance struct {
 	ViewDistance int32
 }
 
-func (ret *PlayToClientPacketUpdateViewDistance) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketUpdateViewDistance) Decode(r io.ReadSeeker) (err error) {
 	ret.ViewDistance, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -22266,7 +22266,7 @@ type PlayToClientPacketUpdateViewPosition struct {
 	ChunkZ int32
 }
 
-func (ret *PlayToClientPacketUpdateViewPosition) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketUpdateViewPosition) Decode(r io.ReadSeeker) (err error) {
 	ret.ChunkX, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -22297,7 +22297,7 @@ type PlayToClientPacketVehicleMove struct {
 	Pitch float32
 }
 
-func (ret *PlayToClientPacketVehicleMove) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketVehicleMove) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -22351,7 +22351,7 @@ type PlayToClientPacketWindowItems struct {
 	CarriedItem Slot
 }
 
-func (ret *PlayToClientPacketWindowItems) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketWindowItems) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -22411,7 +22411,7 @@ type PlayToClientPacketWorldBorderCenter struct {
 	Z float64
 }
 
-func (ret *PlayToClientPacketWorldBorderCenter) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketWorldBorderCenter) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -22440,7 +22440,7 @@ type PlayToClientPacketWorldBorderLerpSize struct {
 	Speed       int32
 }
 
-func (ret *PlayToClientPacketWorldBorderLerpSize) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketWorldBorderLerpSize) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.OldDiameter)
 	if err != nil {
 		return
@@ -22475,7 +22475,7 @@ type PlayToClientPacketWorldBorderSize struct {
 	Diameter float64
 }
 
-func (ret *PlayToClientPacketWorldBorderSize) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketWorldBorderSize) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Diameter)
 	if err != nil {
 		return
@@ -22494,7 +22494,7 @@ type PlayToClientPacketWorldBorderWarningDelay struct {
 	WarningTime int32
 }
 
-func (ret *PlayToClientPacketWorldBorderWarningDelay) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketWorldBorderWarningDelay) Decode(r io.ReadSeeker) (err error) {
 	ret.WarningTime, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -22513,7 +22513,7 @@ type PlayToClientPacketWorldBorderWarningReach struct {
 	WarningBlocks int32
 }
 
-func (ret *PlayToClientPacketWorldBorderWarningReach) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketWorldBorderWarningReach) Decode(r io.ReadSeeker) (err error) {
 	ret.WarningBlocks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -22535,7 +22535,7 @@ type PlayToClientPacketWorldEvent struct {
 	Global   bool
 }
 
-func (ret *PlayToClientPacketWorldEvent) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketWorldEvent) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.EffectId)
 	if err != nil {
 		return
@@ -22588,7 +22588,7 @@ type PlayToClientPacketWorldParticles struct {
 	Particle       Particle
 }
 
-func (ret *PlayToClientPacketWorldParticles) Decode(r io.Reader) (err error) {
+func (ret *PlayToClientPacketWorldParticles) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.LongDistance)
 	if err != nil {
 		return
@@ -22687,7 +22687,7 @@ type PlayToServerMovementFlags struct {
 	Val uint8
 }
 
-func (ret *PlayToServerMovementFlags) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerMovementFlags) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Val)
 	if err != nil {
 		return
@@ -22709,7 +22709,7 @@ type PlayToServerPacket struct {
 
 var PlayToServerPacketNameMap = map[int32]string{0x00: "teleport_confirm", 0x01: "query_block_nbt", 0x02: "select_bundle_item", 0x03: "set_difficulty", 0x04: "change_gamemode", 0x05: "message_acknowledgement", 0x06: "chat_command", 0x07: "chat_command_signed", 0x08: "chat_message", 0x09: "chat_session_update", 0x0a: "chunk_batch_received", 0x0b: "client_command", 0x0c: "tick_end", 0x0d: "settings", 0x0e: "tab_complete", 0x0f: "configuration_acknowledged", 0x10: "enchant_item", 0x11: "window_click", 0x12: "close_window", 0x13: "set_slot_state", 0x14: "cookie_response", 0x15: "custom_payload", 0x16: "debug_subscription_request", 0x17: "edit_book", 0x18: "query_entity_nbt", 0x19: "use_entity", 0x1a: "generate_structure", 0x1b: "keep_alive", 0x1c: "lock_difficulty", 0x1d: "position", 0x1e: "position_look", 0x1f: "look", 0x20: "flying", 0x21: "vehicle_move", 0x22: "steer_boat", 0x23: "pick_item_from_block", 0x24: "pick_item_from_entity", 0x25: "ping_request", 0x26: "craft_recipe_request", 0x27: "abilities", 0x28: "block_dig", 0x29: "entity_action", 0x2a: "player_input", 0x2b: "player_loaded", 0x2c: "pong", 0x2d: "recipe_book", 0x2e: "displayed_recipe", 0x2f: "name_item", 0x30: "resource_pack_receive", 0x31: "advancement_tab", 0x32: "select_trade", 0x33: "set_beacon_effect", 0x34: "held_item_slot", 0x35: "update_command_block", 0x36: "update_command_block_minecart", 0x37: "set_creative_slot", 0x38: "update_jigsaw_block", 0x39: "update_structure_block", 0x3a: "set_test_block", 0x3b: "update_sign", 0x3c: "arm_animation", 0x3d: "spectate", 0x3e: "test_instance_block_action", 0x3f: "block_place", 0x40: "use_item", 0x41: "custom_click_action"}
 
-func (ret *PlayToServerPacket) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacket) Decode(r io.ReadSeeker) (err error) {
 	var PlayToServerPacketNameKey int32
 	PlayToServerPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -23867,7 +23867,7 @@ type PlayToServerPacketAbilities struct {
 	Flags int8
 }
 
-func (ret *PlayToServerPacketAbilities) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketAbilities) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Flags)
 	if err != nil {
 		return
@@ -23887,7 +23887,7 @@ type PlayToServerPacketAdvancementTab struct {
 	TabId  any
 }
 
-func (ret *PlayToServerPacketAdvancementTab) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketAdvancementTab) Decode(r io.ReadSeeker) (err error) {
 	ret.Action, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -23938,7 +23938,7 @@ type PlayToServerPacketArmAnimation struct {
 	Hand int32
 }
 
-func (ret *PlayToServerPacketArmAnimation) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketArmAnimation) Decode(r io.ReadSeeker) (err error) {
 	ret.Hand, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -23960,7 +23960,7 @@ type PlayToServerPacketBlockDig struct {
 	Sequence int32
 }
 
-func (ret *PlayToServerPacketBlockDig) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketBlockDig) Decode(r io.ReadSeeker) (err error) {
 	ret.Status, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -24011,7 +24011,7 @@ type PlayToServerPacketBlockPlace struct {
 	Sequence       int32
 }
 
-func (ret *PlayToServerPacketBlockPlace) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketBlockPlace) Decode(r io.ReadSeeker) (err error) {
 	ret.Hand, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -24096,7 +24096,7 @@ type PlayToServerPacketChangeGamemode struct {
 
 var PlayToServerPacketChangeGamemodeModeMap = map[int32]string{0: "survival", 1: "creative", 2: "adventure", 3: "spectator"}
 
-func (ret *PlayToServerPacketChangeGamemode) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketChangeGamemode) Decode(r io.ReadSeeker) (err error) {
 	var PlayToServerPacketChangeGamemodeModeKey int32
 	PlayToServerPacketChangeGamemodeModeKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -24128,7 +24128,7 @@ type PlayToServerPacketChatCommand struct {
 	Command string
 }
 
-func (ret *PlayToServerPacketChatCommand) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketChatCommand) Decode(r io.ReadSeeker) (err error) {
 	ret.Command, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -24156,7 +24156,7 @@ type PlayToServerPacketChatCommandSigned struct {
 	Checksum     int8
 }
 
-func (ret *PlayToServerPacketChatCommandSigned) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketChatCommandSigned) Decode(r io.ReadSeeker) (err error) {
 	ret.Command, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -24261,7 +24261,7 @@ type PlayToServerPacketChatMessage struct {
 	Checksum     uint8
 }
 
-func (ret *PlayToServerPacketChatMessage) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketChatMessage) Decode(r io.ReadSeeker) (err error) {
 	ret.Message, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -24348,7 +24348,7 @@ type PlayToServerPacketChatSessionUpdate struct {
 	Signature   ByteArray
 }
 
-func (ret *PlayToServerPacketChatSessionUpdate) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketChatSessionUpdate) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.SessionUUID[:])
 	if err != nil {
 		return
@@ -24391,7 +24391,7 @@ type PlayToServerPacketChunkBatchReceived struct {
 	ChunksPerTick float32
 }
 
-func (ret *PlayToServerPacketChunkBatchReceived) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketChunkBatchReceived) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.ChunksPerTick)
 	if err != nil {
 		return
@@ -24410,7 +24410,7 @@ type PlayToServerPacketClientCommand struct {
 	ActionId int32
 }
 
-func (ret *PlayToServerPacketClientCommand) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketClientCommand) Decode(r io.ReadSeeker) (err error) {
 	ret.ActionId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -24429,7 +24429,7 @@ type PlayToServerPacketCloseWindow struct {
 	WindowId ContainerID
 }
 
-func (ret *PlayToServerPacketCloseWindow) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCloseWindow) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -24452,7 +24452,7 @@ type PlayToServerPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *PlayToServerPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -24517,7 +24517,7 @@ func (ret *PlayToServerPacketCommonAddResourcePack) Encode(w io.Writer) (err err
 type PlayToServerPacketCommonClearDialog struct {
 }
 
-func (ret *PlayToServerPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -24528,7 +24528,7 @@ type PlayToServerPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *PlayToServerPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -24548,7 +24548,7 @@ type PlayToServerPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *PlayToServerPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -24591,7 +24591,7 @@ type PlayToServerPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *PlayToServerPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -24636,7 +24636,7 @@ type PlayToServerPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *PlayToServerPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToServerPacketCommonCustomReportDetailsDetails int32
 	lPlayToServerPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -24685,7 +24685,7 @@ type PlayToServerPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *PlayToServerPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var PlayToServerPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &PlayToServerPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -24723,7 +24723,7 @@ type PlayToServerPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *PlayToServerPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToServerPacketCommonSelectKnownPacksPacks int32
 	lPlayToServerPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -24787,7 +24787,7 @@ type PlayToServerPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *PlayToServerPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToServerPacketCommonServerLinksLinks int32
 	lPlayToServerPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -24892,7 +24892,7 @@ type PlayToServerPacketCommonSettings struct {
 
 var PlayToServerPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *PlayToServerPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -24989,7 +24989,7 @@ type PlayToServerPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *PlayToServerPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -25017,7 +25017,7 @@ type PlayToServerPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *PlayToServerPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -25043,7 +25043,7 @@ func (ret *PlayToServerPacketCommonTransfer) Encode(w io.Writer) (err error) {
 type PlayToServerPacketConfigurationAcknowledged struct {
 }
 
-func (ret *PlayToServerPacketConfigurationAcknowledged) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketConfigurationAcknowledged) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketConfigurationAcknowledged) Encode(w io.Writer) (err error) {
@@ -25056,7 +25056,7 @@ type PlayToServerPacketCraftRecipeRequest struct {
 	MakeAll  bool
 }
 
-func (ret *PlayToServerPacketCraftRecipeRequest) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCraftRecipeRequest) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -25092,7 +25092,7 @@ type PlayToServerPacketCustomPayload struct {
 	Data    proto_base.RestBuffer
 }
 
-func (ret *PlayToServerPacketCustomPayload) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketCustomPayload) Decode(r io.ReadSeeker) (err error) {
 	ret.Channel, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -25119,7 +25119,7 @@ type PlayToServerPacketDebugSubscriptionRequest struct {
 	Subscriptions []DebugSubscriptionDataType
 }
 
-func (ret *PlayToServerPacketDebugSubscriptionRequest) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketDebugSubscriptionRequest) Decode(r io.ReadSeeker) (err error) {
 	var lPlayToServerPacketDebugSubscriptionRequestSubscriptions int32
 	lPlayToServerPacketDebugSubscriptionRequestSubscriptions, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -25154,7 +25154,7 @@ type PlayToServerPacketDisplayedRecipe struct {
 	RecipeId int32
 }
 
-func (ret *PlayToServerPacketDisplayedRecipe) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketDisplayedRecipe) Decode(r io.ReadSeeker) (err error) {
 	ret.RecipeId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25175,7 +25175,7 @@ type PlayToServerPacketEditBook struct {
 	Title *string
 }
 
-func (ret *PlayToServerPacketEditBook) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketEditBook) Decode(r io.ReadSeeker) (err error) {
 	ret.Hand, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25242,7 +25242,7 @@ type PlayToServerPacketEnchantItem struct {
 	Enchantment int8
 }
 
-func (ret *PlayToServerPacketEnchantItem) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketEnchantItem) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -25273,7 +25273,7 @@ type PlayToServerPacketEntityAction struct {
 
 var PlayToServerPacketEntityActionActionIdMap = map[int32]string{0: "leave_bed", 1: "start_sprinting", 2: "stop_sprinting", 3: "start_horse_jump", 4: "stop_horse_jump", 5: "open_vehicle_inventory", 6: "start_elytra_flying"}
 
-func (ret *PlayToServerPacketEntityAction) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketEntityAction) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25321,7 +25321,7 @@ type PlayToServerPacketFlying struct {
 	Flags PlayToServerMovementFlags
 }
 
-func (ret *PlayToServerPacketFlying) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketFlying) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Flags.Decode(r)
 	if err != nil {
 		return
@@ -25342,7 +25342,7 @@ type PlayToServerPacketGenerateStructure struct {
 	KeepJigsaws bool
 }
 
-func (ret *PlayToServerPacketGenerateStructure) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketGenerateStructure) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -25377,7 +25377,7 @@ type PlayToServerPacketHeldItemSlot struct {
 	SlotId int16
 }
 
-func (ret *PlayToServerPacketHeldItemSlot) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketHeldItemSlot) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.SlotId)
 	if err != nil {
 		return
@@ -25396,7 +25396,7 @@ type PlayToServerPacketKeepAlive struct {
 	KeepAliveId int64
 }
 
-func (ret *PlayToServerPacketKeepAlive) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketKeepAlive) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.KeepAliveId)
 	if err != nil {
 		return
@@ -25415,7 +25415,7 @@ type PlayToServerPacketLockDifficulty struct {
 	Locked bool
 }
 
-func (ret *PlayToServerPacketLockDifficulty) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketLockDifficulty) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Locked)
 	if err != nil {
 		return
@@ -25436,7 +25436,7 @@ type PlayToServerPacketLook struct {
 	Flags PlayToServerMovementFlags
 }
 
-func (ret *PlayToServerPacketLook) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketLook) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Yaw)
 	if err != nil {
 		return
@@ -25471,7 +25471,7 @@ type PlayToServerPacketMessageAcknowledgement struct {
 	Count int32
 }
 
-func (ret *PlayToServerPacketMessageAcknowledgement) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketMessageAcknowledgement) Decode(r io.ReadSeeker) (err error) {
 	ret.Count, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25490,7 +25490,7 @@ type PlayToServerPacketNameItem struct {
 	Name string
 }
 
-func (ret *PlayToServerPacketNameItem) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketNameItem) Decode(r io.ReadSeeker) (err error) {
 	ret.Name, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -25510,7 +25510,7 @@ type PlayToServerPacketPickItemFromBlock struct {
 	IncludeData bool
 }
 
-func (ret *PlayToServerPacketPickItemFromBlock) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketPickItemFromBlock) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Position.Decode(r)
 	if err != nil {
 		return
@@ -25538,7 +25538,7 @@ type PlayToServerPacketPickItemFromEntity struct {
 	IncludeData bool
 }
 
-func (ret *PlayToServerPacketPickItemFromEntity) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketPickItemFromEntity) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25565,7 +25565,7 @@ type PlayToServerPacketPingRequest struct {
 	Id int64
 }
 
-func (ret *PlayToServerPacketPingRequest) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketPingRequest) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Id)
 	if err != nil {
 		return
@@ -25584,7 +25584,7 @@ type PlayToServerPacketPlayerInput struct {
 	Inputs uint8
 }
 
-func (ret *PlayToServerPacketPlayerInput) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketPlayerInput) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Inputs)
 	if err != nil {
 		return
@@ -25602,7 +25602,7 @@ func (ret *PlayToServerPacketPlayerInput) Encode(w io.Writer) (err error) {
 type PlayToServerPacketPlayerLoaded struct {
 }
 
-func (ret *PlayToServerPacketPlayerLoaded) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketPlayerLoaded) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketPlayerLoaded) Encode(w io.Writer) (err error) {
@@ -25613,7 +25613,7 @@ type PlayToServerPacketPong struct {
 	Id int32
 }
 
-func (ret *PlayToServerPacketPong) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketPong) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Id)
 	if err != nil {
 		return
@@ -25635,7 +25635,7 @@ type PlayToServerPacketPosition struct {
 	Flags PlayToServerMovementFlags
 }
 
-func (ret *PlayToServerPacketPosition) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketPosition) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -25683,7 +25683,7 @@ type PlayToServerPacketPositionLook struct {
 	Flags PlayToServerMovementFlags
 }
 
-func (ret *PlayToServerPacketPositionLook) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketPositionLook) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -25743,7 +25743,7 @@ type PlayToServerPacketQueryBlockNbt struct {
 	Location      Position
 }
 
-func (ret *PlayToServerPacketQueryBlockNbt) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketQueryBlockNbt) Decode(r io.ReadSeeker) (err error) {
 	ret.TransactionId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25771,7 +25771,7 @@ type PlayToServerPacketQueryEntityNbt struct {
 	EntityId      int32
 }
 
-func (ret *PlayToServerPacketQueryEntityNbt) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketQueryEntityNbt) Decode(r io.ReadSeeker) (err error) {
 	ret.TransactionId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25800,7 +25800,7 @@ type PlayToServerPacketRecipeBook struct {
 	FilterActive bool
 }
 
-func (ret *PlayToServerPacketRecipeBook) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketRecipeBook) Decode(r io.ReadSeeker) (err error) {
 	ret.BookId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25836,7 +25836,7 @@ type PlayToServerPacketResourcePackReceive struct {
 	Result int32
 }
 
-func (ret *PlayToServerPacketResourcePackReceive) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketResourcePackReceive) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -25864,7 +25864,7 @@ type PlayToServerPacketSelectBundleItem struct {
 	SelectedItemIndex int32
 }
 
-func (ret *PlayToServerPacketSelectBundleItem) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSelectBundleItem) Decode(r io.ReadSeeker) (err error) {
 	ret.SlotId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25891,7 +25891,7 @@ type PlayToServerPacketSelectTrade struct {
 	Slot int32
 }
 
-func (ret *PlayToServerPacketSelectTrade) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSelectTrade) Decode(r io.ReadSeeker) (err error) {
 	ret.Slot, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -25911,7 +25911,7 @@ type PlayToServerPacketSetBeaconEffect struct {
 	SecondaryEffect *int32
 }
 
-func (ret *PlayToServerPacketSetBeaconEffect) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSetBeaconEffect) Decode(r io.ReadSeeker) (err error) {
 	var PlayToServerPacketSetBeaconEffectPrimaryEffectPresent bool
 	err = binary.Read(r, binary.BigEndian, &PlayToServerPacketSetBeaconEffectPrimaryEffectPresent)
 	if err != nil {
@@ -25969,7 +25969,7 @@ type PlayToServerPacketSetCreativeSlot struct {
 	Item UntrustedSlot
 }
 
-func (ret *PlayToServerPacketSetCreativeSlot) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSetCreativeSlot) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Slot)
 	if err != nil {
 		return
@@ -25998,7 +25998,7 @@ type PlayToServerPacketSetDifficulty struct {
 
 var PlayToServerPacketSetDifficultyNewDifficultyMap = map[int32]string{0: "peaceful", 1: "easy", 2: "normal", 3: "hard"}
 
-func (ret *PlayToServerPacketSetDifficulty) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSetDifficulty) Decode(r io.ReadSeeker) (err error) {
 	var PlayToServerPacketSetDifficultyNewDifficultyKey int32
 	PlayToServerPacketSetDifficultyNewDifficultyKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -26032,7 +26032,7 @@ type PlayToServerPacketSetSlotState struct {
 	State    bool
 }
 
-func (ret *PlayToServerPacketSetSlotState) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSetSlotState) Decode(r io.ReadSeeker) (err error) {
 	ret.SlotId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -26069,7 +26069,7 @@ type PlayToServerPacketSetTestBlock struct {
 	Message  string
 }
 
-func (ret *PlayToServerPacketSetTestBlock) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSetTestBlock) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Position.Decode(r)
 	if err != nil {
 		return
@@ -26104,7 +26104,7 @@ type PlayToServerPacketSpectate struct {
 	Target uuid.UUID
 }
 
-func (ret *PlayToServerPacketSpectate) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSpectate) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Target[:])
 	if err != nil {
 		return
@@ -26124,7 +26124,7 @@ type PlayToServerPacketSteerBoat struct {
 	RightPaddle bool
 }
 
-func (ret *PlayToServerPacketSteerBoat) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketSteerBoat) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.LeftPaddle)
 	if err != nil {
 		return
@@ -26152,7 +26152,7 @@ type PlayToServerPacketTabComplete struct {
 	Text          string
 }
 
-func (ret *PlayToServerPacketTabComplete) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketTabComplete) Decode(r io.ReadSeeker) (err error) {
 	ret.TransactionId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -26179,7 +26179,7 @@ type PlayToServerPacketTeleportConfirm struct {
 	TeleportId int32
 }
 
-func (ret *PlayToServerPacketTeleportConfirm) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketTeleportConfirm) Decode(r io.ReadSeeker) (err error) {
 	ret.TeleportId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -26207,7 +26207,7 @@ type PlayToServerPacketTestInstanceBlockAction struct {
 	}
 }
 
-func (ret *PlayToServerPacketTestInstanceBlockAction) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketTestInstanceBlockAction) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Pos.Decode(r)
 	if err != nil {
 		return
@@ -26311,7 +26311,7 @@ func (ret *PlayToServerPacketTestInstanceBlockAction) Encode(w io.Writer) (err e
 type PlayToServerPacketTickEnd struct {
 }
 
-func (ret *PlayToServerPacketTickEnd) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketTickEnd) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketTickEnd) Encode(w io.Writer) (err error) {
@@ -26325,7 +26325,7 @@ type PlayToServerPacketUpdateCommandBlock struct {
 	Flags    uint8
 }
 
-func (ret *PlayToServerPacketUpdateCommandBlock) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketUpdateCommandBlock) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -26370,7 +26370,7 @@ type PlayToServerPacketUpdateCommandBlockMinecart struct {
 	TrackOutput bool
 }
 
-func (ret *PlayToServerPacketUpdateCommandBlockMinecart) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketUpdateCommandBlockMinecart) Decode(r io.ReadSeeker) (err error) {
 	ret.EntityId, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -26412,7 +26412,7 @@ type PlayToServerPacketUpdateJigsawBlock struct {
 	PlacementPriority int32
 }
 
-func (ret *PlayToServerPacketUpdateJigsawBlock) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketUpdateJigsawBlock) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -26492,7 +26492,7 @@ type PlayToServerPacketUpdateSign struct {
 	Text4       string
 }
 
-func (ret *PlayToServerPacketUpdateSign) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketUpdateSign) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -26568,7 +26568,7 @@ type PlayToServerPacketUpdateStructureBlock struct {
 
 var PlayToServerPacketUpdateStructureBlockFlagsMap = map[uint8]string{0: "ignore_entities", 1: "show_air", 2: "show_bounding_box", 3: "strict"}
 
-func (ret *PlayToServerPacketUpdateStructureBlock) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketUpdateStructureBlock) Decode(r io.ReadSeeker) (err error) {
 	err = ret.Location.Decode(r)
 	if err != nil {
 		return
@@ -26726,7 +26726,7 @@ type PlayToServerPacketUseEntity struct {
 	Sneaking bool
 }
 
-func (ret *PlayToServerPacketUseEntity) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketUseEntity) Decode(r io.ReadSeeker) (err error) {
 	ret.Target, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -26908,7 +26908,7 @@ type PlayToServerPacketUseItem struct {
 	Rotation Vec2f
 }
 
-func (ret *PlayToServerPacketUseItem) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketUseItem) Decode(r io.ReadSeeker) (err error) {
 	ret.Hand, err = proto_base.DecodeVarInt(r)
 	if err != nil {
 		return
@@ -26948,7 +26948,7 @@ type PlayToServerPacketVehicleMove struct {
 	OnGround bool
 }
 
-func (ret *PlayToServerPacketVehicleMove) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketVehicleMove) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.X)
 	if err != nil {
 		return
@@ -27016,7 +27016,7 @@ type PlayToServerPacketWindowClick struct {
 	CursorItem *HashedSlot
 }
 
-func (ret *PlayToServerPacketWindowClick) Decode(r io.Reader) (err error) {
+func (ret *PlayToServerPacketWindowClick) Decode(r io.ReadSeeker) (err error) {
 	err = ret.WindowId.Decode(r)
 	if err != nil {
 		return
@@ -27146,7 +27146,7 @@ type StatusToClientPacket struct {
 
 var StatusToClientPacketNameMap = map[int32]string{0x00: "server_info", 0x01: "ping"}
 
-func (ret *StatusToClientPacket) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacket) Decode(r io.ReadSeeker) (err error) {
 	var StatusToClientPacketNameKey int32
 	StatusToClientPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -27220,7 +27220,7 @@ type StatusToClientPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *StatusToClientPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -27285,7 +27285,7 @@ func (ret *StatusToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err e
 type StatusToClientPacketCommonClearDialog struct {
 }
 
-func (ret *StatusToClientPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *StatusToClientPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -27296,7 +27296,7 @@ type StatusToClientPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *StatusToClientPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -27316,7 +27316,7 @@ type StatusToClientPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *StatusToClientPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -27359,7 +27359,7 @@ type StatusToClientPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *StatusToClientPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -27404,7 +27404,7 @@ type StatusToClientPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *StatusToClientPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lStatusToClientPacketCommonCustomReportDetailsDetails int32
 	lStatusToClientPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -27453,7 +27453,7 @@ type StatusToClientPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *StatusToClientPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var StatusToClientPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &StatusToClientPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -27491,7 +27491,7 @@ type StatusToClientPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *StatusToClientPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lStatusToClientPacketCommonSelectKnownPacksPacks int32
 	lStatusToClientPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -27555,7 +27555,7 @@ type StatusToClientPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *StatusToClientPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lStatusToClientPacketCommonServerLinksLinks int32
 	lStatusToClientPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -27660,7 +27660,7 @@ type StatusToClientPacketCommonSettings struct {
 
 var StatusToClientPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *StatusToClientPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -27757,7 +27757,7 @@ type StatusToClientPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *StatusToClientPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -27785,7 +27785,7 @@ type StatusToClientPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *StatusToClientPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -27812,7 +27812,7 @@ type StatusToClientPacketPing struct {
 	Time int64
 }
 
-func (ret *StatusToClientPacketPing) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketPing) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Time)
 	if err != nil {
 		return
@@ -27831,7 +27831,7 @@ type StatusToClientPacketServerInfo struct {
 	Response string
 }
 
-func (ret *StatusToClientPacketServerInfo) Decode(r io.Reader) (err error) {
+func (ret *StatusToClientPacketServerInfo) Decode(r io.ReadSeeker) (err error) {
 	ret.Response, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -27853,7 +27853,7 @@ type StatusToServerPacket struct {
 
 var StatusToServerPacketNameMap = map[int32]string{0x00: "ping_start", 0x01: "ping"}
 
-func (ret *StatusToServerPacket) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacket) Decode(r io.ReadSeeker) (err error) {
 	var StatusToServerPacketNameKey int32
 	StatusToServerPacketNameKey, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -27927,7 +27927,7 @@ type StatusToServerPacketCommonAddResourcePack struct {
 	PromptMessage *nbt.Anon
 }
 
-func (ret *StatusToServerPacketCommonAddResourcePack) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonAddResourcePack) Decode(r io.ReadSeeker) (err error) {
 	_, err = io.ReadFull(r, ret.Uuid[:])
 	if err != nil {
 		return
@@ -27992,7 +27992,7 @@ func (ret *StatusToServerPacketCommonAddResourcePack) Encode(w io.Writer) (err e
 type StatusToServerPacketCommonClearDialog struct {
 }
 
-func (ret *StatusToServerPacketCommonClearDialog) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonClearDialog) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *StatusToServerPacketCommonClearDialog) Encode(w io.Writer) (err error) {
@@ -28003,7 +28003,7 @@ type StatusToServerPacketCommonCookieRequest struct {
 	Cookie string
 }
 
-func (ret *StatusToServerPacketCommonCookieRequest) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonCookieRequest) Decode(r io.ReadSeeker) (err error) {
 	ret.Cookie, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -28023,7 +28023,7 @@ type StatusToServerPacketCommonCookieResponse struct {
 	Value *ByteArray
 }
 
-func (ret *StatusToServerPacketCommonCookieResponse) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonCookieResponse) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -28066,7 +28066,7 @@ type StatusToServerPacketCommonCustomClickAction struct {
 	Nbt *nbt.Anon
 }
 
-func (ret *StatusToServerPacketCommonCustomClickAction) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonCustomClickAction) Decode(r io.ReadSeeker) (err error) {
 	ret.Id, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -28111,7 +28111,7 @@ type StatusToServerPacketCommonCustomReportDetails struct {
 	}
 }
 
-func (ret *StatusToServerPacketCommonCustomReportDetails) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonCustomReportDetails) Decode(r io.ReadSeeker) (err error) {
 	var lStatusToServerPacketCommonCustomReportDetailsDetails int32
 	lStatusToServerPacketCommonCustomReportDetailsDetails, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -28160,7 +28160,7 @@ type StatusToServerPacketCommonRemoveResourcePack struct {
 	Uuid *uuid.UUID
 }
 
-func (ret *StatusToServerPacketCommonRemoveResourcePack) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonRemoveResourcePack) Decode(r io.ReadSeeker) (err error) {
 	var StatusToServerPacketCommonRemoveResourcePackUuidPresent bool
 	err = binary.Read(r, binary.BigEndian, &StatusToServerPacketCommonRemoveResourcePackUuidPresent)
 	if err != nil {
@@ -28198,7 +28198,7 @@ type StatusToServerPacketCommonSelectKnownPacks struct {
 	}
 }
 
-func (ret *StatusToServerPacketCommonSelectKnownPacks) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonSelectKnownPacks) Decode(r io.ReadSeeker) (err error) {
 	var lStatusToServerPacketCommonSelectKnownPacksPacks int32
 	lStatusToServerPacketCommonSelectKnownPacksPacks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -28262,7 +28262,7 @@ type StatusToServerPacketCommonServerLinks struct {
 	}
 }
 
-func (ret *StatusToServerPacketCommonServerLinks) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonServerLinks) Decode(r io.ReadSeeker) (err error) {
 	var lStatusToServerPacketCommonServerLinksLinks int32
 	lStatusToServerPacketCommonServerLinksLinks, err = proto_base.DecodeVarInt(r)
 	if err != nil {
@@ -28367,7 +28367,7 @@ type StatusToServerPacketCommonSettings struct {
 
 var StatusToServerPacketCommonSettingsParticleStatusMap = map[int32]string{0: "all", 1: "decreased", 2: "minimal"}
 
-func (ret *StatusToServerPacketCommonSettings) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonSettings) Decode(r io.ReadSeeker) (err error) {
 	ret.Locale, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -28464,7 +28464,7 @@ type StatusToServerPacketCommonStoreCookie struct {
 	Value ByteArray
 }
 
-func (ret *StatusToServerPacketCommonStoreCookie) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonStoreCookie) Decode(r io.ReadSeeker) (err error) {
 	ret.Key, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -28492,7 +28492,7 @@ type StatusToServerPacketCommonTransfer struct {
 	Port int32
 }
 
-func (ret *StatusToServerPacketCommonTransfer) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketCommonTransfer) Decode(r io.ReadSeeker) (err error) {
 	ret.Host, err = proto_base.DecodeString(r)
 	if err != nil {
 		return
@@ -28519,7 +28519,7 @@ type StatusToServerPacketPing struct {
 	Time int64
 }
 
-func (ret *StatusToServerPacketPing) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketPing) Decode(r io.ReadSeeker) (err error) {
 	err = binary.Read(r, binary.BigEndian, &ret.Time)
 	if err != nil {
 		return
@@ -28537,7 +28537,7 @@ func (ret *StatusToServerPacketPing) Encode(w io.Writer) (err error) {
 type StatusToServerPacketPingStart struct {
 }
 
-func (ret *StatusToServerPacketPingStart) Decode(r io.Reader) (err error) {
+func (ret *StatusToServerPacketPingStart) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *StatusToServerPacketPingStart) Encode(w io.Writer) (err error) {

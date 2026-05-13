@@ -219,7 +219,7 @@ func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 		e, retExpr := FixPointerReceivers(e)
 		AppendDecl(g.File, TypeDecl(tName, e))
 
-		args := []NameAndType{{"r", Ident("io.Reader")}}
+		args := []NameAndType{{"r", Ident("io.ReadSeeker")}}
 		rets := []NameAndType{{"err", Ident("error")}}
 		decodeFunction := NewFuncWithReceiver("Decode", "ret", Pointer(Ident(tName)), args, rets)
 		g.Depth = 0

@@ -51,7 +51,7 @@ func (u *UnCodablePacket) Encode(w io.Writer) (err error) {
 	return
 }
 
-func (u *UnCodablePacket) Decode(r io.Reader) (err error) {
+func (u *UnCodablePacket) Decode(r io.ReadSeeker) (err error) {
 	err = errors.New("how did you even get here")
 	return
 }
@@ -234,7 +234,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	if err != nil {
 		return
 	}
-	b := bytes.NewBuffer(packetBytes)
+	b := bytes.NewReader(packetBytes)
 	id, err := proto_base.DecodeVarInt(b)
 	if err != nil {
 		return

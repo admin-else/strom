@@ -236,7 +236,7 @@ func ErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
 
 type EncodeDecodeAble interface {
 	Encode(w io.Writer) (err error)
-	Decode(r io.Reader) (err error)
+	Decode(r io.ReadSeeker) (err error)
 }
 
 type Void struct{}
@@ -244,7 +244,7 @@ type Void struct{}
 func (v Void) Encode(w io.Writer) (err error) {
 	return
 }
-func (v Void) Decode(r io.Reader) (err error) {
+func (v Void) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 
