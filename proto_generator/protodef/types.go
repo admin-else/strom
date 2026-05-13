@@ -64,4 +64,9 @@ type (
 		Flags []string
 		Type  any
 	}
+
+	EntityMetadataLoop struct {
+		EndVal int
+		Type   any
+	}
 )

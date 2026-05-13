@@ -2885,7 +2885,7 @@ type SlotComponentType struct {
 	Val string
 }
 
-var SlotComponentTypeMap = map[int32]string{0: "custom_data", 1: "max_stack_size", 10: "enchantments", 11: "can_place_on", 12: "can_break", 13: "attribute_modifiers", 14: "custom_model_data", 15: "tooltip_display", 16: "repair_cost", 17: "creative_slot_lock", 18: "enchantment_glint_override", 19: "intangible_projectile", 2: "max_damage", 20: "food", 21: "consumable", 22: "use_remainder", 23: "use_cooldown", 24: "damage_resistant", 25: "tool", 26: "weapon", 27: "enchantable", 28: "equippable", 29: "repairable", 3: "damage", 30: "glider", 31: "tooltip_style", 32: "death_protection", 33: "blocks_attacks", 34: "stored_enchantments", 35: "dyed_color", 36: "map_color", 37: "map_id", 38: "map_decorations", 39: "map_post_processing", 4: "unbreakable", 40: "potion_duration_scale", 41: "charged_projectiles", 42: "bundle_contents", 43: "potion_contents", 44: "suspicious_stew_effects", 45: "writable_book_content", 46: "written_book_content", 47: "trim", 48: "debug_stick_state", 49: "entity_data", 5: "custom_name", 50: "bucket_entity_data", 51: "block_entity_data", 52: "instrument", 53: "provides_trim_material", 54: "ominous_bottle_amplifier", 55: "jukebox_playable", 56: "provides_banner_patterns", 57: "recipes", 58: "lodestone_tracker", 59: "firework_explosion", 6: "item_name", 60: "fireworks", 61: "profile", 62: "note_block_sound", 63: "banner_patterns", 64: "base_color", 65: "pot_decorations", 66: "container", 67: "block_state", 68: "bees", 69: "lock", 7: "item_model", 70: "container_loot", 71: "break_sound", 72: "villager/variant", 73: "wolf/variant", 74: "wolf/sound_variant", 75: "wolf/collar", 76: "fox/variant", 77: "salmon/size", 78: "parrot/variant", 79: "tropical_fish/pattern", 8: "lore", 80: "tropical_fish/base_color", 81: "tropical_fish/pattern_color", 82: "mooshroom/variant", 83: "rabbit/variant", 84: "pig/variant", 85: "cow/variant", 86: "chicken/variant", 87: "frog/variant", 88: "horse/variant", 89: "painting/variant", 9: "rarity", 90: "llama/variant", 91: "axolotl/variant", 92: "cat/variant", 93: "cat/collar", 94: "sheep/color", 95: "shulker/color"}
+var SlotComponentTypeMap = map[int32]string{0: "custom_data", 1: "max_stack_size", 10: "enchantments", 11: "can_place_on", 12: "can_break", 13: "attribute_modifiers", 14: "custom_model_data", 15: "tooltip_display", 16: "repair_cost", 17: "creative_slot_lock", 18: "enchantment_glint_override", 19: "intangible_projectile", 2: "max_damage", 20: "food", 21: "consumable", 22: "use_remainder", 23: "use_cooldown", 24: "damage_resistant", 25: "tool", 26: "weapon", 27: "enchantable", 28: "equippable", 29: "repairable", 3: "damage", 30: "glider", 31: "tooltip_style", 32: "death_protection", 33: "blocks_attacks", 34: "stored_enchantments", 35: "dyed_color", 36: "map_color", 37: "map_id", 38: "map_decorations", 39: "map_post_processing", 4: "unbreakable", 40: "charged_projectiles", 41: "bundle_contents", 42: "potion_contents", 43: "potion_duration_scale", 44: "suspicious_stew_effects", 45: "writable_book_content", 46: "written_book_content", 47: "trim", 48: "debug_stick_state", 49: "entity_data", 5: "custom_name", 50: "bucket_entity_data", 51: "block_entity_data", 52: "instrument", 53: "provides_trim_material", 54: "ominous_bottle_amplifier", 55: "jukebox_playable", 56: "provides_banner_patterns", 57: "recipes", 58: "lodestone_tracker", 59: "firework_explosion", 6: "item_name", 60: "fireworks", 61: "profile", 62: "note_block_sound", 63: "banner_patterns", 64: "base_color", 65: "pot_decorations", 66: "container", 67: "block_state", 68: "bees", 69: "lock", 7: "item_model", 70: "container_loot", 71: "break_sound", 72: "villager/variant", 73: "wolf/variant", 74: "wolf/sound_variant", 75: "wolf/collar", 76: "fox/variant", 77: "salmon/size", 78: "parrot/variant", 79: "tropical_fish/pattern", 8: "lore", 80: "tropical_fish/base_color", 81: "tropical_fish/pattern_color", 82: "mooshroom/variant", 83: "rabbit/variant", 84: "pig/variant", 85: "cow/variant", 86: "chicken/variant", 87: "frog/variant", 88: "horse/variant", 89: "painting/variant", 9: "rarity", 90: "llama/variant", 91: "axolotl/variant", 92: "cat/variant", 93: "cat/collar", 94: "sheep/color", 95: "shulker/color"}
 
 func (ret *SlotComponentType) Decode(r io.Reader) (err error) {
 	var SlotComponentTypeKey int32
@@ -2900,7 +2900,7 @@ func (ret *SlotComponentType) Decode(r io.Reader) (err error) {
 	return
 }
 
-var SlotComponentTypeReverseMap = map[string]int32{"custom_data": 0, "max_stack_size": 1, "enchantments": 10, "can_place_on": 11, "can_break": 12, "attribute_modifiers": 13, "custom_model_data": 14, "tooltip_display": 15, "repair_cost": 16, "creative_slot_lock": 17, "enchantment_glint_override": 18, "intangible_projectile": 19, "max_damage": 2, "food": 20, "consumable": 21, "use_remainder": 22, "use_cooldown": 23, "damage_resistant": 24, "tool": 25, "weapon": 26, "enchantable": 27, "equippable": 28, "repairable": 29, "damage": 3, "glider": 30, "tooltip_style": 31, "death_protection": 32, "blocks_attacks": 33, "stored_enchantments": 34, "dyed_color": 35, "map_color": 36, "map_id": 37, "map_decorations": 38, "map_post_processing": 39, "unbreakable": 4, "potion_duration_scale": 40, "charged_projectiles": 41, "bundle_contents": 42, "potion_contents": 43, "suspicious_stew_effects": 44, "writable_book_content": 45, "written_book_content": 46, "trim": 47, "debug_stick_state": 48, "entity_data": 49, "custom_name": 5, "bucket_entity_data": 50, "block_entity_data": 51, "instrument": 52, "provides_trim_material": 53, "ominous_bottle_amplifier": 54, "jukebox_playable": 55, "provides_banner_patterns": 56, "recipes": 57, "lodestone_tracker": 58, "firework_explosion": 59, "item_name": 6, "fireworks": 60, "profile": 61, "note_block_sound": 62, "banner_patterns": 63, "base_color": 64, "pot_decorations": 65, "container": 66, "block_state": 67, "bees": 68, "lock": 69, "item_model": 7, "container_loot": 70, "break_sound": 71, "villager/variant": 72, "wolf/variant": 73, "wolf/sound_variant": 74, "wolf/collar": 75, "fox/variant": 76, "salmon/size": 77, "parrot/variant": 78, "tropical_fish/pattern": 79, "lore": 8, "tropical_fish/base_color": 80, "tropical_fish/pattern_color": 81, "mooshroom/variant": 82, "rabbit/variant": 83, "pig/variant": 84, "cow/variant": 85, "chicken/variant": 86, "frog/variant": 87, "horse/variant": 88, "painting/variant": 89, "rarity": 9, "llama/variant": 90, "axolotl/variant": 91, "cat/variant": 92, "cat/collar": 93, "sheep/color": 94, "shulker/color": 95}
+var SlotComponentTypeReverseMap = map[string]int32{"custom_data": 0, "max_stack_size": 1, "enchantments": 10, "can_place_on": 11, "can_break": 12, "attribute_modifiers": 13, "custom_model_data": 14, "tooltip_display": 15, "repair_cost": 16, "creative_slot_lock": 17, "enchantment_glint_override": 18, "intangible_projectile": 19, "max_damage": 2, "food": 20, "consumable": 21, "use_remainder": 22, "use_cooldown": 23, "damage_resistant": 24, "tool": 25, "weapon": 26, "enchantable": 27, "equippable": 28, "repairable": 29, "damage": 3, "glider": 30, "tooltip_style": 31, "death_protection": 32, "blocks_attacks": 33, "stored_enchantments": 34, "dyed_color": 35, "map_color": 36, "map_id": 37, "map_decorations": 38, "map_post_processing": 39, "unbreakable": 4, "charged_projectiles": 40, "bundle_contents": 41, "potion_contents": 42, "potion_duration_scale": 43, "suspicious_stew_effects": 44, "writable_book_content": 45, "written_book_content": 46, "trim": 47, "debug_stick_state": 48, "entity_data": 49, "custom_name": 5, "bucket_entity_data": 50, "block_entity_data": 51, "instrument": 52, "provides_trim_material": 53, "ominous_bottle_amplifier": 54, "jukebox_playable": 55, "provides_banner_patterns": 56, "recipes": 57, "lodestone_tracker": 58, "firework_explosion": 59, "item_name": 6, "fireworks": 60, "profile": 61, "note_block_sound": 62, "banner_patterns": 63, "base_color": 64, "pot_decorations": 65, "container": 66, "block_state": 67, "bees": 68, "lock": 69, "item_model": 7, "container_loot": 70, "break_sound": 71, "villager/variant": 72, "wolf/variant": 73, "wolf/sound_variant": 74, "wolf/collar": 75, "fox/variant": 76, "salmon/size": 77, "parrot/variant": 78, "tropical_fish/pattern": 79, "lore": 8, "tropical_fish/base_color": 80, "tropical_fish/pattern_color": 81, "mooshroom/variant": 82, "rabbit/variant": 83, "pig/variant": 84, "cow/variant": 85, "chicken/variant": 86, "frog/variant": 87, "horse/variant": 88, "painting/variant": 89, "rarity": 9, "llama/variant": 90, "axolotl/variant": 91, "cat/variant": 92, "cat/collar": 93, "sheep/color": 94, "shulker/color": 95}
 
 func (ret *SlotComponentType) Encode(w io.Writer) (err error) {
 	var vSlotComponentType int32
@@ -3366,15 +3366,44 @@ func (ret *CommandNode) Encode(w io.Writer) (err error) {
 }
 
 type EntityMetadata struct {
-	Val proto_base.ToDo
+	Val map[byte]EntityMetadataEntry
 }
 
 func (ret *EntityMetadata) Decode(r io.Reader) (err error) {
-	err = proto_base.ToDoError
+	ret.Val = make(map[uint8]EntityMetadataEntry)
+	var id uint8
+	for {
+		err = binary.Read(r, binary.BigEndian, &id)
+		if err != nil {
+			return
+		}
+		if id == 255 {
+			break
+		}
+		var entry EntityMetadataEntry
+		err = entry.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Val[id] = entry
+	}
 	return
 }
 func (ret *EntityMetadata) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
+	for k, v := range ret.Val {
+		err = binary.Write(w, binary.BigEndian, k)
+		if err != nil {
+			return
+		}
+		err = v.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = binary.Write(w, binary.BigEndian, uint8(255))
+	if err != nil {
+		return
+	}
 	return
 }
 

@@ -561,6 +561,57 @@ func VoidDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s [
 	return
 }
 
+func EntityMetadataLoopDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	var data protodef.EntityMetadataLoop
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+
+	innerType, err := g.VisitType(data.Type)
+	if err != nil {
+		return
+	}
+
+	assignVts := Assign121(varToSet, Call(Ident("make"), MapType(Ident("uint8"), innerType)))
+	idVar := VarStmt("id", Ident("uint8"))
+
+	decodeIdStatements, err := g.VisitDecoder(Ident("id"), "u8", name)
+	endCheck := If(Equals(Ident("id"), NumLit(data.EndVal)), NewBlockEllipsis(Break()))
+	declEntry := VarStmt("entry", innerType)
+	decodingEntryStmts, err := g.VisitDecoder(Ident("entry"), data.Type, name+"Inner")
+	if err != nil {
+		return
+	}
+	assignEntry := Assign121(Index(varToSet, Ident("id")), Ident("entry"))
+
+	var loopStmts []ast.Stmt
+	loopStmts = append(loopStmts, decodeIdStatements...)
+	loopStmts = append(loopStmts, endCheck)
+	loopStmts = append(loopStmts, declEntry)
+	loopStmts = append(loopStmts, decodingEntryStmts...)
+	loopStmts = append(loopStmts, assignEntry)
+
+	s = Stmts(assignVts, idVar, ForStmt(nil, nil, nil, NewBlock(loopStmts)))
+	/*
+		vts = make(map[uint8]{{data.type}})
+		var id uint8
+		for  {
+			err = binary.Read(r, binary.BigEndian, &id)
+			if err != nil {
+				return
+			}
+			if id == {{data.EndId}} {
+				return
+			}
+			var data {{type(data.type)}}
+			{{unpack(data.type)}}
+			vts[id] = data
+		}
+	*/
+	return
+}
+
 func (g *Generator) RegisterDecoderNatives() {
 	g.DecoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerDecoder,
@@ -596,7 +647,7 @@ func (g *Generator) RegisterDecoderNatives() {
 
 		"registryEntryHolder":      RegistryEntryHolderDecoder,
 		"registryEntryHolderSet":   ToDoDecoder, // RegistryEntryHolderSetDecoder
-		"entityMetadataLoop":       ToDoDecoder,
+		"entityMetadataLoop":       EntityMetadataLoopDecoder,
 		"topBitSetTerminatedArray": ToDoDecoder,
 		"todo":                     ToDoDecoder,
 	}

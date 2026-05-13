@@ -329,6 +329,12 @@ func NewBlockEllipsis(statements ...ast.Stmt) *ast.BlockStmt {
 	}
 }
 
+func Break() *ast.BranchStmt {
+	return &ast.BranchStmt{
+		Tok: token.BREAK,
+	}
+}
+
 //func MergeBlocks(blocks ...*ast.BlockStmt) *ast.BlockStmt {
 //	list := make([]ast.Stmt, 0)
 //	for _, block := range blocks {
@@ -382,7 +388,16 @@ func ForRange(K, X ast.Expr, block *ast.BlockStmt) *ast.RangeStmt {
 		Tok:   token.DEFINE, // ":=" token
 		Body:  block,
 	}
+}
 
+func ForRangeKV(K, V, X ast.Expr, block *ast.BlockStmt) *ast.RangeStmt {
+	return &ast.RangeStmt{
+		Key:   K,
+		Value: V,
+		X:     X,
+		Tok:   token.DEFINE,
+		Body:  block,
+	}
 }
 
 func Index(X, I ast.Expr) *ast.IndexExpr {
@@ -523,5 +538,14 @@ func LeftShift(lhs, rhs ast.Expr) *ast.BinaryExpr {
 func Grouping(e ast.Expr) *ast.ParenExpr {
 	return &ast.ParenExpr{
 		X: e,
+	}
+}
+
+func ForStmt(init ast.Stmt, cond ast.Expr, post ast.Stmt, body *ast.BlockStmt) *ast.ForStmt {
+	return &ast.ForStmt{
+		Init: init,
+		Cond: cond,
+		Post: post,
+		Body: body,
 	}
 }

@@ -356,6 +356,46 @@ func VoidEncoder(_ *Generator, _ ast.Expr, _ any, _ string) (s []ast.Stmt, err e
 	return
 }
 
+func EntityMetadataLoopEncoder(g *Generator, vts ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	var data protodef.EntityMetadataLoop
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+
+	/*
+		for k, v := range vts.Val {
+			WriteU8(w, uint8(k))
+			WriteData(w, v)
+		}
+		WriteU8(w, 0xFF)
+	*/
+
+	encodeid, err := g.VisitEncoder(Ident("k"), "u8", name)
+	if err != nil {
+		return
+	}
+	encodeV, err := g.VisitEncoder(Ident("v"), data.Type, name)
+	if err != nil {
+		return
+	}
+	var innerstmts []ast.Stmt
+	innerstmts = append(innerstmts, encodeid...)
+	innerstmts = append(innerstmts, encodeV...)
+
+	forStmt := ForRangeKV(Ident("k"), Ident("v"), vts, NewBlock(innerstmts))
+
+	encodeEndId, err := g.VisitEncoder(Call(Ident("uint8"), NumLit(data.EndVal)), "u8", name)
+	if err != nil {
+		return
+	}
+
+	s = append(s, forStmt)
+	s = append(s, encodeEndId...)
+
+	return
+}
+
 func (g *Generator) RegisterEncoderNatives() {
 	g.EncoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerEncoder,
@@ -391,7 +431,7 @@ func (g *Generator) RegisterEncoderNatives() {
 
 		"registryEntryHolder":      RegistryEntryHolderEncoder,
 		"registryEntryHolderSet":   ToDoEncoder,
-		"entityMetadataLoop":       ToDoEncoder,
+		"entityMetadataLoop":       EntityMetadataLoopEncoder,
 		"topBitSetTerminatedArray": ToDoEncoder,
 		"todo":                     ToDoEncoder,
 	}

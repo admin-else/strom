@@ -175,6 +175,20 @@ func VoidType(_ *Generator, _ any) (e ast.Expr, err error) {
 	return
 }
 
+func EntityMetadataLoopType(g *Generator, v any) (e ast.Expr, err error) {
+	var data protodef.EntityMetadataLoop
+	err = mapstructure.Decode(v, &data)
+	if err != nil {
+		return
+	}
+	innerType, err := g.VisitType(data.Type)
+	if err != nil {
+		return
+	}
+	e = MapType(Ident("byte"), innerType)
+	return
+}
+
 func (g *Generator) RegisterNatives() {
 	g.Natives = map[string]ExprGeneratorFunc{
 		"container":                VisitContainerType,
@@ -200,7 +214,7 @@ func (g *Generator) RegisterNatives() {
 		"f64":                      MakeIdentVisitor("float64"),
 		"registryEntryHolder":      MakeIdentVisitor("any"), // Go really fucking needs good tagged unions
 		"registryEntryHolderSet":   MakeIdentVisitor("any"),
-		"entityMetadataLoop":       VisitToDoType,
+		"entityMetadataLoop":       EntityMetadataLoopType,
 		"option":                   VisitOptionType,
 		"switch":                   MakeIdentVisitor("any"),
 		"UUID":                     MakeSelectorVisitor("uuid", "UUID"),
