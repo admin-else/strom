@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
+	"math"
 )
 
 var (
@@ -283,4 +284,116 @@ func Bool2uint64(b bool) uint64 {
 		return 1
 	}
 	return 0
+}
+
+type LpVec3d struct {
+	X, Y, Z float64
+}
+
+func (v *LpVec3d) Encode(w io.Writer) error {
+	return writeVelocity(w, *v)
+}
+func (v *LpVec3d) Decode(r io.ReadSeeker) error {
+	v3, err := readVelocity(r)
+	if err != nil {
+		return err
+	}
+	v.X = v3.X
+	v.Y = v3.Y
+	v.Z = v3.Z
+	return nil
+}
+func readVelocity(r io.Reader) (LpVec3d, error) {
+	var marker, second uint8
+	if err := binary.Read(r, binary.BigEndian, &marker); err != nil {
+		return LpVec3d{}, err
+	}
+	if marker == 0 {
+		return LpVec3d{}, nil
+	}
+	if err := binary.Read(r, binary.BigEndian, &second); err != nil {
+		return LpVec3d{}, err
+	}
+	var packed uint32
+	if err := binary.Read(r, binary.BigEndian, &packed); err != nil {
+		return LpVec3d{}, err
+	}
+	m := (uint64(packed) << 16) | (uint64(second) << 8) | uint64(marker)
+	n := int64(marker & 3)
+	if (marker & 4) != 0 {
+		// fast marker bit set, read varint for extended scale
+		scale, err := DecodeVarInt(r)
+		if err != nil {
+			return LpVec3d{}, err
+		}
+		n |= (int64(scale) & 0xFFFFFFFF) << 2
+	}
+	x := fromLong(int64(m>>3), n)
+	y := fromLong(int64(m>>18), n)
+	z := fromLong(int64(m>>33), n)
+	return LpVec3d{X: x, Y: y, Z: z}, nil
+}
+func writeVelocity(w io.Writer, v LpVec3d) error {
+	const maxVal = 1.7179869183e10
+	const scaleMax = 32766.0
+	x := clamp(v.X, maxVal)
+	y := clamp(v.Y, maxVal)
+	z := clamp(v.Z, maxVal)
+	g := absMax(absMax(x, y), z)
+	if g < 3.051944088384301e-5 {
+		_, err := w.Write([]byte{0})
+		return err
+	}
+	l := int64(math.Ceil(g))
+	bl := (l & 3) != l
+	m := l
+	if bl {
+		m = (l & 3) | 4
+	}
+	lf := float64(l)
+	n := toLong(x/lf) << 3
+	o := toLong(y/lf) << 18
+	p := toLong(z/lf) << 33
+	q := m | n | o | p
+	var buf [7]byte
+	buf[0] = byte(q)
+	buf[1] = byte(q >> 8)
+	binary.BigEndian.PutUint32(buf[2:6], uint32(q>>16))
+	if _, err := w.Write(buf[:6]); err != nil {
+		return err
+	}
+	if bl {
+		if err := EncodeVarInt(w, int32(l>>2)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func clamp(v, max float64) float64 {
+	if math.IsNaN(v) {
+		return 0
+	}
+	if v > max {
+		return max
+	}
+	if v < -max {
+		return -max
+	}
+	return v
+}
+func absMax(a, b float64) float64 {
+	if math.Abs(a) > math.Abs(b) {
+		return a
+	}
+	return b
+}
+func toLong(v float64) int64 {
+	return int64(math.Round((v*0.5 + 0.5) * 32766.0))
+}
+func fromLong(bits int64, scale int64) float64 {
+	v := bits & 0x7FFF
+	if v > 32766 {
+		v = 32766
+	}
+	return (float64(v)*2.0/32766.0 - 1.0) * float64(scale)
 }
