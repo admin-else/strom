@@ -1,12 +1,12 @@
 package main
 
 import (
-	"debug/buildinfo"
 	"errors"
 	"fmt"
 	"log/slog"
 	"maps"
 	"os"
+	"runtime/debug"
 	"slices"
 
 	"github.com/admin-else/strom/cmd/strom/api"
@@ -23,17 +23,25 @@ import (
 var ExpectedASubcommandErr = errors.New("expected a subcommand")
 var UnknownSubcommandErr = errors.New("unknown subcommand try 'strom help' for a list of subcommands")
 
-func Version(args []string) (err error) {
-	selfPath, err := os.Executable()
-	if err != nil {
-		return
+func ToolVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "devel"
 	}
-	info, err := buildinfo.ReadFile(selfPath)
-	if err != nil {
-		return
+	return info.Main.Version
+}
+
+func ToolSum() string {
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return ""
 	}
-	fmt.Println("strom cli ", info.Main.Version, " (", info.Main.Sum, ")")
-	return
+	return info.Main.Sum
+}
+
+func Version(args []string) error {
+	fmt.Println("strom cli ", ToolVersion(), " (", ToolSum(), ")")
+	return nil
 }
 
 var subcommands = map[string]func(args []string) error{
