@@ -179,6 +179,32 @@ func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packet
 	return
 }
 
+func SimplePacketToBytes(packet proto_base.EncodeDecodeAble) (b []byte, err error) {
+	var packetBuff = bytes.NewBuffer(nil)
+	i, ok := LookupPacketInfoByType(packet)
+	if !ok {
+		err = BadPacketTypeErr
+		return
+	}
+	err = proto_base.EncodeVarInt(packetBuff, i.PacketId)
+	if err != nil {
+		return
+	}
+	err = packet.Encode(packetBuff)
+	if err != nil {
+		return
+	}
+	b = packetBuff.Bytes()
+	var packetWithLenBuf = bytes.NewBuffer(nil)
+	err = proto_base.EncodeVarInt(packetWithLenBuf, int32(len(b)))
+	if err != nil {
+		return
+	}
+	packetWithLenBuf.Write(b)
+	b = packetWithLenBuf.Bytes()
+	return
+}
+
 func (c *Conn) sendRegisteredPacket(packet proto_base.EncodeDecodeAble) (err error) {
 	i, ok := LookupPacketInfoByTypeAndState(packet, c.State())
 	if !ok {
