@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
 	"go/format"
 	"go/token"
 	"io"
+	"strings"
 )
 
 func NewStruct() (s *ast.StructType) {
@@ -357,8 +359,42 @@ func AppendDecl(file *ast.File, decl ast.Decl) {
 	file.Decls = append(file.Decls, decl)
 }
 
+// AddFileComment adds a comment block at the top of the file
+func AddFileComment(f *ast.File, comment string) {
+	f.Doc = &ast.CommentGroup{}
+	lines := strings.Split(comment, "\n")
+	for _, line := range lines {
+		f.Doc.List = append(f.Doc.List, &ast.Comment{Text: "// " + line})
+	}
+}
+
 func PrintToFile(f *ast.File, w io.Writer) error {
-	return format.Node(w, token.NewFileSet(), f)
+	// Extract doc comment header if present
+	var header string
+	if f.Doc != nil {
+		for _, c := range f.Doc.List {
+			header += c.Text + "\n"
+		}
+		f.Doc = nil // Clear so go/format doesn't print it
+	}
+
+	// Format the file
+	var buf bytes.Buffer
+	if err := format.Node(&buf, token.NewFileSet(), f); err != nil {
+		return err
+	}
+
+	// Find where "package " starts in formatted output
+	formatted := buf.String()
+	pkgIndex := strings.Index(formatted, "package ")
+	if pkgIndex < 0 {
+		pkgIndex = 0
+	}
+
+	// Write header, then formatted content starting from package
+	w.Write([]byte(header))
+	w.Write([]byte(formatted[pkgIndex:]))
+	return nil
 }
 
 func IfErrNil() *ast.IfStmt {
