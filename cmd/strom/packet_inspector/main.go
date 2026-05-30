@@ -102,7 +102,7 @@ func Run(args []string) (err error) {
 				return
 			}
 		}
-		_, err = server.ServeLogin(serveeConn, server.WithOtherAccount(acc), server.WithStatus(StatusResponse), server.WithoutOnlineMode())
+		_, err = server.ServeLogin(serveeConn, server.WithOtherAccount(acc), server.WithStatus(StatusResponse), server.WithoutOnlineMode(), server.WithoutEncryption())
 		if err != nil {
 			return
 		}

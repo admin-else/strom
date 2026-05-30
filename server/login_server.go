@@ -38,14 +38,14 @@ func (u UnexpectedNextStateError) Error() string {
 
 type LoginServer struct {
 	*proto.Conn
-	DontEncrypt, OnlineMode bool
-	ServerHost              string
-	ServerPort              uint16
-	Requested               NameAndUUID
-	Given                   *NameAndUUID
-	CompressionThreshold    int32
-	Status                  []byte
-	CompatibleVersions      []int32
+	Encryption, OnlineMode bool
+	ServerHost             string
+	ServerPort             uint16
+	Requested              NameAndUUID
+	Given                  *NameAndUUID
+	CompressionThreshold   int32
+	Status                 []byte
+	CompatibleVersions     []int32
 
 	ServerId       string // always empty for now
 	VerifyToken    []byte
@@ -107,7 +107,7 @@ func (l *LoginServer) OnLoginStart(packet *v1_21_8.LoginToServerPacketLoginStart
 	}
 
 	l.Requested = NameAndUUID{packet.Username, packet.PlayerUUID}
-	if !l.DontEncrypt {
+	if l.Encryption {
 		return l.Encrypt()
 	}
 	return l.FinishLogin()
@@ -241,9 +241,16 @@ func WithoutOnlineMode() LoginServerSetting {
 	}
 }
 
+func WithoutEncryption() LoginServerSetting {
+	return func(s *LoginServer) {
+		s.Encryption = false
+	}
+}
+
 func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
 	ret.OnlineMode = true
+	ret.Encryption = true
 
 	ret.RegisterCritical(ret.OnDefault)
 	ret.RegisterCriticalUntilLatest(ret.OnHandshake)
@@ -255,6 +262,11 @@ func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer
 	for _, s := range settings {
 		s(ret)
 	}
+	if ret.OnlineMode && !ret.Encryption {
+		err = fmt.Errorf("online mode requires encryption")
+		return
+	}
+
 	ret.CompressionThreshold = 256
 	err = ret.StartConn()
 	return
