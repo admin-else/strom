@@ -67,7 +67,7 @@ func Help(args []string) (err error) {
 func mainE() (err error) {
 	subcommands["help"] = Help
 	args := os.Args
-	args = []string{"TEST", "packet-spy", "-addr", "127.0.0.1:25571"}
+	//args = []string{"TEST", "packet-spy", "-addr", "127.0.0.1:25571", "-true-forward"}
 
 	if len(args) < 2 {
 		err = ExpectedASubcommandErr

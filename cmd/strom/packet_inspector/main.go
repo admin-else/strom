@@ -22,6 +22,7 @@ var Token = Cmd.String("token", "", "token to use")
 
 var TargetAddr = Cmd.String("addr", "127.0.0.1:25565", "address to connect to")
 var ListenAddr = Cmd.String("listen", "127.0.0.1:25566", "address to listen on")
+var TrueForward = Cmd.Bool("true-forward", false, "forward packets without modification -name and custom server status wont work")
 
 type Proxy struct {
 	Client, Servee *proto.Conn
@@ -33,6 +34,9 @@ func (p *Proxy) Start() (err error) {
 	p.Servee.RegisterCritical(p.OnAnything)
 
 	p.Servee.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
+	p.Servee.RegisterCriticalUntilLatest(p.OnHandshake)
+	//p.Servee.RegisterCriticalUntilLatest(p.OnCompress)
+	p.Client.RegisterCriticalUntilLatest(p.OnCompress)
 
 	errChan := make(chan error)
 	go func() {
@@ -74,6 +78,29 @@ func (p *Proxy) OnFinishConfiguration(packet *v1_21_11.ConfigurationToServerPack
 	return
 }
 
+func (p *Proxy) OnHandshake(packet *v1_21_11.HandshakingToServerPacketSetProtocol) (err error) {
+	err = p.Client.Send(packet)
+	state := proto_base.State(packet.NextState)
+	if err != nil {
+		return
+	}
+	p.Servee.SetState(state)
+	p.Client.SetState(state)
+	err = event.DontForwardErr
+	return
+}
+
+func (p *Proxy) OnCompress(packet *v1_21_11.LoginToClientPacketCompress) (err error) {
+	err = p.Servee.Send(packet)
+	if err != nil {
+		return
+	}
+	p.Servee.SetCompressionThreshold(packet.Threshold)
+	p.Client.SetCompressionThreshold(packet.Threshold)
+	err = event.DontForwardErr
+	return
+}
+
 var StatusResponse = server.StatusResponse{
 	Version: server.StatusResponseVersion{
 		Name:     text.Pretty("STROM"),
@@ -96,15 +123,17 @@ func Run(args []string) (err error) {
 		serveeConn.DebugPrintPackets = []string{""}
 		p := &Proxy{Servee: serveeConn, Client: nil}
 		var acc = api.NewOfflineAccount(*OfflineNameFlag)
-		if *Token != "" {
-			acc, err = api.NewAccountFromYGG(*Token)
+		if !*TrueForward {
+			if *Token != "" {
+				acc, err = api.NewAccountFromYGG(*Token)
+				if err != nil {
+					return
+				}
+			}
+			_, err = server.ServeLogin(serveeConn, server.WithOtherAccount(acc), server.WithStatus(StatusResponse), server.WithoutOnlineMode(), server.WithoutEncryption())
 			if err != nil {
 				return
 			}
-		}
-		_, err = server.ServeLogin(serveeConn, server.WithOtherAccount(acc), server.WithStatus(StatusResponse), server.WithoutOnlineMode(), server.WithoutEncryption())
-		if err != nil {
-			return
 		}
 
 		*TargetAddr, err = client.DoDnsSimple(*TargetAddr)
@@ -115,12 +144,14 @@ func Run(args []string) (err error) {
 		if err != nil {
 			return
 		}
-		c.DebugPrintPackets = []string{""}
-		err = client.LoginRaw(c, acc)
-		if err != nil {
-			return
-		}
 		defer c.Close()
+		c.DebugPrintPackets = []string{""}
+		if !*TrueForward {
+			err = client.LoginRaw(c, acc)
+			if err != nil {
+				return
+			}
+		}
 		p.Client = c
 		err = p.Start()
 		return
