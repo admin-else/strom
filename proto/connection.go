@@ -197,6 +197,14 @@ func SimplePacketToBytes(packet proto_base.EncodeDecodeAble) (b []byte, err erro
 		return
 	}
 	b = packetBuff.Bytes()
+	return
+}
+
+func SimplePacketToBytesLenPrefix(packet proto_base.EncodeDecodeAble) (b []byte, err error) {
+	b, err = SimplePacketToBytes(packet)
+	if err != nil {
+		return
+	}
 	var packetWithLenBuf = bytes.NewBuffer(nil)
 	err = proto_base.EncodeVarInt(packetWithLenBuf, int32(len(b)))
 	if err != nil {
