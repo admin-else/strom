@@ -5,6 +5,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/admin-else/strom/data"
 	"github.com/admin-else/strom/proto"
 	"github.com/admin-else/strom/proto_base"
 	"github.com/google/go-cmp/cmp"
@@ -97,4 +98,19 @@ func FuzzConnPlayToServer(f *testing.F) {
 
 func FuzzConnPlayToClient(f *testing.F) {
 	f.Fuzz(NewStateFuzzer(proto_base.Play, proto_base.Client))
+}
+
+func TestEntityMetadata(t *testing.T) {
+	packetData := []byte{97, 198, 9, 9, 3, 65, 160, 0, 0, 16, 0, 127, 255}
+	packet, err := proto.SimpleBytesToPacket(packetData, data.MustLookupProtocolVersion("1.21.11"), proto_base.ToClient, proto_base.Play)
+	if err != nil {
+		t.Fatal(err)
+	}
+	packetData2, err := proto.SimplePacketToBytes(packet)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !cmp.Equal(packetData, packetData2) {
+		t.Error("packet data is not equal", cmp.Diff(packetData, packetData2))
+	}
 }
