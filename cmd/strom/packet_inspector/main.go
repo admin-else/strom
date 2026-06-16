@@ -34,6 +34,7 @@ func (p *Proxy) Start() (err error) {
 	p.Servee.RegisterCritical(p.OnAnything)
 
 	p.Servee.RegisterCriticalUntilLatest(p.OnFinishConfiguration)
+	p.Servee.RegisterCriticalUntilLatest(p.OnFinishLogin)
 	p.Servee.RegisterCriticalUntilLatest(p.OnHandshake)
 	//p.Servee.RegisterCriticalUntilLatest(p.OnCompress)
 	p.Client.RegisterCriticalUntilLatest(p.OnCompress)
@@ -74,6 +75,17 @@ func (p *Proxy) OnFinishConfiguration(packet *v1_21_11.ConfigurationToServerPack
 	}
 	p.Servee.SetState(proto_base.Play)
 	p.Client.SetState(proto_base.Play)
+	err = event.DontForwardErr
+	return
+}
+
+func (p *Proxy) OnFinishLogin(packet *v1_21_11.LoginToServerPacketLoginAcknowledged) (err error) {
+	err = p.Client.Send(packet)
+	if err != nil {
+		return
+	}
+	p.Servee.SetState(proto_base.Configuration)
+	p.Client.SetState(proto_base.Configuration)
 	err = event.DontForwardErr
 	return
 }
