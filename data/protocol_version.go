@@ -53,6 +53,13 @@ func LookUpVersionByDataVersion(version int32) (ret VersionInfo, err error) {
 	return
 }
 
+// MustLookupProtocolVersion panics if the version is not found only intended for testing code.
+func MustLookupProtocolVersion(version string) int32 {
+	v, err := LookUpVersionByName(version)
+	must(err)
+	return v.Version
+}
+
 func init() {
 	must(LoadJson("minecraft-data/pc/common/protocolVersions.json", &ProtocolVersions))
 }
