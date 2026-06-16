@@ -179,6 +179,8 @@ func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packet
 	return
 }
 
+// SimplePacketToBytes converts a packet to bytes and prepends the packet length and packet id.
+// Its usefull for generating static data like handshakes or for debugging.
 func SimplePacketToBytes(packet proto_base.EncodeDecodeAble) (b []byte, err error) {
 	var packetBuff = bytes.NewBuffer(nil)
 	i, ok := LookupPacketInfoByType(packet)
@@ -202,6 +204,34 @@ func SimplePacketToBytes(packet proto_base.EncodeDecodeAble) (b []byte, err erro
 	}
 	packetWithLenBuf.Write(b)
 	b = packetWithLenBuf.Bytes()
+	return
+}
+
+// SimpleBytesToPacket converts packet bytes to usable packet data.
+func SimpleBytesToPacket(packetBytes []byte, version int32, direction proto_base.Direction, state proto_base.State) (packet proto_base.EncodeDecodeAble, err error) {
+	b := bytes.NewReader(packetBytes)
+	id, err := proto_base.DecodeVarInt(b)
+	if err != nil {
+		return
+	}
+
+	i, ok := LookUpTypeByPacketInfo(direction, state, id, version)
+	if !ok {
+		packet = &UnCodablePacket{Err: BadPacketIdErr, Data: packetBytes, Info: i}
+		return
+	}
+	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
+	err = packet.Decode(b)
+	if err != nil {
+		packet = &UnCodablePacket{Err: err, Data: packetBytes, Info: i}
+		err = nil
+		return
+	}
+	if b.Len() != 0 {
+		err = nil
+		packet = &UnCodablePacket{Err: PacketNotFullyDecodedErr, Data: packetBytes, Info: i}
+		return
+	}
 	return
 }
 
@@ -291,7 +321,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 		return
 	}
 	if debugPrint {
-		c.Log.Debug("recv", "packet", fmt.Sprintf("%#v", packet), "isListenerRegistered", isListenerRegistered)
+		c.Log.Debug("recv", "packet", fmt.Sprintf("%#v", packet), "isListenerRegistered", isListenerRegistered, "len", len(packetBytes))
 	}
 	return
 }
