@@ -68,6 +68,7 @@ type Conn struct {
 
 	asyncPackets      bool
 	asyncPacketsMutex sync.RWMutex
+	AlwaysDecode      bool
 
 	Log *slog.Logger
 }
@@ -313,7 +314,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	debugPrint := slog.Default().Enabled(context.Background(), slog.LevelDebug) &&
 		slices.ContainsFunc(c.DebugPrintPackets, func(s string) bool { return strings.Contains(i.Name, s) })
 	isListenerRegistered := c.IsTypeRegistered(reflect.TypeOf(packet))
-	if !isListenerRegistered && !debugPrint {
+	if !isListenerRegistered && !debugPrint && !c.AlwaysDecode {
 		packet = &UnCodablePacket{Err: NoHandlerRegisteredErr, Data: packetBytes, Info: i}
 		return
 	}

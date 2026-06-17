@@ -1,8 +1,11 @@
 package packet_inspector
 
 import (
+	"encoding/json"
 	"flag"
 	"log/slog"
+	"os"
+	"time"
 
 	"github.com/admin-else/strom/api"
 	"github.com/admin-else/strom/client"
@@ -50,6 +53,22 @@ func (p *Proxy) Start() (err error) {
 	return
 }
 
+type PacketLogEvent struct {
+	Time       time.Time
+	Packet     proto_base.EncodeDecodeAble
+	Info       PacketInfoNoTypeJson
+	ClientAddr string
+}
+
+type PacketInfoNoTypeJson struct {
+	Type            proto_base.EncodeDecodeAble `json:"-"`
+	Name            string
+	Direction       proto_base.Direction
+	State           proto_base.State
+	PacketId        int32
+	ProtocolVersion int32
+}
+
 func (p *Proxy) OnAnything(e event.Anything) (err error) {
 	packet, ok := e.Val.(proto_base.EncodeDecodeAble)
 	if !ok {
@@ -59,6 +78,19 @@ func (p *Proxy) OnAnything(e event.Anything) (err error) {
 	if !ok {
 		return
 	}
+	jsonBytes, err := json.Marshal(PacketLogEvent{
+		Time:       time.Now(),
+		Packet:     packet,
+		ClientAddr: p.Client.RemoteAddr().String(),
+		Info:       PacketInfoNoTypeJson(packetInfo),
+	})
+	if err != nil {
+		return
+	}
+	// :pray:
+	_, _ = os.Stdout.Write(jsonBytes)
+	_, _ = os.Stdout.Write([]byte("\n"))
+
 	switch packetInfo.Direction {
 	case proto_base.ToServer:
 		err = p.Client.Send(packet)
@@ -129,10 +161,8 @@ func Run(args []string) (err error) {
 	if err != nil {
 		return
 	}
-	slog.SetLogLoggerLevel(slog.LevelDebug)
 	slog.Info("Starting packet inspector", "listen", *ListenAddr)
 	err = server.StartServerWithOnConn(*ListenAddr, func(serveeConn *proto.Conn) (err error) {
-		serveeConn.DebugPrintPackets = []string{""}
 		p := &Proxy{Servee: serveeConn, Client: nil}
 		var acc = api.NewOfflineAccount(*OfflineNameFlag)
 		if !*TrueForward {
@@ -157,7 +187,6 @@ func Run(args []string) (err error) {
 			return
 		}
 		defer c.Close()
-		c.DebugPrintPackets = []string{""}
 		if !*TrueForward {
 			err = client.LoginRaw(c, acc)
 			if err != nil {
@@ -165,6 +194,8 @@ func Run(args []string) (err error) {
 			}
 		}
 		p.Client = c
+		p.Client.AlwaysDecode = true
+		p.Servee.AlwaysDecode = true
 		err = p.Start()
 		return
 	})
