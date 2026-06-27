@@ -6,7 +6,7 @@ import (
 	"flag"
 	"os"
 
-	"github.com/admin-else/strom/api"
+	api2 "github.com/admin-else/strom/mc/api"
 )
 
 var cmd = flag.NewFlagSet("api", flag.ContinueOnError)
@@ -25,9 +25,9 @@ func Run(args []string) (err error) {
 	if err != nil {
 		return
 	}
-	a := &api.Account{}
+	a := &api2.Account{}
 	if *tokenFlag != "" {
-		a, err = api.NewAccountFromYGG(*tokenFlag)
+		a, err = api2.NewAccountFromYGG(*tokenFlag)
 		if err != nil {
 			return
 		}
@@ -40,14 +40,14 @@ func Run(args []string) (err error) {
 		}
 	} else if *uuidFlag != "" || *nameFlag != "" {
 		if *nameFlag != "" {
-			var idName api.IdName
-			idName, err = api.NameToId(*nameFlag)
+			var idName api2.IdName
+			idName, err = api2.NameToId(*nameFlag)
 			if err != nil {
 				return
 			}
 			*uuidFlag = idName.Id
 		}
-		data, err = api.Profile(*uuidFlag, *unsignedFlag)
+		data, err = api2.Profile(*uuidFlag, *unsignedFlag)
 		if err != nil {
 			return
 		}

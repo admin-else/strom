@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/admin-else/strom/level/anvil"
-	"github.com/admin-else/strom/nbt"
+	"github.com/admin-else/strom/mc/level/anvil"
+	"github.com/admin-else/strom/mc/nbt"
 )
 
 var (

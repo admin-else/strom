@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/admin-else/strom/data"
-	"github.com/admin-else/strom/proto"
-	"github.com/admin-else/strom/proto_base"
-	"github.com/admin-else/strom/proto_generated"
+	"github.com/admin-else/strom/mc/data"
+	"github.com/admin-else/strom/mc/proto"
+	"github.com/admin-else/strom/mc/proto_base"
+	"github.com/admin-else/strom/mc/proto_generated"
 )
 
 var cmd = flag.NewFlagSet("packet-info", flag.ContinueOnError)

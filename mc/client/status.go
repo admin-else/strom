@@ -1,22 +1,16 @@
-package status
+package client
 
 import (
-	"flag"
-	"fmt"
-	"log/slog"
+	"context"
+	"encoding/json"
 	"time"
 
-	client2 "github.com/admin-else/strom/mc/client"
 	"github.com/admin-else/strom/mc/event"
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/mc/server"
 )
-
-var cmd = flag.NewFlagSet("status", flag.ContinueOnError)
-var addrFlag = cmd.String("addr", "localhost:25565", "address to connect to")
-var srvFlag = cmd.Bool("srv", false, "use SRV records to resolve the address")
-var versionFlag = cmd.String("version", "1.21.8", "version to use")
 
 type StatusClient struct {
 	*proto.Conn
@@ -45,13 +39,13 @@ func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
 // StatusRaw returns a StatusClient that is not connected to a server.
 // So ignore the resource leak warning. And maybe attach a warn ignore comment.
 // It does not resolve SRV records.
-func StatusRaw(addr string) (s *StatusClient, err error) {
-	c, err := client2.ConnectVersionLess(addr)
+func StatusRaw(ctx context.Context, addr string) (s *StatusClient, err error) {
+	c, err := ConnectVersionLess(addr)
 	if err != nil {
 		return
 	}
 	defer c.Close()
-	err = c.SetVersion(*versionFlag)
+	err = c.SetVersion("1.21.8")
 	if err != nil {
 		return
 	}
@@ -61,7 +55,7 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 	s.RegisterCriticalUntilLatest(s.OnStatus)
 	s.RegisterCriticalUntilLatest(s.OnPong)
 
-	p, err := client2.MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
+	p, err := MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {
 		return
 	}
@@ -76,23 +70,21 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 	return
 }
 
-func Run(args []string) (err error) {
-	err = cmd.Parse(args)
+// StatusNoDns is like Status but does not resolve SRV records.
+func StatusNoDns(addr string) (status server.StatusResponse, err error) {
+	s, err := StatusRaw(context.Background(), addr)
 	if err != nil {
 		return
 	}
-	if *srvFlag {
-		*addrFlag, err = client2.DoDnsSimple(*addrFlag)
-		if err != nil {
-			return
-		}
-	}
-	slog.Debug("resolved address to ", "addr", *addrFlag)
-
-	status, err := StatusRaw(*addrFlag)
-	if err != nil {
-		return
-	}
-	fmt.Println(status.Status)
+	err = json.Unmarshal([]byte(s.Status), &status)
 	return
+}
+
+// Status resolves the status of the minecraft server at the given address.
+func Status(addr string) (status server.StatusResponse, err error) {
+	addr, err = DoDnsSimple(addr)
+	if err != nil {
+		return
+	}
+	return StatusNoDns(addr)
 }

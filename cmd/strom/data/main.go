@@ -7,9 +7,9 @@ import (
 	"os"
 	"slices"
 
-	"github.com/admin-else/strom/data"
-	"github.com/admin-else/strom/proto_generated"
-	"github.com/admin-else/strom/util"
+	data2 "github.com/admin-else/strom/mc/data"
+	"github.com/admin-else/strom/mc/proto_generated"
+	"github.com/admin-else/strom/mc/util"
 )
 
 // strom data 1.21.11 blocks id 0 name => air
@@ -39,11 +39,11 @@ func Run(args []string) (err error) {
 	case 0: // print available versions
 		dataValues = proto_generated.SupportedVersions
 	case 1: // print available data for version
-		dataValues = slices.Collect(maps.Keys(data.Paths.Data[args[0]]))
+		dataValues = slices.Collect(maps.Keys(data2.Paths.Data[args[0]]))
 	case 2:
-		err = data.LoadVersionedJson(args[0], args[1], &dataValues)
+		err = data2.LoadVersionedJson(args[0], args[1], &dataValues)
 	case 3:
-		err = data.LoadVersionedJson(args[0], args[1], &dataValues)
+		err = data2.LoadVersionedJson(args[0], args[1], &dataValues)
 		if err != nil {
 			return
 		}
@@ -68,7 +68,7 @@ func Run(args []string) (err error) {
 		}
 		dataValues = result
 	case 4, 5:
-		err = data.LoadVersionedJson(args[0], args[1], &dataValues)
+		err = data2.LoadVersionedJson(args[0], args[1], &dataValues)
 		if err != nil {
 			return
 		}

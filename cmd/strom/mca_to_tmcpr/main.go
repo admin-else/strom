@@ -7,12 +7,12 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/admin-else/strom/level"
-	"github.com/admin-else/strom/level/anvil"
-	"github.com/admin-else/strom/nbt"
-	"github.com/admin-else/strom/proto/replay"
-	"github.com/admin-else/strom/proto_generated/v1_21_11"
-	"github.com/admin-else/strom/util"
+	"github.com/admin-else/strom/mc/level"
+	anvil2 "github.com/admin-else/strom/mc/level/anvil"
+	nbt2 "github.com/admin-else/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/proto/replay"
+	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
+	"github.com/admin-else/strom/mc/util"
 )
 
 var (
@@ -40,15 +40,15 @@ func init() {
 }
 
 func GetChunkFromMca(x, z int32, version string) (b []byte, err error) {
-	xmca := util.FloorDiv(x, anvil.ChunksWidthRegionFile)
-	zmca := util.FloorDiv(z, anvil.ChunksWidthRegionFile)
-	x = x % anvil.ChunksWidthRegionFile
+	xmca := util.FloorDiv(x, anvil2.ChunksWidthRegionFile)
+	zmca := util.FloorDiv(z, anvil2.ChunksWidthRegionFile)
+	x = x % anvil2.ChunksWidthRegionFile
 	if x < 0 {
-		x += anvil.ChunksWidthRegionFile
+		x += anvil2.ChunksWidthRegionFile
 	}
-	z = z % anvil.ChunksWidthRegionFile
+	z = z % anvil2.ChunksWidthRegionFile
 	if z < 0 {
-		z += anvil.ChunksWidthRegionFile
+		z += anvil2.ChunksWidthRegionFile
 	}
 
 	f, err := os.Open(fmt.Sprintf("./level/anvil/testdata/securechattestworld/region/r.%v.%v.mca", xmca, zmca))
@@ -56,12 +56,12 @@ func GetChunkFromMca(x, z int32, version string) (b []byte, err error) {
 		return
 	}
 	defer f.Close()
-	mca, err := anvil.ReadChunkHeader(f)
+	mca, err := anvil2.ReadChunkHeader(f)
 	if err != nil {
 		return
 	}
 
-	var n *nbt.Tag
+	var n *nbt2.Tag
 	n, err = mca.ChunkAt(f, x, z)
 	if err != nil {
 		return
@@ -70,8 +70,8 @@ func GetChunkFromMca(x, z int32, version string) (b []byte, err error) {
 		return
 	}
 
-	var chunk anvil.Chunk
-	err = nbt.Format.Decode(n.Value, &chunk)
+	var chunk anvil2.Chunk
+	err = nbt2.Format.Decode(n.Value, &chunk)
 	if err != nil {
 		return
 	}

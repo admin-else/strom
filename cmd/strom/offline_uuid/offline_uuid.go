@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/admin-else/strom/crypto"
+	"github.com/admin-else/strom/mc/crypto"
 )
 
 var cmd = flag.NewFlagSet("offline-uuid", flag.ContinueOnError)

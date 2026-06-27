@@ -14,9 +14,9 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/admin-else/strom/data"
-	"github.com/admin-else/strom/proto"
-	"github.com/admin-else/strom/proto_base"
+	"github.com/admin-else/strom/mc/data"
+	proto2 "github.com/admin-else/strom/mc/proto"
+	"github.com/admin-else/strom/mc/proto_base"
 )
 
 var (
@@ -32,7 +32,7 @@ var (
 //go:embed failed_packet.go.tmpl
 var TestSrcF string
 
-func SaveUnCodeAbleAsTest(packet *proto.UnCodablePacket) {
+func SaveUnCodeAbleAsTest(packet *proto2.UnCodablePacket) {
 	hUntrimmed := sha256.Sum256(packet.Data)
 	h := hUntrimmed[:8]
 	f, err := os.Create(fmt.Sprintf(*CreateTestsPath+"/%v_%10x_test.go", len(packet.Data), h))
@@ -87,15 +87,15 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 	// indexafterid represents how many bytes we've read so far
 	indexafterid := int(b.Size()) - b.Len()
 
-	i, ok := proto.LookUpTypeByPacketInfo(proto_base.ToClient, state, packetId, int32(*ProtocolVersion))
+	i, ok := proto2.LookUpTypeByPacketInfo(proto_base.ToClient, state, packetId, int32(*ProtocolVersion))
 	if !ok {
-		packet = &proto.UnCodablePacket{Err: proto.BadPacketIdErr, Data: packetData, Info: i}
+		packet = &proto2.UnCodablePacket{Err: proto2.BadPacketIdErr, Data: packetData, Info: i}
 		return
 	}
 	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
 	err = packet.Decode(b)
 	if err != nil {
-		packet = &proto.UnCodablePacket{Err: err, Data: packetData[indexafterid:], Info: i}
+		packet = &proto2.UnCodablePacket{Err: err, Data: packetData[indexafterid:], Info: i}
 		return
 	}
 	switch i.Name {
@@ -138,7 +138,7 @@ func Run(args []string) (err error) {
 	for {
 		var packet proto_base.EncodeDecodeAble
 		packet, err = UnpackPacket(f)
-		unCodablePacket, ok := packet.(*proto.UnCodablePacket)
+		unCodablePacket, ok := packet.(*proto2.UnCodablePacket)
 		if ok {
 			if *CreateTestsPath != "" {
 				SaveUnCodeAbleAsTest(unCodablePacket)
