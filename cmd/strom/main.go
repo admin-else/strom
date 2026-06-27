@@ -12,11 +12,15 @@ import (
 	"github.com/admin-else/strom/cmd/strom/api"
 	"github.com/admin-else/strom/cmd/strom/data"
 	"github.com/admin-else/strom/cmd/strom/extract_mca"
+	"github.com/admin-else/strom/cmd/strom/mca_to_tmcpr"
 	"github.com/admin-else/strom/cmd/strom/offline_uuid"
 	"github.com/admin-else/strom/cmd/strom/packet_info"
 	"github.com/admin-else/strom/cmd/strom/packet_inspector"
 	"github.com/admin-else/strom/cmd/strom/print_nbt"
 	"github.com/admin-else/strom/cmd/strom/print_replay"
+	"github.com/admin-else/strom/cmd/strom/registry_data_hunter"
+	"github.com/admin-else/strom/cmd/strom/serve_tmcpr"
+	"github.com/admin-else/strom/cmd/strom/serve_world"
 	"github.com/admin-else/strom/cmd/strom/status"
 )
 
@@ -45,16 +49,20 @@ func Version(args []string) error {
 }
 
 var subcommands = map[string]func(args []string) error{
-	"offline-uuid": offline_uuid.Run,
-	"packet-info":  packet_info.Run,
-	"print-nbt":    print_nbt.Run,
-	"status":       status.Run,
-	"packet-spy":   packet_inspector.Run,
-	"api":          api.Run,
-	"version":      Version,
-	"extract-mca":  extract_mca.Run,
-	"data":         data.Run,
-	"print-replay": print_replay.Run,
+	"offline-uuid":         offline_uuid.Run,
+	"packet-info":          packet_info.Run,
+	"print-nbt":            print_nbt.Run,
+	"status":               status.Run,
+	"packet-spy":           packet_inspector.Run,
+	"api":                  api.Run,
+	"version":              Version,
+	"extract-mca":          extract_mca.Run,
+	"data":                 data.Run,
+	"print-replay":         print_replay.Run,
+	"registry-data-hunter": registry_data_hunter.Run,
+	"serve-world":          serve_world.Run,
+	"mca-to-tmcpr":         mca_to_tmcpr.Run,
+	"serve-tmcpr":          serve_tmcpr.Run,
 }
 
 func Help(args []string) (err error) {

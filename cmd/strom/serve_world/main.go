@@ -1,4 +1,4 @@
-package main
+package serve_world
 
 import (
 	"bytes"
@@ -28,7 +28,7 @@ type Server struct {
 var FullLight [][]uint8
 
 func init() {
-	light := make([]uint8, 2048) // 4096 values 2 per uint8
+	light := make([]uint8, 2048)
 	for i := range light {
 		light[i] = 0xFF
 	}
@@ -95,13 +95,11 @@ func Limbo(c *proto.Conn) (err error) {
 	s := &Server{
 		Conn: c,
 	}
-	//s.DebugPrintPackets = []string{""}
 	_, err = server.ServeLogin(s.Conn, server.WithoutOnlineMode())
 	if err != nil {
 		return
 	}
 
-	//goland:noinspection GoResourceLeak captures the conn object which should NOT be closed
 	err = server.ServeConfig(s.Conn)
 	if err != nil {
 		return
@@ -176,10 +174,7 @@ func (s *Server) SendKeepAlive() (err error) {
 	return
 }
 
-func main() {
+func Run(args []string) error {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	err := server.StartServerWithOnConn(":25566", Limbo)
-	if err != nil {
-		panic(err)
-	}
+	return server.StartServerWithOnConn(":25566", Limbo)
 }

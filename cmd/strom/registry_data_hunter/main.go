@@ -1,4 +1,4 @@
-package main
+package registry_data_hunter
 
 import (
 	"encoding/json"
@@ -25,10 +25,7 @@ func wontFail[T any](v T, err error) T {
 	return v
 }
 
-// THIS IS REDUNDANT USE LOGIN PACKET IN MINECRAFT DATA
-
 var (
-	// Edit these two
 	Version = "1.21.11"
 	SaveAs  = "data/registry/" + Version + ".nbt"
 
@@ -113,7 +110,6 @@ func (p *Proxy) OnTags(data *v1_21_8.ConfigurationToClientPacketTags) (err error
 func handleClient(c *proto.Conn) (err error) {
 	acc := api.NewOfflineAccount("RegistryHunter")
 
-	// ignore resource leak warning we own c conn so we should not close it here
 	_, err = server.ServeLogin(c, server.WithOtherAccount(acc), server.WithCompatibleVersions(CompatibleProtocolVersion), server.WithRawStatus(Status))
 	if err != nil {
 		return
@@ -150,10 +146,7 @@ func handleClient(c *proto.Conn) (err error) {
 	return
 }
 
-func main() {
+func Run(args []string) error {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	err := server.StartServerWithOnConn(":25566", handleClient)
-	if err != nil {
-		panic(err)
-	}
+	return server.StartServerWithOnConn(":25566", handleClient)
 }
