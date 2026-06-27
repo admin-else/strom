@@ -10,11 +10,11 @@ import (
 	"github.com/admin-else/strom/mc/client"
 	"github.com/admin-else/strom/mc/data"
 	"github.com/admin-else/strom/mc/event"
-	nbt2 "github.com/admin-else/strom/mc/nbt"
-	proto2 "github.com/admin-else/strom/mc/proto"
+	"github.com/admin-else/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
-	server2 "github.com/admin-else/strom/mc/server"
+	"github.com/admin-else/strom/mc/server"
 	"github.com/admin-else/strom/mc/text"
 )
 
@@ -33,8 +33,8 @@ var (
 	FinishedConfigErr         = errors.New("finished configuration")
 )
 
-var Status = wontFail(json.Marshal(server2.StatusResponse{
-	Version: server2.StatusResponseVersion{
+var Status = wontFail(json.Marshal(server.StatusResponse{
+	Version: server.StatusResponseVersion{
 		Name:     nil,
 		Protocol: CompatibleProtocolVersion,
 	},
@@ -42,8 +42,8 @@ var Status = wontFail(json.Marshal(server2.StatusResponse{
 }))
 
 type Proxy struct {
-	Client, Servee *proto2.Conn
-	Data           *nbt2.Tag
+	Client, Servee *proto.Conn
+	Data           *nbt.Tag
 }
 
 func (p *Proxy) OnAnything(e event.Anything) (err error) {
@@ -51,7 +51,7 @@ func (p *Proxy) OnAnything(e event.Anything) (err error) {
 	if !ok {
 		return
 	}
-	packetInfo, ok := proto2.LookupPacketInfoByType(packet)
+	packetInfo, ok := proto.LookupPacketInfoByType(packet)
 	if !ok {
 		return
 	}
@@ -107,10 +107,10 @@ func (p *Proxy) OnTags(data *v1_21_8.ConfigurationToClientPacketTags) (err error
 	return
 }
 
-func handleClient(c *proto2.Conn) (err error) {
+func handleClient(c *proto.Conn) (err error) {
 	acc := api.NewOfflineAccount("RegistryHunter")
 
-	_, err = server2.ServeLogin(c, server2.WithOtherAccount(acc), server2.WithCompatibleVersions(CompatibleProtocolVersion), server2.WithRawStatus(Status))
+	_, err = server.ServeLogin(c, server.WithOtherAccount(acc), server.WithCompatibleVersions(CompatibleProtocolVersion), server.WithRawStatus(Status))
 	if err != nil {
 		return
 	}
@@ -141,12 +141,12 @@ func handleClient(c *proto2.Conn) (err error) {
 		return
 	}
 	defer f.Close()
-	err = nbt2.WriteUnstructuredFile(f, p.Data)
+	err = nbt.WriteUnstructuredFile(f, p.Data)
 	slog.Info("saved", "file", SaveAs)
 	return
 }
 
 func Run(args []string) error {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	return server2.StartServerWithOnConn(":25566", handleClient)
+	return server.StartServerWithOnConn(":25566", handleClient)
 }

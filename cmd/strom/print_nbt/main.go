@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	nbt2 "github.com/admin-else/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/nbt"
 )
 
 var (
@@ -29,14 +29,14 @@ func Run(args []string) (err error) {
 		return
 	}
 	defer f.Close()
-	n, err := nbt2.ReadUnstructuredFile(f)
+	n, err := nbt.ReadUnstructuredFile(f)
 	if err != nil {
 		return
 	}
 	var b []byte
 	if *HashFormatFlag {
 		bb := bytes.NewBuffer(nil)
-		err = nbt2.PrintSNBTAny(n.Value, bb)
+		err = nbt.PrintSNBTAny(n.Value, bb)
 		if err != nil {
 			return
 		}

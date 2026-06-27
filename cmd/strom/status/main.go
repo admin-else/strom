@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"time"
 
-	client2 "github.com/admin-else/strom/mc/client"
+	"github.com/admin-else/strom/mc/client"
 	"github.com/admin-else/strom/mc/event"
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
@@ -46,7 +46,7 @@ func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
 // So ignore the resource leak warning. And maybe attach a warn ignore comment.
 // It does not resolve SRV records.
 func StatusRaw(addr string) (s *StatusClient, err error) {
-	c, err := client2.ConnectVersionLess(addr)
+	c, err := client.ConnectVersionLess(addr)
 	if err != nil {
 		return
 	}
@@ -61,7 +61,7 @@ func StatusRaw(addr string) (s *StatusClient, err error) {
 	s.RegisterCriticalUntilLatest(s.OnStatus)
 	s.RegisterCriticalUntilLatest(s.OnPong)
 
-	p, err := client2.MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
+	p, err := client.MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {
 		return
 	}
@@ -82,7 +82,7 @@ func Run(args []string) (err error) {
 		return
 	}
 	if *srvFlag {
-		*addrFlag, err = client2.DoDnsSimple(*addrFlag)
+		*addrFlag, err = client.DoDnsSimple(*addrFlag)
 		if err != nil {
 			return
 		}

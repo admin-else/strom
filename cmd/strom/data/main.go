@@ -7,7 +7,7 @@ import (
 	"os"
 	"slices"
 
-	data2 "github.com/admin-else/strom/mc/data"
+	mcdata "github.com/admin-else/strom/mc/data"
 	"github.com/admin-else/strom/mc/proto_generated"
 	"github.com/admin-else/strom/mc/util"
 )
@@ -39,11 +39,11 @@ func Run(args []string) (err error) {
 	case 0: // print available versions
 		dataValues = proto_generated.SupportedVersions
 	case 1: // print available data for version
-		dataValues = slices.Collect(maps.Keys(data2.Paths.Data[args[0]]))
+		dataValues = slices.Collect(maps.Keys(mcdata.Paths.Data[args[0]]))
 	case 2:
-		err = data2.LoadVersionedJson(args[0], args[1], &dataValues)
+		err = mcdata.LoadVersionedJson(args[0], args[1], &dataValues)
 	case 3:
-		err = data2.LoadVersionedJson(args[0], args[1], &dataValues)
+		err = mcdata.LoadVersionedJson(args[0], args[1], &dataValues)
 		if err != nil {
 			return
 		}
@@ -68,7 +68,7 @@ func Run(args []string) (err error) {
 		}
 		dataValues = result
 	case 4, 5:
-		err = data2.LoadVersionedJson(args[0], args[1], &dataValues)
+		err = mcdata.LoadVersionedJson(args[0], args[1], &dataValues)
 		if err != nil {
 			return
 		}

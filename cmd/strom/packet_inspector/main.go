@@ -7,14 +7,14 @@ import (
 	"os"
 	"time"
 
-	api2 "github.com/admin-else/strom/mc/api"
-	client2 "github.com/admin-else/strom/mc/client"
+	"github.com/admin-else/strom/mc/api"
+	"github.com/admin-else/strom/mc/client"
 	"github.com/admin-else/strom/mc/event"
 	"github.com/admin-else/strom/mc/nbt"
-	proto2 "github.com/admin-else/strom/mc/proto"
+	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
-	server2 "github.com/admin-else/strom/mc/server"
+	"github.com/admin-else/strom/mc/server"
 	"github.com/admin-else/strom/mc/text"
 )
 
@@ -28,7 +28,7 @@ var ListenAddr = Cmd.String("listen", "127.0.0.1:25566", "address to listen on")
 var TrueForward = Cmd.Bool("true-forward", false, "forward packets without modification -name and custom server status wont work")
 
 type Proxy struct {
-	Client, Servee *proto2.Conn
+	Client, Servee *proto.Conn
 	Data           nbt.Tag
 }
 
@@ -74,7 +74,7 @@ func (p *Proxy) OnAnything(e event.Anything) (err error) {
 	if !ok {
 		return
 	}
-	packetInfo, ok := proto2.LookupPacketInfoByType(packet)
+	packetInfo, ok := proto.LookupPacketInfoByType(packet)
 	if !ok {
 		return
 	}
@@ -145,12 +145,12 @@ func (p *Proxy) OnCompress(packet *v1_21_11.LoginToClientPacketCompress) (err er
 	return
 }
 
-var StatusResponse = server2.StatusResponse{
-	Version: server2.StatusResponseVersion{
+var StatusResponse = server.StatusResponse{
+	Version: server.StatusResponseVersion{
 		Name:     text.Pretty("STROM"),
 		Protocol: 772,
 	},
-	Players:            server2.StatusResponsePlayers{},
+	Players:            server.StatusResponsePlayers{},
 	Description:        text.Pretty("Packet spy forwards to " + *TargetAddr),
 	Favicon:            "",
 	EnforcesSecureChat: false,
@@ -162,33 +162,33 @@ func Run(args []string) (err error) {
 		return
 	}
 	slog.Info("Starting packet inspector", "listen", *ListenAddr)
-	err = server2.StartServerWithOnConn(*ListenAddr, func(serveeConn *proto2.Conn) (err error) {
+	err = server.StartServerWithOnConn(*ListenAddr, func(serveeConn *proto.Conn) (err error) {
 		p := &Proxy{Servee: serveeConn, Client: nil}
-		var acc = api2.NewOfflineAccount(*OfflineNameFlag)
+		var acc = api.NewOfflineAccount(*OfflineNameFlag)
 		if !*TrueForward {
 			if *Token != "" {
-				acc, err = api2.NewAccountFromYGG(*Token)
+				acc, err = api.NewAccountFromYGG(*Token)
 				if err != nil {
 					return
 				}
 			}
-			_, err = server2.ServeLogin(serveeConn, server2.WithOtherAccount(acc), server2.WithStatus(StatusResponse), server2.WithoutOnlineMode(), server2.WithoutEncryption())
+			_, err = server.ServeLogin(serveeConn, server.WithOtherAccount(acc), server.WithStatus(StatusResponse), server.WithoutOnlineMode(), server.WithoutEncryption())
 			if err != nil {
 				return
 			}
 		}
 
-		*TargetAddr, err = client2.DoDnsSimple(*TargetAddr)
+		*TargetAddr, err = client.DoDnsSimple(*TargetAddr)
 		if err != nil {
 			return
 		}
-		c, err := client2.Connect(*TargetAddr)
+		c, err := client.Connect(*TargetAddr)
 		if err != nil {
 			return
 		}
 		defer c.Close()
 		if !*TrueForward {
-			err = client2.LoginRaw(c, acc)
+			err = client.LoginRaw(c, acc)
 			if err != nil {
 				return
 			}

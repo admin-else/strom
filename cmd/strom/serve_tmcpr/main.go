@@ -13,7 +13,7 @@ import (
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto/replay"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
-	server2 "github.com/admin-else/strom/mc/server"
+	"github.com/admin-else/strom/mc/server"
 )
 
 type Server struct {
@@ -30,12 +30,12 @@ var (
 func Limbo(c *proto.Conn, tmcprPath string) (err error) {
 	s := &Server{Conn: c}
 
-	_, err = server2.ServeLogin(s.Conn, server2.WithoutOnlineMode())
+	_, err = server.ServeLogin(s.Conn, server.WithoutOnlineMode())
 	if err != nil {
 		return
 	}
 
-	err = server2.ServeConfig(s.Conn)
+	err = server.ServeConfig(s.Conn)
 	if err != nil {
 		return
 	}
@@ -91,7 +91,7 @@ func Run(args []string) error {
 		return nil
 	}
 
-	return server2.StartServerWithOnConn(*bindAddr, func(c *proto.Conn) error {
+	return server.StartServerWithOnConn(*bindAddr, func(c *proto.Conn) error {
 		return Limbo(c, *tmcprFile)
 	})
 }
