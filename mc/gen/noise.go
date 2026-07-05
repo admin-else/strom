@@ -127,7 +127,7 @@ func PerlinNoiseFromXoroshiro(x Xoroshiro) (p PerlinNoise) {
 		p.d[i] = p.d[j]
 		p.d[j] = n
 	}
-	p.d[256] = 0
+	p.d[256] = p.d[0]
 	i2 := math.Floor(p.yoffset)
 	d2 := p.yoffset - i2
 	p.h2 = uint8(int(i2))

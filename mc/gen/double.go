@@ -6,7 +6,7 @@ type DoublePerlin struct {
 	B         Octave
 }
 
-func DoublePerlinFromXoroshiro(x Xoroshiro, amplitudes []float64, omin int, lenn int, nmax int) (d DoublePerlin) {
+func DoublePerlinFromXoroshiro(x *Xoroshiro, amplitudes []float64, omin int, lenn int, nmax int) (d DoublePerlin) {
 	na := -1
 	nb := -1
 	if nmax > 0 {
@@ -22,9 +22,9 @@ func DoublePerlinFromXoroshiro(x Xoroshiro, amplitudes []float64, omin int, lenn
 	for i := 0; amplitudes[i] == 0.0; i++ {
 		lenn--
 	}
-	var ampInits = []float64{ // (5 ./ 3) * len / (len + 1), len = 2..16
-		0, 5 / 6, 10 / 9, 15 / 12, 20 / 15, 25 / 18, 30 / 21, 35 / 24, 40 / 27, 45 / 30,
-		50 / 33, 55 / 36, 60 / 39, 65 / 42, 70 / 45, 75 / 48, 80 / 51,
+	var ampInits = []float64{
+		0, 5. / 6, 10. / 9, 15. / 12, 20. / 15, 25. / 18, 30. / 21, 35. / 24, 40. / 27, 45. / 30,
+		50. / 33, 55. / 36, 60. / 39, 65. / 42, 70. / 45, 75. / 48, 80. / 51,
 	}
 	d.Amplitude = ampInits[lenn]
 	return
