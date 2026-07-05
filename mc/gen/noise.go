@@ -50,6 +50,10 @@ func lerp(part, from, to float64) float64 {
 	return from + part*(to-from)
 }
 
+func lerp32(part, from, to float32) float32 {
+	return from + part*(to-from)
+}
+
 func (n PerlinNoise) Sample(x, y, z float64, yamp, ymin float64) (v float64) {
 	var h1, h2, h3 uint8
 	var t1, t2, t3 float64
