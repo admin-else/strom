@@ -1,5 +1,7 @@
 package gen
 
+import "math"
+
 type NoiseParam int
 
 const (
@@ -54,6 +56,10 @@ func BiomeNoiseFromXoroshiro(x Xoroshiro, large bool) (v BiomeNoise) {
 	return
 }
 
+func peaksAndValleys(weirdness float64) float64 {
+	return -(math.Abs(math.Abs(weirdness)-0.6666667) - 0.33333334) * 3.0
+}
+
 func (b BiomeNoise) Sample(x, y, z int) (t, h, c, e, d, w float64, combinedData [6]int64, id int) {
 	px := float64(x)
 	pz := float64(z)
@@ -65,6 +71,9 @@ func (b BiomeNoise) Sample(x, y, z int) (t, h, c, e, d, w float64, combinedData 
 	w = b.Weirdness.Sample(px, 0, pz)
 	t = b.Temperature.Sample(px, 0, pz)
 	h = b.Humidity.Sample(px, 0, pz)
+
+	off := float64(BiomeDepthSpline.Sample([]float32{float32(c), float32(e), float32(peaksAndValleys(w)), float32(w)})) + 0.015
+	d = 1.0 - (float64(y)*4)/128.0 - 83.0/160.0 + off
 
 	combinedData = [6]int64{
 		int64(float32(t) * 10000.0),

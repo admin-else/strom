@@ -38,7 +38,7 @@ func TestBiome(t *testing.T) {
 	b := BiomeNoiseFromXoroshiro(x, false)
 	_, _, _, _, _, _, combinedData, _ := b.Sample(-1, -16, 0)
 
-	expected := [6]int64{3238, 3521, 2364, 1396, 0, 2202}
+	expected := [6]int64{3238, 3521, 2364, 1396, 10062, 2202}
 	if combinedData != expected {
 		t.Errorf("combinedData = %v, want %v", combinedData, expected)
 	}
