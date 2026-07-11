@@ -1,6 +1,10 @@
 package gen
 
-import "math"
+import (
+	"math"
+
+	"github.com/admin-else/strom/mc/data"
+)
 
 type NoiseParam int
 
@@ -91,8 +95,8 @@ func (b BiomeNoise) Sample(x, y, z int) (t, h, c, e, d, w float64, combinedData 
 
 // SampleBiome samples the climate noise at (x, y, z) and resolves it through
 // the supplied multi-noise parameter list. preset should be one of the
-// MultiNoise* constants.
-func (b BiomeNoise) SampleBiome(x, y, z int, data *MultiNoiseData, preset string) (string, error) {
+// data.MultiNoise* constants.
+func (b BiomeNoise) SampleBiome(x, y, z int, mnd *data.MultiNoiseData, preset string) (string, error) {
 	_, _, _, _, _, _, combined, _ := b.Sample(x, y, z)
-	return data.Lookup(preset, combined[0], combined[1], combined[2], combined[3], combined[4], combined[5])
+	return mnd.Lookup(preset, combined[0], combined[1], combined[2], combined[3], combined[4], combined[5])
 }

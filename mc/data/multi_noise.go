@@ -1,10 +1,8 @@
-package gen
+package data
 
 import (
 	"fmt"
 	"math"
-
-	"github.com/admin-else/strom/mc/data"
 )
 
 // MultiNoisePreset names the two built-in multi-noise parameter lists.
@@ -59,7 +57,7 @@ type rawMultiNoise map[string][]rawEntry
 // "multi_noise_biome_source_parameter_list" key in minecraft-data.
 func LoadMultiNoise(version string) (*MultiNoiseData, error) {
 	var raw rawMultiNoise
-	if err := data.LoadVersionedJson(version, "multi_noise_biome_source_parameter_list", &raw); err != nil {
+	if err := LoadVersionedJson(version, "multi_noise_biome_source_parameter_list", &raw); err != nil {
 		return nil, fmt.Errorf("load multi_noise for %s: %w", version, err)
 	}
 
