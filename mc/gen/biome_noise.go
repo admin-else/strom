@@ -60,6 +60,9 @@ func peaksAndValleys(weirdness float64) float64 {
 	return -(math.Abs(math.Abs(weirdness)-0.6666667) - 0.33333334) * 3.0
 }
 
+// Sample returns the raw climate parameters at the block position.
+// The returned id is currently unused and always 0; use SampleBiome to resolve
+// the biome from a multi-noise parameter list.
 func (b BiomeNoise) Sample(x, y, z int) (t, h, c, e, d, w float64, combinedData [6]int64, id int) {
 	px := float64(x)
 	pz := float64(z)
@@ -84,4 +87,12 @@ func (b BiomeNoise) Sample(x, y, z int) (t, h, c, e, d, w float64, combinedData 
 		int64(float32(w) * 10000.0),
 	}
 	return
+}
+
+// SampleBiome samples the climate noise at (x, y, z) and resolves it through
+// the supplied multi-noise parameter list. preset should be one of the
+// MultiNoise* constants.
+func (b BiomeNoise) SampleBiome(x, y, z int, data *MultiNoiseData, preset string) (string, error) {
+	_, _, _, _, _, _, combined, _ := b.Sample(x, y, z)
+	return data.Lookup(preset, combined[0], combined[1], combined[2], combined[3], combined[4], combined[5])
 }
