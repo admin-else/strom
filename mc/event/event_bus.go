@@ -4,7 +4,6 @@ package event
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"reflect"
 )
@@ -153,7 +152,6 @@ func (l *Loop) FireFound(event any) (found bool, err error) {
 			errV := handler.Call([]reflect.Value{reflect.ValueOf(event)})[0]
 			if !errV.IsNil() {
 				err = errV.Interface().(error)
-				err = errors.Join(fmt.Errorf("event handler failed at: %T", event), err)
 				return
 			}
 		}
@@ -239,6 +237,7 @@ func NewLoop() (l *Loop) {
 	return NewLoopCtx(context.Background())
 }
 
+// NewLoopCtx creates a new Loop instance with a cancellable context, using the provided context or context.Background if nil.
 func NewLoopCtx(ctx context.Context) (l *Loop) {
 	if ctx == nil {
 		ctx = context.Background()

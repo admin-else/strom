@@ -178,11 +178,11 @@ func Run(args []string) (err error) {
 			}
 		}
 
-		*TargetAddr, err = client.DoDnsSimple(*TargetAddr)
+		*TargetAddr, _, _, err = client.DoDNSChecked(nil, *TargetAddr, nil)
 		if err != nil {
 			return
 		}
-		c, err := client.Connect(*TargetAddr)
+		c, err := client.Connect(nil, *TargetAddr, "")
 		if err != nil {
 			return
 		}

@@ -13,6 +13,7 @@ import (
 	"github.com/admin-else/strom/cmd/strom/data"
 	"github.com/admin-else/strom/cmd/strom/extract_mca"
 	"github.com/admin-else/strom/cmd/strom/mca_to_tmcpr"
+	"github.com/admin-else/strom/cmd/strom/messenger"
 	"github.com/admin-else/strom/cmd/strom/offline_uuid"
 	"github.com/admin-else/strom/cmd/strom/packet_info"
 	"github.com/admin-else/strom/cmd/strom/packet_inspector"
@@ -63,6 +64,7 @@ var subcommands = map[string]func(args []string) error{
 	"serve-world":          serve_world.Run,
 	"mca-to-tmcpr":         mca_to_tmcpr.Run,
 	"serve-tmcpr":          serve_tmcpr.Run,
+	"messenger":            messenger.Run,
 }
 
 func Help(args []string) (err error) {
@@ -75,7 +77,7 @@ func Help(args []string) (err error) {
 func mainE() (err error) {
 	subcommands["help"] = Help
 	args := os.Args
-	//args = []string{"TEST", "packet-spy", "-addr", "127.0.0.1:25571", "-true-forward"}
+	args = []string{"TEST", "messenger", "-addr", "localhost"}
 
 	if len(args) < 2 {
 		err = ExpectedASubcommandErr

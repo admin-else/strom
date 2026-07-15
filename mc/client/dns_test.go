@@ -15,7 +15,7 @@ func TestDoDNS(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Logf("Testing %s", c.Input)
-		_, host, portN, err := DoDns(c.Input)
+		_, host, portN, err := DoDNSChecked(nil, c.Input, nil)
 		if err != nil {
 			t.Error(err)
 			continue

@@ -40,7 +40,7 @@ func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
 // So ignore the resource leak warning. And maybe attach a warn ignore comment.
 // It does not resolve SRV records.
 func StatusRaw(ctx context.Context, addr string) (s *StatusClient, err error) {
-	c, err := ConnectVersionLess(addr)
+	c, err := ConnectVersionLess(ctx, addr)
 	if err != nil {
 		return
 	}
@@ -81,8 +81,8 @@ func StatusNoDns(addr string) (status server.StatusResponse, err error) {
 }
 
 // Status resolves the status of the minecraft server at the given address.
-func Status(addr string) (status server.StatusResponse, err error) {
-	addr, err = DoDnsSimple(addr)
+func Status(ctx context.Context, addr string) (status server.StatusResponse, err error) {
+	addr, _, _, err = DoDNSChecked(ctx, addr, nil)
 	if err != nil {
 		return
 	}

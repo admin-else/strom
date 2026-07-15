@@ -46,7 +46,7 @@ func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
 // So ignore the resource leak warning. And maybe attach a warn ignore comment.
 // It does not resolve SRV records.
 func StatusRaw(addr string) (s *StatusClient, err error) {
-	c, err := client.ConnectVersionLess(addr)
+	c, err := client.ConnectVersionLess(nil, addr)
 	if err != nil {
 		return
 	}
@@ -82,7 +82,7 @@ func Run(args []string) (err error) {
 		return
 	}
 	if *srvFlag {
-		*addrFlag, err = client.DoDnsSimple(*addrFlag)
+		*addrFlag, _, _, err = client.DoDNSChecked(nil, *addrFlag, nil)
 		if err != nil {
 			return
 		}

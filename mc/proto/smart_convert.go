@@ -63,32 +63,40 @@ func SmartConvert(from reflect.Value, to reflect.Type) (ret reflect.Value) {
 
 // RegisterUntilLatest registers a handler for all versions between the passed in packet version and the latest supported version.
 // Warning: If a bad handler is passed in, the program will panic.
-func (c *Conn) RegisterUntilLatest(h any) {
-	eventType, hv := event.ValidateHandler(h)
-	c.RegisterUntilLow(eventType, hv, LatestVersion, false)
+func (c *Conn) RegisterUntilLatest(hs ...any) {
+	for _, h := range hs {
+		eventType, hv := event.ValidateHandler(h)
+		c.RegisterUntilLow(eventType, hv, LatestVersion, false)
+	}
 }
 
 // RegisterUntil registers a handler for all versions between the passed in packet version and the specified version.
 // Warning: If a bad handler is passed in, the program will panic.
-func (c *Conn) RegisterUntil(h any, until string) {
-	eventType, hv := event.ValidateHandler(h)
-	c.RegisterUntilLow(eventType, hv, until, false)
+func (c *Conn) RegisterUntil(until string, hs ...any) {
+	for _, h := range hs {
+		eventType, hv := event.ValidateHandler(h)
+		c.RegisterUntilLow(eventType, hv, until, false)
+	}
 }
 
 // RegisterCriticalUntilLatest registers a handler for all versions between the passed in packet version and the latest supported version.
 // If this handler returns an error, the connection will be closed.
 // Warning: If a bad handler is passed in, the program will panic.
-func (c *Conn) RegisterCriticalUntilLatest(h any) {
-	eventType, hv := event.ValidateHandler(h)
-	c.RegisterUntilLow(eventType, hv, LatestVersion, true)
+func (c *Conn) RegisterCriticalUntilLatest(hs ...any) {
+	for _, h := range hs {
+		eventType, hv := event.ValidateHandler(h)
+		c.RegisterUntilLow(eventType, hv, LatestVersion, true)
+	}
 }
 
 // RegisterCriticalUntil registers a handler for all versions between the passed in packet version and the specified version.
 // If this handler returns an error, the connection will be closed.
 // Warning: If a bad handler is passed in, the program will panic.
-func (c *Conn) RegisterCriticalUntil(h any, until string) {
-	eventType, hv := event.ValidateHandler(h)
-	c.RegisterUntilLow(eventType, hv, until, true)
+func (c *Conn) RegisterCriticalUntil(until string, hs ...any) {
+	for _, h := range hs {
+		eventType, hv := event.ValidateHandler(h)
+		c.RegisterUntilLow(eventType, hv, until, true)
+	}
 }
 
 func (c *Conn) RegisterUntilLow(eventType reflect.Type, hv reflect.Value, until string, critical bool) {

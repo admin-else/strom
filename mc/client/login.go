@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -155,24 +156,55 @@ func LoginRaw(c *proto.Conn, account *api.Account) (err error) {
 	return
 }
 
-func LoginNoSrv(connectTo string, account *api.Account) (c *proto.Conn, err error) {
-	c, err = Connect(connectTo)
-	if err != nil {
-		return
+func WithoutDns() func(ls *loginSettings) {
+	return func(ls *loginSettings) {
+		ls.NoDns = true
 	}
-	err = LoginRaw(c, account)
-	return
 }
 
-func Login(connectTo string, account *api.Account) (c *proto.Conn, err error) {
-	connectTo, err = DoDnsSimple(connectTo)
-	if err != nil {
-		return
+func WithContext(ctx context.Context) func(ls *loginSettings) {
+	return func(ls *loginSettings) {
+		ls.Ctx = ctx
 	}
-	c, err = Connect(connectTo)
+}
+
+func WithVersion(version string) func(ls *loginSettings) {
+	return func(ls *loginSettings) {
+		ls.Version = version
+	}
+}
+
+type loginSettings struct {
+	NoDns        bool
+	Ctx          context.Context
+	Version      string
+	IgnoreConfig bool
+}
+
+func Login(connectTo string, account *api.Account, settings ...func(ls *loginSettings)) (c *proto.Conn, err error) {
+	ls := &loginSettings{}
+
+	for _, setting := range settings {
+		setting(ls)
+	}
+
+	if !ls.NoDns {
+		connectTo, _, _, err = DoDNSChecked(ls.Ctx, connectTo, nil)
+		if err != nil {
+			return
+		}
+	}
+
+	c, err = Connect(ls.Ctx, connectTo, ls.Version)
 	if err != nil {
 		return
 	}
 	err = LoginRaw(c, account)
+	if err != nil {
+		return
+	}
+	if !ls.IgnoreConfig {
+		err = IgnoreConfig(c)
+	}
 	return
 }

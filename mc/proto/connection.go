@@ -164,7 +164,7 @@ func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 }
 
 func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packetInfo proto_base.PacketInfo) (convertedPacket proto_base.EncodeDecodeAble, packetInfoReal proto_base.PacketInfo, err error) {
-	packetInfoReal, found := LookupPacketInfoByNameProtocolVersionAndState(packetInfo.Name, c.ProtocolVersion, c.State())
+	packetInfoReal, found := LookupPacketInfoByNameProtocolVersionStateAndDirection(packetInfo.Name, c.ProtocolVersion, c.State(), packetInfo.Direction)
 	if !found {
 		err = PacketDoesntExistInFutureVersionErr
 		return
