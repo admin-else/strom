@@ -3,6 +3,7 @@ package messenger
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -17,10 +18,17 @@ import (
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
 )
 
+func stror(a, b string) string {
+	if a != "" {
+		return a
+	}
+	return b
+}
+
 var (
 	cmd           = flag.NewFlagSet("status", flag.ContinueOnError)
 	connectToFlag = cmd.String("addr", "", "server address to connect to")
-	accFlag       = cmd.String("acc", "strom_messenger", "the name to use if longer will be treated as ygg token")
+	accFlag       = cmd.String("acc", stror(os.Getenv("STROM_ACC"), "strom_messenger"), "the name to use if longer will be treated as ygg token")
 )
 
 type Messenger struct {
