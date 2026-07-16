@@ -13,9 +13,9 @@ import (
 )
 
 func TestLevel(t *testing.T) {
-	f, err := os.Open("./testdata/testworld/level.dat")
+	f, err := os.Open("../../../.devres/anvil_testdata/testworld/level.dat")
 	if err != nil {
-		t.Fatal(err)
+		t.Skipf("testdata not available: %v", err)
 	}
 	defer f.Close()
 
@@ -27,9 +27,9 @@ func TestLevel(t *testing.T) {
 }
 
 func TestRegionFile(t *testing.T) {
-	f, err := os.Open("./testdata/testworld/region/r.0.0.mca")
+	f, err := os.Open("../../../.devres/anvil_testdata/testworld/region/r.0.0.mca")
 	if err != nil {
-		t.Fatal(err)
+		t.Skipf("testdata not available: %v", err)
 	}
 	defer f.Close()
 	ch, err := anvil2.ReadChunkHeader(f)

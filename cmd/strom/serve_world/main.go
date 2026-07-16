@@ -52,7 +52,7 @@ func GetChunkFromMca(x, z int32, version string) (b []byte, err error) {
 		z += anvil.ChunksWidthRegionFile
 	}
 
-	f, err := os.Open(fmt.Sprintf("./level/anvil/testdata/securechattestworld/region/r.%v.%v.mca", xmca, zmca))
+	f, err := os.Open(fmt.Sprintf("./.devres/anvil_testdata/securechattestworld/region/r.%v.%v.mca", xmca, zmca))
 	if err != nil {
 		return
 	}
