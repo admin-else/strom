@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// UUIDv3 Variation of google.uuid.NewHash
+// uuidV3 Variation of google.uuid.NewHash
 // We need this because we want a 14-byte namespace and Google forces 16
-func UUIDv3(space []byte, data []byte) uuid.UUID {
+func uuidV3(space []byte, data []byte) uuid.UUID {
 	h := md5.New()
 	h.Reset()
 	h.Write(space) //nolint:errcheck
@@ -22,5 +22,5 @@ func UUIDv3(space []byte, data []byte) uuid.UUID {
 }
 
 func FromOfflinePlayer(displayName string) uuid.UUID {
-	return UUIDv3([]byte("OfflinePlayer:"), []byte(displayName))
+	return uuidV3([]byte("OfflinePlayer:"), []byte(displayName))
 }

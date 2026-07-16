@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"log/slog"
 	"os"
 
 	"github.com/admin-else/strom/mc/api"
@@ -52,7 +53,7 @@ func Run(args []string) (err error) {
 			return
 		}
 	} else {
-		err = PleaseProvideArgumentErr
+		slog.Info("account", "name", a.Name, "uuid", a.Uuid)
 		return
 	}
 	err = json.NewEncoder(os.Stdout).Encode(data)

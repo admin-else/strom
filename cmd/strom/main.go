@@ -77,7 +77,7 @@ func Help(args []string) (err error) {
 func mainE() (err error) {
 	subcommands["help"] = Help
 	args := os.Args
-	args = []string{"TEST", "messenger", "-addr", "localhost"}
+	//args = []string{"TEST", "messenger", "-addr", "localhost"}
 
 	if len(args) < 2 {
 		err = ExpectedASubcommandErr
