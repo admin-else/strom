@@ -8,6 +8,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"go/format"
 	"io"
 	"log/slog"
 	"os"
@@ -32,32 +33,42 @@ var (
 //go:embed failed_packet.go.tmpl
 var TestSrcF string
 
-func SaveUnCodeAbleAsTest(packet *proto.UnCodablePacket) {
+func SaveUnCodeAbleAsTest(packet *proto.UnCodablePacket) (err error) {
+	if packet.Info.Type == nil {
+		slog.Warn("skipping test for unknown packet id", "packet_id", packet.Info.PacketId, "state", packet.Info.State, "error", packet.Err)
+		return
+	}
+
 	hUntrimmed := sha256.Sum256(packet.Data)
 	h := hUntrimmed[:8]
-	f, err := os.Create(fmt.Sprintf(*CreateTestsPath+"/%v_%10x_test.go", len(packet.Data), h))
-	if err != nil {
-		panic(err)
+	if err = os.MkdirAll(*CreateTestsPath, 0755); err != nil {
+		return
 	}
 
 	ret, err := data.LookUpVersionByProtocolVersion(packet.Info.ProtocolVersion)
 	if err != nil {
-		panic(err)
+		return
 	}
 	goPackage := "v" + strings.ReplaceAll(ret.MinecraftVersion, ".", "_")
+	typeName := reflect.TypeOf(packet.Info.Type).Elem().Name()
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer f.Close()
-	_, err = fmt.Fprintf(f, TestSrcF, goPackage, packet.Err, h, reflect.TypeOf(packet.Info.Type).Elem().Name(), packet.Data)
-	if err != nil {
-		panic(err)
+	src := fmt.Sprintf(TestSrcF, goPackage, packet.Err, h, typeName, packet.Data)
+	formatted, formatErr := format.Source([]byte(src))
+	if formatErr != nil {
+		formatted = []byte(src)
 	}
-	slog.Info("Packet failed to parse", "error", packet.Err, "saved", f.Name(), "data", fmt.Sprintf("%q", packet.Data))
+
+	filePath := fmt.Sprintf(*CreateTestsPath+"/%v_%10x_test.go", len(packet.Data), h)
+	if err = os.WriteFile(filePath, formatted, 0644); err != nil {
+		return
+	}
+	slog.Info("Packet failed to parse", "error", packet.Err, "saved", filePath, "data", fmt.Sprintf("%q", packet.Data))
+	return
 }
 
 var state = proto_base.Login
 
-func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
+func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, i proto_base.PacketInfo, err error) {
 	var timestamp, length uint32
 	err = binary.Read(r, binary.BigEndian, &timestamp)
 	if err != nil {
@@ -87,15 +98,10 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 	// indexafterid represents how many bytes we've read so far
 	indexafterid := int(b.Size()) - b.Len()
 
-	i, ok := proto.LookUpTypeByPacketInfo(proto_base.ToClient, state, packetId, int32(*ProtocolVersion))
+	var ok bool
+	i, ok = proto.LookUpTypeByPacketInfo(proto_base.ToClient, state, packetId, int32(*ProtocolVersion))
 	if !ok {
 		packet = &proto.UnCodablePacket{Err: proto.BadPacketIdErr, Data: packetData, Info: i}
-		return
-	}
-	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
-	err = packet.Decode(b)
-	if err != nil {
-		packet = &proto.UnCodablePacket{Err: err, Data: packetData[indexafterid:], Info: i}
 		return
 	}
 	switch i.Name {
@@ -103,6 +109,16 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, err error) {
 		state = proto_base.Configuration
 	case "finish_configuration":
 		state = proto_base.Play
+	}
+	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
+	err = packet.Decode(b)
+	if err != nil {
+		packet = &proto.UnCodablePacket{Err: err, Data: packetData[indexafterid:], Info: i}
+		return
+	}
+	if b.Len() != 0 {
+		packet = &proto.UnCodablePacket{Err: proto.PacketNotFullyDecodedErr, Data: packetData[indexafterid:], Info: i}
+		return
 	}
 	return
 }
@@ -137,21 +153,22 @@ func Run(args []string) (err error) {
 	var totalPackets, failedPackets int
 	for {
 		var packet proto_base.EncodeDecodeAble
-		packet, err = UnpackPacket(f)
+		var info proto_base.PacketInfo
+		packet, info, err = UnpackPacket(f)
 		unCodablePacket, ok := packet.(*proto.UnCodablePacket)
 		if ok {
+			slog.Error("failed to decode packet", "error", err, "packet_name", info.Name)
 			if *CreateTestsPath != "" {
-				SaveUnCodeAbleAsTest(unCodablePacket)
+				err = SaveUnCodeAbleAsTest(unCodablePacket)
+				if err != nil {
+					slog.Error("failed to save uncodable packet as test", "error", err)
+				}
 			}
 			failedPackets++
 		}
 
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Printf("Packet: %#v\n", packet)
-		}
-		if errors.Is(err, io.EOF) {
+		fmt.Printf("Packet: %#v\n", packet)
+		if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
 			break
 		}
 		totalPackets++
