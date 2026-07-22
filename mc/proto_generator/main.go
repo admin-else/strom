@@ -429,7 +429,7 @@ func GenerateVersions(versions []string) (err error) {
 }
 
 func main() {
-	err := GenerateVersions([]string{"1.21.8", "1.21.9", "1.21.11"})
+	err := GenerateVersions([]string{"1.21.8", "1.21.9", "1.21.11", "26.1"})
 	if err != nil {
 		panic(err)
 	}

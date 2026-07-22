@@ -26,6 +26,7 @@ var (
 	ProtocolVersion = cmd.Int("protocol", -1, "The protocol version")
 	CreateTestsPath = cmd.String("create-tests", "", "")
 	StateFlag       = cmd.String("state", "login", "Initial state: login, config, play")
+	DirectionFlag   = cmd.String("direction", "clientbound", "Packet direction: clientbound (ToClient) or serverbound (ToServer)")
 )
 
 // TODO: maybe use the proto replay api
@@ -67,6 +68,7 @@ func SaveUnCodeAbleAsTest(packet *proto.UnCodablePacket) (err error) {
 }
 
 var state = proto_base.Login
+var direction = proto_base.ToClient
 
 func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, i proto_base.PacketInfo, err error) {
 	var timestamp, length uint32
@@ -99,16 +101,26 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, i proto_base
 	indexafterid := int(b.Size()) - b.Len()
 
 	var ok bool
-	i, ok = proto.LookUpTypeByPacketInfo(proto_base.ToClient, state, packetId, int32(*ProtocolVersion))
+	i, ok = proto.LookUpTypeByPacketInfo(direction, state, packetId, int32(*ProtocolVersion))
 	if !ok {
 		packet = &proto.UnCodablePacket{Err: proto.BadPacketIdErr, Data: packetData, Info: i}
 		return
 	}
-	switch i.Name {
-	case "success":
-		state = proto_base.Configuration
-	case "finish_configuration":
-		state = proto_base.Play
+	switch direction {
+	case proto_base.ToClient:
+		switch i.Name {
+		case "success":
+			state = proto_base.Configuration
+		case "finish_configuration":
+			state = proto_base.Play
+		}
+	case proto_base.ToServer:
+		switch i.Name {
+		case "login_acknowledged":
+			state = proto_base.Configuration
+		case "finish_configuration":
+			state = proto_base.Play
+		}
 	}
 	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
 	err = packet.Decode(b)
@@ -143,6 +155,14 @@ func Run(args []string) (err error) {
 		state = proto_base.Play
 	default:
 		return fmt.Errorf("unknown state: %s", *StateFlag)
+	}
+	switch *DirectionFlag {
+	case "clientbound", "to-client":
+		direction = proto_base.ToClient
+	case "serverbound", "to-server":
+		direction = proto_base.ToServer
+	default:
+		return fmt.Errorf("unknown direction: %s", *DirectionFlag)
 	}
 	f, err := os.Open(*FileFlag)
 	if err != nil {
