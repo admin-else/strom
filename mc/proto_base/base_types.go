@@ -240,15 +240,6 @@ type EncodeDecodeAble interface {
 	Decode(r io.ReadSeeker) (err error)
 }
 
-type Void struct{}
-
-func (v Void) Encode(w io.Writer) (err error) {
-	return
-}
-func (v Void) Decode(r io.ReadSeeker) (err error) {
-	return
-}
-
 type PacketInfo struct {
 	Type            EncodeDecodeAble
 	Name            string

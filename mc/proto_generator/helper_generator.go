@@ -33,7 +33,7 @@ func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err er
 		typeName := p.TName
 		var typeExpr ast.Expr
 		if p.PacketDef == "void" {
-			typeExpr = Selector("proto_base", "Void")
+			typeExpr = NewStruct()
 		} else {
 			typeExpr = Selector(vUnderscore, typeName)
 		}
