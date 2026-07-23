@@ -383,11 +383,11 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 
 func generateVersion(v string) (packetInfos []PacketInfo, err error) {
 	vUnderscore := strings.ReplaceAll(v, ".", "_")
-	err = os.MkdirAll("proto_generated/v"+vUnderscore, 0755)
+	err = os.MkdirAll("mc/proto_generated/v"+vUnderscore, 0755)
 	if err != nil {
 		return
 	}
-	f, err := os.Create("proto_generated/v" + vUnderscore + "/proto.go")
+	f, err := os.Create("mc/proto_generated/v" + vUnderscore + "/proto.go")
 	if err != nil {
 		return
 	}
@@ -408,11 +408,11 @@ func generateVersion(v string) (packetInfos []PacketInfo, err error) {
 }
 
 func GenerateVersions(versions []string) (err error) {
-	err = os.RemoveAll("proto_generated/")
+	err = os.RemoveAll("mc/proto_generated/")
 	if err != nil {
 		return
 	}
-	err = os.MkdirAll("proto_generated/", 0755)
+	err = os.MkdirAll("mc/proto_generated/", 0755)
 	if err != nil {
 		return
 	}

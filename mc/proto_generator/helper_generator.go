@@ -57,7 +57,7 @@ func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err er
 	}
 	AppendDecl(f, VarValues("SupportedVersions", CompLit(Slice(Ident("string")), supportedVersionsExprs)))
 	AppendDecl(f, VarValues("Packets", CompLit(Slice(Selector("proto_base", "PacketInfo")), packetInfoExprs)))
-	out, err := os.Create("proto_generated/packet_info.go")
+	out, err := os.Create("mc/proto_generated/packet_info.go")
 	if err != nil {
 		return
 	}
