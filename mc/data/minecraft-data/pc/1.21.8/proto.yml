@@ -1595,6 +1595,9 @@
          if select_known_packs: packet_common_select_known_packs
          if custom_click_action: packet_common_custom_click_action
 ^play.toClient.types:
+   # MC: ClientboundBundleDelimiterPacket
+   packet_bundle_delimiter:
+      # empty
    SlotDisplay:
       type: varint =>
          - empty
@@ -2844,7 +2847,7 @@
       - clear_dialog
       - show_dialog
       params: name ?
-         if bundle_delimiter: void
+         if bundle_delimiter: packet_bundle_delimiter
          if spawn_entity: packet_spawn_entity
          if animation: packet_animation
          if statistics: packet_statistics

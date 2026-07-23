@@ -5706,6 +5706,10 @@
   "play": {
     "toClient": {
       "types": {
+        "packet_bundle_delimiter": [
+          "container",
+          []
+        ],
         "SlotDisplay": [
           "container",
           [
