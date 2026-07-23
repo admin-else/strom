@@ -166,13 +166,14 @@ func (c *Conn) ActivateReceiveRoutine() (chSending <-chan any) {
 func (c *Conn) translatePacketVersion(packet proto_base.EncodeDecodeAble, packetInfo proto_base.PacketInfo) (convertedPacket proto_base.EncodeDecodeAble, packetInfoReal proto_base.PacketInfo, err error) {
 	packetInfoReal, found := LookupPacketInfoByNameProtocolVersionStateAndDirection(packetInfo.Name, c.ProtocolVersion, c.State(), packetInfo.Direction)
 	if !found {
-		err = PacketDoesntExistInFutureVersionErr
+		err = fmt.Errorf("%w: %s from pv%d to pv%d in %s/%s not found", PacketDoesntExistInFutureVersionErr, packetInfo.Name, packetInfo.ProtocolVersion, c.ProtocolVersion, packetInfo.State, packetInfo.Direction)
 		return
 	}
 
 	dstType := reflect.TypeOf(packetInfoReal.Type)
-	if !SmartConvertibleTo(reflect.TypeOf(packetInfo.Type), dstType) {
-		err = CantTranslateErr
+	srcType := reflect.TypeOf(packetInfo.Type)
+	if !SmartConvertibleTo(srcType, dstType) {
+		err = fmt.Errorf("%w: %s from pv%d to pv%d in %s/%s (src=%s dst=%s)", CantTranslateErr, packetInfo.Name, packetInfo.ProtocolVersion, c.ProtocolVersion, packetInfo.State, packetInfo.Direction, srcType, dstType)
 		return
 	}
 	// can't fail cause pacetinfo.type is proto_base.EncodeDecodeAble

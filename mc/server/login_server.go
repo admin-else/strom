@@ -12,10 +12,12 @@ import (
 
 	api2 "github.com/admin-else/strom/mc/api"
 	"github.com/admin-else/strom/mc/crypto"
+	"github.com/admin-else/strom/mc/data"
 	"github.com/admin-else/strom/mc/event"
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/mc/proto_generated/v26_2"
 	"github.com/google/uuid"
 )
 
@@ -183,11 +185,20 @@ func (l *LoginServer) FinishLogin() (err error) {
 	if l.Given == nil {
 		l.Given = &l.Requested
 	}
-	err = l.Send(&v1_21_8.LoginToClientPacketSuccess{
-		Uuid:       l.Given.UUID,
-		Username:   l.Given.Name,
-		Properties: nil,
-	})
+	if l.ProtocolVersion >= data.MustLookupProtocolVersion("26.2") {
+		err = l.Send(&v26_2.LoginToClientPacketSuccess{
+			Uuid:       l.Given.UUID,
+			Username:   l.Given.Name,
+			Properties: nil,
+			SessionId:  uuid.New(),
+		})
+	} else {
+		err = l.Send(&v1_21_8.LoginToClientPacketSuccess{
+			Uuid:       l.Given.UUID,
+			Username:   l.Given.Name,
+			Properties: nil,
+		})
+	}
 	return
 }
 
@@ -195,9 +206,6 @@ type LoginServerSetting func(*LoginServer)
 
 func WithOtherAccount(a *api2.Account) LoginServerSetting {
 	return func(s *LoginServer) {
-		if s.Given == nil {
-			return
-		}
 		s.Given = &NameAndUUID{
 			Name: a.Name,
 			UUID: a.Uuid,

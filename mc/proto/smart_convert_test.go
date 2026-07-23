@@ -8,6 +8,7 @@ import (
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_9"
+	"github.com/admin-else/strom/mc/proto_generated/v26_2"
 )
 
 func TestCanSmartConvert(t *testing.T) {
@@ -64,5 +65,17 @@ func TestSmartConvert(t *testing.T) {
 		if d.E != nil && !reflect.DeepEqual(got.Interface(), d.E) {
 			t.Errorf("got %#v, want %#v", got.Interface(), d.E)
 		}
+	}
+}
+
+func TestLoginSuccessNotConvertibleAcross26_2(t *testing.T) {
+	// login_success gained an extra SessionId field in 26.2, so it is not
+	// smart-convertible in either direction. This is why the login server has
+	// version-gated send code and the login client has a dedicated 26.2 handler.
+	if proto2.SmartConvertibleTo(reflect.TypeFor[*v1_21_8.LoginToClientPacketSuccess](), reflect.TypeFor[*v26_2.LoginToClientPacketSuccess]()) {
+		t.Fatal("expected v1_21_8 login_success NOT to be convertible to v26_2")
+	}
+	if proto2.SmartConvertibleTo(reflect.TypeFor[*v26_2.LoginToClientPacketSuccess](), reflect.TypeFor[*v1_21_8.LoginToClientPacketSuccess]()) {
+		t.Fatal("expected v26_2 login_success NOT to be convertible to v1_21_8")
 	}
 }

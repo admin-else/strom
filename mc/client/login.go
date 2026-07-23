@@ -14,6 +14,7 @@ import (
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/mc/proto_generated/v26_2"
 	"github.com/admin-else/strom/mc/text"
 )
 
@@ -121,6 +122,14 @@ func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (er
 	return
 }
 
+func (s *LoginClient) OnSuccess26_2(success *v26_2.LoginToClientPacketSuccess) (err error) {
+	return s.OnSuccess(&v1_21_8.LoginToClientPacketSuccess{
+		Uuid:       success.Uuid,
+		Username:   success.Username,
+		Properties: success.Properties,
+	})
+}
+
 func (s *LoginClient) OnStart() (err error) {
 	return
 }
@@ -135,7 +144,8 @@ func LoginRaw(c *proto.Conn, account *api.Account) (err error) {
 	lc.RegisterCriticalUntilLatest(lc.OnCompress)
 	lc.RegisterCriticalUntilLatest(lc.OnEncrypt)
 	lc.RegisterCriticalUntilLatest(lc.OnDisconnect)
-	lc.RegisterCriticalUntilLatest(lc.OnSuccess)
+	lc.RegisterCriticalUntil("26.1", lc.OnSuccess)
+	lc.RegisterCriticalUntilLatest(lc.OnSuccess26_2)
 
 	p, err := MakeHandshakePacket(lc.Conn, proto_base.Login)
 	if err != nil {
