@@ -7,6 +7,8 @@ set -xeuo pipefail
 
 LOCAL_MINECRAFT_DATA="${LOCAL_MINECRAFT_DATA:-$HOME/src/anygate/minecraft-data}"
 
+cd "$(dirname "$0")"
+
 rm -rf minecraft-data/
 mkdir -p minecraft-data/pc
 
