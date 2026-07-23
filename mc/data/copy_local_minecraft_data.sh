@@ -22,3 +22,4 @@ copy-mc 1.21.8
 copy-mc 1.21.9
 copy-mc 1.21.11
 copy-mc 26.1
+copy-mc 26.2
