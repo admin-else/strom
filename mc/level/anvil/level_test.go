@@ -42,7 +42,7 @@ func TestRegionFile(t *testing.T) {
 		return
 	}
 
-	fmt.Println(string(util.MustT(json.MarshalIndent(n, "", "  "))))
+	fmt.Println(string(util.MustT(json.MarshalIndent(n, "", "  ")))[100:])
 	fmt.Println("Chunk loaded successfully")
 }
 
