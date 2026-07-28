@@ -20,6 +20,11 @@ type RawConn struct {
 	W                       io.Writer
 	compressionThreshold    int32
 	CompressionThresholdMut sync.RWMutex
+
+	// MaxPacketSize is the maximum size of a packet that can be sent or received.
+	// Applies to both raw and compressed packets.
+	// Should be set while the connection is not in use. Or in sync mode.
+	MaxPacketSize int32
 }
 
 func (c *RawConn) SetCompressionThreshold(threshold int32) {
@@ -35,6 +40,10 @@ func (c *RawConn) GetCompressionThreshold() int32 {
 }
 
 func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
+	if c.MaxPacketSize > 0 && int32(len(rawPacketBytes)) > c.MaxPacketSize {
+		err = errors.New("packet too large")
+		return
+	}
 	//fmt.Println("send:", rawPacketBytes)
 	var packetBytes []byte
 	threshold := c.GetCompressionThreshold()
@@ -45,7 +54,7 @@ func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
 			if err != nil {
 				return
 			}
-			zW := zlib.NewWriter(packetBuffer) // ignore we don't care about the result if it errors
+			zW := zlib.NewWriter(packetBuffer)
 			_, err = zW.Write(rawPacketBytes)
 			if err != nil {
 				return
@@ -86,6 +95,11 @@ func (c *RawConn) ReceiveRaw() (packetBytes []byte, err error) {
 	if err != nil {
 		return
 	}
+	if c.MaxPacketSize > 0 && rawPacketLen > c.MaxPacketSize {
+		err = errors.New("packet too large")
+		return
+	}
+
 	rawPacketBytes, err := io.ReadAll(io.LimitReader(c.R, int64(rawPacketLen)))
 	if err != nil {
 		return
@@ -99,6 +113,10 @@ func (c *RawConn) ReceiveRaw() (packetBytes []byte, err error) {
 		var packetLen int32
 		packetLen, err = proto_base.DecodeVarInt(rawPacketBuffer)
 		if err != nil {
+			return
+		}
+		if c.MaxPacketSize > 0 && packetLen > c.MaxPacketSize {
+			err = errors.New("deflated packet too large")
 			return
 		}
 		if packetLen == 0 {
