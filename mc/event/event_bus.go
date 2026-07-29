@@ -139,9 +139,11 @@ func (l *Loop) RegisterLow(eventType reflect.Type, hv reflect.Value, critical bo
 
 // RegisterCritical registers a handler that will close the loop if it returns an error.
 // Warning: If a bad handler is passed in the program will panic.
-func (l *Loop) RegisterCritical(h any) {
-	eventType, hv := ValidateHandler(h)
-	l.HandlerFunctions[eventType] = append(l.HandlerFunctions[eventType], hv)
+func (l *Loop) RegisterCritical(hs ...any) {
+	for _, h := range hs {
+		eventType, hv := ValidateHandler(h)
+		l.HandlerFunctions[eventType] = append(l.HandlerFunctions[eventType], hv)
+	}
 }
 
 // FireFound triggers all handlers registered for the specified event type and returns if handlers were found or an error occurred.
