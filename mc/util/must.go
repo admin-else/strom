@@ -2,6 +2,7 @@ package util
 
 import "fmt"
 
+// MustOk returns v if ok is true, otherwise panics.
 func MustOk[T any](v T, ok bool) T {
 	if !ok {
 		panic("not ok")
@@ -9,6 +10,7 @@ func MustOk[T any](v T, ok bool) T {
 	return v
 }
 
+// MustT returns v if err is nil, otherwise panics.
 func MustT[T any](v T, err error) T {
 	if err != nil {
 		panic(err)
@@ -16,12 +18,14 @@ func MustT[T any](v T, err error) T {
 	return v
 }
 
+// Must panics if err is non-nil.
 func Must(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
+// AssertTypeError asserts that v is of type T and returns it, or returns an error.
 func AssertTypeError[T any](v any) (T, error) {
 	var zero T
 	r, ok := v.(T)
@@ -31,6 +35,7 @@ func AssertTypeError[T any](v any) (T, error) {
 	return r, nil
 }
 
+// MapGetError returns the value for key k from map m, or an error if not present.
 func MapGetError[K comparable, V any, M map[K]V](m M, k K) (V, error) {
 	v, ok := m[k]
 	if !ok {

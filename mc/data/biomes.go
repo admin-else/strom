@@ -28,6 +28,7 @@ type Biome struct {
 
 var BiomesCache = make(map[string][]*Biome)
 
+// BiomesForVersion returns the biome definitions for the given Minecraft version, caching them after the first load.
 func BiomesForVersion(v string) (ret []*Biome) {
 	var ok bool
 	if ret, ok = BiomesCache[v]; ok {
@@ -39,6 +40,7 @@ func BiomesForVersion(v string) (ret []*Biome) {
 	return b
 }
 
+// LookupBiomeById returns the biome with the given numeric ID in the given version.
 func LookupBiomeById(version string, id int32) (biome *Biome, ok bool) {
 	for _, b := range BiomesForVersion(version) {
 		if b.Id == id {
@@ -52,6 +54,7 @@ func LookupBiomeById(version string, id int32) (biome *Biome, ok bool) {
 
 var UnknownBiomeNameErr = errors.New("unknown biome Name")
 
+// LookupBiomeByName returns the biome with the given name in the given version.
 func LookupBiomeByName(version string, name string) (biome *Biome, ok bool) {
 	for _, b := range BiomesForVersion(version) {
 		if b.Name == name {

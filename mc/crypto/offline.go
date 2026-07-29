@@ -21,6 +21,7 @@ func uuidV3(space []byte, data []byte) uuid.UUID {
 	return u
 }
 
+// FromOfflinePlayer generates a UUID for an offline-mode (cracked) player from their display name.
 func FromOfflinePlayer(displayName string) uuid.UUID {
 	return uuidV3([]byte("OfflinePlayer:"), []byte(displayName))
 }

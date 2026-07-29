@@ -94,6 +94,7 @@ type Structure struct {
 	Version string
 }
 
+// LoadFromPath loads a litematic file from disk.
 func LoadFromPath(path string) (s *Structure, err error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -104,6 +105,7 @@ func LoadFromPath(path string) (s *Structure, err error) {
 	return
 }
 
+// LoadFromFile reads and parses a litematic file from a reader.
 func LoadFromFile(r io.Reader) (s *Structure, err error) {
 	n, err := nbt.ReadUnstructuredFile(r)
 	if err != nil {
@@ -112,6 +114,7 @@ func LoadFromFile(r io.Reader) (s *Structure, err error) {
 	return Load(n.Value)
 }
 
+// Load decodes raw NBT data into a litematic Structure.
 func Load(v any) (s *Structure, err error) {
 	s = &Structure{}
 	err = mapstructure.Decode(v, &s.File)

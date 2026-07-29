@@ -10,6 +10,7 @@ type Chunk struct {
 	Version  string
 }
 
+// ReadChunkFromChunkPacketData decodes chunk packet data from a reader into a Chunk.
 func ReadChunkFromChunkPacketData(r io.Reader, version string, worldHeight int) (c *Chunk, err error) {
 	c = &Chunk{}
 	c.Version = version

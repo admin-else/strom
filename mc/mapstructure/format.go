@@ -25,6 +25,7 @@ type Format struct {
 	encoders map[reflect.Type]func(any, string) (any, error)
 }
 
+// NewFormat creates a new Format with the given name and options.
 func NewFormat(name string, opts ...Option) *Format {
 	f := &Format{
 		Name:     name,
@@ -39,30 +40,35 @@ func NewFormat(name string, opts ...Option) *Format {
 
 type Option func(*Format)
 
+// WithRequireAll returns an Option that requires all struct fields to be present in the map.
 func WithRequireAll() Option {
 	return func(f *Format) {
 		f.requireAll = true
 	}
 }
 
+// WithErrorOnExtra returns an Option that causes an error when the map contains unmatched keys.
 func WithErrorOnExtra() Option {
 	return func(f *Format) {
 		f.errorOnExtra = true
 	}
 }
 
+// WithTrySnakeCase returns an Option that tries to match struct fields using snake_case names.
 func WithTrySnakeCase() Option {
 	return func(f *Format) {
 		f.trySnakeCase = true
 	}
 }
 
+// WithTryLowCase returns an Option that tries to match struct fields using lowercase names.
 func WithTryLowCase() Option {
 	return func(f *Format) {
 		f.tryLowCase = true
 	}
 }
 
+// WithTypeCodec returns an Option that registers custom decode/encode functions for a type.
 func WithTypeCodec(decodeFn, encodeFn any) Option {
 	dt := reflect.TypeOf(decodeFn)
 	et := reflect.TypeOf(encodeFn)
@@ -94,6 +100,7 @@ func WithTypeCodec(decodeFn, encodeFn any) Option {
 	}
 }
 
+// Decode populates target (a pointer to a struct) from data (a map[string]any).
 func (f *Format) Decode(data any, target any) error {
 	v := reflect.ValueOf(target)
 	if v.Kind() != reflect.Pointer || v.IsNil() {
@@ -110,6 +117,7 @@ func (f *Format) Decode(data any, target any) error {
 	return f.decode(m, v)
 }
 
+// Encode converts source (a struct or pointer to a struct) into a map[string]any.
 func (f *Format) Encode(source any) (map[string]any, error) {
 	v := reflect.ValueOf(source)
 	if v.Kind() == reflect.Pointer {

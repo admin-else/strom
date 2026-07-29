@@ -116,6 +116,7 @@ func (n PerlinNoise) Sample(x, y, z float64, yamp, ymin float64) (v float64) {
 	return lerp(t3, l1, l5)
 }
 
+// PerlinNoiseFromXoroshiro initializes a PerlinNoise from the given Xoroshiro source.
 func PerlinNoiseFromXoroshiro(x Xoroshiro) (p PerlinNoise) {
 	p.xoffset = x.NextFloat64() * 256.0
 	p.yoffset = x.NextFloat64() * 256.0

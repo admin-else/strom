@@ -12,6 +12,7 @@ import (
 //go:embed minecraft-data/pc minecraft-data/dataPaths.json
 var MinecraftData embed.FS
 
+// LoadJson reads a JSON file from the embedded minecraft-data FS and unmarshals it into data.
 func LoadJson(path string, data any) (err error) {
 	b, err := MinecraftData.ReadFile(path)
 	if err != nil {
@@ -21,6 +22,7 @@ func LoadJson(path string, data any) (err error) {
 	return
 }
 
+// LoadVersionedJson loads a version-specific JSON data file from the embedded minecraft-data FS and unmarshals it into data.
 func LoadVersionedJson(version, dataName string, data any) (err error) {
 	b, err := MinecraftData.ReadFile("minecraft-data/" + Paths.Data[version][dataName] + "/" + dataName + ".json")
 	if err != nil {

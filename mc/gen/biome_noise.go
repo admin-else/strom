@@ -48,6 +48,7 @@ type BiomeNoise struct {
 	Temperature, Humidity, ContinentalNess, Erosion, Shift, Weirdness DoublePerlin
 }
 
+// BiomeNoiseFromXoroshiro creates a BiomeNoise from the given Xoroshiro source.
 func BiomeNoiseFromXoroshiro(x Xoroshiro, large bool) (v BiomeNoise) {
 	x = x.Split()
 

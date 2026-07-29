@@ -56,6 +56,7 @@ func (p *StatusServer) OnStatusPing(packet *v1_21_8.StatusToServerPacketPing) (e
 	return p.Send(&v1_21_8.StatusToClientPacketPing{Time: packet.Time})
 }
 
+// ServeStatus runs the server list ping sequence, responding with the given StatusResponse.
 func ServeStatus(c *proto.Conn, s StatusResponse) (err error) {
 	status, err := json.Marshal(s)
 	if err != nil {

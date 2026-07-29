@@ -52,6 +52,7 @@ type ChunkHeader struct {
 	Chunk, Time [ChunksRegionFile]int32
 }
 
+// ReadChunkHeader reads the chunk header from an MCA region file.
 func ReadChunkHeader(r *os.File) (ch *ChunkHeader, err error) {
 	var h ChunkHeader
 	err = binary.Read(r, binary.BigEndian, &h)

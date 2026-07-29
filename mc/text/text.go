@@ -526,6 +526,7 @@ func replacePlaceholders(s string, values map[string]any) string {
 	return result
 }
 
+// PrettyPlaceholders parses a legacy formatted string with named placeholders replaced from the given map, returning a Component.
 func PrettyPlaceholders(format string, placeholders map[string]any) *Component {
 	s := replacePlaceholders(format, placeholders)
 	return Pretty(s)

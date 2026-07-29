@@ -17,6 +17,7 @@ var (
 	CantKickInStateErr = errors.New("cant kick in this state")
 )
 
+// Kick sends a disconnect/kick packet appropriate for the connection's current state.
 func Kick(c *proto.Conn, reason *text.Component, status string) (err error) {
 	if c.Actor != proto_base.Servee {
 		err = NotClientErr

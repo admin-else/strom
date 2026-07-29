@@ -20,6 +20,7 @@ type VersionInfo struct {
 
 var ProtocolVersions []VersionInfo
 
+// LookUpVersionByName returns the VersionInfo for the given Minecraft version name (e.g. "1.21.11").
 func LookUpVersionByName(name string) (ret VersionInfo, err error) {
 	for _, v := range ProtocolVersions {
 		if v.MinecraftVersion == name {
@@ -31,6 +32,7 @@ func LookUpVersionByName(name string) (ret VersionInfo, err error) {
 	return
 }
 
+// LookUpVersionByProtocolVersion returns the VersionInfo for the given protocol version number.
 func LookUpVersionByProtocolVersion(version int32) (ret VersionInfo, err error) {
 	for _, v := range ProtocolVersions {
 		if v.Version == version {
@@ -42,6 +44,7 @@ func LookUpVersionByProtocolVersion(version int32) (ret VersionInfo, err error) 
 	return
 }
 
+// LookUpVersionByDataVersion returns the VersionInfo for the given Minecraft data version number.
 func LookUpVersionByDataVersion(version int32) (ret VersionInfo, err error) {
 	for _, v := range ProtocolVersions {
 		if v.DataVersion == version {

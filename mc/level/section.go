@@ -30,6 +30,7 @@ type Section struct {
 	Blocks, Biomes *Storage
 }
 
+// MakeBiomeFormat returns the StorageFormat for biome data at the given version.
 func MakeBiomeFormat(version string) StorageFormat {
 	directBpe := uint8(math.Ceil(math.Log2(float64(len(data2.BiomesForVersion(version))))))
 	return StorageFormat{
@@ -39,6 +40,7 @@ func MakeBiomeFormat(version string) StorageFormat {
 	}
 }
 
+// MakeBlockFormat returns the StorageFormat for block data at the given version.
 func MakeBlockFormat(version string) StorageFormat {
 	directBpe := uint8(math.Ceil(math.Log2(float64(len(data2.BlocksForVersion(version))))))
 	return StorageFormat{
@@ -51,6 +53,7 @@ func MakeBlockFormat(version string) StorageFormat {
 
 var BadPaletteLenErr = errors.New("bad palette length")
 
+// ReadSectionStorage reads a packed section storage from a reader.
 func ReadSectionStorage(r io.Reader, format StorageFormat) (s *Storage, err error) {
 	var bpe uint8
 	err = binary.Read(r, binary.BigEndian, &bpe)
@@ -97,6 +100,7 @@ func ReadSectionStorage(r io.Reader, format StorageFormat) (s *Storage, err erro
 	return format.ImportFromReader(r, bpe, pallette)
 }
 
+// WriteSectionStorage writes a packed section storage to a writer.
 func WriteSectionStorage(w io.Writer, s *Storage) (err error) {
 	err = binary.Write(w, binary.BigEndian, s.bpe)
 	if err != nil {
@@ -122,6 +126,7 @@ func WriteSectionStorage(w io.Writer, s *Storage) (err error) {
 	return binary.Write(w, binary.BigEndian, s.data)
 }
 
+// SectionDecodePacket decodes a chunk section from the Minecraft packet wire format.
 func SectionDecodePacket(r io.Reader, version string) (s Section, err error) {
 	s = Section{}
 	err = binary.Read(r, binary.BigEndian, &s.BlockCount)
@@ -136,6 +141,7 @@ func SectionDecodePacket(r io.Reader, version string) (s Section, err error) {
 	return
 }
 
+// SectionEncodePacket encodes a chunk section to the Minecraft packet wire format.
 func SectionEncodePacket(w io.Writer, s Section) (err error) {
 	err = binary.Write(w, binary.BigEndian, s.BlockCount)
 	if err != nil {
@@ -149,6 +155,7 @@ func SectionEncodePacket(w io.Writer, s Section) (err error) {
 	return
 }
 
+// SectionEquals returns whether two sections are equal.
 func SectionEquals(a, b Section) bool {
 	if a.BlockCount != b.BlockCount {
 		return false

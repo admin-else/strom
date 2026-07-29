@@ -14,6 +14,7 @@ type ConfigServer struct {
 	registryData map[string]any
 }
 
+// ServeConfig runs the configuration phase: sends known packs, registry data, and tags, then transitions to play.
 func ServeConfig(c *proto.Conn) (err error) {
 	cs := &ConfigServer{Conn: c}
 	n, err := data.LoadRegistry(c.Version)

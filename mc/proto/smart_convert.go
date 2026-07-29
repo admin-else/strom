@@ -11,6 +11,7 @@ import (
 	"github.com/admin-else/strom/mc/proto_generated"
 )
 
+// SmartConvertibleTo reports whether a value of type from can be recursively converted to type to.
 func SmartConvertibleTo(from, to reflect.Type) bool {
 	switch from.Kind() {
 	case reflect.Struct:
@@ -36,6 +37,7 @@ func SmartConvertibleTo(from, to reflect.Type) bool {
 	}
 }
 
+// SmartConvert recursively converts a reflect.Value from one type to another compatible type.
 func SmartConvert(from reflect.Value, to reflect.Type) (ret reflect.Value) {
 	switch from.Kind() {
 	case reflect.Struct:

@@ -59,6 +59,7 @@ type BlockState struct {
 var BlocksCache = make(map[string][]*Block)
 var BlocksCacheIdMap = make(map[string]map[int32]*Block)
 
+// BlocksForVersion returns the block definitions for the given Minecraft version, caching them after the first load.
 func BlocksForVersion(v string) (ret []*Block) {
 	var ok bool
 	if ret, ok = BlocksCache[v]; ok {
@@ -84,6 +85,7 @@ func BlocksForVersion(v string) (ret []*Block) {
 	return b
 }
 
+// LookupBlockByStateId returns the block for the given global palette state ID in the given version.
 func LookupBlockByStateId(version string, stateId int32) (block *Block, ok bool) {
 	idmap, found := BlocksCacheIdMap[version]
 	if !found {
@@ -101,6 +103,7 @@ func LookupBlockByStateId(version string, stateId int32) (block *Block, ok bool)
 
 var UnknownBlockNameErr = errors.New("unknown block Name")
 
+// LookupBlockByName returns the block with the given name in the given version.
 func LookupBlockByName(version string, name string) (block *Block, ok bool) {
 	for _, b := range BlocksForVersion(version) {
 		if b.Name == name {
@@ -111,6 +114,7 @@ func LookupBlockByName(version string, name string) (block *Block, ok bool) {
 	return
 }
 
+// StateIdFromBlocKAndStateMap returns the global palette state ID for the given block name and state property map in the given version.
 func StateIdFromBlocKAndStateMap(version string, name string, stateMap map[string]string) (stateId int32, err error) {
 	b, ok := LookupBlockByName(version, name)
 	if !ok {
@@ -135,6 +139,7 @@ var BadBlockStateTypeErr = errors.New("bad block state type")
 var BadEnumErr = errors.New("bad enum")
 var SupplyAllStatesErr = errors.New("supply all states")
 
+// FromBlockState converts a global palette state ID back into a block definition and a map of state properties.
 func FromBlockState(version string, stateId int32) (b *Block, stateData map[string]string, err error) {
 	b, ok := LookupBlockByStateId(version, stateId)
 	if !ok {

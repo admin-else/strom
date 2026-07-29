@@ -9,6 +9,7 @@ import (
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
 )
 
+// MakeHandshakePacket creates a handshake packet using the connection's remote address as the server host.
 func MakeHandshakePacket(c *proto.Conn, nextState proto_base.State) (p *v1_21_8.HandshakingToServerPacketSetProtocol, err error) {
 	return MakeHandshakePacketAddr(c, nextState, c.RemoteAddr().String())
 }

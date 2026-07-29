@@ -16,6 +16,7 @@ type Reader struct {
 	Version int32
 }
 
+// NewReader creates a new replay Reader from an io.Reader.
 func NewReader(r io.Reader) *Reader {
 	return &Reader{r: r}
 }

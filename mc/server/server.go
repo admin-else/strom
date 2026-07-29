@@ -9,6 +9,7 @@ import (
 	"github.com/admin-else/strom/mc/text"
 )
 
+// Servee wraps a net.Conn in a new proto.Conn configured for the servee side.
 func Servee(c net.Conn) (ret *proto.Conn) {
 	ret = proto.NewConn()
 	ret.Actor = proto_base.Servee
@@ -24,6 +25,7 @@ type ConnAcceptor func(c net.Conn) (err error)
 
 type Factory func(c *proto.Conn) (h ConnAcceptor, err error)
 
+// ServeClient accepts a single client connection, creates a handler via the factory, and runs it.
 func ServeClient(cNet net.Conn, factory Factory) {
 	c := Servee(cNet)
 	defer c.Close()
@@ -40,6 +42,7 @@ func ServeClient(cNet net.Conn, factory Factory) {
 	}
 }
 
+// StartServerWithFactory listens on the given address and spawns ServeClient for every accepted connection.
 func StartServerWithFactory(listenAddr string, factory Factory) (err error) {
 	l, err := net.Listen("tcp", listenAddr)
 	if err != nil {
@@ -57,6 +60,8 @@ func StartServerWithFactory(listenAddr string, factory Factory) (err error) {
 
 var ShutDownServerErr = errors.New("server shutting down")
 
+// StartServerWithOnConn listens on the given address and calls onConn for every accepted connection.
+// The server loop stops when onConn returns ShutDownServerErr.
 func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err error)) (err error) {
 	l, err := net.Listen("tcp", listenAddr)
 	if err != nil {

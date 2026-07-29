@@ -204,6 +204,7 @@ func (l *LoginServer) FinishLogin() (err error) {
 
 type LoginServerSetting func(*LoginServer)
 
+// WithOtherAccount returns a setting that overrides the login identity with the given account.
 func WithOtherAccount(a *api2.Account) LoginServerSetting {
 	return func(s *LoginServer) {
 		s.Given = &NameAndUUID{
@@ -213,12 +214,14 @@ func WithOtherAccount(a *api2.Account) LoginServerSetting {
 	}
 }
 
+// WithRawStatus returns a setting that sets the raw JSON status response payload.
 func WithRawStatus(status []byte) LoginServerSetting {
 	return func(s *LoginServer) {
 		s.Status = status
 	}
 }
 
+// WithStatus marshals a StatusResponse to JSON and passes it to WithRawStatus.
 func WithStatus(response StatusResponse) LoginServerSetting {
 	var status []byte
 	status, err := json.Marshal(response)
@@ -229,6 +232,7 @@ func WithStatus(response StatusResponse) LoginServerSetting {
 	return WithRawStatus(status)
 }
 
+// WithCompatibleVersionsRange returns a setting that restricts the server to protocol versions in [start, end].
 func WithCompatibleVersionsRange(start, end int32) LoginServerSetting {
 	var versions []int32
 	for i := start; i <= end; i++ {
@@ -237,24 +241,28 @@ func WithCompatibleVersionsRange(start, end int32) LoginServerSetting {
 	return WithCompatibleVersions(versions...)
 }
 
+// WithCompatibleVersions returns a setting that restricts the server to the given protocol versions.
 func WithCompatibleVersions(versions ...int32) LoginServerSetting {
 	return func(s *LoginServer) {
 		s.CompatibleVersions = versions
 	}
 }
 
+// WithoutOnlineMode returns a setting that disables online-mode authentication.
 func WithoutOnlineMode() LoginServerSetting {
 	return func(s *LoginServer) {
 		s.OnlineMode = false
 	}
 }
 
+// WithoutEncryption returns a setting that disables connection encryption.
 func WithoutEncryption() LoginServerSetting {
 	return func(s *LoginServer) {
 		s.Encryption = false
 	}
 }
 
+// ServeLogin runs the full login sequence (handshake, encryption, auth, and configuration handoff) on a connection.
 func ServeLogin(c *proto.Conn, settings ...LoginServerSetting) (ret *LoginServer, err error) {
 	ret = &LoginServer{Conn: c}
 	ret.OnlineMode = true

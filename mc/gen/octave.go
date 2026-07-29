@@ -28,6 +28,7 @@ var octaveLacunaInits = []float64{1, .5, .25, 1. / 8, 1. / 16, 1. / 32, 1. / 64,
 var octavePersistInits = []float64{0, 1, 2. / 3, 4. / 7, 8. / 15, 16. / 31, 32. / 63, 64. / 127, 128. / 255, 256. / 511, 512. / 1023,
 	1024. / 2047, 2048. / 4095, 4096. / 8191, 8192. / 16383, 16384. / 32767, 32768. / 65535}
 
+// OctaveFromXoroshiro creates an Octave (multi-octave Perlin noise) from the given Xoroshiro source.
 func OctaveFromXoroshiro(x *Xoroshiro, amplitudes []float64, omin int, lenn int, nmax int) (o Octave) {
 	if (-omin < 0 || -omin >= len(octaveLacunaInits)) || (lenn < 0 || lenn >= len(octavePersistInits)) {
 		panic("octave initialization out of range")

@@ -183,6 +183,7 @@ func landSpline(f, g, h, i, j, k float32, bl bool) Spline {
 	return s
 }
 
+// CreateBiomeDepthSpline builds the Minecraft biome depth spline used for terrain generation.
 func CreateBiomeDepthSpline() Spline {
 	sp1 := landSpline(-0.15, 0.00, 0.0, 0.1, 0.00, -0.03, false)
 	sp2 := landSpline(-0.10, 0.03, 0.1, 0.1, 0.01, -0.03, false)

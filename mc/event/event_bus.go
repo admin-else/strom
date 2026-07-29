@@ -69,6 +69,8 @@ var WhileClosingErr = errors.New("error while closing")
 var ContextDoneErr = errors.New("context done")
 var RecvNotOkErr = errors.New("recv not ok")
 
+// ValidateHandler validates that h is a function taking a single argument and returning an error.
+// It panics if the handler does not match the expected signature.
 func ValidateHandler(h any) (eventType reflect.Type, hv reflect.Value) {
 	hv = reflect.ValueOf(h)
 	if hv.Kind() != reflect.Func {
@@ -235,6 +237,7 @@ func (l *Loop) StartLoop() (err error) {
 	return
 }
 
+// NewLoop creates a new Loop with a background context.
 func NewLoop() (l *Loop) {
 	return NewLoopCtx(context.Background())
 }

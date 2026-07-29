@@ -42,6 +42,7 @@ func (x *Xoroshiro) NextFloat64() float64 {
 	return float64(x.Next()>>(64-53)) * 1.1102230246251565e-16
 }
 
+// XoroshiroFromString creates an Xoroshiro from an MD5 hash of the given string.
 func XoroshiroFromString(s string) (x Xoroshiro) {
 	sum := md5.Sum([]byte(s))
 	x.L = binary.BigEndian.Uint64(sum[:8])
@@ -49,6 +50,7 @@ func XoroshiroFromString(s string) (x Xoroshiro) {
 	return
 }
 
+// XoroshiroFromSeed creates an Xoroshiro from an int64 seed.
 func XoroshiroFromSeed(seed int64) (x Xoroshiro) {
 	x.L = uint64(seed) ^ 0x6a09e667f3bcc909
 	x.H = x.L + 0x9e3779b97f4a7c15

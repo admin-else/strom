@@ -289,6 +289,9 @@ func (a *Account) CheckGiftCodeValidity(giftCode string) (valid bool, err error)
 	return
 }
 
+// NewAccountFromYGG creates an Account by authenticating the YGG token against
+// Mojang's API. It makes an HTTP call to fetch the player profile and returns
+// an Account with name and UUID populated, or an error if authentication fails.
 func NewAccountFromYGG(ygg string) (a *Account, err error) {
 	a = &Account{
 		Ygg:     ygg,
@@ -303,6 +306,8 @@ func NewAccountFromYGG(ygg string) (a *Account, err error) {
 	return
 }
 
+// NewAccount creates an Account from explicit name, UUID, and YGG token without
+// making any HTTP calls. The account uses Mojang's default API servers.
 func NewAccount(name string, uuid uuid.UUID, ygg string) (a *Account) {
 	return &Account{
 		Name:    name,

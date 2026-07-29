@@ -41,10 +41,12 @@ type CFB8 struct {
 	mutex     sync.Mutex
 }
 
+// NewCFB8Decrypt creates a new CFB8 stream cipher in decrypt mode.
 func NewCFB8Decrypt(c cipher.Block, iv []byte) *CFB8 {
 	return newCFB8(c, iv, true)
 }
 
+// NewCFB8Encrypt creates a new CFB8 stream cipher in encrypt mode.
 func NewCFB8Encrypt(c cipher.Block, iv []byte) *CFB8 {
 	return newCFB8(c, iv, false)
 }

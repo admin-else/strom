@@ -6,6 +6,7 @@ type DoublePerlin struct {
 	B         Octave
 }
 
+// DoublePerlinFromXoroshiro creates a DoublePerlin from the given Xoroshiro source.
 func DoublePerlinFromXoroshiro(x *Xoroshiro, amplitudes []float64, omin int, lenn int, nmax int) (d DoublePerlin) {
 	na := -1
 	nb := -1

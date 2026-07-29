@@ -13,6 +13,7 @@ type Writer struct {
 	w io.Writer
 }
 
+// NewWriter creates a new replay Writer from an io.Writer.
 func NewWriter(w io.Writer) *Writer {
 	return &Writer{w: w}
 }

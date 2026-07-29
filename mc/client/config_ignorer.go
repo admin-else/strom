@@ -47,6 +47,7 @@ func (c *ConfigIgnorer) OnKeepAlive(packet *v1_21_8.ConfigurationToClientPacketK
 	return
 }
 
+// IgnoreConfig acknowledges configuration packets on the connection and transitions it to the Play state once configuration is complete.
 func IgnoreConfig(c *proto.Conn) (err error) {
 	ci := &ConfigIgnorer{c}
 	ci.RegisterCritical(ci.Default)

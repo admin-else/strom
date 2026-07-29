@@ -73,6 +73,7 @@ type Conn struct {
 	Log *slog.Logger
 }
 
+// StartConn starts the connection event loop, registering the receive routine and login tick handler.
 func (c *Conn) StartConn() (err error) {
 	c.RegisterEventSource(c.ActivateReceiveRoutine())
 	c.RegisterCritical(c.OnLoginTick)
@@ -81,6 +82,7 @@ func (c *Conn) StartConn() (err error) {
 	return
 }
 
+// OnLoginTick handles a login tick by receiving a packet and firing it as an event.
 func (c *Conn) OnLoginTick(_ LoginTick) (err error) {
 	packet, err := c.Receive()
 	if err != nil {
@@ -90,30 +92,35 @@ func (c *Conn) OnLoginTick(_ LoginTick) (err error) {
 	return
 }
 
+// SetState sets the connection's protocol state.
 func (c *Conn) SetState(state proto_base.State) {
 	c.stateMutex.Lock()
 	defer c.stateMutex.Unlock()
 	c.state = state
 }
 
+// State returns the current connection protocol state.
 func (c *Conn) State() proto_base.State {
 	c.stateMutex.RLock()
 	defer c.stateMutex.RUnlock()
 	return c.state
 }
 
+// SetAsyncPackets enables or disables asynchronous packet handling in the receive routine.
 func (c *Conn) SetAsyncPackets(asyncPackets bool) {
 	c.asyncPacketsMutex.Lock()
 	defer c.asyncPacketsMutex.Unlock()
 	c.asyncPackets = asyncPackets
 }
 
+// GetAsyncPackets returns whether asynchronous packet handling is enabled.
 func (c *Conn) GetAsyncPackets() bool {
 	c.asyncPacketsMutex.RLock()
 	defer c.asyncPacketsMutex.RUnlock()
 	return c.asyncPackets
 }
 
+// SetVersion sets the connection's Minecraft version by version name and looks up the corresponding protocol version.
 func (c *Conn) SetVersion(version string) (err error) {
 	versionData, err := data.LookUpVersionByName(version)
 	if err != nil {
@@ -124,6 +131,7 @@ func (c *Conn) SetVersion(version string) (err error) {
 	return
 }
 
+// SetProtocolVersion sets the connection's version by protocol version number and looks up the corresponding version name.
 func (c *Conn) SetProtocolVersion(version int32) (err error) {
 	versionData, err := data.LookUpVersionByProtocolVersion(version)
 	if err != nil {
@@ -202,6 +210,7 @@ func SimplePacketToBytes(packet proto_base.EncodeDecodeAble) (b []byte, err erro
 	return
 }
 
+// SimplePacketToBytesLenPrefix is like SimplePacketToBytes but also prepends the length-prefix framing.
 func SimplePacketToBytesLenPrefix(packet proto_base.EncodeDecodeAble) (b []byte, err error) {
 	b, err = SimplePacketToBytes(packet)
 	if err != nil {
@@ -282,6 +291,7 @@ func (c *Conn) sendRegisteredPacket(packet proto_base.EncodeDecodeAble) (err err
 	return c.SendRaw(packetBuff.Bytes())
 }
 
+// Send encodes and sends a packet to the remote peer, translating protocol versions if needed.
 func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
 	switch packet := packet.(type) {
 	case *UnCodablePacket:
@@ -292,6 +302,7 @@ func (c *Conn) Send(packet proto_base.EncodeDecodeAble) (err error) {
 	return
 }
 
+// Receive reads and decodes a raw packet from the remote peer.
 func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	if c.R == nil {
 		return
@@ -335,10 +346,12 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	}
 	return
 }
+// NewConn creates a new Conn with default settings and a background context.
 func NewConn() (ret *Conn) {
 	return NewConnCtx(context.Background())
 }
 
+// NewConnCtx creates a new Conn with the given context, setting the handshaking state and latest version.
 func NewConnCtx(ctx context.Context) (ret *Conn) {
 	ret = &Conn{}
 	ret.SetState(proto_base.Handshaking)

@@ -7,10 +7,12 @@ import (
 	"math"
 )
 
+// UnimplementedErr is returned when a code path is not yet implemented.
 var (
 	UnimplementedErr = errors.New("unimplemented")
 )
 
+// Direction indicates whether a packet is sent to the server or to the client.
 type Direction int
 
 const (
@@ -18,6 +20,7 @@ const (
 	ToClient
 )
 
+// String returns a human-readable representation of the Direction.
 func (d Direction) String() string {
 	switch d {
 	case ToServer:
@@ -29,10 +32,12 @@ func (d Direction) String() string {
 	}
 }
 
+// Opposite returns the reverse Direction.
 func (d Direction) Opposite() Direction {
 	return d ^ 1
 }
 
+// State represents the Minecraft connection state.
 type State int32
 
 const (
@@ -43,6 +48,7 @@ const (
 	Play
 )
 
+// String returns a human-readable representation of the State.
 func (s State) String() string {
 	switch s {
 	case Handshaking:
@@ -60,13 +66,16 @@ func (s State) String() string {
 	}
 }
 
+// Actor represents a participant in a Minecraft connection.
 type Actor int
 
 const (
-	Servee Actor = iota // Servee is the one being served
+	// Servee is the one being served (e.g. the backend server in a proxy).
+	Servee Actor = iota
 	Client
 )
 
+// String returns a human-readable representation of the Actor.
 func (a Actor) String() string {
 	switch a {
 	case Servee:
@@ -78,6 +87,7 @@ func (a Actor) String() string {
 	}
 }
 
+// SendDirection returns the Direction in which this Actor sends packets.
 func (a Actor) SendDirection() Direction {
 	switch a {
 	case Servee:
@@ -89,6 +99,7 @@ func (a Actor) SendDirection() Direction {
 	}
 }
 
+// ReceiveDirection returns the Direction from which this Actor receives packets.
 func (a Actor) ReceiveDirection() Direction {
 	switch a {
 	case Servee:
@@ -101,13 +112,19 @@ func (a Actor) ReceiveDirection() Direction {
 }
 
 type (
+	// ToDo is a placeholder type for unimplemented packet fields.
 	ToDo       struct{}
+	// RestBuffer represents the remaining unread bytes in a packet buffer.
 	RestBuffer []byte
 )
 
+// ToDoError is returned when a ToDo placeholder is used.
 var ToDoError = errors.New("to do")
+
+// BadTypeError is returned when an unexpected type is encountered.
 var BadTypeError = errors.New("bad type")
 
+// Encode writes the RestBuffer to w.
 func (b *RestBuffer) Encode(w io.Writer) (err error) {
 	n, err := w.Write(*b)
 	if n != len(*b) {
@@ -116,11 +133,13 @@ func (b *RestBuffer) Encode(w io.Writer) (err error) {
 	return
 }
 
+// Decode reads all remaining bytes from r into the RestBuffer.
 func (b *RestBuffer) Decode(r io.Reader) (err error) {
 	*b, err = io.ReadAll(r)
 	return
 }
 
+// EncodeString encodes a length-prefixed UTF-8 string in Minecraft varint format.
 func EncodeString(w io.Writer, s string) (err error) {
 	err = EncodeVarInt(w, int32(len(s)))
 	if err != nil {
@@ -130,6 +149,7 @@ func EncodeString(w io.Writer, s string) (err error) {
 	return
 }
 
+// DecodeString decodes a length-prefixed UTF-8 string in Minecraft varint format.
 func DecodeString(r io.Reader) (ret string, err error) {
 	l, err := DecodeVarInt(r)
 	if err != nil {
@@ -146,16 +166,19 @@ func DecodeString(r io.Reader) (ret string, err error) {
 	return string(rawString), nil
 }
 
+// Encode is a no-op stub that always returns ToDoError.
 func (t ToDo) Encode(_ io.Writer) (err error) {
 	err = ToDoError
 	return
 }
 
+// Decode is a no-op stub that always returns ToDoError.
 func (t ToDo) Decode(_ io.Reader) (ret ToDo, err error) {
 	err = ToDoError
 	return
 }
 
+// EncodeVarInt encodes a signed 32-bit integer in Minecraft varint format.
 func EncodeVarInt(w io.Writer, v int32) (err error) {
 	uv := uint32(v)
 	for {
@@ -175,6 +198,7 @@ func EncodeVarInt(w io.Writer, v int32) (err error) {
 	return nil
 }
 
+// DecodeVarInt decodes a signed 32-bit integer in Minecraft varint format.
 func DecodeVarInt(r io.Reader) (ret int32, err error) {
 	for i := range 5 { // 32/7
 		var b uint8 = 0
@@ -191,6 +215,7 @@ func DecodeVarInt(r io.Reader) (ret int32, err error) {
 	return
 }
 
+// EncodeVarLong encodes a signed 64-bit integer in Minecraft varlong format.
 func EncodeVarLong(w io.Writer, v int64) (err error) {
 	uv := uint64(v)
 	for {
@@ -210,6 +235,7 @@ func EncodeVarLong(w io.Writer, v int64) (err error) {
 	return nil
 }
 
+// DecodeVarLong decodes a signed 64-bit integer in Minecraft varlong format.
 func DecodeVarLong(r io.Reader) (ret int64, err error) {
 	for i := range 10 { // ceil(64/7)
 		var b uint8
@@ -226,6 +252,7 @@ func DecodeVarLong(r io.Reader) (ret int64, err error) {
 	return
 }
 
+// ErroringIndex looks up key k in map m and returns an error if the key is not found.
 func ErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
 	var ok bool
 	v, ok = m[i]
@@ -235,11 +262,14 @@ func ErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
 	return
 }
 
+// EncodeDecodeAble is implemented by types that can be encoded and decoded for
+// Minecraft protocol packets.
 type EncodeDecodeAble interface {
 	Encode(w io.Writer) (err error)
 	Decode(r io.ReadSeeker) (err error)
 }
 
+// PacketInfo holds metadata about a Minecraft protocol packet.
 type PacketInfo struct {
 	Type            EncodeDecodeAble
 	Name            string
@@ -249,6 +279,7 @@ type PacketInfo struct {
 	ProtocolVersion int32
 }
 
+// Bool2uint8 converts a bool to a uint8 (1 for true, 0 for false).
 func Bool2uint8(b bool) uint8 {
 	if b {
 		return 1
@@ -256,6 +287,7 @@ func Bool2uint8(b bool) uint8 {
 	return 0
 }
 
+// Bool2uint16 converts a bool to a uint16 (1 for true, 0 for false).
 func Bool2uint16(b bool) uint16 {
 	if b {
 		return 1
@@ -263,6 +295,7 @@ func Bool2uint16(b bool) uint16 {
 	return 0
 }
 
+// Bool2uint32 converts a bool to a uint32 (1 for true, 0 for false).
 func Bool2uint32(b bool) uint32 {
 	if b {
 		return 1
@@ -270,6 +303,7 @@ func Bool2uint32(b bool) uint32 {
 	return 0
 }
 
+// Bool2uint64 converts a bool to a uint64 (1 for true, 0 for false).
 func Bool2uint64(b bool) uint64 {
 	if b {
 		return 1
@@ -277,13 +311,17 @@ func Bool2uint64(b bool) uint64 {
 	return 0
 }
 
+// LpVec3d is a compressed 3D velocity vector used in Minecraft packets.
 type LpVec3d struct {
 	X, Y, Z float64
 }
 
+// Encode encodes the LpVec3d as a compressed velocity triple into w.
 func (v *LpVec3d) Encode(w io.Writer) error {
 	return writeVelocity(w, *v)
 }
+
+// Decode decodes a compressed velocity triple from r into the LpVec3d.
 func (v *LpVec3d) Decode(r io.ReadSeeker) error {
 	v3, err := readVelocity(r)
 	if err != nil {

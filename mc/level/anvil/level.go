@@ -174,6 +174,7 @@ type Attribute struct {
 	Base float64
 }
 
+// ReadLevelData reads and decodes the level.dat NBT file from a reader.
 func ReadLevelData(r io.Reader) (l Level, err error) {
 	var lDataWrapped struct{ Data Level }
 	err = nbt.ReadFile(r, &lDataWrapped)

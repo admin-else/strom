@@ -27,18 +27,21 @@ type RawConn struct {
 	MaxPacketSize int32
 }
 
+// SetCompressionThreshold sets the packet compression threshold. Values below 0 disable compression.
 func (c *RawConn) SetCompressionThreshold(threshold int32) {
 	c.CompressionThresholdMut.Lock()
 	defer c.CompressionThresholdMut.Unlock()
 	c.compressionThreshold = threshold
 }
 
+// GetCompressionThreshold returns the current compression threshold.
 func (c *RawConn) GetCompressionThreshold() int32 {
 	c.CompressionThresholdMut.RLock()
 	defer c.CompressionThresholdMut.RUnlock()
 	return c.compressionThreshold
 }
 
+// SendRaw sends raw packet bytes over the connection, applying compression if the threshold is met.
 func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
 	if c.MaxPacketSize > 0 && int32(len(rawPacketBytes)) > c.MaxPacketSize {
 		err = errors.New("packet too large")
@@ -90,6 +93,7 @@ func (c *RawConn) SendRaw(rawPacketBytes []byte) (err error) {
 	return
 }
 
+// ReceiveRaw reads and decompresses (if needed) a raw packet from the connection.
 func (c *RawConn) ReceiveRaw() (packetBytes []byte, err error) {
 	rawPacketLen, err := proto_base.DecodeVarInt(c.R)
 	if err != nil {
@@ -142,6 +146,7 @@ func (c *RawConn) ReceiveRaw() (packetBytes []byte, err error) {
 	return
 }
 
+// SetSecret enables AES/CFB8 encryption on the connection using the shared secret.
 func (c *RawConn) SetSecret(sharedSecret []byte) (err error) {
 	var b cipher.Block
 	b, err = aes.NewCipher(sharedSecret)

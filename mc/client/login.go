@@ -134,6 +134,7 @@ func (s *LoginClient) OnStart() (err error) {
 	return
 }
 
+// LoginRaw performs the login handshake on an already-established connection without DNS resolution or configuration handling.
 func LoginRaw(c *proto.Conn, account *api.Account) (err error) {
 	lc := &LoginClient{
 		Conn:    c,
@@ -166,18 +167,21 @@ func LoginRaw(c *proto.Conn, account *api.Account) (err error) {
 	return
 }
 
+// WithoutDns returns a login setting that disables SRV DNS resolution during login.
 func WithoutDns() func(ls *loginSettings) {
 	return func(ls *loginSettings) {
 		ls.NoDns = true
 	}
 }
 
+// WithContext returns a login setting that sets the context used for the connection dial and DNS resolution.
 func WithContext(ctx context.Context) func(ls *loginSettings) {
 	return func(ls *loginSettings) {
 		ls.Ctx = ctx
 	}
 }
 
+// WithVersion returns a login setting that forces a specific Minecraft version string for the connection.
 func WithVersion(version string) func(ls *loginSettings) {
 	return func(ls *loginSettings) {
 		ls.Version = version
@@ -191,6 +195,7 @@ type loginSettings struct {
 	IgnoreConfig bool
 }
 
+// Login resolves the address with SRV DNS, connects, performs the login handshake, and handles the configuration phase, returning an authenticated connection ready for play.
 func Login(connectTo string, account *api.Account, settings ...func(ls *loginSettings)) (c *proto.Conn, err error) {
 	ls := &loginSettings{}
 

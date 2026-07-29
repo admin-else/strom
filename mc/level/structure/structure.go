@@ -5,6 +5,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
+// Load reads a structure NBT file and returns the decoded Structure.
 func Load(fileName string) (s *Structure, err error) {
 	n, err := nbt.ReadUnstructuredFilePath(fileName)
 	if err != nil {

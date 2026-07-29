@@ -250,6 +250,7 @@ func (r *Storage) Equals(other *Storage) bool {
 	return true
 }
 
+// CountStorage counts the number of elements in the storage that match the given value.
 func CountStorage(s *Storage, v int32) (a int) {
 	for i := range s.format.Len {
 		if w, _ := s.Get(i); w == v {

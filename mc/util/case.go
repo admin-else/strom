@@ -7,6 +7,7 @@ import (
 
 var boundaries = []rune{' ', '_', '-', '.', ',', ';', ':', '(', ')', '[', ']', '{', '}'}
 
+// CamelCase converts a string with word boundaries to CamelCase.
 func CamelCase(s string) string {
 	ret := ""
 	atWordBoundary := true
@@ -24,6 +25,7 @@ func CamelCase(s string) string {
 	return ret
 }
 
+// SnakeCase converts a CamelCase string to snake_case.
 func SnakeCase(s string) string {
 	ret := ""
 	for i, c := range s {
@@ -38,6 +40,7 @@ func SnakeCase(s string) string {
 	return ret
 }
 
+// FirstLetterLower returns the string with the first rune lowercased.
 func FirstLetterLower(s string) string {
 	return string(unicode.ToLower(rune(s[0]))) + s[1:]
 }
