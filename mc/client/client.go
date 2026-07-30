@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"net"
 
 	"github.com/admin-else/strom/mc/data"
@@ -19,6 +20,10 @@ func Connect(ctx context.Context, addr string, version string) (ret *proto.Conn,
 		var s server.StatusResponse
 		s, err = Status(ctx, addr)
 		if err != nil {
+			return
+		}
+		if s.Version.Protocol == 0 {
+			err = errors.New("server didnt return protocol version")
 			return
 		}
 		protocolVersion = s.Version.Protocol
