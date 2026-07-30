@@ -71,11 +71,12 @@ func StatusRaw(ctx context.Context, addr string) (s *StatusClient, err error) {
 }
 
 // StatusNoDns is like Status but does not resolve SRV records.
-func StatusNoDns(addr string) (status server.StatusResponse, err error) {
-	s, err := StatusRaw(context.Background(), addr)
+func StatusNoDns(ctx context.Context, addr string) (status server.StatusResponse, err error) {
+	s, err := StatusRaw(ctx, addr)
 	if err != nil {
 		return
 	}
+	defer s.Close()
 	err = json.Unmarshal([]byte(s.Status), &status)
 	return
 }
@@ -86,5 +87,5 @@ func Status(ctx context.Context, addr string) (status server.StatusResponse, err
 	if err != nil {
 		return
 	}
-	return StatusNoDns(addr)
+	return StatusNoDns(ctx, addr)
 }
