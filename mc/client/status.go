@@ -40,12 +40,17 @@ func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
 // So ignore the resource leak warning. And maybe attach a warn ignore comment.
 // It does not resolve SRV records.
 func StatusRaw(ctx context.Context, addr string) (s *StatusClient, err error) {
+	return StatusRawWithVersion(ctx, addr, "1.21.8")
+}
+
+// StatusRawWithVersion is like StatusRaw but uses the given Minecraft version for the handshake.
+func StatusRawWithVersion(ctx context.Context, addr, version string) (s *StatusClient, err error) {
 	c, err := ConnectVersionLess(ctx, addr)
 	if err != nil {
 		return
 	}
 	defer c.Close()
-	err = c.SetVersion("1.21.8")
+	err = c.SetVersion(version)
 	if err != nil {
 		return
 	}
