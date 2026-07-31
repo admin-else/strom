@@ -188,6 +188,12 @@ func WithVersion(version string) func(ls *loginSettings) {
 	}
 }
 
+func WithIgnoreConfig() func(ls *loginSettings) {
+	return func(ls *loginSettings) {
+		ls.IgnoreConfig = true
+	}
+}
+
 type loginSettings struct {
 	NoDns        bool
 	Ctx          context.Context
