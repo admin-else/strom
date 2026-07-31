@@ -27,13 +27,15 @@ func ServeConfig(c *proto.Conn) (err error) {
 	}
 	cs.registryData = n.Value.(map[string]any)
 	packet := &v1_21_8.ConfigurationToClientPacketCommonSelectKnownPacks{}
-	for _, pAny := range cs.registryData["KnownPacks"].([]any) {
-		p := pAny.(map[string]any)
-		packet.Packs = append(packet.Packs, struct {
-			Namespace string
-			Id        string
-			Version   string
-		}{p["Namespace"].(string), p["Id"].(string), p["Version"].(string)})
+	if knownPacks, ok := cs.registryData["KnownPacks"]; ok {
+		for _, pAny := range knownPacks.([]any) {
+			p := pAny.(map[string]any)
+			packet.Packs = append(packet.Packs, struct {
+				Namespace string
+				Id        string
+				Version   string
+			}{p["Namespace"].(string), p["Id"].(string), p["Version"].(string)})
+		}
 	}
 	err = c.Send(packet)
 	if err != nil {
