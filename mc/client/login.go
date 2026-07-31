@@ -7,6 +7,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"net"
 
 	"github.com/admin-else/strom/mc/api"
 	"github.com/admin-else/strom/mc/crypto"
@@ -135,7 +136,14 @@ func (s *LoginClient) OnStart() (err error) {
 }
 
 // LoginRaw performs the login handshake on an already-established connection without DNS resolution or configuration handling.
+// The handshake address is derived from the connection's RemoteAddr.
 func LoginRaw(c *proto.Conn, account *api.Account) (err error) {
+	return LoginRawAddr(c, account, "")
+}
+
+// LoginRawAddr performs the login handshake on an already-established connection using the given address for the handshake packet.
+// If hostAddr is empty, the handshake address is derived from the connection's RemoteAddr.
+func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err error) {
 	lc := &LoginClient{
 		Conn:    c,
 		Account: account,
@@ -148,7 +156,12 @@ func LoginRaw(c *proto.Conn, account *api.Account) (err error) {
 	lc.RegisterCriticalUntil("26.1", lc.OnSuccess)
 	lc.RegisterCriticalUntilLatest(lc.OnSuccess26_2)
 
-	p, err := MakeHandshakePacket(lc.Conn, proto_base.Login)
+	var p proto_base.EncodeDecodeAble
+	if hostAddr != "" {
+		p, err = MakeHandshakePacketAddr(lc.Conn, proto_base.Login, hostAddr)
+	} else {
+		p, err = MakeHandshakePacket(lc.Conn, proto_base.Login)
+	}
 	if err != nil {
 		return
 	}
@@ -194,11 +207,37 @@ func WithIgnoreConfig() func(ls *loginSettings) {
 	}
 }
 
+// DialFunc is a context-aware dial function used by Login to establish a TCP connection.
+type DialFunc func(ctx context.Context, network, addr string) (net.Conn, error)
+
+// WithConn returns a login setting that uses an already-established net.Conn instead of dialling.
+// WithVersion must also be set; auto-detection is not possible with a pre-established connection.
+func WithConn(conn net.Conn) func(ls *loginSettings) {
+	return func(ls *loginSettings) {
+		ls.Conn = conn
+	}
+}
+
+// WithDialer returns a login setting that uses the given dial function instead of net.Dialer.
+// Auto version detection via status ping is still supported when no explicit version is set.
+func WithDialer(d DialFunc) func(ls *loginSettings) {
+	return func(ls *loginSettings) {
+		ls.Dialer = d
+	}
+}
+
+var (
+	ErrWithConnRequiresVersion = errors.New("WithVersion is required when using WithConn")
+	ErrWithConnNoStatus        = errors.New("auto version detection is not supported with WithConn")
+)
+
 type loginSettings struct {
 	NoDns        bool
 	Ctx          context.Context
 	Version      string
 	IgnoreConfig bool
+	Conn         net.Conn
+	Dialer       DialFunc
 }
 
 // Login resolves the address with SRV DNS, connects, performs the login handshake, and handles the configuration phase, returning an authenticated connection ready for play.
@@ -209,18 +248,48 @@ func Login(connectTo string, account *api.Account, settings ...func(ls *loginSet
 		setting(ls)
 	}
 
-	if !ls.NoDns {
-		connectTo, _, _, err = DoDNSChecked(ls.Ctx, connectTo, nil)
+	if ls.Conn != nil {
+		if ls.Version == "" {
+			return nil, ErrWithConnRequiresVersion
+		}
+		c, err = ConnectWithConn(ls.Ctx, ls.Conn, ls.Version)
+		if err != nil {
+			return
+		}
+	} else if ls.Dialer != nil {
+		if ls.Version == "" {
+			return nil, ErrWithConnRequiresVersion
+		}
+		if !ls.NoDns {
+			connectTo, _, _, err = DoDNSChecked(ls.Ctx, connectTo, nil)
+			if err != nil {
+				return
+			}
+		}
+		var conn net.Conn
+		conn, err = ls.Dialer(ls.Ctx, "tcp", connectTo)
+		if err != nil {
+			return
+		}
+		c, err = ConnectWithConn(ls.Ctx, conn, ls.Version)
+		if err != nil {
+			conn.Close()
+			return
+		}
+	} else {
+		if !ls.NoDns {
+			connectTo, _, _, err = DoDNSChecked(ls.Ctx, connectTo, nil)
+			if err != nil {
+				return
+			}
+		}
+		c, err = Connect(ls.Ctx, connectTo, ls.Version)
 		if err != nil {
 			return
 		}
 	}
 
-	c, err = Connect(ls.Ctx, connectTo, ls.Version)
-	if err != nil {
-		return
-	}
-	err = LoginRaw(c, account)
+	err = LoginRawAddr(c, account, connectTo)
 	if err != nil {
 		return
 	}

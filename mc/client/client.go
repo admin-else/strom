@@ -60,3 +60,23 @@ func ConnectVersionLess(ctx context.Context, addr string) (ret *proto.Conn, err 
 	ret.W = ret.Conn
 	return
 }
+
+// ConnectWithConn wraps an existing net.Conn into a proto.Conn with the given
+// Minecraft version. The version must be non-empty.
+func ConnectWithConn(ctx context.Context, conn net.Conn, version string) (ret *proto.Conn, err error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	ret = proto.NewConnCtx(ctx)
+	ret.Actor = proto_base.Client
+	ret.Conn = conn
+	ret.R = conn
+	ret.W = conn
+	v, err := data.LookUpVersionByName(version)
+	if err != nil {
+		return
+	}
+	ret.ProtocolVersion = v.Version
+	ret.Version = version
+	return
+}
