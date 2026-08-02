@@ -113,7 +113,7 @@ func (a Actor) ReceiveDirection() Direction {
 
 type (
 	// ToDo is a placeholder type for unimplemented packet fields.
-	ToDo       struct{}
+	ToDo struct{}
 	// RestBuffer represents the remaining unread bytes in a packet buffer.
 	RestBuffer []byte
 )
