@@ -11,15 +11,16 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
-func DefaultEncoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.Stmt, err error) {
+func DefaultEncoder(_ *Generator, varToSet ast.Expr, _ any, name string) (s []ast.Stmt, err error) {
+	tmpName := name + "EncTmp"
 	s = Stmts(
+		Define121(Ident(tmpName), varToSet),
 		Assign121(
 			Ident("err"),
-			Call(SelectorExprAndStr(varToSet, "Encode"), Ident("w")),
+			Call(SelectorExprAndStr(Ident(tmpName), "Encode"), Ident("w")),
 		),
 		IfErrNil(),
 	)
-
 	return
 }
 

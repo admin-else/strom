@@ -101,7 +101,8 @@ func (ret *EntityMetadata) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = v.Value.Encode(w)
+		EntityMetadataValueEncTmp := v.Value
+		err = EntityMetadataValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -183,7 +184,7 @@ func (ret *Slot) Decode(r io.ReadSeeker) (err error) {
 		var SlotAnonTmp struct {
 			ItemCount  int8
 			ItemDamage int16
-			NbtData    nbt.Anon
+			NbtData    nbt.Tag
 		}
 		err = binary.Read(r, binary.BigEndian, &SlotAnonTmp.ItemCount)
 		if err != nil {
@@ -218,26 +219,34 @@ func (ret *Slot) Encode(w io.Writer) (err error) {
 		_, ok := ret.Anon.(struct {
 			ItemCount  int8
 			ItemDamage int16
-			NbtData    nbt.Anon
+			NbtData    nbt.Tag
 		})
 		if !ok {
 			err = proto_base.BadTypeError
 			return
 		}
-		slotAnon := ret.Anon.(struct {
+		err = binary.Write(w, binary.BigEndian, ret.Anon.(struct {
 			ItemCount  int8
 			ItemDamage int16
-			NbtData    nbt.Anon
-		})
-		err = binary.Write(w, binary.BigEndian, slotAnon.ItemCount)
+			NbtData    nbt.Tag
+		}).ItemCount)
 		if err != nil {
 			return
 		}
-		err = binary.Write(w, binary.BigEndian, slotAnon.ItemDamage)
+		err = binary.Write(w, binary.BigEndian, ret.Anon.(struct {
+			ItemCount  int8
+			ItemDamage int16
+			NbtData    nbt.Tag
+		}).ItemDamage)
 		if err != nil {
 			return
 		}
-		err = slotAnon.NbtData.Encode(w)
+		SlotAnonNbtDataEncTmp := ret.Anon.(struct {
+			ItemCount  int8
+			ItemDamage int16
+			NbtData    nbt.Tag
+		}).NbtData
+		err = SlotAnonNbtDataEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -372,7 +381,8 @@ func (ret *HandshakingToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = HandshakingToServerPacketParams.Encode(w)
+		HandshakingToServerPacketParamsEncTmp := HandshakingToServerPacketParams
+		err = HandshakingToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -382,7 +392,8 @@ func (ret *HandshakingToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = HandshakingToServerPacketParams.Encode(w)
+		HandshakingToServerPacketParamsEncTmp := HandshakingToServerPacketParams
+		err = HandshakingToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -524,7 +535,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -534,7 +546,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -544,7 +557,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -554,7 +568,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -738,7 +753,8 @@ func (ret *LoginToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToServerPacketParams.Encode(w)
+		LoginToServerPacketParamsEncTmp := LoginToServerPacketParams
+		err = LoginToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -748,7 +764,8 @@ func (ret *LoginToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToServerPacketParams.Encode(w)
+		LoginToServerPacketParamsEncTmp := LoginToServerPacketParams
+		err = LoginToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1380,7 +1397,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1390,7 +1408,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1400,7 +1419,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1410,7 +1430,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1420,7 +1441,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1430,7 +1452,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1440,7 +1463,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1450,7 +1474,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1460,7 +1485,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1470,7 +1496,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1480,7 +1507,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1490,7 +1518,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1500,7 +1529,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1510,7 +1540,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1520,7 +1551,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1530,7 +1562,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1540,7 +1573,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1550,7 +1584,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1560,7 +1595,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1570,7 +1606,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1580,7 +1617,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1590,7 +1628,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1600,7 +1639,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1610,7 +1650,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1620,7 +1661,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1630,7 +1672,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1640,7 +1683,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1650,7 +1694,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1660,7 +1705,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1670,7 +1716,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1680,7 +1727,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1690,7 +1738,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1700,7 +1749,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1710,7 +1760,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1720,7 +1771,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1730,7 +1782,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1740,7 +1793,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1750,7 +1804,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1760,7 +1815,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1770,7 +1826,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1780,7 +1837,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1790,7 +1848,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1800,7 +1859,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1810,7 +1870,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1820,7 +1881,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1830,7 +1892,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1840,7 +1903,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1850,7 +1914,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1860,7 +1925,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1870,7 +1936,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1880,7 +1947,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1890,7 +1958,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1900,7 +1969,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1910,7 +1980,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1920,7 +1991,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1930,7 +2002,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1940,7 +2013,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1950,7 +2024,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1960,7 +2035,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1970,7 +2046,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1980,7 +2057,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1990,7 +2068,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2000,7 +2079,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2010,7 +2090,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2020,7 +2101,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2030,7 +2112,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2040,7 +2123,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2050,7 +2134,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2060,7 +2145,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2070,7 +2156,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2080,7 +2167,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2090,7 +2178,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2100,7 +2189,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2110,7 +2200,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2241,7 +2332,8 @@ func (ret *PlayToClientPacketBed) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToClientPacketBedLocationEncTmp := ret.Location
+	err = PlayToClientPacketBedLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2275,7 +2367,8 @@ func (ret *PlayToClientPacketBlockAction) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketBlockAction) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketBlockActionLocationEncTmp := ret.Location
+	err = PlayToClientPacketBlockActionLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2320,7 +2413,8 @@ func (ret *PlayToClientPacketBlockBreakAnimation) Encode(w io.Writer) (err error
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToClientPacketBlockBreakAnimationLocationEncTmp := ret.Location
+	err = PlayToClientPacketBlockBreakAnimationLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2348,7 +2442,8 @@ func (ret *PlayToClientPacketBlockChange) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketBlockChange) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketBlockChangeLocationEncTmp := ret.Location
+	err = PlayToClientPacketBlockChangeLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2679,7 +2774,8 @@ func (ret *PlayToClientPacketCustomPayload) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Data.Encode(w)
+	PlayToClientPacketCustomPayloadDataEncTmp := ret.Data
+	err = PlayToClientPacketCustomPayloadDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2844,7 +2940,8 @@ func (ret *PlayToClientPacketEntityEquipment) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Item.Encode(w)
+	PlayToClientPacketEntityEquipmentItemEncTmp := ret.Item
+	err = PlayToClientPacketEntityEquipmentItemEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2946,7 +3043,8 @@ func (ret *PlayToClientPacketEntityMetadata) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Metadata.Encode(w)
+	PlayToClientPacketEntityMetadataMetadataEncTmp := ret.Metadata
+	err = PlayToClientPacketEntityMetadataMetadataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -3148,7 +3246,8 @@ func (ret *PlayToClientPacketEntityVelocity) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Velocity.Encode(w)
+	PlayToClientPacketEntityVelocityVelocityEncTmp := ret.Velocity
+	err = PlayToClientPacketEntityVelocityVelocityEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -3845,7 +3944,8 @@ func (ret *PlayToClientPacketMapChunkBulk) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = ret.Data.Encode(w)
+	PlayToClientPacketMapChunkBulkDataEncTmp := ret.Data
+	err = PlayToClientPacketMapChunkBulkDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -4017,7 +4117,8 @@ func (ret *PlayToClientPacketNamedEntitySpawn) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Metadata.Encode(w)
+	PlayToClientPacketNamedEntitySpawnMetadataEncTmp := ret.Metadata
+	err = PlayToClientPacketNamedEntitySpawnMetadataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -4100,7 +4201,8 @@ func (ret *PlayToClientPacketOpenSignEntity) Decode(r io.ReadSeeker) (err error)
 	return
 }
 func (ret *PlayToClientPacketOpenSignEntity) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketOpenSignEntityLocationEncTmp := ret.Location
+	err = PlayToClientPacketOpenSignEntityLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -5453,7 +5555,8 @@ func (ret *PlayToClientPacketSetSlot) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Item.Encode(w)
+	PlayToClientPacketSetSlotItemEncTmp := ret.Item
+	err = PlayToClientPacketSetSlotItemEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -5567,8 +5670,8 @@ func (ret *PlayToClientPacketSpawnEntity) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		v := ret.Velocity.(Vec3i16)
-	err = v.Encode(w)
+		PlayToClientPacketSpawnEntityVelocityEncTmp := ret.Velocity.(Vec3i16)
+		err = PlayToClientPacketSpawnEntityVelocityEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5720,11 +5823,13 @@ func (ret *PlayToClientPacketSpawnEntityLiving) Encode(w io.Writer) (err error) 
 	if err != nil {
 		return
 	}
-	err = ret.Velocity.Encode(w)
+	PlayToClientPacketSpawnEntityLivingVelocityEncTmp := ret.Velocity
+	err = PlayToClientPacketSpawnEntityLivingVelocityEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Metadata.Encode(w)
+	PlayToClientPacketSpawnEntityLivingMetadataEncTmp := ret.Metadata
+	err = PlayToClientPacketSpawnEntityLivingMetadataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -5766,7 +5871,8 @@ func (ret *PlayToClientPacketSpawnEntityPainting) Encode(w io.Writer) (err error
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToClientPacketSpawnEntityPaintingLocationEncTmp := ret.Location
+	err = PlayToClientPacketSpawnEntityPaintingLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -5844,7 +5950,8 @@ func (ret *PlayToClientPacketSpawnPosition) Decode(r io.ReadSeeker) (err error) 
 	return
 }
 func (ret *PlayToClientPacketSpawnPosition) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketSpawnPositionLocationEncTmp := ret.Location
+	err = PlayToClientPacketSpawnPositionLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -5941,7 +6048,7 @@ func (ret *PlayToClientPacketTabComplete) Encode(w io.Writer) (err error) {
 type PlayToClientPacketTileEntityData struct {
 	Location Position
 	Action   uint8
-	NbtData  nbt.Anon
+	NbtData  nbt.Tag
 }
 
 func (ret *PlayToClientPacketTileEntityData) Decode(r io.ReadSeeker) (err error) {
@@ -5960,7 +6067,8 @@ func (ret *PlayToClientPacketTileEntityData) Decode(r io.ReadSeeker) (err error)
 	return
 }
 func (ret *PlayToClientPacketTileEntityData) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketTileEntityDataLocationEncTmp := ret.Location
+	err = PlayToClientPacketTileEntityDataLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -5968,7 +6076,8 @@ func (ret *PlayToClientPacketTileEntityData) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.NbtData.Encode(w)
+	PlayToClientPacketTileEntityDataNbtDataEncTmp := ret.NbtData
+	err = PlayToClientPacketTileEntityDataNbtDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -6306,7 +6415,7 @@ func (ret *PlayToClientPacketUpdateAttributes) Encode(w io.Writer) (err error) {
 
 type PlayToClientPacketUpdateEntityNbt struct {
 	EntityId int32
-	Tag      nbt.Anon
+	Tag      nbt.Tag
 }
 
 func (ret *PlayToClientPacketUpdateEntityNbt) Decode(r io.ReadSeeker) (err error) {
@@ -6325,7 +6434,8 @@ func (ret *PlayToClientPacketUpdateEntityNbt) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Tag.Encode(w)
+	PlayToClientPacketUpdateEntityNbtTagEncTmp := ret.Tag
+	err = PlayToClientPacketUpdateEntityNbtTagEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -6401,7 +6511,8 @@ func (ret *PlayToClientPacketUpdateSign) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketUpdateSign) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketUpdateSignLocationEncTmp := ret.Location
+	err = PlayToClientPacketUpdateSignLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -6488,7 +6599,8 @@ func (ret *PlayToClientPacketWindowItems) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientPacketWindowItemsItems := range len(ret.Items) {
-		err = ret.Items[iPlayToClientPacketWindowItemsItems].Encode(w)
+		PlayToClientPacketWindowItemsItemsInnerEncTmp := ret.Items[iPlayToClientPacketWindowItemsItems]
+		err = PlayToClientPacketWindowItemsItemsInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6962,7 +7074,8 @@ func (ret *PlayToClientPacketWorldEvent) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToClientPacketWorldEventLocationEncTmp := ret.Location
+	err = PlayToClientPacketWorldEventLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -7223,7 +7336,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7233,7 +7347,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7243,7 +7358,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7253,7 +7369,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7263,7 +7380,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7273,7 +7391,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7283,7 +7402,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7293,7 +7413,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7303,7 +7424,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7313,7 +7435,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7323,7 +7446,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7333,7 +7457,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7343,7 +7468,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7353,7 +7479,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7363,7 +7490,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7373,7 +7501,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7383,7 +7512,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7393,7 +7523,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7403,7 +7534,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7413,7 +7545,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7423,7 +7556,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7433,7 +7567,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7443,7 +7578,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7453,7 +7589,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7463,7 +7600,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7473,7 +7611,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7554,7 +7693,8 @@ func (ret *PlayToServerPacketBlockDig) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToServerPacketBlockDigLocationEncTmp := ret.Location
+	err = PlayToServerPacketBlockDigLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -7602,7 +7742,8 @@ func (ret *PlayToServerPacketBlockPlace) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketBlockPlace) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToServerPacketBlockPlaceLocationEncTmp := ret.Location
+	err = PlayToServerPacketBlockPlaceLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -7610,7 +7751,8 @@ func (ret *PlayToServerPacketBlockPlace) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.HeldItem.Encode(w)
+	PlayToServerPacketBlockPlaceHeldItemEncTmp := ret.HeldItem
+	err = PlayToServerPacketBlockPlaceHeldItemEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -7707,7 +7849,8 @@ func (ret *PlayToServerPacketCustomPayload) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Data.Encode(w)
+	PlayToServerPacketCustomPayloadDataEncTmp := ret.Data
+	err = PlayToServerPacketCustomPayloadDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -8032,7 +8175,8 @@ func (ret *PlayToServerPacketSetCreativeSlot) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Item.Encode(w)
+	PlayToServerPacketSetCreativeSlotItemEncTmp := ret.Item
+	err = PlayToServerPacketSetCreativeSlotItemEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -8185,7 +8329,8 @@ func (ret *PlayToServerPacketTabComplete) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.Block != nil {
-		err = (*ret.Block).Encode(w)
+		PlayToServerPacketTabCompleteBlockEncTmp := *ret.Block
+		err = PlayToServerPacketTabCompleteBlockEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8262,7 +8407,8 @@ func (ret *PlayToServerPacketUpdateSign) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketUpdateSign) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToServerPacketUpdateSignLocationEncTmp := ret.Location
+	err = PlayToServerPacketUpdateSignLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -8469,7 +8615,8 @@ func (ret *PlayToServerPacketWindowClick) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Item.Encode(w)
+	PlayToServerPacketWindowClickItemEncTmp := ret.Item
+	err = PlayToServerPacketWindowClickItemEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -8531,7 +8678,8 @@ func (ret *StatusToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = StatusToClientPacketParams.Encode(w)
+		StatusToClientPacketParamsEncTmp := StatusToClientPacketParams
+		err = StatusToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8541,7 +8689,8 @@ func (ret *StatusToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = StatusToClientPacketParams.Encode(w)
+		StatusToClientPacketParamsEncTmp := StatusToClientPacketParams
+		err = StatusToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8642,7 +8791,8 @@ func (ret *StatusToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = StatusToServerPacketParams.Encode(w)
+		StatusToServerPacketParamsEncTmp := StatusToServerPacketParams
+		err = StatusToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8652,7 +8802,8 @@ func (ret *StatusToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = StatusToServerPacketParams.Encode(w)
+		StatusToServerPacketParamsEncTmp := StatusToServerPacketParams
+		err = StatusToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}

@@ -74,7 +74,8 @@ func (ret *ArmorTrimMaterial) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = ret.Description.Encode(w)
+	ArmorTrimMaterialDescriptionEncTmp := ret.Description
+	err = ArmorTrimMaterialDescriptionEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -107,7 +108,8 @@ func (ret *ArmorTrimPattern) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Description.Encode(w)
+	ArmorTrimPatternDescriptionEncTmp := ret.Description
+	err = ArmorTrimPatternDescriptionEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -185,7 +187,8 @@ func (ret *BannerPatternLayer) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = BannerPatternLayerPatternKnownType.Encode(w)
+		BannerPatternLayerPatternOtherwiseEncTmp := BannerPatternLayerPatternKnownType
+		err = BannerPatternLayerPatternOtherwiseEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -367,7 +370,8 @@ func (ret *DataComponentMatchers) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *DataComponentMatchers) Encode(w io.Writer) (err error) {
-	err = ret.ExactMatchers.Encode(w)
+	DataComponentMatchersExactMatchersEncTmp := ret.ExactMatchers
+	err = DataComponentMatchersExactMatchersEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -436,11 +440,13 @@ func (ret *DebugStructureInfo) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *DebugStructureInfo) Encode(w io.Writer) (err error) {
-	err = ret.BoundingBoxMin.Encode(w)
+	DebugStructureInfoBoundingBoxMinEncTmp := ret.BoundingBoxMin
+	err = DebugStructureInfoBoundingBoxMinEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.BoundingBoxMax.Encode(w)
+	DebugStructureInfoBoundingBoxMaxEncTmp := ret.BoundingBoxMax
+	err = DebugStructureInfoBoundingBoxMaxEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -449,11 +455,13 @@ func (ret *DebugStructureInfo) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iDebugStructureInfoPieces := range len(ret.Pieces) {
-		err = ret.Pieces[iDebugStructureInfoPieces].BoundingBoxMin.Encode(w)
+		DebugStructureInfoPiecesInnerBoundingBoxMinEncTmp := ret.Pieces[iDebugStructureInfoPieces].BoundingBoxMin
+		err = DebugStructureInfoPiecesInnerBoundingBoxMinEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = ret.Pieces[iDebugStructureInfoPieces].BoundingBoxMax.Encode(w)
+		DebugStructureInfoPiecesInnerBoundingBoxMaxEncTmp := ret.Pieces[iDebugStructureInfoPieces].BoundingBoxMax
+		err = DebugStructureInfoPiecesInnerBoundingBoxMaxEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -594,7 +602,8 @@ func (ret *EntityMetadataPaintingVariant) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.Title != nil {
-		err = (*ret.Title).Encode(w)
+		EntityMetadataPaintingVariantTitleEncTmp := *ret.Title
+		err = EntityMetadataPaintingVariantTitleEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -604,7 +613,8 @@ func (ret *EntityMetadataPaintingVariant) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.Author != nil {
-		err = (*ret.Author).Encode(w)
+		EntityMetadataPaintingVariantAuthorEncTmp := *ret.Author
+		err = EntityMetadataPaintingVariantAuthorEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -639,7 +649,8 @@ func (ret *ExactComponentMatcher) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iExactComponentMatcher := range len(ret.Val) {
-		err = ret.Val[iExactComponentMatcher].Encode(w)
+		ExactComponentMatcherInnerEncTmp := ret.Val[iExactComponentMatcher]
+		err = ExactComponentMatcherInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -692,7 +703,8 @@ func (ret *GameProfile) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iGameProfileProperties := range len(ret.Properties) {
-		err = ret.Properties[iGameProfileProperties].Encode(w)
+		GameProfilePropertiesInnerEncTmp := ret.Properties[iGameProfileProperties]
+		err = GameProfilePropertiesInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -773,7 +785,8 @@ func (ret *GlobalPos) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	GlobalPosLocationEncTmp := ret.Location
+	err = GlobalPosLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -859,7 +872,8 @@ func (ret *HashedSlot) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iHashedSlotComponents := range len(ret.Components) {
-		err = ret.Components[iHashedSlotComponents].Type.Encode(w)
+		HashedSlotComponentsInnerTypeEncTmp := ret.Components[iHashedSlotComponents].Type
+		err = HashedSlotComponentsInnerTypeEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -873,7 +887,8 @@ func (ret *HashedSlot) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iHashedSlotRemoveComponents := range len(ret.RemoveComponents) {
-		err = ret.RemoveComponents[iHashedSlotRemoveComponents].Type.Encode(w)
+		HashedSlotRemoveComponentsInnerTypeEncTmp := ret.RemoveComponents[iHashedSlotRemoveComponents].Type
+		err = HashedSlotRemoveComponentsInnerTypeEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -921,7 +936,8 @@ func (ret *InstrumentData) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *InstrumentData) Encode(w io.Writer) (err error) {
-	err = ret.SoundEvent.Encode(w)
+	InstrumentDataSoundEventEncTmp := ret.SoundEvent
+	err = InstrumentDataSoundEventEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -933,7 +949,8 @@ func (ret *InstrumentData) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Description.Encode(w)
+	InstrumentDataDescriptionEncTmp := ret.Description
+	err = InstrumentDataDescriptionEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -1188,7 +1205,8 @@ func (ret *ItemConsumeEffect) Encode(w io.Writer) (err error) {
 			return
 		}
 		for iItemConsumeEffectAnonEffects := range len(ItemConsumeEffectAnon.Effects) {
-			err = ItemConsumeEffectAnon.Effects[iItemConsumeEffectAnonEffects].Encode(w)
+			ItemConsumeEffectAnonEffectsInnerEncTmp := ItemConsumeEffectAnon.Effects[iItemConsumeEffectAnonEffects]
+			err = ItemConsumeEffectAnonEffectsInnerEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -1212,7 +1230,8 @@ func (ret *ItemConsumeEffect) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ItemConsumeEffectAnon.Sound.Encode(w)
+		ItemConsumeEffectAnonSoundEncTmp := ItemConsumeEffectAnon.Sound
+		err = ItemConsumeEffectAnonSoundEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1224,7 +1243,8 @@ func (ret *ItemConsumeEffect) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ItemConsumeEffectAnon.Effects.Encode(w)
+		ItemConsumeEffectAnonEffectsEncTmp := ItemConsumeEffectAnon.Effects
+		err = ItemConsumeEffectAnonEffectsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1315,7 +1335,8 @@ func (ret *ItemEffectDetail) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.HiddenEffect != nil {
-		err = (*ret.HiddenEffect).Encode(w)
+		ItemEffectDetailHiddenEffectEncTmp := *ret.HiddenEffect
+		err = ItemEffectDetailHiddenEffectEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1446,7 +1467,8 @@ func (ret *ItemPotionEffect) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Details.Encode(w)
+	ItemPotionEffectDetailsEncTmp := ret.Details
+	err = ItemPotionEffectDetailsEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -1530,7 +1552,8 @@ func (ret *ItemSoundHolder) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = ItemSoundHolderKnownType.Encode(w)
+		ItemSoundHolderOtherwiseEncTmp := ItemSoundHolderKnownType
+		err = ItemSoundHolderOtherwiseEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -1557,11 +1580,13 @@ func (ret *ItemWrittenBookPage) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *ItemWrittenBookPage) Encode(w io.Writer) (err error) {
-	err = ret.Content.Encode(w)
+	ItemWrittenBookPageContentEncTmp := ret.Content
+	err = ItemWrittenBookPageContentEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.FilteredContent.Encode(w)
+	ItemWrittenBookPageFilteredContentEncTmp := ret.FilteredContent
+	err = ItemWrittenBookPageFilteredContentEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -1595,11 +1620,13 @@ func (ret *JukeboxSongData) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *JukeboxSongData) Encode(w io.Writer) (err error) {
-	err = ret.SoundEvent.Encode(w)
+	JukeboxSongDataSoundEventEncTmp := ret.SoundEvent
+	err = JukeboxSongDataSoundEventEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Description.Encode(w)
+	JukeboxSongDataDescriptionEncTmp := ret.Description
+	err = JukeboxSongDataDescriptionEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -1698,7 +1725,8 @@ func (ret *Node) Decode(r io.ReadSeeker) (err error) {
 var NodeTypeReverseMap = map[string]int32{"blocked": 0, "open": 1, "water_border": 10, "rail": 11, "unpassable_rail": 12, "danger_fire": 13, "damage_fire": 14, "danger_other": 15, "damage_other": 16, "door_open": 17, "door_wood_closed": 18, "door_iron_closed": 19, "walkable": 2, "breach": 20, "leaves": 21, "sticky_honey": 22, "cocoa": 23, "damage_cautious": 24, "danger_trapdoor": 25, "walkable_door": 3, "trapdoor": 4, "powder_snow": 5, "danger_powder_snow": 6, "fence": 7, "lava": 8, "water": 9}
 
 func (ret *Node) Encode(w io.Writer) (err error) {
-	err = ret.Position.Encode(w)
+	NodePositionEncTmp := ret.Position
+	err = NodePositionEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -1805,7 +1833,8 @@ func (ret *PartialResolvableProfile) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPartialResolvableProfileProperties := range len(ret.Properties) {
-		err = ret.Properties[iPartialResolvableProfileProperties].Encode(w)
+		PartialResolvableProfilePropertiesInnerEncTmp := ret.Properties[iPartialResolvableProfileProperties]
+		err = PartialResolvableProfilePropertiesInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2286,7 +2315,8 @@ func (ret *Particle) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ParticleData.Encode(w)
+		ParticleDataEncTmp := ParticleData
+		err = ParticleDataEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2329,7 +2359,8 @@ func (ret *Particle) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ParticleData.Target.Encode(w)
+		ParticleDataTargetEncTmp := ParticleData.Target
+		err = ParticleDataTargetEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2363,7 +2394,8 @@ func (ret *Particle) Encode(w io.Writer) (err error) {
 				err = proto_base.BadTypeError
 				return
 			}
-			err = ParticleDataPosition.Encode(w)
+			ParticleDataPositionEncTmp := ParticleDataPosition
+			err = ParticleDataPositionEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -2443,7 +2475,8 @@ func (ret *Path) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Target.Encode(w)
+	PathTargetEncTmp := ret.Target
+	err = PathTargetEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2452,12 +2485,14 @@ func (ret *Path) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPathNodes := range len(ret.Nodes) {
-		err = ret.Nodes[iPathNodes].Encode(w)
+		PathNodesInnerEncTmp := ret.Nodes[iPathNodes]
+		err = PathNodesInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
 	}
-	err = ret.DebugData.Encode(w)
+	PathDebugDataEncTmp := ret.DebugData
+	err = PathDebugDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2521,7 +2556,8 @@ func (ret *PathDebugData) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPathDebugDataOpenSet := range len(ret.OpenSet) {
-		err = ret.OpenSet[iPathDebugDataOpenSet].Encode(w)
+		PathDebugDataOpenSetInnerEncTmp := ret.OpenSet[iPathDebugDataOpenSet]
+		err = PathDebugDataOpenSetInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2531,7 +2567,8 @@ func (ret *PathDebugData) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPathDebugDataClosedSet := range len(ret.ClosedSet) {
-		err = ret.ClosedSet[iPathDebugDataClosedSet].Encode(w)
+		PathDebugDataClosedSetInnerEncTmp := ret.ClosedSet[iPathDebugDataClosedSet]
+		err = PathDebugDataClosedSetInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2541,7 +2578,8 @@ func (ret *PathDebugData) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPathDebugDataTargetNodes := range len(ret.TargetNodes) {
-		err = ret.TargetNodes[iPathDebugDataTargetNodes].Encode(w)
+		PathDebugDataTargetNodesInnerEncTmp := ret.TargetNodes[iPathDebugDataTargetNodes]
+		err = PathDebugDataTargetNodesInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2730,7 +2768,8 @@ func (ret *ResolvableProfile) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ResolvableProfileAnon.Encode(w)
+		ResolvableProfileAnonEncTmp := ResolvableProfileAnon
+		err = ResolvableProfileAnonEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -2740,12 +2779,14 @@ func (ret *ResolvableProfile) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ResolvableProfileAnon.Encode(w)
+		ResolvableProfileAnonEncTmp := ResolvableProfileAnon
+		err = ResolvableProfileAnonEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
 	}
-	err = ret.SkinPatch.Encode(w)
+	ResolvableProfileSkinPatchEncTmp := ret.SkinPatch
+	err = ResolvableProfileSkinPatchEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2774,7 +2815,8 @@ func (ret *RespawnData) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *RespawnData) Encode(w io.Writer) (err error) {
-	err = ret.GlobalPos.Encode(w)
+	RespawnDataGlobalPosEncTmp := ret.GlobalPos
+	err = RespawnDataGlobalPosEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -2962,7 +3004,7 @@ func (ret *Slot) Encode(w io.Writer) (err error) {
 				Type SlotComponentType
 			}
 		}).Components) {
-			err = ret.Anon.(struct {
+			SlotAnonComponentsInnerEncTmp := ret.Anon.(struct {
 				ItemId                int32
 				AddedComponentCount   int32
 				RemovedComponentCount int32
@@ -2970,7 +3012,8 @@ func (ret *Slot) Encode(w io.Writer) (err error) {
 				RemoveComponents      []struct {
 					Type SlotComponentType
 				}
-			}).Components[iSlotAnonComponents].Encode(w)
+			}).Components[iSlotAnonComponents]
+			err = SlotAnonComponentsInnerEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -2984,7 +3027,7 @@ func (ret *Slot) Encode(w io.Writer) (err error) {
 				Type SlotComponentType
 			}
 		}).RemoveComponents) {
-			err = ret.Anon.(struct {
+			SlotAnonRemoveComponentsInnerTypeEncTmp := ret.Anon.(struct {
 				ItemId                int32
 				AddedComponentCount   int32
 				RemovedComponentCount int32
@@ -2992,7 +3035,8 @@ func (ret *Slot) Encode(w io.Writer) (err error) {
 				RemoveComponents      []struct {
 					Type SlotComponentType
 				}
-			}).RemoveComponents[iSlotAnonRemoveComponents].Type.Encode(w)
+			}).RemoveComponents[iSlotAnonRemoveComponents].Type
+			err = SlotAnonRemoveComponentsInnerTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -3188,7 +3232,7 @@ func (ret *UntrustedSlot) Encode(w io.Writer) (err error) {
 				Type SlotComponentType
 			}
 		}).Components) {
-			err = ret.Anon.(struct {
+			UntrustedSlotAnonComponentsInnerEncTmp := ret.Anon.(struct {
 				ItemId                int32
 				AddedComponentCount   int32
 				RemovedComponentCount int32
@@ -3196,7 +3240,8 @@ func (ret *UntrustedSlot) Encode(w io.Writer) (err error) {
 				RemoveComponents      []struct {
 					Type SlotComponentType
 				}
-			}).Components[iUntrustedSlotAnonComponents].Encode(w)
+			}).Components[iUntrustedSlotAnonComponents]
+			err = UntrustedSlotAnonComponentsInnerEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -3210,7 +3255,7 @@ func (ret *UntrustedSlot) Encode(w io.Writer) (err error) {
 				Type SlotComponentType
 			}
 		}).RemoveComponents) {
-			err = ret.Anon.(struct {
+			UntrustedSlotAnonRemoveComponentsInnerTypeEncTmp := ret.Anon.(struct {
 				ItemId                int32
 				AddedComponentCount   int32
 				RemovedComponentCount int32
@@ -3218,7 +3263,8 @@ func (ret *UntrustedSlot) Encode(w io.Writer) (err error) {
 				RemoveComponents      []struct {
 					Type SlotComponentType
 				}
-			}).RemoveComponents[iUntrustedSlotAnonRemoveComponents].Type.Encode(w)
+			}).RemoveComponents[iUntrustedSlotAnonRemoveComponents].Type
+			err = UntrustedSlotAnonRemoveComponentsInnerTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -3244,11 +3290,13 @@ func (ret *UntrustedSlotComponent) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *UntrustedSlotComponent) Encode(w io.Writer) (err error) {
-	err = ret.Type.Encode(w)
+	UntrustedSlotComponentTypeEncTmp := ret.Type
+	err = UntrustedSlotComponentTypeEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Data.Encode(w)
+	UntrustedSlotComponentDataEncTmp := ret.Data
+	err = UntrustedSlotComponentDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -3393,7 +3441,8 @@ func (ret *ChunkBlockEntity) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.NbtData.Encode(w)
+	ChunkBlockEntityNbtDataEncTmp := ret.NbtData
+	err = ChunkBlockEntityNbtDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -3529,7 +3578,8 @@ func (ret *EntityMetadata) Decode(r io.ReadSeeker) (err error) {
 }
 func (ret *EntityMetadata) Encode(w io.Writer) (err error) {
 	for _, v := range ret.Val {
-		err = v.Encode(w)
+		EntityMetadataEncTmp := v
+		err = EntityMetadataEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -3962,7 +4012,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4022,7 +4073,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4107,7 +4159,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4132,7 +4185,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			return
 		}
 		if EntityMetadataEntryValue != nil {
-			err = (*EntityMetadataEntryValue).Encode(w)
+			EntityMetadataEntryValueEncTmp := *EntityMetadataEntryValue
+			err = EntityMetadataEntryValueEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -4143,7 +4197,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4158,7 +4213,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			return
 		}
 		if EntityMetadataEntryValue != nil {
-			err = (*EntityMetadataEntryValue).Encode(w)
+			EntityMetadataEntryValueEncTmp := *EntityMetadataEntryValue
+			err = EntityMetadataEntryValueEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -4174,7 +4230,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			return
 		}
 		if EntityMetadataEntryValue != nil {
-			err = (*EntityMetadataEntryValue).Encode(w)
+			EntityMetadataEntryValueEncTmp := *EntityMetadataEntryValue
+			err = EntityMetadataEntryValueEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -4185,7 +4242,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4222,7 +4280,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			if err != nil {
 				return
 			}
-			err = EntityMetadataEntryValueKnownType.Encode(w)
+			EntityMetadataEntryValueOtherwiseEncTmp := EntityMetadataEntryValueKnownType
+			err = EntityMetadataEntryValueOtherwiseEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -4235,7 +4294,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4250,7 +4310,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			return
 		}
 		for iEntityMetadataEntryValue := range len(EntityMetadataEntryValue) {
-			err = EntityMetadataEntryValue[iEntityMetadataEntryValue].Encode(w)
+			EntityMetadataEntryValueInnerEncTmp := EntityMetadataEntryValue[iEntityMetadataEntryValue]
+			err = EntityMetadataEntryValueInnerEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -4281,7 +4342,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4291,7 +4353,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4343,7 +4406,8 @@ func (ret *EntityMetadataEntry) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = EntityMetadataEntryValue.Encode(w)
+		EntityMetadataEntryValueEncTmp := EntityMetadataEntryValue
+		err = EntityMetadataEntryValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4449,7 +4513,8 @@ func (ret *GameProfileNameProp) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iGameProfileNamePropProperties := range len(ret.Properties) {
-		err = ret.Properties[iGameProfileNamePropProperties].Encode(w)
+		GameProfileNamePropPropertiesInnerEncTmp := ret.Properties[iGameProfileNamePropProperties]
+		err = GameProfileNamePropPropertiesInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -4484,7 +4549,8 @@ func (ret *Ingredient) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iIngredient := range len(ret.Val) {
-		err = ret.Val[iIngredient].Encode(w)
+		IngredientInnerEncTmp := ret.Val[iIngredient]
+		err = IngredientInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5159,7 +5225,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5169,7 +5236,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5179,7 +5247,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5189,7 +5258,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5199,7 +5269,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5209,7 +5280,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5219,7 +5291,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5229,7 +5302,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5239,7 +5313,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5249,7 +5324,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5259,7 +5335,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5269,7 +5346,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5279,7 +5357,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5289,7 +5368,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5299,7 +5379,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5309,7 +5390,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5319,7 +5401,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5329,7 +5412,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5339,7 +5423,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5349,7 +5434,8 @@ func (ret *ConfigurationToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToClientPacketParams.Encode(w)
+		ConfigurationToClientPacketParamsEncTmp := ConfigurationToClientPacketParams
+		err = ConfigurationToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5438,7 +5524,8 @@ func (ret *ConfigurationToClientPacketCommonAddResourcePack) Encode(w io.Writer)
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		ConfigurationToClientPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = ConfigurationToClientPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5510,7 +5597,8 @@ func (ret *ConfigurationToClientPacketCommonCookieResponse) Encode(w io.Writer) 
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		ConfigurationToClientPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = ConfigurationToClientPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5553,7 +5641,8 @@ func (ret *ConfigurationToClientPacketCommonCustomClickAction) Encode(w io.Write
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		ConfigurationToClientPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = ConfigurationToClientPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -5785,7 +5874,8 @@ func (ret *ConfigurationToClientPacketCommonServerLinks) Encode(w io.Writer) (er
 				err = proto_base.BadTypeError
 				return
 			}
-			err = ConfigurationToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			ConfigurationToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp := ConfigurationToClientPacketCommonServerLinksLinksInnerKnownType
+			err = ConfigurationToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -5797,7 +5887,8 @@ func (ret *ConfigurationToClientPacketCommonServerLinks) Encode(w io.Writer) (er
 				err = proto_base.BadTypeError
 				return
 			}
-			err = ConfigurationToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			ConfigurationToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := ConfigurationToClientPacketCommonServerLinksLinksInnerUnknownType
+			err = ConfigurationToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -5937,7 +6028,8 @@ func (ret *ConfigurationToClientPacketCommonStoreCookie) Encode(w io.Writer) (er
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	ConfigurationToClientPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = ConfigurationToClientPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -5993,7 +6085,8 @@ func (ret *ConfigurationToClientPacketCustomPayload) Encode(w io.Writer) (err er
 	if err != nil {
 		return
 	}
-	err = ret.Data.Encode(w)
+	ConfigurationToClientPacketCustomPayloadDataEncTmp := ret.Data
+	err = ConfigurationToClientPacketCustomPayloadDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -6012,7 +6105,8 @@ func (ret *ConfigurationToClientPacketDisconnect) Decode(r io.ReadSeeker) (err e
 	return
 }
 func (ret *ConfigurationToClientPacketDisconnect) Encode(w io.Writer) (err error) {
-	err = ret.Reason.Encode(w)
+	ConfigurationToClientPacketDisconnectReasonEncTmp := ret.Reason
+	err = ConfigurationToClientPacketDisconnectReasonEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -6169,7 +6263,8 @@ func (ret *ConfigurationToClientPacketRegistryData) Encode(w io.Writer) (err err
 			return
 		}
 		if ret.Entries[iConfigurationToClientPacketRegistryDataEntries].Value != nil {
-			err = (*ret.Entries[iConfigurationToClientPacketRegistryDataEntries].Value).Encode(w)
+			ConfigurationToClientPacketRegistryDataEntriesInnerValueEncTmp := *ret.Entries[iConfigurationToClientPacketRegistryDataEntries].Value
+			err = ConfigurationToClientPacketRegistryDataEntriesInnerValueEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -6200,7 +6295,8 @@ func (ret *ConfigurationToClientPacketShowDialog) Decode(r io.ReadSeeker) (err e
 	return
 }
 func (ret *ConfigurationToClientPacketShowDialog) Encode(w io.Writer) (err error) {
-	err = ret.Dialog.Encode(w)
+	ConfigurationToClientPacketShowDialogDialogEncTmp := ret.Dialog
+	err = ConfigurationToClientPacketShowDialogDialogEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -6251,7 +6347,8 @@ func (ret *ConfigurationToClientPacketTags) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = ret.Tags[iConfigurationToClientPacketTagsTags].Tags.Encode(w)
+		ConfigurationToClientPacketTagsTagsInnerTagsEncTmp := ret.Tags[iConfigurationToClientPacketTagsTags].Tags
+		err = ConfigurationToClientPacketTagsTagsInnerTagsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6370,7 +6467,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6380,7 +6478,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6390,7 +6489,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6400,7 +6500,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6410,7 +6511,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6420,7 +6522,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6430,7 +6533,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6440,7 +6544,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6450,7 +6555,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6460,7 +6566,8 @@ func (ret *ConfigurationToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = ConfigurationToServerPacketParams.Encode(w)
+		ConfigurationToServerPacketParamsEncTmp := ConfigurationToServerPacketParams
+		err = ConfigurationToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6540,7 +6647,8 @@ func (ret *ConfigurationToServerPacketCommonAddResourcePack) Encode(w io.Writer)
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		ConfigurationToServerPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = ConfigurationToServerPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6612,7 +6720,8 @@ func (ret *ConfigurationToServerPacketCommonCookieResponse) Encode(w io.Writer) 
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		ConfigurationToServerPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = ConfigurationToServerPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6655,7 +6764,8 @@ func (ret *ConfigurationToServerPacketCommonCustomClickAction) Encode(w io.Write
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		ConfigurationToServerPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = ConfigurationToServerPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -6887,7 +6997,8 @@ func (ret *ConfigurationToServerPacketCommonServerLinks) Encode(w io.Writer) (er
 				err = proto_base.BadTypeError
 				return
 			}
-			err = ConfigurationToServerPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			ConfigurationToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp := ConfigurationToServerPacketCommonServerLinksLinksInnerKnownType
+			err = ConfigurationToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -6899,7 +7010,8 @@ func (ret *ConfigurationToServerPacketCommonServerLinks) Encode(w io.Writer) (er
 				err = proto_base.BadTypeError
 				return
 			}
-			err = ConfigurationToServerPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			ConfigurationToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := ConfigurationToServerPacketCommonServerLinksLinksInnerUnknownType
+			err = ConfigurationToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -7039,7 +7151,8 @@ func (ret *ConfigurationToServerPacketCommonStoreCookie) Encode(w io.Writer) (er
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	ConfigurationToServerPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = ConfigurationToServerPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -7095,7 +7208,8 @@ func (ret *ConfigurationToServerPacketCustomPayload) Encode(w io.Writer) (err er
 	if err != nil {
 		return
 	}
-	err = ret.Data.Encode(w)
+	ConfigurationToServerPacketCustomPayloadDataEncTmp := ret.Data
+	err = ConfigurationToServerPacketCustomPayloadDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -7275,7 +7389,8 @@ func (ret *HandshakingToClientPacketCommonAddResourcePack) Encode(w io.Writer) (
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		HandshakingToClientPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = HandshakingToClientPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7347,7 +7462,8 @@ func (ret *HandshakingToClientPacketCommonCookieResponse) Encode(w io.Writer) (e
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		HandshakingToClientPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = HandshakingToClientPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7390,7 +7506,8 @@ func (ret *HandshakingToClientPacketCommonCustomClickAction) Encode(w io.Writer)
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		HandshakingToClientPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = HandshakingToClientPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7622,7 +7739,8 @@ func (ret *HandshakingToClientPacketCommonServerLinks) Encode(w io.Writer) (err 
 				err = proto_base.BadTypeError
 				return
 			}
-			err = HandshakingToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			HandshakingToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp := HandshakingToClientPacketCommonServerLinksLinksInnerKnownType
+			err = HandshakingToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -7634,7 +7752,8 @@ func (ret *HandshakingToClientPacketCommonServerLinks) Encode(w io.Writer) (err 
 				err = proto_base.BadTypeError
 				return
 			}
-			err = HandshakingToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			HandshakingToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := HandshakingToClientPacketCommonServerLinksLinksInnerUnknownType
+			err = HandshakingToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -7774,7 +7893,8 @@ func (ret *HandshakingToClientPacketCommonStoreCookie) Encode(w io.Writer) (err 
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	HandshakingToClientPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = HandshakingToClientPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -7864,7 +7984,8 @@ func (ret *HandshakingToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = HandshakingToServerPacketParams.Encode(w)
+		HandshakingToServerPacketParamsEncTmp := HandshakingToServerPacketParams
+		err = HandshakingToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7874,7 +7995,8 @@ func (ret *HandshakingToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = HandshakingToServerPacketParams.Encode(w)
+		HandshakingToServerPacketParamsEncTmp := HandshakingToServerPacketParams
+		err = HandshakingToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -7944,7 +8066,8 @@ func (ret *HandshakingToServerPacketCommonAddResourcePack) Encode(w io.Writer) (
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		HandshakingToServerPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = HandshakingToServerPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8016,7 +8139,8 @@ func (ret *HandshakingToServerPacketCommonCookieResponse) Encode(w io.Writer) (e
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		HandshakingToServerPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = HandshakingToServerPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8059,7 +8183,8 @@ func (ret *HandshakingToServerPacketCommonCustomClickAction) Encode(w io.Writer)
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		HandshakingToServerPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = HandshakingToServerPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8291,7 +8416,8 @@ func (ret *HandshakingToServerPacketCommonServerLinks) Encode(w io.Writer) (err 
 				err = proto_base.BadTypeError
 				return
 			}
-			err = HandshakingToServerPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			HandshakingToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp := HandshakingToServerPacketCommonServerLinksLinksInnerKnownType
+			err = HandshakingToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -8303,7 +8429,8 @@ func (ret *HandshakingToServerPacketCommonServerLinks) Encode(w io.Writer) (err 
 				err = proto_base.BadTypeError
 				return
 			}
-			err = HandshakingToServerPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			HandshakingToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := HandshakingToServerPacketCommonServerLinksLinksInnerUnknownType
+			err = HandshakingToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -8443,7 +8570,8 @@ func (ret *HandshakingToServerPacketCommonStoreCookie) Encode(w io.Writer) (err 
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	HandshakingToServerPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = HandshakingToServerPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -8626,7 +8754,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8636,7 +8765,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8646,7 +8776,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8656,7 +8787,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8666,7 +8798,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8676,7 +8809,8 @@ func (ret *LoginToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToClientPacketParams.Encode(w)
+		LoginToClientPacketParamsEncTmp := LoginToClientPacketParams
+		err = LoginToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8746,7 +8880,8 @@ func (ret *LoginToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err er
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		LoginToClientPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = LoginToClientPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8818,7 +8953,8 @@ func (ret *LoginToClientPacketCommonCookieResponse) Encode(w io.Writer) (err err
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		LoginToClientPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = LoginToClientPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -8861,7 +8997,8 @@ func (ret *LoginToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err 
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		LoginToClientPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = LoginToClientPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -9093,7 +9230,8 @@ func (ret *LoginToClientPacketCommonServerLinks) Encode(w io.Writer) (err error)
 				err = proto_base.BadTypeError
 				return
 			}
-			err = LoginToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			LoginToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp := LoginToClientPacketCommonServerLinksLinksInnerKnownType
+			err = LoginToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -9105,7 +9243,8 @@ func (ret *LoginToClientPacketCommonServerLinks) Encode(w io.Writer) (err error)
 				err = proto_base.BadTypeError
 				return
 			}
-			err = LoginToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			LoginToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := LoginToClientPacketCommonServerLinksLinksInnerUnknownType
+			err = LoginToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -9245,7 +9384,8 @@ func (ret *LoginToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error)
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	LoginToClientPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = LoginToClientPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -9412,7 +9552,8 @@ func (ret *LoginToClientPacketLoginPluginRequest) Encode(w io.Writer) (err error
 	if err != nil {
 		return
 	}
-	err = ret.Data.Encode(w)
+	LoginToClientPacketLoginPluginRequestDataEncTmp := ret.Data
+	err = LoginToClientPacketLoginPluginRequestDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -9591,7 +9732,8 @@ func (ret *LoginToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToServerPacketParams.Encode(w)
+		LoginToServerPacketParamsEncTmp := LoginToServerPacketParams
+		err = LoginToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -9601,7 +9743,8 @@ func (ret *LoginToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToServerPacketParams.Encode(w)
+		LoginToServerPacketParamsEncTmp := LoginToServerPacketParams
+		err = LoginToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -9611,7 +9754,8 @@ func (ret *LoginToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToServerPacketParams.Encode(w)
+		LoginToServerPacketParamsEncTmp := LoginToServerPacketParams
+		err = LoginToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -9621,7 +9765,8 @@ func (ret *LoginToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToServerPacketParams.Encode(w)
+		LoginToServerPacketParamsEncTmp := LoginToServerPacketParams
+		err = LoginToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -9631,7 +9776,8 @@ func (ret *LoginToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = LoginToServerPacketParams.Encode(w)
+		LoginToServerPacketParamsEncTmp := LoginToServerPacketParams
+		err = LoginToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -9701,7 +9847,8 @@ func (ret *LoginToServerPacketCommonAddResourcePack) Encode(w io.Writer) (err er
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		LoginToServerPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = LoginToServerPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -9773,7 +9920,8 @@ func (ret *LoginToServerPacketCommonCookieResponse) Encode(w io.Writer) (err err
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		LoginToServerPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = LoginToServerPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -9816,7 +9964,8 @@ func (ret *LoginToServerPacketCommonCustomClickAction) Encode(w io.Writer) (err 
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		LoginToServerPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = LoginToServerPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -10048,7 +10197,8 @@ func (ret *LoginToServerPacketCommonServerLinks) Encode(w io.Writer) (err error)
 				err = proto_base.BadTypeError
 				return
 			}
-			err = LoginToServerPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			LoginToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp := LoginToServerPacketCommonServerLinksLinksInnerKnownType
+			err = LoginToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -10060,7 +10210,8 @@ func (ret *LoginToServerPacketCommonServerLinks) Encode(w io.Writer) (err error)
 				err = proto_base.BadTypeError
 				return
 			}
-			err = LoginToServerPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			LoginToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := LoginToServerPacketCommonServerLinksLinksInnerUnknownType
+			err = LoginToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -10200,7 +10351,8 @@ func (ret *LoginToServerPacketCommonStoreCookie) Encode(w io.Writer) (err error)
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	LoginToServerPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = LoginToServerPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -10326,7 +10478,8 @@ func (ret *LoginToServerPacketLoginPluginResponse) Encode(w io.Writer) (err erro
 		return
 	}
 	if ret.Data != nil {
-		err = (*ret.Data).Encode(w)
+		LoginToServerPacketLoginPluginResponseDataEncTmp := *ret.Data
+		err = LoginToServerPacketLoginPluginResponseDataEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -10403,12 +10556,14 @@ func (ret *PlayToClientChatType) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientChatTypeParameters := range len(ret.Parameters) {
-		err = ret.Parameters[iPlayToClientChatTypeParameters].Encode(w)
+		PlayToClientChatTypeParametersInnerEncTmp := ret.Parameters[iPlayToClientChatTypeParameters]
+		err = PlayToClientChatTypeParametersInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
 	}
-	err = ret.Style.Encode(w)
+	PlayToClientChatTypeStyleEncTmp := ret.Style
+	err = PlayToClientChatTypeStyleEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -10466,11 +10621,13 @@ func (ret *PlayToClientChatTypes) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientChatTypes) Encode(w io.Writer) (err error) {
-	err = ret.Chat.Encode(w)
+	PlayToClientChatTypesChatEncTmp := ret.Chat
+	err = PlayToClientChatTypesChatEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Narration.Encode(w)
+	PlayToClientChatTypesNarrationEncTmp := ret.Narration
+	err = PlayToClientChatTypesNarrationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -10511,7 +10668,8 @@ func (ret *PlayToClientChatTypesHolder) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = PlayToClientChatTypesHolderKnownType.Encode(w)
+		PlayToClientChatTypesHolderOtherwiseEncTmp := PlayToClientChatTypesHolderKnownType
+		err = PlayToClientChatTypesHolderOtherwiseEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -10538,7 +10696,8 @@ func (ret *PlayToClientExplosionParticleEntry) Decode(r io.ReadSeeker) (err erro
 	return
 }
 func (ret *PlayToClientExplosionParticleEntry) Encode(w io.Writer) (err error) {
-	err = ret.Data.Encode(w)
+	PlayToClientExplosionParticleEntryDataEncTmp := ret.Data
+	err = PlayToClientExplosionParticleEntryDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -10571,7 +10730,8 @@ func (ret *PlayToClientExplosionParticleInfo) Decode(r io.ReadSeeker) (err error
 	return
 }
 func (ret *PlayToClientExplosionParticleInfo) Encode(w io.Writer) (err error) {
-	err = ret.Particle.Encode(w)
+	PlayToClientExplosionParticleInfoParticleEncTmp := ret.Particle
+	err = PlayToClientExplosionParticleInfoParticleEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -10843,16 +11003,19 @@ func (ret *PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			return
 		}
 		for iPlayToClientRecipeDisplayDataIngredients := range len(PlayToClientRecipeDisplayData.Ingredients) {
-			err = PlayToClientRecipeDisplayData.Ingredients[iPlayToClientRecipeDisplayDataIngredients].Encode(w)
+			PlayToClientRecipeDisplayDataIngredientsInnerEncTmp := PlayToClientRecipeDisplayData.Ingredients[iPlayToClientRecipeDisplayDataIngredients]
+			err = PlayToClientRecipeDisplayDataIngredientsInnerEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
 		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		PlayToClientRecipeDisplayDataResultEncTmp := PlayToClientRecipeDisplayData.Result
+		err = PlayToClientRecipeDisplayDataResultEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		PlayToClientRecipeDisplayDataCraftingStationEncTmp := PlayToClientRecipeDisplayData.CraftingStation
+		err = PlayToClientRecipeDisplayDataCraftingStationEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -10871,16 +11034,19 @@ func (ret *PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			return
 		}
 		for iPlayToClientRecipeDisplayDataIngredients := range len(PlayToClientRecipeDisplayData.Ingredients) {
-			err = PlayToClientRecipeDisplayData.Ingredients[iPlayToClientRecipeDisplayDataIngredients].Encode(w)
+			PlayToClientRecipeDisplayDataIngredientsInnerEncTmp := PlayToClientRecipeDisplayData.Ingredients[iPlayToClientRecipeDisplayDataIngredients]
+			err = PlayToClientRecipeDisplayDataIngredientsInnerEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
 		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		PlayToClientRecipeDisplayDataResultEncTmp := PlayToClientRecipeDisplayData.Result
+		err = PlayToClientRecipeDisplayDataResultEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		PlayToClientRecipeDisplayDataCraftingStationEncTmp := PlayToClientRecipeDisplayData.CraftingStation
+		err = PlayToClientRecipeDisplayDataCraftingStationEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -10897,19 +11063,23 @@ func (ret *PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Ingredient.Encode(w)
+		PlayToClientRecipeDisplayDataIngredientEncTmp := PlayToClientRecipeDisplayData.Ingredient
+		err = PlayToClientRecipeDisplayDataIngredientEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Fuel.Encode(w)
+		PlayToClientRecipeDisplayDataFuelEncTmp := PlayToClientRecipeDisplayData.Fuel
+		err = PlayToClientRecipeDisplayDataFuelEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		PlayToClientRecipeDisplayDataResultEncTmp := PlayToClientRecipeDisplayData.Result
+		err = PlayToClientRecipeDisplayDataResultEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		PlayToClientRecipeDisplayDataCraftingStationEncTmp := PlayToClientRecipeDisplayData.CraftingStation
+		err = PlayToClientRecipeDisplayDataCraftingStationEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -10933,23 +11103,28 @@ func (ret *PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Template.Encode(w)
+		PlayToClientRecipeDisplayDataTemplateEncTmp := PlayToClientRecipeDisplayData.Template
+		err = PlayToClientRecipeDisplayDataTemplateEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Base.Encode(w)
+		PlayToClientRecipeDisplayDataBaseEncTmp := PlayToClientRecipeDisplayData.Base
+		err = PlayToClientRecipeDisplayDataBaseEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Addition.Encode(w)
+		PlayToClientRecipeDisplayDataAdditionEncTmp := PlayToClientRecipeDisplayData.Addition
+		err = PlayToClientRecipeDisplayDataAdditionEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		PlayToClientRecipeDisplayDataResultEncTmp := PlayToClientRecipeDisplayData.Result
+		err = PlayToClientRecipeDisplayDataResultEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		PlayToClientRecipeDisplayDataCraftingStationEncTmp := PlayToClientRecipeDisplayData.CraftingStation
+		err = PlayToClientRecipeDisplayDataCraftingStationEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -10963,15 +11138,18 @@ func (ret *PlayToClientRecipeDisplay) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Ingredient.Encode(w)
+		PlayToClientRecipeDisplayDataIngredientEncTmp := PlayToClientRecipeDisplayData.Ingredient
+		err = PlayToClientRecipeDisplayDataIngredientEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.Result.Encode(w)
+		PlayToClientRecipeDisplayDataResultEncTmp := PlayToClientRecipeDisplayData.Result
+		err = PlayToClientRecipeDisplayDataResultEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientRecipeDisplayData.CraftingStation.Encode(w)
+		PlayToClientRecipeDisplayDataCraftingStationEncTmp := PlayToClientRecipeDisplayData.CraftingStation
+		err = PlayToClientRecipeDisplayDataCraftingStationEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -11122,7 +11300,8 @@ func (ret *PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			return
 		}
 		for iPlayToClientSlotDisplayData := range len(PlayToClientSlotDisplayData) {
-			err = PlayToClientSlotDisplayData[iPlayToClientSlotDisplayData].Encode(w)
+			PlayToClientSlotDisplayDataInnerEncTmp := PlayToClientSlotDisplayData[iPlayToClientSlotDisplayData]
+			err = PlayToClientSlotDisplayDataInnerEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -11150,7 +11329,8 @@ func (ret *PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientSlotDisplayData.Encode(w)
+		PlayToClientSlotDisplayDataEncTmp := PlayToClientSlotDisplayData
+		err = PlayToClientSlotDisplayDataEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -11164,11 +11344,13 @@ func (ret *PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientSlotDisplayData.Base.Encode(w)
+		PlayToClientSlotDisplayDataBaseEncTmp := PlayToClientSlotDisplayData.Base
+		err = PlayToClientSlotDisplayDataBaseEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientSlotDisplayData.Material.Encode(w)
+		PlayToClientSlotDisplayDataMaterialEncTmp := PlayToClientSlotDisplayData.Material
+		err = PlayToClientSlotDisplayDataMaterialEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -11183,7 +11365,8 @@ func (ret *PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			if err != nil {
 				return
 			}
-			err = PlayToClientSlotDisplayDataPatternKnownType.Encode(w)
+			PlayToClientSlotDisplayDataPatternOtherwiseEncTmp := PlayToClientSlotDisplayDataPatternKnownType
+			err = PlayToClientSlotDisplayDataPatternOtherwiseEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -11209,11 +11392,13 @@ func (ret *PlayToClientSlotDisplay) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientSlotDisplayData.Input.Encode(w)
+		PlayToClientSlotDisplayDataInputEncTmp := PlayToClientSlotDisplayData.Input
+		err = PlayToClientSlotDisplayDataInputEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientSlotDisplayData.Remainder.Encode(w)
+		PlayToClientSlotDisplayDataRemainderEncTmp := PlayToClientSlotDisplayData.Remainder
+		err = PlayToClientSlotDisplayDataRemainderEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -11335,7 +11520,8 @@ func (ret *PlayToClientSpawnInfo) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.Death != nil {
-		err = (*ret.Death).Encode(w)
+		PlayToClientSpawnInfoDeathEncTmp := *ret.Death
+		err = PlayToClientSpawnInfoDeathEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12379,7 +12565,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12389,7 +12576,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12399,7 +12587,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12409,7 +12598,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12419,7 +12609,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12429,7 +12620,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12439,7 +12631,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12449,7 +12642,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12459,7 +12653,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12469,7 +12664,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12479,7 +12675,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12489,7 +12686,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12499,7 +12697,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12509,7 +12708,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12519,7 +12719,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12529,7 +12730,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12539,7 +12741,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12549,7 +12752,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12559,7 +12763,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12569,7 +12774,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12579,7 +12785,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12589,7 +12796,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12599,7 +12807,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12609,7 +12818,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12619,7 +12829,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12629,7 +12840,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12639,7 +12851,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12649,7 +12862,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12659,7 +12873,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12669,7 +12884,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12679,7 +12895,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12689,7 +12906,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12699,7 +12917,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12709,7 +12928,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12719,7 +12939,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12729,7 +12950,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12739,7 +12961,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12749,7 +12972,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12759,7 +12983,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12769,7 +12994,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12779,7 +13005,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12789,7 +13016,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12799,7 +13027,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12809,7 +13038,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12819,7 +13049,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12829,7 +13060,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12839,7 +13071,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12849,7 +13082,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12859,7 +13093,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12869,7 +13104,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12879,7 +13115,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12889,7 +13126,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12899,7 +13137,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12909,7 +13148,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12919,7 +13159,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12929,7 +13170,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12939,7 +13181,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12949,7 +13192,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12959,7 +13203,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12969,7 +13214,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12979,7 +13225,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12989,7 +13236,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -12999,7 +13247,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13009,7 +13258,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13019,7 +13269,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13029,7 +13280,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13039,7 +13291,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13049,7 +13302,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13059,7 +13313,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13069,7 +13324,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13079,7 +13335,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13089,7 +13346,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13099,7 +13357,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13109,7 +13368,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13119,7 +13379,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13129,7 +13390,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13139,7 +13401,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13149,7 +13412,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13159,7 +13423,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13169,7 +13434,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13179,7 +13445,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13189,7 +13456,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13199,7 +13467,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13209,7 +13478,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13219,7 +13489,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13229,7 +13500,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13239,7 +13511,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13249,7 +13522,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13259,7 +13533,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13269,7 +13544,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13279,7 +13555,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13289,7 +13566,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13299,7 +13577,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13309,7 +13588,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13319,7 +13599,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13329,7 +13610,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13339,7 +13621,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13349,7 +13632,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13359,7 +13643,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13369,7 +13654,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13379,7 +13665,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13389,7 +13676,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13399,7 +13687,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13409,7 +13698,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13419,7 +13709,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13429,7 +13720,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13439,7 +13731,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13449,7 +13742,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13459,7 +13753,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13469,7 +13764,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13479,7 +13775,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13489,7 +13786,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13499,7 +13797,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13509,7 +13808,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13519,7 +13819,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13529,7 +13830,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13539,7 +13841,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13549,7 +13852,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13559,7 +13863,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13569,7 +13874,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13579,7 +13885,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13589,7 +13896,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13599,7 +13907,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13609,7 +13918,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13619,7 +13929,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13629,7 +13940,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13639,7 +13951,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13649,7 +13962,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13659,7 +13973,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13669,7 +13984,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13679,7 +13995,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13689,7 +14006,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13699,7 +14017,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13709,7 +14028,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13719,7 +14039,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13729,7 +14050,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13739,7 +14061,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13749,7 +14072,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13759,7 +14083,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13769,7 +14094,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13779,7 +14105,8 @@ func (ret *PlayToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketParams.Encode(w)
+		PlayToClientPacketParamsEncTmp := PlayToClientPacketParams
+		err = PlayToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -13855,7 +14182,8 @@ func (ret *PlayToClientPacketActionBar) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketActionBar) Encode(w io.Writer) (err error) {
-	err = ret.Text.Encode(w)
+	PlayToClientPacketActionBarTextEncTmp := ret.Text
+	err = PlayToClientPacketActionBarTextEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -14179,15 +14507,18 @@ func (ret *PlayToClientPacketAdvancements) Encode(w io.Writer) (err error) {
 			return
 		}
 		if ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData != nil {
-			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Title.Encode(w)
+			PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataTitleEncTmp := (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Title
+			err = PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataTitleEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
-			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Description.Encode(w)
+			PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataDescriptionEncTmp := (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Description
+			err = PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataDescriptionEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
-			err = (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Icon.Encode(w)
+			PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataIconEncTmp := (*ret.AdvancementMapping[iPlayToClientPacketAdvancementsAdvancementMapping].Value.DisplayData).Icon
+			err = PlayToClientPacketAdvancementsAdvancementMappingInnerValueDisplayDataIconEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -14383,7 +14714,8 @@ func (ret *PlayToClientPacketBlockAction) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketBlockAction) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketBlockActionLocationEncTmp := ret.Location
+	err = PlayToClientPacketBlockActionLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -14428,7 +14760,8 @@ func (ret *PlayToClientPacketBlockBreakAnimation) Encode(w io.Writer) (err error
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToClientPacketBlockBreakAnimationLocationEncTmp := ret.Location
+	err = PlayToClientPacketBlockBreakAnimationLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -14456,7 +14789,8 @@ func (ret *PlayToClientPacketBlockChange) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketBlockChange) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketBlockChangeLocationEncTmp := ret.Location
+	err = PlayToClientPacketBlockChangeLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -14604,7 +14938,8 @@ func (ret *PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketBossBarTitle.Encode(w)
+		PlayToClientPacketBossBarTitleEncTmp := PlayToClientPacketBossBarTitle
+		err = PlayToClientPacketBossBarTitleEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -14614,7 +14949,8 @@ func (ret *PlayToClientPacketBossBar) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketBossBarTitle.Encode(w)
+		PlayToClientPacketBossBarTitleEncTmp := PlayToClientPacketBossBarTitle
+		err = PlayToClientPacketBossBarTitleEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -14887,11 +15223,13 @@ func (ret *PlayToClientPacketChunkBiomes) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientPacketChunkBiomesBiomes := range len(ret.Biomes) {
-		err = ret.Biomes[iPlayToClientPacketChunkBiomesBiomes].Position.Encode(w)
+		PlayToClientPacketChunkBiomesBiomesInnerPositionEncTmp := ret.Biomes[iPlayToClientPacketChunkBiomesBiomes].Position
+		err = PlayToClientPacketChunkBiomesBiomesInnerPositionEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = ret.Biomes[iPlayToClientPacketChunkBiomesBiomes].Data.Encode(w)
+		PlayToClientPacketChunkBiomesBiomesInnerDataEncTmp := ret.Biomes[iPlayToClientPacketChunkBiomesBiomes].Data
+		err = PlayToClientPacketChunkBiomesBiomesInnerDataEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -14930,7 +15268,8 @@ func (ret *PlayToClientPacketCloseWindow) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketCloseWindow) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToClientPacketCloseWindowWindowIdEncTmp := ret.WindowId
+	err = PlayToClientPacketCloseWindowWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15036,7 +15375,8 @@ func (ret *PlayToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err err
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		PlayToClientPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = PlayToClientPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -15108,7 +15448,8 @@ func (ret *PlayToClientPacketCommonCookieResponse) Encode(w io.Writer) (err erro
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		PlayToClientPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = PlayToClientPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -15151,7 +15492,8 @@ func (ret *PlayToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err e
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		PlayToClientPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = PlayToClientPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -15383,7 +15725,8 @@ func (ret *PlayToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) 
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			PlayToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp := PlayToClientPacketCommonServerLinksLinksInnerKnownType
+			err = PlayToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -15395,7 +15738,8 @@ func (ret *PlayToClientPacketCommonServerLinks) Encode(w io.Writer) (err error) 
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			PlayToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := PlayToClientPacketCommonServerLinksLinksInnerUnknownType
+			err = PlayToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -15535,7 +15879,8 @@ func (ret *PlayToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error) 
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	PlayToClientPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = PlayToClientPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15592,7 +15937,8 @@ func (ret *PlayToClientPacketCraftProgressBar) Decode(r io.ReadSeeker) (err erro
 	return
 }
 func (ret *PlayToClientPacketCraftProgressBar) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToClientPacketCraftProgressBarWindowIdEncTmp := ret.WindowId
+	err = PlayToClientPacketCraftProgressBarWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15624,11 +15970,13 @@ func (ret *PlayToClientPacketCraftRecipeResponse) Decode(r io.ReadSeeker) (err e
 	return
 }
 func (ret *PlayToClientPacketCraftRecipeResponse) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToClientPacketCraftRecipeResponseWindowIdEncTmp := ret.WindowId
+	err = PlayToClientPacketCraftRecipeResponseWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.RecipeDisplay.Encode(w)
+	PlayToClientPacketCraftRecipeResponseRecipeDisplayEncTmp := ret.RecipeDisplay
+	err = PlayToClientPacketCraftRecipeResponseRecipeDisplayEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15656,7 +16004,8 @@ func (ret *PlayToClientPacketCustomPayload) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Data.Encode(w)
+	PlayToClientPacketCustomPayloadDataEncTmp := ret.Data
+	err = PlayToClientPacketCustomPayloadDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15725,7 +16074,8 @@ func (ret *PlayToClientPacketDamageEvent) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.SourcePosition != nil {
-		err = (*ret.SourcePosition).Encode(w)
+		PlayToClientPacketDamageEventSourcePositionEncTmp := *ret.SourcePosition
+		err = PlayToClientPacketDamageEventSourcePositionEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -15754,7 +16104,8 @@ func (ret *PlayToClientPacketDeathCombatEvent) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Message.Encode(w)
+	PlayToClientPacketDeathCombatEventMessageEncTmp := ret.Message
+	err = PlayToClientPacketDeathCombatEventMessageEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15778,11 +16129,13 @@ func (ret *PlayToClientPacketDebugBlockValue) Decode(r io.ReadSeeker) (err error
 	return
 }
 func (ret *PlayToClientPacketDebugBlockValue) Encode(w io.Writer) (err error) {
-	err = ret.BlockPos.Encode(w)
+	PlayToClientPacketDebugBlockValueBlockPosEncTmp := ret.BlockPos
+	err = PlayToClientPacketDebugBlockValueBlockPosEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Update.Encode(w)
+	PlayToClientPacketDebugBlockValueUpdateEncTmp := ret.Update
+	err = PlayToClientPacketDebugBlockValueUpdateEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15806,11 +16159,13 @@ func (ret *PlayToClientPacketDebugChunkValue) Decode(r io.ReadSeeker) (err error
 	return
 }
 func (ret *PlayToClientPacketDebugChunkValue) Encode(w io.Writer) (err error) {
-	err = ret.ChunkPos.Encode(w)
+	PlayToClientPacketDebugChunkValueChunkPosEncTmp := ret.ChunkPos
+	err = PlayToClientPacketDebugChunkValueChunkPosEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Update.Encode(w)
+	PlayToClientPacketDebugChunkValueUpdateEncTmp := ret.Update
+	err = PlayToClientPacketDebugChunkValueUpdateEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15838,7 +16193,8 @@ func (ret *PlayToClientPacketDebugEntityValue) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Update.Encode(w)
+	PlayToClientPacketDebugEntityValueUpdateEncTmp := ret.Update
+	err = PlayToClientPacketDebugEntityValueUpdateEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15857,7 +16213,8 @@ func (ret *PlayToClientPacketDebugEvent) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketDebugEvent) Encode(w io.Writer) (err error) {
-	err = ret.Event.Encode(w)
+	PlayToClientPacketDebugEventEventEncTmp := ret.Event
+	err = PlayToClientPacketDebugEventEventEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -15940,7 +16297,8 @@ func (ret *PlayToClientPacketDeclareCommands) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientPacketDeclareCommandsNodes := range len(ret.Nodes) {
-		err = ret.Nodes[iPlayToClientPacketDeclareCommandsNodes].Encode(w)
+		PlayToClientPacketDeclareCommandsNodesInnerEncTmp := ret.Nodes[iPlayToClientPacketDeclareCommandsNodes]
+		err = PlayToClientPacketDeclareCommandsNodesInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -16050,11 +16408,13 @@ func (ret *PlayToClientPacketDeclareRecipes) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientPacketDeclareRecipesStoneCutterRecipes := range len(ret.StoneCutterRecipes) {
-		err = ret.StoneCutterRecipes[iPlayToClientPacketDeclareRecipesStoneCutterRecipes].Input.Encode(w)
+		PlayToClientPacketDeclareRecipesStoneCutterRecipesInnerInputEncTmp := ret.StoneCutterRecipes[iPlayToClientPacketDeclareRecipesStoneCutterRecipes].Input
+		err = PlayToClientPacketDeclareRecipesStoneCutterRecipesInnerInputEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = ret.StoneCutterRecipes[iPlayToClientPacketDeclareRecipesStoneCutterRecipes].SlotDisplay.Encode(w)
+		PlayToClientPacketDeclareRecipesStoneCutterRecipesInnerSlotDisplayEncTmp := ret.StoneCutterRecipes[iPlayToClientPacketDeclareRecipesStoneCutterRecipes].SlotDisplay
+		err = PlayToClientPacketDeclareRecipesStoneCutterRecipesInnerSlotDisplayEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -16332,7 +16692,8 @@ func (ret *PlayToClientPacketEntityMetadata) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Metadata.Encode(w)
+	PlayToClientPacketEntityMetadataMetadataEncTmp := ret.Metadata
+	err = PlayToClientPacketEntityMetadataMetadataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -16449,11 +16810,13 @@ func (ret *PlayToClientPacketEntitySoundEffect) Decode(r io.ReadSeeker) (err err
 	return
 }
 func (ret *PlayToClientPacketEntitySoundEffect) Encode(w io.Writer) (err error) {
-	err = ret.Sound.Encode(w)
+	PlayToClientPacketEntitySoundEffectSoundEncTmp := ret.Sound
+	err = PlayToClientPacketEntitySoundEffectSoundEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.SoundCategory.Encode(w)
+	PlayToClientPacketEntitySoundEffectSoundCategoryEncTmp := ret.SoundCategory
+	err = PlayToClientPacketEntitySoundEffectSoundCategoryEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -16737,7 +17100,8 @@ func (ret *PlayToClientPacketEntityVelocity) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Velocity.Encode(w)
+	PlayToClientPacketEntityVelocityVelocityEncTmp := ret.Velocity
+	err = PlayToClientPacketEntityVelocityVelocityEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -16842,7 +17206,8 @@ func (ret *PlayToClientPacketExplosion) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketExplosion) Encode(w io.Writer) (err error) {
-	err = ret.Center.Encode(w)
+	PlayToClientPacketExplosionCenterEncTmp := ret.Center
+	err = PlayToClientPacketExplosionCenterEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -16859,16 +17224,19 @@ func (ret *PlayToClientPacketExplosion) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.PlayerKnockback != nil {
-		err = (*ret.PlayerKnockback).Encode(w)
+		PlayToClientPacketExplosionPlayerKnockbackEncTmp := *ret.PlayerKnockback
+		err = PlayToClientPacketExplosionPlayerKnockbackEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
 	}
-	err = ret.ExplosionParticle.Encode(w)
+	PlayToClientPacketExplosionExplosionParticleEncTmp := ret.ExplosionParticle
+	err = PlayToClientPacketExplosionExplosionParticleEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Sound.Encode(w)
+	PlayToClientPacketExplosionSoundEncTmp := ret.Sound
+	err = PlayToClientPacketExplosionSoundEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -16877,7 +17245,8 @@ func (ret *PlayToClientPacketExplosion) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientPacketExplosionBlockParticles := range len(ret.BlockParticles) {
-		err = ret.BlockParticles[iPlayToClientPacketExplosionBlockParticles].Encode(w)
+		PlayToClientPacketExplosionBlockParticlesInnerEncTmp := ret.BlockParticles[iPlayToClientPacketExplosionBlockParticles]
+		err = PlayToClientPacketExplosionBlockParticlesInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -17118,11 +17487,13 @@ func (ret *PlayToClientPacketGameTestHighlightPos) Decode(r io.ReadSeeker) (err 
 	return
 }
 func (ret *PlayToClientPacketGameTestHighlightPos) Encode(w io.Writer) (err error) {
-	err = ret.AbsolutePos.Encode(w)
+	PlayToClientPacketGameTestHighlightPosAbsolutePosEncTmp := ret.AbsolutePos
+	err = PlayToClientPacketGameTestHighlightPosAbsolutePosEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.RelativePos.Encode(w)
+	PlayToClientPacketGameTestHighlightPosRelativePosEncTmp := ret.RelativePos
+	err = PlayToClientPacketGameTestHighlightPosRelativePosEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -17342,7 +17713,8 @@ func (ret *PlayToClientPacketKickDisconnect) Decode(r io.ReadSeeker) (err error)
 	return
 }
 func (ret *PlayToClientPacketKickDisconnect) Encode(w io.Writer) (err error) {
-	err = ret.Reason.Encode(w)
+	PlayToClientPacketKickDisconnectReasonEncTmp := ret.Reason
+	err = PlayToClientPacketKickDisconnectReasonEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -17463,7 +17835,8 @@ func (ret *PlayToClientPacketLogin) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.WorldState.Encode(w)
+	PlayToClientPacketLoginWorldStateEncTmp := ret.WorldState
+	err = PlayToClientPacketLoginWorldStateEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -17688,7 +18061,8 @@ func (ret *PlayToClientPacketMap) Encode(w io.Writer) (err error) {
 				return
 			}
 			if (*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName != nil {
-				err = (*(*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName).Encode(w)
+				PlayToClientPacketMapIconsInnerDisplayNameEncTmp := *(*ret.Icons)[iPlayToClientPacketMapIcons].DisplayName
+				err = PlayToClientPacketMapIconsInnerDisplayNameEncTmp.Encode(w)
 				if err != nil {
 					return
 				}
@@ -18010,7 +18384,8 @@ func (ret *PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 			}
 		}
 	}
-	err = ret.ChunkData.Encode(w)
+	PlayToClientPacketMapChunkChunkDataEncTmp := ret.ChunkData
+	err = PlayToClientPacketMapChunkChunkDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -18019,7 +18394,8 @@ func (ret *PlayToClientPacketMapChunk) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientPacketMapChunkBlockEntities := range len(ret.BlockEntities) {
-		err = ret.BlockEntities[iPlayToClientPacketMapChunkBlockEntities].Encode(w)
+		PlayToClientPacketMapChunkBlockEntitiesInnerEncTmp := ret.BlockEntities[iPlayToClientPacketMapChunkBlockEntities]
+		err = PlayToClientPacketMapChunkBlockEntitiesInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -18169,11 +18545,13 @@ func (ret *PlayToClientPacketMoveMinecart) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientPacketMoveMinecartSteps := range len(ret.Steps) {
-		err = ret.Steps[iPlayToClientPacketMoveMinecartSteps].Position.Encode(w)
+		PlayToClientPacketMoveMinecartStepsInnerPositionEncTmp := ret.Steps[iPlayToClientPacketMoveMinecartSteps].Position
+		err = PlayToClientPacketMoveMinecartStepsInnerPositionEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = ret.Steps[iPlayToClientPacketMoveMinecartSteps].Velocity.Encode(w)
+		PlayToClientPacketMoveMinecartStepsInnerVelocityEncTmp := ret.Steps[iPlayToClientPacketMoveMinecartSteps].Velocity
+		err = PlayToClientPacketMoveMinecartStepsInnerVelocityEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -18279,7 +18657,8 @@ func (ret *PlayToClientPacketNbtQueryResponse) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Nbt.Encode(w)
+	PlayToClientPacketNbtQueryResponseNbtEncTmp := ret.Nbt
+	err = PlayToClientPacketNbtQueryResponseNbtEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -18327,7 +18706,8 @@ func (ret *PlayToClientPacketOpenHorseWindow) Decode(r io.ReadSeeker) (err error
 	return
 }
 func (ret *PlayToClientPacketOpenHorseWindow) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToClientPacketOpenHorseWindowWindowIdEncTmp := ret.WindowId
+	err = PlayToClientPacketOpenHorseWindowWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -18359,7 +18739,8 @@ func (ret *PlayToClientPacketOpenSignEntity) Decode(r io.ReadSeeker) (err error)
 	return
 }
 func (ret *PlayToClientPacketOpenSignEntity) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketOpenSignEntityLocationEncTmp := ret.Location
+	err = PlayToClientPacketOpenSignEntityLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -18400,7 +18781,8 @@ func (ret *PlayToClientPacketOpenWindow) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.WindowTitle.Encode(w)
+	PlayToClientPacketOpenWindowWindowTitleEncTmp := ret.WindowTitle
+	err = PlayToClientPacketOpenWindowWindowTitleEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -18603,7 +18985,8 @@ func (ret *PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.PreviousMessages.Encode(w)
+	PlayToClientPacketPlayerChatPreviousMessagesEncTmp := ret.PreviousMessages
+	err = PlayToClientPacketPlayerChatPreviousMessagesEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -18612,7 +18995,8 @@ func (ret *PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.UnsignedChatContent != nil {
-		err = (*ret.UnsignedChatContent).Encode(w)
+		PlayToClientPacketPlayerChatUnsignedChatContentEncTmp := *ret.UnsignedChatContent
+		err = PlayToClientPacketPlayerChatUnsignedChatContentEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -18646,11 +19030,13 @@ func (ret *PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	err = ret.Type.Encode(w)
+	PlayToClientPacketPlayerChatTypeEncTmp := ret.Type
+	err = PlayToClientPacketPlayerChatTypeEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.NetworkName.Encode(w)
+	PlayToClientPacketPlayerChatNetworkNameEncTmp := ret.NetworkName
+	err = PlayToClientPacketPlayerChatNetworkNameEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -18659,7 +19045,8 @@ func (ret *PlayToClientPacketPlayerChat) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.NetworkTargetName != nil {
-		err = (*ret.NetworkTargetName).Encode(w)
+		PlayToClientPacketPlayerChatNetworkTargetNameEncTmp := *ret.NetworkTargetName
+		err = PlayToClientPacketPlayerChatNetworkTargetNameEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -18857,7 +19244,8 @@ func (ret *PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketPlayerInfoDataInnerPlayer.Encode(w)
+			PlayToClientPacketPlayerInfoDataInnerPlayerEncTmp := PlayToClientPacketPlayerInfoDataInnerPlayer
+			err = PlayToClientPacketPlayerInfoDataInnerPlayerEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -18876,7 +19264,8 @@ func (ret *PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketPlayerInfoDataInnerChatSession.Encode(w)
+			PlayToClientPacketPlayerInfoDataInnerChatSessionEncTmp := PlayToClientPacketPlayerInfoDataInnerChatSession
+			err = PlayToClientPacketPlayerInfoDataInnerChatSessionEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -18957,7 +19346,8 @@ func (ret *PlayToClientPacketPlayerInfo) Encode(w io.Writer) (err error) {
 				return
 			}
 			if PlayToClientPacketPlayerInfoDataInnerDisplayName != nil {
-				err = (*PlayToClientPacketPlayerInfoDataInnerDisplayName).Encode(w)
+				PlayToClientPacketPlayerInfoDataInnerDisplayNameEncTmp := *PlayToClientPacketPlayerInfoDataInnerDisplayName
+				err = PlayToClientPacketPlayerInfoDataInnerDisplayNameEncTmp.Encode(w)
 				if err != nil {
 					return
 				}
@@ -19110,11 +19500,13 @@ func (ret *PlayToClientPacketPlayerlistHeader) Decode(r io.ReadSeeker) (err erro
 	return
 }
 func (ret *PlayToClientPacketPlayerlistHeader) Encode(w io.Writer) (err error) {
-	err = ret.Header.Encode(w)
+	PlayToClientPacketPlayerlistHeaderHeaderEncTmp := ret.Header
+	err = PlayToClientPacketPlayerlistHeaderHeaderEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Footer.Encode(w)
+	PlayToClientPacketPlayerlistHeaderFooterEncTmp := ret.Footer
+	err = PlayToClientPacketPlayerlistHeaderFooterEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -19214,7 +19606,8 @@ func (ret *PlayToClientPacketPosition) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Flags.Encode(w)
+	PlayToClientPacketPositionFlagsEncTmp := ret.Flags
+	err = PlayToClientPacketPositionFlagsEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -19257,15 +19650,18 @@ func (ret *PlayToClientPacketProfilelessChat) Decode(r io.ReadSeeker) (err error
 	return
 }
 func (ret *PlayToClientPacketProfilelessChat) Encode(w io.Writer) (err error) {
-	err = ret.Message.Encode(w)
+	PlayToClientPacketProfilelessChatMessageEncTmp := ret.Message
+	err = PlayToClientPacketProfilelessChatMessageEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Type.Encode(w)
+	PlayToClientPacketProfilelessChatTypeEncTmp := ret.Type
+	err = PlayToClientPacketProfilelessChatTypeEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Name.Encode(w)
+	PlayToClientPacketProfilelessChatNameEncTmp := ret.Name
+	err = PlayToClientPacketProfilelessChatNameEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -19274,7 +19670,8 @@ func (ret *PlayToClientPacketProfilelessChat) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.Target != nil {
-		err = (*ret.Target).Encode(w)
+		PlayToClientPacketProfilelessChatTargetEncTmp := *ret.Target
+		err = PlayToClientPacketProfilelessChatTargetEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -19394,11 +19791,13 @@ func (ret *PlayToClientPacketRecipeBookAdd) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Display.Encode(w)
+		PlayToClientPacketRecipeBookAddEntriesInnerRecipeDisplayEncTmp := ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Display
+		err = PlayToClientPacketRecipeBookAddEntriesInnerRecipeDisplayEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Group.Encode(w)
+		PlayToClientPacketRecipeBookAddEntriesInnerRecipeGroupEncTmp := ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.Group
+		err = PlayToClientPacketRecipeBookAddEntriesInnerRecipeGroupEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -19421,7 +19820,8 @@ func (ret *PlayToClientPacketRecipeBookAdd) Encode(w io.Writer) (err error) {
 				return
 			}
 			for iPlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirements := range len(*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements) {
-				err = (*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements)[iPlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirements].Encode(w)
+				PlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirementsInnerEncTmp := (*ret.Entries[iPlayToClientPacketRecipeBookAddEntries].Recipe.CraftingRequirements)[iPlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirements]
+				err = PlayToClientPacketRecipeBookAddEntriesInnerRecipeCraftingRequirementsInnerEncTmp.Encode(w)
 				if err != nil {
 					return
 				}
@@ -19501,19 +19901,23 @@ func (ret *PlayToClientPacketRecipeBookSettings) Decode(r io.ReadSeeker) (err er
 	return
 }
 func (ret *PlayToClientPacketRecipeBookSettings) Encode(w io.Writer) (err error) {
-	err = ret.Crafting.Encode(w)
+	PlayToClientPacketRecipeBookSettingsCraftingEncTmp := ret.Crafting
+	err = PlayToClientPacketRecipeBookSettingsCraftingEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Furnace.Encode(w)
+	PlayToClientPacketRecipeBookSettingsFurnaceEncTmp := ret.Furnace
+	err = PlayToClientPacketRecipeBookSettingsFurnaceEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Blast.Encode(w)
+	PlayToClientPacketRecipeBookSettingsBlastEncTmp := ret.Blast
+	err = PlayToClientPacketRecipeBookSettingsBlastEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Smoker.Encode(w)
+	PlayToClientPacketRecipeBookSettingsSmokerEncTmp := ret.Smoker
+	err = PlayToClientPacketRecipeBookSettingsSmokerEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -19663,7 +20067,8 @@ func (ret *PlayToClientPacketRespawn) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketRespawn) Encode(w io.Writer) (err error) {
-	err = ret.WorldState.Encode(w)
+	PlayToClientPacketRespawnWorldStateEncTmp := ret.WorldState
+	err = PlayToClientPacketRespawnWorldStateEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -19868,7 +20273,8 @@ func (ret *PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketScoreboardObjectiveDisplayText.Encode(w)
+		PlayToClientPacketScoreboardObjectiveDisplayTextEncTmp := PlayToClientPacketScoreboardObjectiveDisplayText
+		err = PlayToClientPacketScoreboardObjectiveDisplayTextEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -19878,7 +20284,8 @@ func (ret *PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketScoreboardObjectiveDisplayText.Encode(w)
+		PlayToClientPacketScoreboardObjectiveDisplayTextEncTmp := PlayToClientPacketScoreboardObjectiveDisplayText
+		err = PlayToClientPacketScoreboardObjectiveDisplayTextEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -19974,7 +20381,8 @@ func (ret *PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
+			PlayToClientPacketScoreboardObjectiveStylingEncTmp := PlayToClientPacketScoreboardObjectiveStyling
+			err = PlayToClientPacketScoreboardObjectiveStylingEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -19984,7 +20392,8 @@ func (ret *PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
+			PlayToClientPacketScoreboardObjectiveStylingEncTmp := PlayToClientPacketScoreboardObjectiveStyling
+			err = PlayToClientPacketScoreboardObjectiveStylingEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -20009,7 +20418,8 @@ func (ret *PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
+			PlayToClientPacketScoreboardObjectiveStylingEncTmp := PlayToClientPacketScoreboardObjectiveStyling
+			err = PlayToClientPacketScoreboardObjectiveStylingEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -20019,7 +20429,8 @@ func (ret *PlayToClientPacketScoreboardObjective) Encode(w io.Writer) (err error
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToClientPacketScoreboardObjectiveStyling.Encode(w)
+			PlayToClientPacketScoreboardObjectiveStylingEncTmp := PlayToClientPacketScoreboardObjectiveStyling
+			err = PlayToClientPacketScoreboardObjectiveStylingEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -20120,7 +20531,8 @@ func (ret *PlayToClientPacketServerData) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketServerData) Encode(w io.Writer) (err error) {
-	err = ret.Motd.Encode(w)
+	PlayToClientPacketServerDataMotdEncTmp := ret.Motd
+	err = PlayToClientPacketServerDataMotdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20129,7 +20541,8 @@ func (ret *PlayToClientPacketServerData) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.IconBytes != nil {
-		err = (*ret.IconBytes).Encode(w)
+		PlayToClientPacketServerDataIconBytesEncTmp := *ret.IconBytes
+		err = PlayToClientPacketServerDataIconBytesEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -20177,7 +20590,8 @@ func (ret *PlayToClientPacketSetCursorItem) Decode(r io.ReadSeeker) (err error) 
 	return
 }
 func (ret *PlayToClientPacketSetCursorItem) Encode(w io.Writer) (err error) {
-	err = ret.Contents.Encode(w)
+	PlayToClientPacketSetCursorItemContentsEncTmp := ret.Contents
+	err = PlayToClientPacketSetCursorItemContentsEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20249,7 +20663,8 @@ func (ret *PlayToClientPacketSetPlayerInventory) Encode(w io.Writer) (err error)
 	if err != nil {
 		return
 	}
-	err = ret.Contents.Encode(w)
+	PlayToClientPacketSetPlayerInventoryContentsEncTmp := ret.Contents
+	err = PlayToClientPacketSetPlayerInventoryContentsEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20311,7 +20726,8 @@ func (ret *PlayToClientPacketSetSlot) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketSetSlot) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToClientPacketSetSlotWindowIdEncTmp := ret.WindowId
+	err = PlayToClientPacketSetSlotWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20323,7 +20739,8 @@ func (ret *PlayToClientPacketSetSlot) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Item.Encode(w)
+	PlayToClientPacketSetSlotItemEncTmp := ret.Item
+	err = PlayToClientPacketSetSlotItemEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20370,7 +20787,8 @@ func (ret *PlayToClientPacketSetTitleSubtitle) Decode(r io.ReadSeeker) (err erro
 	return
 }
 func (ret *PlayToClientPacketSetTitleSubtitle) Encode(w io.Writer) (err error) {
-	err = ret.Text.Encode(w)
+	PlayToClientPacketSetTitleSubtitleTextEncTmp := ret.Text
+	err = PlayToClientPacketSetTitleSubtitleTextEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20389,7 +20807,8 @@ func (ret *PlayToClientPacketSetTitleText) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketSetTitleText) Encode(w io.Writer) (err error) {
-	err = ret.Text.Encode(w)
+	PlayToClientPacketSetTitleTextTextEncTmp := ret.Text
+	err = PlayToClientPacketSetTitleTextTextEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20467,7 +20886,8 @@ func (ret *PlayToClientPacketShowDialog) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = PlayToClientPacketShowDialogDialogKnownType.Encode(w)
+		PlayToClientPacketShowDialogDialogOtherwiseEncTmp := PlayToClientPacketShowDialogDialogKnownType
+		err = PlayToClientPacketShowDialogDialogOtherwiseEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -20543,11 +20963,13 @@ func (ret *PlayToClientPacketSoundEffect) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketSoundEffect) Encode(w io.Writer) (err error) {
-	err = ret.Sound.Encode(w)
+	PlayToClientPacketSoundEffectSoundEncTmp := ret.Sound
+	err = PlayToClientPacketSoundEffectSoundEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.SoundCategory.Encode(w)
+	PlayToClientPacketSoundEffectSoundCategoryEncTmp := ret.SoundCategory
+	err = PlayToClientPacketSoundEffectSoundCategoryEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20664,7 +21086,8 @@ func (ret *PlayToClientPacketSpawnEntity) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Velocity.Encode(w)
+	PlayToClientPacketSpawnEntityVelocityEncTmp := ret.Velocity
+	err = PlayToClientPacketSpawnEntityVelocityEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -20699,7 +21122,8 @@ func (ret *PlayToClientPacketSpawnPosition) Decode(r io.ReadSeeker) (err error) 
 	return
 }
 func (ret *PlayToClientPacketSpawnPosition) Encode(w io.Writer) (err error) {
-	err = ret.Val.Encode(w)
+	PlayToClientPacketSpawnPositionEncTmp := ret.Val
+	err = PlayToClientPacketSpawnPositionEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -21034,7 +21458,8 @@ func (ret *PlayToClientPacketSystemChat) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketSystemChat) Encode(w io.Writer) (err error) {
-	err = ret.Content.Encode(w)
+	PlayToClientPacketSystemChatContentEncTmp := ret.Content
+	err = PlayToClientPacketSystemChatContentEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -21130,7 +21555,8 @@ func (ret *PlayToClientPacketTabComplete) Encode(w io.Writer) (err error) {
 			return
 		}
 		if ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip != nil {
-			err = (*ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip).Encode(w)
+			PlayToClientPacketTabCompleteMatchesInnerTooltipEncTmp := *ret.Matches[iPlayToClientPacketTabCompleteMatches].Tooltip
+			err = PlayToClientPacketTabCompleteMatchesInnerTooltipEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -21183,7 +21609,8 @@ func (ret *PlayToClientPacketTags) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = ret.Tags[iPlayToClientPacketTagsTags].Tags.Encode(w)
+		PlayToClientPacketTagsTagsInnerTagsEncTmp := ret.Tags[iPlayToClientPacketTagsTags].Tags
+		err = PlayToClientPacketTagsTagsInnerTagsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -21415,7 +21842,8 @@ func (ret *PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketTeamsAnon.Name.Encode(w)
+		PlayToClientPacketTeamsAnonNameEncTmp := PlayToClientPacketTeamsAnon.Name
+		err = PlayToClientPacketTeamsAnonNameEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -21445,11 +21873,13 @@ func (ret *PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = PlayToClientPacketTeamsAnon.Prefix.Encode(w)
+		PlayToClientPacketTeamsAnonPrefixEncTmp := PlayToClientPacketTeamsAnon.Prefix
+		err = PlayToClientPacketTeamsAnonPrefixEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientPacketTeamsAnon.Suffix.Encode(w)
+		PlayToClientPacketTeamsAnonSuffixEncTmp := PlayToClientPacketTeamsAnon.Suffix
+		err = PlayToClientPacketTeamsAnonSuffixEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -21467,7 +21897,8 @@ func (ret *PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketTeamsAnon.Name.Encode(w)
+		PlayToClientPacketTeamsAnonNameEncTmp := PlayToClientPacketTeamsAnon.Name
+		err = PlayToClientPacketTeamsAnonNameEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -21497,11 +21928,13 @@ func (ret *PlayToClientPacketTeams) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = PlayToClientPacketTeamsAnon.Prefix.Encode(w)
+		PlayToClientPacketTeamsAnonPrefixEncTmp := PlayToClientPacketTeamsAnon.Prefix
+		err = PlayToClientPacketTeamsAnonPrefixEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = PlayToClientPacketTeamsAnon.Suffix.Encode(w)
+		PlayToClientPacketTeamsAnonSuffixEncTmp := PlayToClientPacketTeamsAnon.Suffix
+		err = PlayToClientPacketTeamsAnonSuffixEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -21599,7 +22032,8 @@ func (ret *PlayToClientPacketTestInstanceBlockStatus) Decode(r io.ReadSeeker) (e
 	return
 }
 func (ret *PlayToClientPacketTestInstanceBlockStatus) Encode(w io.Writer) (err error) {
-	err = ret.Status.Encode(w)
+	PlayToClientPacketTestInstanceBlockStatusStatusEncTmp := ret.Status
+	err = PlayToClientPacketTestInstanceBlockStatusStatusEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -21608,7 +22042,8 @@ func (ret *PlayToClientPacketTestInstanceBlockStatus) Encode(w io.Writer) (err e
 		return
 	}
 	if ret.Size != nil {
-		err = (*ret.Size).Encode(w)
+		PlayToClientPacketTestInstanceBlockStatusSizeEncTmp := *ret.Size
+		err = PlayToClientPacketTestInstanceBlockStatusSizeEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -21638,7 +22073,8 @@ func (ret *PlayToClientPacketTileEntityData) Decode(r io.ReadSeeker) (err error)
 	return
 }
 func (ret *PlayToClientPacketTileEntityData) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToClientPacketTileEntityDataLocationEncTmp := ret.Location
+	err = PlayToClientPacketTileEntityDataLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -21646,7 +22082,8 @@ func (ret *PlayToClientPacketTileEntityData) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.NbtData.Encode(w)
+	PlayToClientPacketTileEntityDataNbtDataEncTmp := ret.NbtData
+	err = PlayToClientPacketTileEntityDataNbtDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -21887,7 +22324,8 @@ func (ret *PlayToClientPacketTrackedWaypoint) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToClientPacketTrackedWaypointWaypointData.Encode(w)
+		PlayToClientPacketTrackedWaypointWaypointDataEncTmp := PlayToClientPacketTrackedWaypointWaypointData
+		err = PlayToClientPacketTrackedWaypointWaypointDataEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -22064,7 +22502,8 @@ func (ret *PlayToClientPacketTradeList) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketTradeList) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToClientPacketTradeListWindowIdEncTmp := ret.WindowId
+	err = PlayToClientPacketTradeListWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -22081,11 +22520,13 @@ func (ret *PlayToClientPacketTradeList) Encode(w io.Writer) (err error) {
 		if err != nil {
 			return
 		}
-		err = ret.Trades[iPlayToClientPacketTradeListTrades].InputItem1.Components.Encode(w)
+		PlayToClientPacketTradeListTradesInnerInputItem1ComponentsEncTmp := ret.Trades[iPlayToClientPacketTradeListTrades].InputItem1.Components
+		err = PlayToClientPacketTradeListTradesInnerInputItem1ComponentsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
-		err = ret.Trades[iPlayToClientPacketTradeListTrades].OutputItem.Encode(w)
+		PlayToClientPacketTradeListTradesInnerOutputItemEncTmp := ret.Trades[iPlayToClientPacketTradeListTrades].OutputItem
+		err = PlayToClientPacketTradeListTradesInnerOutputItemEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -22102,7 +22543,8 @@ func (ret *PlayToClientPacketTradeList) Encode(w io.Writer) (err error) {
 			if err != nil {
 				return
 			}
-			err = (*ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2).Components.Encode(w)
+			PlayToClientPacketTradeListTradesInnerInputItem2ComponentsEncTmp := (*ret.Trades[iPlayToClientPacketTradeListTrades].InputItem2).Components
+			err = PlayToClientPacketTradeListTradesInnerInputItem2ComponentsEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -22606,7 +23048,8 @@ func (ret *PlayToClientPacketWindowItems) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToClientPacketWindowItems) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToClientPacketWindowItemsWindowIdEncTmp := ret.WindowId
+	err = PlayToClientPacketWindowItemsWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -22619,12 +23062,14 @@ func (ret *PlayToClientPacketWindowItems) Encode(w io.Writer) (err error) {
 		return
 	}
 	for iPlayToClientPacketWindowItemsItems := range len(ret.Items) {
-		err = ret.Items[iPlayToClientPacketWindowItemsItems].Encode(w)
+		PlayToClientPacketWindowItemsItemsInnerEncTmp := ret.Items[iPlayToClientPacketWindowItemsItems]
+		err = PlayToClientPacketWindowItemsItemsInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
 	}
-	err = ret.CarriedItem.Encode(w)
+	PlayToClientPacketWindowItemsCarriedItemEncTmp := ret.CarriedItem
+	err = PlayToClientPacketWindowItemsCarriedItemEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -22784,7 +23229,8 @@ func (ret *PlayToClientPacketWorldEvent) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToClientPacketWorldEventLocationEncTmp := ret.Location
+	err = PlayToClientPacketWorldEventLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -22901,7 +23347,8 @@ func (ret *PlayToClientPacketWorldParticles) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Particle.Encode(w)
+	PlayToClientPacketWorldParticlesParticleEncTmp := ret.Particle
+	err = PlayToClientPacketWorldParticlesParticleEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -23451,7 +23898,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23461,7 +23909,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23471,7 +23920,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23481,7 +23931,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23491,7 +23942,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23501,7 +23953,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23511,7 +23964,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23521,7 +23975,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23531,7 +23986,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23541,7 +23997,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23551,7 +24008,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23561,7 +24019,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23571,7 +24030,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23581,7 +24041,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23591,7 +24052,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23601,7 +24063,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23611,7 +24074,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23621,7 +24085,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23631,7 +24096,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23641,7 +24107,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23651,7 +24118,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23661,7 +24129,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23671,7 +24140,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23681,7 +24151,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23691,7 +24162,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23701,7 +24173,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23711,7 +24184,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23721,7 +24195,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23731,7 +24206,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23741,7 +24217,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23751,7 +24228,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23761,7 +24239,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23771,7 +24250,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23781,7 +24261,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23791,7 +24272,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23801,7 +24283,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23811,7 +24294,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23821,7 +24305,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23831,7 +24316,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23841,7 +24327,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23851,7 +24338,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23861,7 +24349,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23871,7 +24360,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23881,7 +24371,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23891,7 +24382,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23901,7 +24393,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23911,7 +24404,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23921,7 +24415,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23931,7 +24426,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23941,7 +24437,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23951,7 +24448,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23961,7 +24459,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23971,7 +24470,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23981,7 +24481,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -23991,7 +24492,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24001,7 +24503,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24011,7 +24514,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24021,7 +24525,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24031,7 +24536,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24041,7 +24547,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24051,7 +24558,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24061,7 +24569,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24071,7 +24580,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24081,7 +24591,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24091,7 +24602,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24101,7 +24613,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24111,7 +24624,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24121,7 +24635,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24131,7 +24646,8 @@ func (ret *PlayToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = PlayToServerPacketParams.Encode(w)
+		PlayToServerPacketParamsEncTmp := PlayToServerPacketParams
+		err = PlayToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24279,7 +24795,8 @@ func (ret *PlayToServerPacketBlockDig) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToServerPacketBlockDigLocationEncTmp := ret.Location
+	err = PlayToServerPacketBlockDigLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -24350,7 +24867,8 @@ func (ret *PlayToServerPacketBlockPlace) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToServerPacketBlockPlaceLocationEncTmp := ret.Location
+	err = PlayToServerPacketBlockPlaceLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -24671,11 +25189,13 @@ func (ret *PlayToServerPacketChatSessionUpdate) Encode(w io.Writer) (err error) 
 	if err != nil {
 		return
 	}
-	err = ret.PublicKey.Encode(w)
+	PlayToServerPacketChatSessionUpdatePublicKeyEncTmp := ret.PublicKey
+	err = PlayToServerPacketChatSessionUpdatePublicKeyEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
-	err = ret.Signature.Encode(w)
+	PlayToServerPacketChatSessionUpdateSignatureEncTmp := ret.Signature
+	err = PlayToServerPacketChatSessionUpdateSignatureEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -24732,7 +25252,8 @@ func (ret *PlayToServerPacketCloseWindow) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketCloseWindow) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToServerPacketCloseWindowWindowIdEncTmp := ret.WindowId
+	err = PlayToServerPacketCloseWindowWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -24801,7 +25322,8 @@ func (ret *PlayToServerPacketCommonAddResourcePack) Encode(w io.Writer) (err err
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		PlayToServerPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = PlayToServerPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24873,7 +25395,8 @@ func (ret *PlayToServerPacketCommonCookieResponse) Encode(w io.Writer) (err erro
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		PlayToServerPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = PlayToServerPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -24916,7 +25439,8 @@ func (ret *PlayToServerPacketCommonCustomClickAction) Encode(w io.Writer) (err e
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		PlayToServerPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = PlayToServerPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -25148,7 +25672,8 @@ func (ret *PlayToServerPacketCommonServerLinks) Encode(w io.Writer) (err error) 
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToServerPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			PlayToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp := PlayToServerPacketCommonServerLinksLinksInnerKnownType
+			err = PlayToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -25160,7 +25685,8 @@ func (ret *PlayToServerPacketCommonServerLinks) Encode(w io.Writer) (err error) 
 				err = proto_base.BadTypeError
 				return
 			}
-			err = PlayToServerPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			PlayToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := PlayToServerPacketCommonServerLinksLinksInnerUnknownType
+			err = PlayToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -25300,7 +25826,8 @@ func (ret *PlayToServerPacketCommonStoreCookie) Encode(w io.Writer) (err error) 
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	PlayToServerPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = PlayToServerPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -25362,7 +25889,8 @@ func (ret *PlayToServerPacketContainerButtonClick) Decode(r io.ReadSeeker) (err 
 	return
 }
 func (ret *PlayToServerPacketContainerButtonClick) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToServerPacketContainerButtonClickWindowIdEncTmp := ret.WindowId
+	err = PlayToServerPacketContainerButtonClickWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -25395,7 +25923,8 @@ func (ret *PlayToServerPacketCraftRecipeRequest) Decode(r io.ReadSeeker) (err er
 	return
 }
 func (ret *PlayToServerPacketCraftRecipeRequest) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToServerPacketCraftRecipeRequestWindowIdEncTmp := ret.WindowId
+	err = PlayToServerPacketCraftRecipeRequestWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -25431,7 +25960,8 @@ func (ret *PlayToServerPacketCustomPayload) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Data.Encode(w)
+	PlayToServerPacketCustomPayloadDataEncTmp := ret.Data
+	err = PlayToServerPacketCustomPayloadDataEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -25465,7 +25995,8 @@ func (ret *PlayToServerPacketDebugSubscriptionRequest) Encode(w io.Writer) (err 
 		return
 	}
 	for iPlayToServerPacketDebugSubscriptionRequestSubscriptions := range len(ret.Subscriptions) {
-		err = ret.Subscriptions[iPlayToServerPacketDebugSubscriptionRequestSubscriptions].Encode(w)
+		PlayToServerPacketDebugSubscriptionRequestSubscriptionsInnerEncTmp := ret.Subscriptions[iPlayToServerPacketDebugSubscriptionRequestSubscriptions]
+		err = PlayToServerPacketDebugSubscriptionRequestSubscriptionsInnerEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -25624,7 +26155,8 @@ func (ret *PlayToServerPacketFlying) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketFlying) Encode(w io.Writer) (err error) {
-	err = ret.Flags.Encode(w)
+	PlayToServerPacketFlyingFlagsEncTmp := ret.Flags
+	err = PlayToServerPacketFlyingFlagsEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -25653,7 +26185,8 @@ func (ret *PlayToServerPacketGenerateStructure) Decode(r io.ReadSeeker) (err err
 	return
 }
 func (ret *PlayToServerPacketGenerateStructure) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToServerPacketGenerateStructureLocationEncTmp := ret.Location
+	err = PlayToServerPacketGenerateStructureLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -25755,7 +26288,8 @@ func (ret *PlayToServerPacketLook) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Flags.Encode(w)
+	PlayToServerPacketLookFlagsEncTmp := ret.Flags
+	err = PlayToServerPacketLookFlagsEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -25817,7 +26351,8 @@ func (ret *PlayToServerPacketPickItemFromBlock) Decode(r io.ReadSeeker) (err err
 	return
 }
 func (ret *PlayToServerPacketPickItemFromBlock) Encode(w io.Writer) (err error) {
-	err = ret.Position.Encode(w)
+	PlayToServerPacketPickItemFromBlockPositionEncTmp := ret.Position
+	err = PlayToServerPacketPickItemFromBlockPositionEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -25962,7 +26497,8 @@ func (ret *PlayToServerPacketPosition) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Flags.Encode(w)
+	PlayToServerPacketPositionFlagsEncTmp := ret.Flags
+	err = PlayToServerPacketPositionFlagsEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26026,7 +26562,8 @@ func (ret *PlayToServerPacketPositionLook) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Flags.Encode(w)
+	PlayToServerPacketPositionLookFlagsEncTmp := ret.Flags
+	err = PlayToServerPacketPositionLookFlagsEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26054,7 +26591,8 @@ func (ret *PlayToServerPacketQueryBlockNbt) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Location.Encode(w)
+	PlayToServerPacketQueryBlockNbtLocationEncTmp := ret.Location
+	err = PlayToServerPacketQueryBlockNbtLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26280,7 +26818,8 @@ func (ret *PlayToServerPacketSetCreativeSlot) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Item.Encode(w)
+	PlayToServerPacketSetCreativeSlotItemEncTmp := ret.Item
+	err = PlayToServerPacketSetCreativeSlotItemEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26399,7 +26938,8 @@ func (ret *PlayToServerPacketSetSlotState) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.WindowId.Encode(w)
+	PlayToServerPacketSetSlotStateWindowIdEncTmp := ret.WindowId
+	err = PlayToServerPacketSetSlotStateWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26432,7 +26972,8 @@ func (ret *PlayToServerPacketSetTestBlock) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketSetTestBlock) Encode(w io.Writer) (err error) {
-	err = ret.Position.Encode(w)
+	PlayToServerPacketSetTestBlockPositionEncTmp := ret.Position
+	err = PlayToServerPacketSetTestBlockPositionEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26627,7 +27168,8 @@ func (ret *PlayToServerPacketTestInstanceBlockAction) Decode(r io.ReadSeeker) (e
 	return
 }
 func (ret *PlayToServerPacketTestInstanceBlockAction) Encode(w io.Writer) (err error) {
-	err = ret.Pos.Encode(w)
+	PlayToServerPacketTestInstanceBlockActionPosEncTmp := ret.Pos
+	err = PlayToServerPacketTestInstanceBlockActionPosEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26645,7 +27187,8 @@ func (ret *PlayToServerPacketTestInstanceBlockAction) Encode(w io.Writer) (err e
 			return
 		}
 	}
-	err = ret.Data.Size.Encode(w)
+	PlayToServerPacketTestInstanceBlockActionDataSizeEncTmp := ret.Data.Size
+	err = PlayToServerPacketTestInstanceBlockActionDataSizeEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26666,7 +27209,8 @@ func (ret *PlayToServerPacketTestInstanceBlockAction) Encode(w io.Writer) (err e
 		return
 	}
 	if ret.Data.ErrorMessage != nil {
-		err = (*ret.Data.ErrorMessage).Encode(w)
+		PlayToServerPacketTestInstanceBlockActionDataErrorMessageEncTmp := *ret.Data.ErrorMessage
+		err = PlayToServerPacketTestInstanceBlockActionDataErrorMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -26711,7 +27255,8 @@ func (ret *PlayToServerPacketUpdateCommandBlock) Decode(r io.ReadSeeker) (err er
 	return
 }
 func (ret *PlayToServerPacketUpdateCommandBlock) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToServerPacketUpdateCommandBlockLocationEncTmp := ret.Location
+	err = PlayToServerPacketUpdateCommandBlockLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26814,7 +27359,8 @@ func (ret *PlayToServerPacketUpdateJigsawBlock) Decode(r io.ReadSeeker) (err err
 	return
 }
 func (ret *PlayToServerPacketUpdateJigsawBlock) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToServerPacketUpdateJigsawBlockLocationEncTmp := ret.Location
+	err = PlayToServerPacketUpdateJigsawBlockLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -26886,7 +27432,8 @@ func (ret *PlayToServerPacketUpdateSign) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketUpdateSign) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToServerPacketUpdateSignLocationEncTmp := ret.Location
+	err = PlayToServerPacketUpdateSignLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -27010,7 +27557,8 @@ func (ret *PlayToServerPacketUpdateStructureBlock) Decode(r io.ReadSeeker) (err 
 var PlayToServerPacketUpdateStructureBlockFlagsReverseMap = map[string]uint8{"ignore_entities": 0, "show_air": 1, "show_bounding_box": 2, "strict": 3}
 
 func (ret *PlayToServerPacketUpdateStructureBlock) Encode(w io.Writer) (err error) {
-	err = ret.Location.Encode(w)
+	PlayToServerPacketUpdateStructureBlockLocationEncTmp := ret.Location
+	err = PlayToServerPacketUpdateStructureBlockLocationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -27298,7 +27846,8 @@ func (ret *PlayToServerPacketUseItem) Encode(w io.Writer) (err error) {
 	if err != nil {
 		return
 	}
-	err = ret.Rotation.Encode(w)
+	PlayToServerPacketUseItemRotationEncTmp := ret.Rotation
+	err = PlayToServerPacketUseItemRotationEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -27452,7 +28001,8 @@ func (ret *PlayToServerPacketWindowClick) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *PlayToServerPacketWindowClick) Encode(w io.Writer) (err error) {
-	err = ret.WindowId.Encode(w)
+	PlayToServerPacketWindowClickWindowIdEncTmp := ret.WindowId
+	err = PlayToServerPacketWindowClickWindowIdEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -27486,7 +28036,8 @@ func (ret *PlayToServerPacketWindowClick) Encode(w io.Writer) (err error) {
 			return
 		}
 		if ret.ChangedSlots[iPlayToServerPacketWindowClickChangedSlots].Item != nil {
-			err = (*ret.ChangedSlots[iPlayToServerPacketWindowClickChangedSlots].Item).Encode(w)
+			PlayToServerPacketWindowClickChangedSlotsInnerItemEncTmp := *ret.ChangedSlots[iPlayToServerPacketWindowClickChangedSlots].Item
+			err = PlayToServerPacketWindowClickChangedSlotsInnerItemEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -27497,7 +28048,8 @@ func (ret *PlayToServerPacketWindowClick) Encode(w io.Writer) (err error) {
 		return
 	}
 	if ret.CursorItem != nil {
-		err = (*ret.CursorItem).Encode(w)
+		PlayToServerPacketWindowClickCursorItemEncTmp := *ret.CursorItem
+		err = PlayToServerPacketWindowClickCursorItemEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -27560,7 +28112,8 @@ func (ret *StatusToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = StatusToClientPacketParams.Encode(w)
+		StatusToClientPacketParamsEncTmp := StatusToClientPacketParams
+		err = StatusToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -27570,7 +28123,8 @@ func (ret *StatusToClientPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = StatusToClientPacketParams.Encode(w)
+		StatusToClientPacketParamsEncTmp := StatusToClientPacketParams
+		err = StatusToClientPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -27640,7 +28194,8 @@ func (ret *StatusToClientPacketCommonAddResourcePack) Encode(w io.Writer) (err e
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		StatusToClientPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = StatusToClientPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -27712,7 +28267,8 @@ func (ret *StatusToClientPacketCommonCookieResponse) Encode(w io.Writer) (err er
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		StatusToClientPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = StatusToClientPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -27755,7 +28311,8 @@ func (ret *StatusToClientPacketCommonCustomClickAction) Encode(w io.Writer) (err
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		StatusToClientPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = StatusToClientPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -27987,7 +28544,8 @@ func (ret *StatusToClientPacketCommonServerLinks) Encode(w io.Writer) (err error
 				err = proto_base.BadTypeError
 				return
 			}
-			err = StatusToClientPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			StatusToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp := StatusToClientPacketCommonServerLinksLinksInnerKnownType
+			err = StatusToClientPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -27999,7 +28557,8 @@ func (ret *StatusToClientPacketCommonServerLinks) Encode(w io.Writer) (err error
 				err = proto_base.BadTypeError
 				return
 			}
-			err = StatusToClientPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			StatusToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := StatusToClientPacketCommonServerLinksLinksInnerUnknownType
+			err = StatusToClientPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -28139,7 +28698,8 @@ func (ret *StatusToClientPacketCommonStoreCookie) Encode(w io.Writer) (err error
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	StatusToClientPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = StatusToClientPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
@@ -28267,7 +28827,8 @@ func (ret *StatusToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = StatusToServerPacketParams.Encode(w)
+		StatusToServerPacketParamsEncTmp := StatusToServerPacketParams
+		err = StatusToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -28277,7 +28838,8 @@ func (ret *StatusToServerPacket) Encode(w io.Writer) (err error) {
 			err = proto_base.BadTypeError
 			return
 		}
-		err = StatusToServerPacketParams.Encode(w)
+		StatusToServerPacketParamsEncTmp := StatusToServerPacketParams
+		err = StatusToServerPacketParamsEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -28347,7 +28909,8 @@ func (ret *StatusToServerPacketCommonAddResourcePack) Encode(w io.Writer) (err e
 		return
 	}
 	if ret.PromptMessage != nil {
-		err = (*ret.PromptMessage).Encode(w)
+		StatusToServerPacketCommonAddResourcePackPromptMessageEncTmp := *ret.PromptMessage
+		err = StatusToServerPacketCommonAddResourcePackPromptMessageEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -28419,7 +28982,8 @@ func (ret *StatusToServerPacketCommonCookieResponse) Encode(w io.Writer) (err er
 		return
 	}
 	if ret.Value != nil {
-		err = (*ret.Value).Encode(w)
+		StatusToServerPacketCommonCookieResponseValueEncTmp := *ret.Value
+		err = StatusToServerPacketCommonCookieResponseValueEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -28462,7 +29026,8 @@ func (ret *StatusToServerPacketCommonCustomClickAction) Encode(w io.Writer) (err
 		return
 	}
 	if ret.Nbt != nil {
-		err = (*ret.Nbt).Encode(w)
+		StatusToServerPacketCommonCustomClickActionNbtEncTmp := *ret.Nbt
+		err = StatusToServerPacketCommonCustomClickActionNbtEncTmp.Encode(w)
 		if err != nil {
 			return
 		}
@@ -28694,7 +29259,8 @@ func (ret *StatusToServerPacketCommonServerLinks) Encode(w io.Writer) (err error
 				err = proto_base.BadTypeError
 				return
 			}
-			err = StatusToServerPacketCommonServerLinksLinksInnerKnownType.Encode(w)
+			StatusToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp := StatusToServerPacketCommonServerLinksLinksInnerKnownType
+			err = StatusToServerPacketCommonServerLinksLinksInnerKnownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -28706,7 +29272,8 @@ func (ret *StatusToServerPacketCommonServerLinks) Encode(w io.Writer) (err error
 				err = proto_base.BadTypeError
 				return
 			}
-			err = StatusToServerPacketCommonServerLinksLinksInnerUnknownType.Encode(w)
+			StatusToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp := StatusToServerPacketCommonServerLinksLinksInnerUnknownType
+			err = StatusToServerPacketCommonServerLinksLinksInnerUnknownTypeEncTmp.Encode(w)
 			if err != nil {
 				return
 			}
@@ -28846,7 +29413,8 @@ func (ret *StatusToServerPacketCommonStoreCookie) Encode(w io.Writer) (err error
 	if err != nil {
 		return
 	}
-	err = ret.Value.Encode(w)
+	StatusToServerPacketCommonStoreCookieValueEncTmp := ret.Value
+	err = StatusToServerPacketCommonStoreCookieValueEncTmp.Encode(w)
 	if err != nil {
 		return
 	}
