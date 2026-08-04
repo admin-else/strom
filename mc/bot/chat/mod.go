@@ -15,6 +15,7 @@ import (
 	"github.com/admin-else/strom/mc/api"
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
+	"github.com/admin-else/strom/mc/proto_generated/v1_8"
 	"github.com/google/uuid"
 )
 
@@ -43,6 +44,9 @@ func Start(c *proto.Conn, acc *api.Account) (*Module, error) {
 }
 
 func (m *Module) initSigning(acc *api.Account) (err error) {
+	if m.Conn.ProtocolVersion < 764 {
+		return nil
+	}
 	keys, err := acc.FetchKeys()
 	if err != nil {
 		return fmt.Errorf("fetch profile keys: %w", err)
@@ -80,8 +84,12 @@ func (m *Module) initSigning(acc *api.Account) (err error) {
 }
 
 // SendMessage sends a chat message. If signing is enabled, the message is signed;
-// otherwise it is sent unsigned.
+// otherwise it is sent unsigned. For pre-1.19 protocol versions, uses the legacy
+// chat packet format (plain string).
 func (m *Module) SendMessage(message string) (err error) {
+	if m.Conn.ProtocolVersion < 764 {
+		return m.Conn.Send(&v1_8.PlayToServerPacketChat{Message: message})
+	}
 	if m.canSign {
 		return m.sendSigned(message)
 	}
