@@ -16,6 +16,7 @@ import (
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/mc/proto_generated/v1_8"
+	"github.com/admin-else/strom/mc/proto_generated/v1_12_2"
 	"github.com/admin-else/strom/mc/proto_generated/v26_2"
 	"github.com/admin-else/strom/mc/text"
 	"github.com/google/uuid"
@@ -139,6 +140,31 @@ func (s *LoginClient) OnSuccessV1_8(success *v1_8.LoginToClientPacketSuccess) (e
 	return
 }
 
+func (s *LoginClient) OnDisconnectV1_12_2(packet *v1_12_2.LoginToClientPacketDisconnect) (err error) {
+	var reason text.Component
+	err = json.Unmarshal([]byte(packet.Reason), &reason)
+	if err != nil {
+		return
+	}
+	err = KickedDuringLoginErr{reason}
+	return
+}
+
+func (s *LoginClient) OnCompressV1_12_2(packet *v1_12_2.LoginToClientPacketCompress) (err error) {
+	s.SetCompressionThreshold(packet.Threshold)
+	return
+}
+
+func (s *LoginClient) OnSuccessV1_12_2(success *v1_12_2.LoginToClientPacketSuccess) (err error) {
+	s.GivenAccount = &v1_21_8.LoginToClientPacketSuccess{
+		Uuid:     uuid.MustParse(success.Uuid),
+		Username: success.Username,
+	}
+	s.SetState(proto_base.Play)
+	err = event.HandlerDoneErr{}
+	return
+}
+
 func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (err error) {
 	s.GivenAccount = success
 	if s.ProtocolVersion >= 764 {
@@ -189,6 +215,9 @@ func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err err
 	lc.RegisterCritical(lc.OnCompressV1_8)
 	lc.RegisterCritical(lc.OnDisconnectV1_8)
 	lc.RegisterCritical(lc.OnSuccessV1_8)
+	lc.RegisterCritical(lc.OnCompressV1_12_2)
+	lc.RegisterCritical(lc.OnDisconnectV1_12_2)
+	lc.RegisterCritical(lc.OnSuccessV1_12_2)
 
 	var p proto_base.EncodeDecodeAble
 	if hostAddr != "" {

@@ -10,6 +10,7 @@ import (
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/mc/proto_generated/v1_8"
+	"github.com/admin-else/strom/mc/proto_generated/v1_12_2"
 	"github.com/admin-else/strom/mc/server"
 )
 
@@ -54,6 +55,23 @@ func (s *StatusClient) OnPongV1_8(p *v1_8.StatusToClientPacketPing) (err error) 
 	return
 }
 
+func (s *StatusClient) OnStatusV1_12_2(p *v1_12_2.StatusToClientPacketServerInfo) (err error) {
+	s.Status = p.Response
+	s.PingSendTime = time.Now()
+	if s.DoPingRoundTripTime {
+		err = s.Send(&v1_21_8.StatusToServerPacketPing{Time: s.PingSendTime.UnixMilli()})
+	} else {
+		err = event.HandlerDoneErr{}
+	}
+	return
+}
+
+func (s *StatusClient) OnPongV1_12_2(p *v1_12_2.StatusToClientPacketPing) (err error) {
+	s.PingReceiveTime = time.Now()
+	err = event.HandlerDoneErr{}
+	return
+}
+
 // StatusRaw returns a StatusClient that is not connected to a server.
 // So ignore the resource leak warning. And maybe attach a warn ignore comment.
 // It does not resolve SRV records.
@@ -79,6 +97,8 @@ func StatusRawWithVersion(ctx context.Context, addr, version string) (s *StatusC
 	s.RegisterCriticalUntilLatest(s.OnPong)
 	s.RegisterCritical(s.OnStatusV1_8)
 	s.RegisterCritical(s.OnPongV1_8)
+	s.RegisterCritical(s.OnStatusV1_12_2)
+	s.RegisterCritical(s.OnPongV1_12_2)
 
 	p, err := MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {
