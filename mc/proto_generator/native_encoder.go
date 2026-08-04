@@ -402,6 +402,8 @@ func (g *Generator) RegisterEncoderNatives() {
 		"varlong":         VarLongEncoder,
 		"anonymousNbt":    DefaultEncoder,
 		"anonOptionalNbt": DefaultEncoder, // I have no idea what the difference is between these two
+		"optionalNbt":     DefaultEncoder,
+		"nbt":             DefaultEncoder,
 		"UUID":            UUIDEncoder,
 		"restBuffer":      DefaultEncoder,
 		"lpVec3":          DefaultEncoder,

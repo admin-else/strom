@@ -12,6 +12,10 @@ import (
 )
 
 func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, cet CaseExprType, err error) {
+	if strings.HasPrefix(compareTo, "$") {
+		err = fmt.Errorf("parameterized type placeholder: %s", compareTo)
+		return
+	}
 	parts := strings.Split(compareTo, "/")
 	downPrefixCount := 0
 	for _, part := range parts {
@@ -124,6 +128,12 @@ func (g *Generator) RegisterCompareToNatives() {
 		"bitfield":  BitfieldCompareTo,
 		"u8":        ReturnInputCompareTo,
 		"i8":        ReturnInputCompareTo,
+		"i16":       ReturnInputCompareTo,
+		"i32":       ReturnInputCompareTo,
+		"i64":       ReturnInputCompareTo,
+		"u16":       ReturnInputCompareTo,
+		"u32":       ReturnInputCompareTo,
+		"string":    ReturnInputCompareTo,
 		"bitflags":  BitflagsCompareTo,
 		"switch":    ReturnInputCompareTo,
 		"varlong":   ReturnInputCompareTo,

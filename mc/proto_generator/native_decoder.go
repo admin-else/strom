@@ -634,6 +634,8 @@ func (g *Generator) RegisterDecoderNatives() {
 		"varlong":         VarLongDecoder,
 		"anonymousNbt":    DefaultDecoder,
 		"anonOptionalNbt": DefaultDecoder, // I have no idea what the difference is between these two
+		"optionalNbt":     DefaultDecoder,
+		"nbt":             DefaultDecoder,
 		"lpVec3":          DefaultDecoder,
 		"UUID":            UUIDDecoder,
 		"restBuffer":      DefaultDecoder,

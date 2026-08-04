@@ -25,7 +25,7 @@ var (
 	FileFlag        = cmd.String("file", "", "The tmcpr file to print")
 	ProtocolVersion = cmd.Int("protocol", -1, "The protocol version")
 	CreateTestsPath = cmd.String("create-tests", "", "")
-	StateFlag       = cmd.String("state", "login", "Initial state: login, config, play")
+	StateFlag       = cmd.String("state", "login", "Initial state: handshake, login, config, status, play")
 	DirectionFlag   = cmd.String("direction", "clientbound", "Packet direction: clientbound (ToClient) or serverbound (ToServer)")
 )
 
@@ -106,22 +106,6 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, i proto_base
 		packet = &proto.UnCodablePacket{Err: proto.BadPacketIdErr, Data: packetData, Info: i}
 		return
 	}
-	switch direction {
-	case proto_base.ToClient:
-		switch i.Name {
-		case "success":
-			state = proto_base.Configuration
-		case "finish_configuration":
-			state = proto_base.Play
-		}
-	case proto_base.ToServer:
-		switch i.Name {
-		case "login_acknowledged":
-			state = proto_base.Configuration
-		case "finish_configuration":
-			state = proto_base.Play
-		}
-	}
 	packet = reflect.New(reflect.TypeOf(i.Type).Elem()).Interface().(proto_base.EncodeDecodeAble)
 	err = packet.Decode(b)
 	if err != nil {
@@ -132,7 +116,38 @@ func UnpackPacket(r io.Reader) (packet proto_base.EncodeDecodeAble, i proto_base
 		packet = &proto.UnCodablePacket{Err: proto.PacketNotFullyDecodedErr, Data: packetData[indexafterid:], Info: i}
 		return
 	}
+	trackState(packet, i)
 	return
+}
+
+func trackState(packet proto_base.EncodeDecodeAble, i proto_base.PacketInfo) {
+	switch i.Name {
+	case "set_protocol":
+		v := reflect.ValueOf(packet).Elem()
+		nsField := v.FieldByName("NextState")
+		if nsField.IsValid() && nsField.Kind() == reflect.Int32 {
+			switch nsField.Int() {
+			case 1:
+				state = proto_base.Status
+			case 2:
+				state = proto_base.Login
+			}
+		}
+	case "login_start":
+		if int32(*ProtocolVersion) <= 47 {
+			state = proto_base.Play
+		}
+	case "success":
+		if int32(*ProtocolVersion) >= 764 {
+			state = proto_base.Configuration
+		} else {
+			state = proto_base.Play
+		}
+	case "finish_configuration":
+		state = proto_base.Play
+	case "login_acknowledged":
+		state = proto_base.Configuration
+	}
 }
 
 func Run(args []string) (err error) {
@@ -147,12 +162,16 @@ func Run(args []string) (err error) {
 		return fmt.Errorf("no file specified")
 	}
 	switch *StateFlag {
+	case "handshake":
+		state = proto_base.Handshaking
 	case "login":
 		state = proto_base.Login
 	case "config":
 		state = proto_base.Configuration
 	case "play":
 		state = proto_base.Play
+	case "status":
+		state = proto_base.Status
 	default:
 		return fmt.Errorf("unknown state: %s", *StateFlag)
 	}

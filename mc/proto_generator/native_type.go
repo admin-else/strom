@@ -200,6 +200,8 @@ func (g *Generator) RegisterNatives() {
 		"native":                   VisitDontGenerateType,
 		"anonymousNbt":             MakeSelectorVisitor("nbt", "Anon"),
 		"anonOptionalNbt":          MakeSelectorVisitor("nbt", "Anon"), // I have no idea what the difference is between these two
+		"optionalNbt":              MakeSelectorVisitor("nbt", "Anon"),
+		"nbt":                      MakeSelectorVisitor("nbt", "Anon"),
 		"void":                     VoidType,
 		"bool":                     MakeIdentVisitor("bool"),
 		"u8":                       MakeIdentVisitor("uint8"),
