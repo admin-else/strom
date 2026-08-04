@@ -16,6 +16,7 @@ import (
 	"github.com/admin-else/strom/mc/event"
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
+	"github.com/admin-else/strom/mc/proto_generated/v1_8"
 )
 
 func stror(a, b string) string {
@@ -29,12 +30,14 @@ var (
 	cmd           = flag.NewFlagSet("status", flag.ContinueOnError)
 	connectToFlag = cmd.String("addr", "", "server address to connect to")
 	accFlag       = cmd.String("acc", stror(os.Getenv("STROM_ACC"), "strom_messenger"), "the name to use if longer will be treated as ygg token")
+	versionFlag   = cmd.String("version", "26.2", "minecraft version to use (e.g. 1.8, 1.21.11)")
 )
 
 type Messenger struct {
 	*proto.Conn
-	chat  *chat.Module
-	world *world.Module
+	chat   *chat.Module
+	world  *world.Module
+	legacy bool
 }
 
 func (m *Messenger) OnChat(e *v1_21_11.PlayToClientPacketPlayerChat) (err error) {
@@ -52,15 +55,27 @@ func (m *Messenger) OnChatSystem(e *v1_21_11.PlayToClientPacketSystemChat) (err 
 	return
 }
 
+func (m *Messenger) OnChatLegacy(e *v1_8.PlayToClientPacketChat) (err error) {
+	m.Log.Info("chat", "m", e.Message)
+	return
+}
+
 func (m *Messenger) OnStdin(e event.Stdin) (err error) {
 	input := strings.TrimSpace(e.Val)
 	if strings.HasPrefix(input, ">say ") {
-		return m.chat.SendMessage(strings.TrimSpace(strings.TrimPrefix(input, ">say")))
+		return m.sendChat(strings.TrimSpace(strings.TrimPrefix(input, ">say")))
 	}
-	if strings.HasPrefix(input, ">getblock ") {
+	if !m.legacy && strings.HasPrefix(input, ">getblock ") {
 		return m.handleGetBlock(strings.TrimSpace(strings.TrimPrefix(input, ">getblock")))
 	}
-	return m.chat.SendMessage(input)
+	return m.sendChat(input)
+}
+
+func (m *Messenger) sendChat(message string) (err error) {
+	if m.legacy {
+		return m.Send(&v1_8.PlayToServerPacketChat{Message: message})
+	}
+	return m.chat.SendMessage(message)
 }
 
 func (m *Messenger) handleGetBlock(args string) (err error) {
@@ -105,30 +120,45 @@ func Run(args []string) (err error) {
 	if err != nil {
 		return
 	}
-	c, err := client.Login(*connectToFlag, acc)
+	c, err := client.Login(*connectToFlag, acc, client.WithVersion(*versionFlag))
 	if err != nil {
 		return
 	}
 	defer c.Close()
 
-	chatMod, err := chat.Start(c, acc)
-	if err != nil {
-		return
+	isLegacy := c.ProtocolVersion < 764
+
+	var chatMod *chat.Module
+	if !isLegacy {
+		chatMod, err = chat.Start(c, acc)
+		if err != nil {
+			return
+		}
 	}
 
-	// Shareable world storage. Other bots can subscribe to the same World.
-	w := world.NewWorld(c.Version, -64, 384)
-
 	m := &Messenger{
-		Conn:  c,
-		chat:  chatMod,
-		world: world.Start(c, w),
+		Conn:   c,
+		chat:   chatMod,
+		legacy: isLegacy,
+	}
+
+	if !isLegacy {
+		w := world.NewWorld(c.Version, -64, 384)
+		m.world = world.Start(c, w)
 	}
 
 	event.StartListingStdin(m.Loop)
 	m.Register(m.OnStdin)
-	m.RegisterUntilLatest(m.OnChat, m.OnChatUnsigned, m.OnChatSystem)
-	keepalive.Start(m.Conn)
+
+	if isLegacy {
+		m.Register(m.OnChatLegacy)
+	} else {
+		m.RegisterUntilLatest(m.OnChat, m.OnChatUnsigned, m.OnChatSystem)
+	}
+
+	if !isLegacy {
+		keepalive.Start(m.Conn)
+	}
 
 	return m.StartConn()
 }

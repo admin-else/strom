@@ -15,8 +15,10 @@ import (
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/mc/proto_generated/v1_8"
 	"github.com/admin-else/strom/mc/proto_generated/v26_2"
 	"github.com/admin-else/strom/mc/text"
+	"github.com/google/uuid"
 )
 
 type LoginClient struct {
@@ -112,13 +114,42 @@ func (s *LoginClient) OnDisconnect(packet *v1_21_8.LoginToClientPacketDisconnect
 	return
 }
 
-func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (err error) {
-	s.GivenAccount = success
-	err = s.Send(&v1_21_8.LoginToServerPacketLoginAcknowledged{})
+func (s *LoginClient) OnDisconnectV1_8(packet *v1_8.LoginToClientPacketDisconnect) (err error) {
+	var reason text.Component
+	err = json.Unmarshal([]byte(packet.Reason), &reason)
 	if err != nil {
 		return
 	}
-	s.SetState(proto_base.Configuration)
+	err = KickedDuringLoginErr{reason}
+	return
+}
+
+func (s *LoginClient) OnCompressV1_8(packet *v1_8.LoginToClientPacketCompress) (err error) {
+	s.SetCompressionThreshold(packet.Threshold)
+	return
+}
+
+func (s *LoginClient) OnSuccessV1_8(success *v1_8.LoginToClientPacketSuccess) (err error) {
+	s.GivenAccount = &v1_21_8.LoginToClientPacketSuccess{
+		Uuid:     uuid.MustParse(success.Uuid),
+		Username: success.Username,
+	}
+	s.SetState(proto_base.Play)
+	err = event.HandlerDoneErr{}
+	return
+}
+
+func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (err error) {
+	s.GivenAccount = success
+	if s.ProtocolVersion >= 764 {
+		err = s.Send(&v1_21_8.LoginToServerPacketLoginAcknowledged{})
+		if err != nil {
+			return
+		}
+		s.SetState(proto_base.Configuration)
+	} else {
+		s.SetState(proto_base.Play)
+	}
 	err = event.HandlerDoneErr{}
 	return
 }
@@ -155,6 +186,9 @@ func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err err
 	lc.RegisterCriticalUntilLatest(lc.OnDisconnect)
 	lc.RegisterCriticalUntil("26.1", lc.OnSuccess)
 	lc.RegisterCriticalUntilLatest(lc.OnSuccess26_2)
+	lc.RegisterCritical(lc.OnCompressV1_8)
+	lc.RegisterCritical(lc.OnDisconnectV1_8)
+	lc.RegisterCritical(lc.OnSuccessV1_8)
 
 	var p proto_base.EncodeDecodeAble
 	if hostAddr != "" {
@@ -171,7 +205,11 @@ func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err err
 		return
 	}
 	lc.SetState(proto_base.Login)
-	err = lc.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: lc.Account.Name, PlayerUUID: lc.Account.Uuid})
+	if lc.Conn.ProtocolVersion < 759 {
+		err = lc.Send(&v1_8.LoginToServerPacketLoginStart{Username: lc.Account.Name})
+	} else {
+		err = lc.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: lc.Account.Name, PlayerUUID: lc.Account.Uuid})
+	}
 
 	err = lc.StartConn()
 	if err != nil {
@@ -293,7 +331,7 @@ func Login(connectTo string, account *api.Account, settings ...func(ls *loginSet
 	if err != nil {
 		return
 	}
-	if !ls.IgnoreConfig {
+	if !ls.IgnoreConfig && c.ProtocolVersion >= 764 {
 		err = IgnoreConfig(c)
 	}
 	return
