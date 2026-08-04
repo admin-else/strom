@@ -56,28 +56,36 @@ func (s *LoginClient) OnClose(_ event.Close) (err error) {
 	return
 }
 
-func (s *LoginClient) OnCompress(compress *v1_21_8.LoginToClientPacketCompress) (err error) {
-	s.SetCompressionThreshold(compress.Threshold)
+func (s *LoginClient) OnCompress(packet *v1_8.LoginToClientPacketCompress) (err error) {
+	s.SetCompressionThreshold(packet.Threshold)
 	return
 }
 
+func (s *LoginClient) OnEncryptV1_8(packet *v1_8.LoginToClientPacketEncryptionBegin) (err error) {
+	return s.doEncrypt(packet.ServerId, packet.PublicKey, packet.VerifyToken, true)
+}
+
 func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBegin) (err error) {
+	return s.doEncrypt(packet.ServerId, packet.PublicKey, packet.VerifyToken, packet.ShouldAuthenticate)
+}
+
+func (s *LoginClient) doEncrypt(serverId string, publicKey []byte, verifyToken []byte, shouldAuthenticate bool) (err error) {
 	sharedSecret := make([]byte, 16)
 	_, _ = rand.Read(sharedSecret) //never fails
 
-	if packet.ShouldAuthenticate {
+	if shouldAuthenticate {
 		if s.Account.Ygg == "" {
 			err = NoTokenErr
 			return
 		}
-		serverId := crypto.AuthDigest([]byte(packet.ServerId), sharedSecret, packet.PublicKey)
-		err = s.Account.JoinServer(serverId)
+		hash := crypto.AuthDigest([]byte(serverId), sharedSecret, publicKey)
+		err = s.Account.JoinServer(hash)
 		if err != nil {
 			return
 		}
 	}
 
-	pubAny, err := x509.ParsePKIXPublicKey(packet.PublicKey)
+	pubAny, err := x509.ParsePKIXPublicKey(publicKey)
 	if err != nil {
 		return
 	}
@@ -86,7 +94,7 @@ func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBeg
 		err = BadPublicKeyTypeErr
 		return
 	}
-	verifyTokenEnc, err := rsa.EncryptPKCS1v15(rand.Reader, pub, packet.VerifyToken)
+	verifyTokenEnc, err := rsa.EncryptPKCS1v15(rand.Reader, pub, verifyToken)
 	if err != nil {
 		return
 	}
@@ -101,31 +109,15 @@ func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBeg
 	}
 	err = s.SetSecret(sharedSecret)
 	return
-
 }
 
-func (s *LoginClient) OnDisconnect(packet *v1_21_8.LoginToClientPacketDisconnect) (err error) {
+func (s *LoginClient) OnDisconnect(packet *v1_8.LoginToClientPacketDisconnect) (err error) {
 	var reason text.Component
 	err = json.Unmarshal([]byte(packet.Reason), &reason)
 	if err != nil {
 		return
 	}
 	err = KickedDuringLoginErr{reason}
-	return
-}
-
-func (s *LoginClient) OnDisconnectV1_8(packet *v1_8.LoginToClientPacketDisconnect) (err error) {
-	var reason text.Component
-	err = json.Unmarshal([]byte(packet.Reason), &reason)
-	if err != nil {
-		return
-	}
-	err = KickedDuringLoginErr{reason}
-	return
-}
-
-func (s *LoginClient) OnCompressV1_8(packet *v1_8.LoginToClientPacketCompress) (err error) {
-	s.SetCompressionThreshold(packet.Threshold)
 	return
 }
 
@@ -181,10 +173,10 @@ func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err err
 	}
 	lc.RegisterCritical(lc.OnDefault)
 	lc.RegisterCritical(lc.OnClose)
-	lc.RegisterUntil("26.2", lc.OnCompress, lc.OnEncrypt, lc.OnDisconnect)
+	lc.RegisterUntil("26.2", lc.OnCompress, lc.OnDisconnect, lc.OnEncrypt)
 	lc.RegisterUntil("26.1", lc.OnSuccess)
 	lc.RegisterUntilLatest(lc.OnSuccess26_2)
-	lc.RegisterUntil("1.12.2", lc.OnCompressV1_8, lc.OnDisconnectV1_8, lc.OnSuccessV1_8)
+	lc.RegisterUntil("1.12.2", lc.OnEncryptV1_8, lc.OnSuccessV1_8)
 
 	var p proto_base.EncodeDecodeAble
 	if hostAddr != "" {
