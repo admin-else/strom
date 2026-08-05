@@ -24,6 +24,7 @@ copy-mc common
 copy-mc 1.8
 copy-mc 1.12.2
 copy-mc 1.14.4
+copy-mc 1.16.5
 
 # Modern versions
 copy-mc 1.21.8

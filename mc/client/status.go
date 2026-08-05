@@ -58,7 +58,7 @@ func StatusRawWithVersion(ctx context.Context, addr, version string) (s *StatusC
 	s = &StatusClient{
 		Conn: c,
 	}
-	s.RegisterUntil("26.2", s.OnStatus, s.OnPong)
+	s.RegisterUntil("26.2", s.OnStatus, s.OnPong) 
 
 	p, err := MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {
