@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"slices"
@@ -124,13 +125,14 @@ func ArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 			return
 		}
 	} else {
+		countStr := fmt.Sprint(data.Count)
 		var n int
-		n, err = strconv.Atoi(data.Count)
+		n, err = strconv.Atoi(countStr)
 		var e ast.Expr
 		if err == nil {
 			e = NumLit(n)
 		} else {
-			e, _, err = g.ParseCompareTo(data.Count)
+			e, _, err = g.ParseCompareTo(countStr)
 		}
 		s2 = append(s2, Assign121(Ident(lName), e))
 	}

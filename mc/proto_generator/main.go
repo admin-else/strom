@@ -7,6 +7,7 @@ import (
 	"go/ast"
 	"go/token"
 	"io"
+	"maps"
 	"os"
 	"runtime/debug"
 	"slices"
@@ -56,6 +57,7 @@ type Generator struct {
 	EncoderNatives   map[string]FunctionGeneratorFunc
 	CompareToNatives map[string]CompareToGeneratorFunc
 	Protocol         Protocol
+	RawTypes         map[string]map[string]any
 	File             *ast.File
 
 	// These persist in the current GenerateType call
@@ -129,6 +131,11 @@ func (g *Generator) VisitNameAndData(tName string, tData any) (e ast.Expr, err e
 	}
 	t, found := g.Protocol.Types.Types[tName]
 	if t != "native" && found {
+		if tData != nil {
+			if _, ok := g.mergeCompareTo(tName, t, tData); ok {
+				return Ident("any"), nil
+			}
+		}
 		return Ident(util2.CamelCase(tName)), nil
 	}
 	t, found = g.CurrentlyGeneratingTypes.Types[tName]
@@ -152,12 +159,69 @@ func (g *Generator) VisitDecoder(varToSet ast.Expr, data any, name string) (e []
 	if found {
 		return d(g, varToSet, tData, name)
 	}
+	if tData != nil {
+		if merged, ok := g.mergeCompareTo(tName, g.Protocol.Types.Types[tName], tData); ok {
+			s, found := g.DecoderNatives[merged.tName]
+			if found {
+				return s(g, varToSet, merged.data, name)
+			}
+		}
+	}
 	t, found := g.Protocol.Types.Types[tName]
 	if t == "native" {
 		err = fmt.Errorf("decoder native not implemented %v", tName)
 		return
 	}
 	return DefaultDecoder(g, varToSet, tData, name)
+}
+
+type mergedType struct {
+	tName string
+	data  any
+}
+
+func (g *Generator) mergeCompareTo(tName string, t any, overrideData any) (mergedType, bool) {
+	overrideMap, ok := overrideData.(map[string]any)
+	if !ok {
+		return mergedType{}, false
+	}
+	overrideCompareTo, hasOverride := overrideMap["compareTo"]
+	if !hasOverride {
+		return mergedType{}, false
+	}
+	if s, ok := overrideCompareTo.(string); ok && strings.HasPrefix(s, "$") {
+		return mergedType{}, false
+	}
+	var typeMap map[string]any
+	var nativeName string
+	if m, ok := t.(map[string]any); ok {
+		typeMap = m
+		nativeName = "container"
+	} else if a, ok := t.([]any); ok && len(a) >= 2 {
+		if m, ok := a[1].(map[string]any); ok {
+			typeMap = m
+		}
+		if s, ok := a[0].(string); ok {
+			nativeName = s
+		}
+	} else {
+		m, ok := g.RawTypes[tName]
+		if !ok {
+			return mergedType{}, false
+		}
+		typeMap = m
+		nativeName = "switch"
+	}
+	typeCompareTo, hasType := typeMap["compareTo"]
+	if !hasType {
+		return mergedType{}, false
+	}
+	if s, ok := typeCompareTo.(string); !ok || !strings.HasPrefix(s, "$") {
+		return mergedType{}, false
+	}
+	merged := maps.Clone(typeMap)
+	merged["compareTo"] = overrideCompareTo
+	return mergedType{tName: nativeName, data: merged}, true
 }
 
 func (g *Generator) VisitEncoder(varToSet ast.Expr, data any, name string) (e []ast.Stmt, err error) {
@@ -171,6 +235,14 @@ func (g *Generator) VisitEncoder(varToSet ast.Expr, data any, name string) (e []
 	d, found := g.EncoderNatives[tName]
 	if found {
 		return d(g, varToSet, tData, name)
+	}
+	if tData != nil {
+		if merged, ok := g.mergeCompareTo(tName, g.Protocol.Types.Types[tName], tData); ok {
+			s, found := g.EncoderNatives[merged.tName]
+			if found {
+				return s(g, varToSet, merged.data, name)
+			}
+		}
 	}
 	t, found := g.Protocol.Types.Types[tName]
 	if t == "native" {
@@ -356,6 +428,20 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 	}
 
 	g := &Generator{Protocol: protocol}
+
+	g.RawTypes = make(map[string]map[string]any)
+	for k, v := range protocol.Types.Types {
+		if m, ok := v.(map[string]any); ok {
+			g.RawTypes[k] = m
+		}
+		if a, ok := v.([]any); ok && len(a) == 2 {
+			if m, ok := a[1].(map[string]any); ok {
+				if _, has := m["fields"]; has {
+					g.RawTypes[k] = m
+				}
+			}
+		}
+	}
 
 	g.File = NewFile("v" + strings.ReplaceAll(version, ".", "_"))
 

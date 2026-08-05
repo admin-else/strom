@@ -59,6 +59,13 @@ func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw a
 		if field.Name == name {
 			return g.VisitCompareTo(parts, SelectorExprAndStr(inExpr, util2.CamelCase(field.Name)), field.Type)
 		}
+		if field.Anon {
+			anonParts := append([]string{name}, parts...)
+			e, cet, err2 := g.VisitCompareTo(anonParts, SelectorExprAndStr(inExpr, "Anon"), field.Type)
+			if err2 == nil {
+				return e, cet, nil
+			}
+		}
 	}
 	err = errors.New("field not found")
 	return

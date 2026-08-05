@@ -35,7 +35,7 @@ type (
 
 	Array struct {
 		CountType any
-		Count     string
+		Count     any
 		Type      any
 	}
 
