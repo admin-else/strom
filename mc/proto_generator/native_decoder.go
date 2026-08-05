@@ -456,56 +456,38 @@ func RegistryEntryHolderSetDecoder(g *Generator, varToSet ast.Expr, dataRaw any,
 	if err != nil {
 		return
 	}
-	var countType ast.Expr
-	countType, err = g.VisitType("varint")
+	idName := name + "Id"
+	varIntType, err := g.VisitNameAndData("varint", nil)
 	if err != nil {
 		return
 	}
+	IdVar := VarStmt(idName, varIntType)
+	idDecodeStatements, err := g.VisitDecoder(Ident(idName), "varint", name)
+	if err != nil {
+		return
+	}
+
 	baseType, err := g.VisitType(data.Base.Type)
 	if err != nil {
 		return
 	}
-	otherwiseArrayType, err := g.VisitNameAndData("array", map[string]any{"type": data.Otherwise.Type})
+	resName := name + "Result"
+	var basePath []ast.Stmt
+	basePath = append(basePath, VarStmt(resName, baseType))
+	baseDecodeStatements, err := g.VisitDecoder(Ident(resName), data.Base.Type, name+"Base")
 	if err != nil {
 		return
 	}
-	otherwiseType, err := g.VisitType(data.Otherwise.Type)
-	if err != nil {
-		return
-	}
-	lName := "l" + util2.CamelCase(name)
-	s1 := VarStmt(lName, countType)
-	s2, err := g.VisitDecoder(Ident(lName), "varint", name)
-	if err != nil {
-		return
-	}
-	s3 := Assign121(Ident(lName), Sub(Ident(lName), NumLit(1)))
-	resultName := name + "Result"
-	b1s1 := VarStmt(resultName, baseType)
-	b1s2, err := g.VisitDecoder(Ident(resultName), data.Base.Type, resultName)
-	b1s3 := Assign121(varToSet, Ident(resultName))
-	b1s4 := Return()
-	var b1 []ast.Stmt
-	b1 = append(b1, b1s1)
-	b1 = append(b1, b1s2...)
-	b1 = append(b1, b1s3)
-	b1 = append(b1, b1s4)
+	basePath = append(basePath, baseDecodeStatements...)
+	basePath = append(basePath, Assign121(varToSet, Ident(resName)))
 
-	tName := name + "Element"
-	rangeStatements := Stmts(VarStmt(tName, otherwiseType))
-	rangeStatementsDecode, err := g.VisitDecoder(Ident(tName), data.Otherwise.Type, tName)
-	rangeStatements = append(rangeStatements, rangeStatementsDecode...)
-	rangeStatements = append(rangeStatements, Assign121(Ident(resultName), Call(Ident("append"), Ident(resultName), Ident(tName))))
+	idPath := IfElse(NotEquals(Ident(idName), NumLit(0)),
+		NewBlockEllipsis(Assign121(varToSet, Ident(idName))),
+		NewBlock(basePath))
 
-	s5 := If(Equals(Ident(lName), NumLit(-1)), NewBlock(b1))
-	s6 := VarStmt(resultName, otherwiseArrayType)
-	s7 := ForRange(nil, Ident(lName), NewBlock(rangeStatements))
-	s = append(s, s1)
-	s = append(s, s2...)
-	s = append(s, s3)
-	s = append(s, s5)
-	s = append(s, s6)
-	s = append(s, s7)
+	s = Stmts(IdVar)
+	s = append(s, idDecodeStatements...)
+	s = append(s, idPath)
 	return
 }
 
@@ -705,7 +687,7 @@ func (g *Generator) RegisterDecoderNatives() {
 		"bool": SimpleTypeDecoder,
 
 		"registryEntryHolder":      RegistryEntryHolderDecoder,
-		"registryEntryHolderSet":   ToDoDecoder, // RegistryEntryHolderSetDecoder
+		"registryEntryHolderSet":   RegistryEntryHolderSetDecoder,
 		"entityMetadataLoop":       EntityMetadataLoopDecoder,
 		"topBitSetTerminatedArray": TopBitSetTerminatedArrayDecoder,
 		"todo":                     ToDoDecoder,

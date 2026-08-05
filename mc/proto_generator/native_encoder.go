@@ -490,6 +490,49 @@ func TopBitSetTerminatedArrayEncoder(g *Generator, varToSet ast.Expr, dataRaw an
 	return
 }
 
+func RegistryEntryHolderSetEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	var data protodef.RegistryEntryHolderSet
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+
+	baseType, err := g.VisitType(data.Base.Type)
+	if err != nil {
+		return
+	}
+	otherwiseType, err := g.VisitType(data.Otherwise.Type)
+	if err != nil {
+		return
+	}
+
+	knownTypeName := name + "KnownType"
+
+	zeroEncode, err := g.VisitEncoder(NumLit(0), "varint", name+"Zero")
+	if err != nil {
+		return
+	}
+
+	baseEncodeStatements, err := g.VisitEncoder(Ident(knownTypeName), data.Base.Type, name+"Base")
+	if err != nil {
+		return
+	}
+	baseEncodeStatements = append(zeroEncode, baseEncodeStatements...)
+
+	otherwiseEncodeStatements, err := g.VisitEncoder(Ident(knownTypeName), data.Otherwise.Type, name+"Otherwise")
+	if err != nil {
+		return
+	}
+
+	statements := Stmts()
+	statements = append(statements, Case(Exprs(baseType), baseEncodeStatements))
+	statements = append(statements, Case(Exprs(otherwiseType), otherwiseEncodeStatements))
+	statements = append(statements, Case(nil, Stmts(Assign121(Ident("err"), Selector("proto_base", "BadTypeError")))))
+
+	s = Stmts(TypeSwitch(Define121(Ident(knownTypeName), TypeAssert(varToSet, Ident("type"))), NewBlock(statements)))
+	return
+}
+
 func (g *Generator) RegisterEncoderNatives() {
 	g.EncoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerEncoder,
@@ -526,7 +569,7 @@ func (g *Generator) RegisterEncoderNatives() {
 		"bool": SimpleTypeEncoder,
 
 		"registryEntryHolder":      RegistryEntryHolderEncoder,
-		"registryEntryHolderSet":   ToDoEncoder,
+		"registryEntryHolderSet":   RegistryEntryHolderSetEncoder,
 		"entityMetadataLoop":       EntityMetadataLoopEncoder,
 		"topBitSetTerminatedArray": TopBitSetTerminatedArrayEncoder,
 		"todo":                     ToDoEncoder,

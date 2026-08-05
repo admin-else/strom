@@ -262,6 +262,12 @@ func ErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
 	return
 }
 
+// NonErroringIndex looks up key k in map m and returns the zero value without error if not found.
+func NonErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
+	v, _ = m[i]
+	return
+}
+
 // EncodeDecodeAble is implemented by types that can be encoded and decoded for
 // Minecraft protocol packets.
 type EncodeDecodeAble interface {
