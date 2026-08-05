@@ -20,8 +20,9 @@ var ClientboundIn = Cmd.String("clientbound", "", "raw tcpflow file for clientbo
 var ServerboundIn = Cmd.String("serverbound", "", "raw tcpflow file for serverbound (client->server) direction")
 var ClientboundOut = Cmd.String("clientbound-out", "clientbound.tmcpr", "output TMCPR file for clientbound")
 var ServerboundOut = Cmd.String("serverbound-out", "serverbound.tmcpr", "output TMCPR file for serverbound")
-var ClientboundState = Cmd.String("clientbound-state", "login", "initial state for clientbound: handshake, login, status, play")
-var ServerboundState = Cmd.String("serverbound-state", "handshake", "initial state for serverbound: handshake, login, status, play")
+var ClientboundState = Cmd.String("clientbound-state", "login", "initial state for clientbound: handshake, login, config, status, play")
+var ServerboundState = Cmd.String("serverbound-state", "handshake", "initial state for serverbound: handshake, login, config, status, play")
+var UseConfig = Cmd.Bool("config", false, "use Configuration state transitions (for protocol >= 764, Minecraft 1.20.2+)")
 
 type captureReader struct {
 	r              io.Reader
@@ -32,6 +33,7 @@ type captureReader struct {
 	haveStartTime  bool
 	direction      proto_base.Direction
 	pendingThreshold int32
+	useConfig      bool
 }
 
 func (cr *captureReader) setStartTime() {
@@ -123,12 +125,20 @@ func (cr *captureReader) trackState(packetBytes []byte) {
 					cr.threshold = threshold
 				}
 			} else if packetId == 0x02 {
-				cr.state = proto_base.Play
+				if cr.useConfig {
+					cr.state = proto_base.Configuration
+				} else {
+					cr.state = proto_base.Play
+				}
 			}
 		} else if cr.direction == proto_base.ToServer && packetId == 0 {
 			if cr.pendingThreshold >= 0 {
 				cr.threshold = cr.pendingThreshold
 			}
+		}
+	case proto_base.Configuration:
+		if cr.direction == proto_base.ToClient && packetId == 0x02 {
+			cr.state = proto_base.Play
 		}
 	case proto_base.Status:
 	case proto_base.Play:
@@ -172,12 +182,14 @@ func Run(args []string) (err error) {
 			return proto_base.Handshaking, nil
 		case "login":
 			return proto_base.Login, nil
+		case "config":
+			return proto_base.Configuration, nil
 		case "play":
 			return proto_base.Play, nil
 		case "status":
 			return proto_base.Status, nil
 		default:
-			return 0, fmt.Errorf("unknown state: %s (valid: handshake, login, status, play)", name)
+			return 0, fmt.Errorf("unknown state: %s (valid: handshake, login, config, status, play)", name)
 		}
 	}
 
@@ -188,7 +200,7 @@ func Run(args []string) (err error) {
 		if err != nil {
 			return err
 		}
-		compressionThreshold, err = processFile(*ClientboundIn, *ClientboundOut, state, proto_base.ToClient, -1)
+		compressionThreshold, err = processFile(*ClientboundIn, *ClientboundOut, state, proto_base.ToClient, -1, *UseConfig)
 		if err != nil {
 			return fmt.Errorf("clientbound: %w", err)
 		}
@@ -199,7 +211,7 @@ func Run(args []string) (err error) {
 		if err != nil {
 			return err
 		}
-		_, err = processFile(*ServerboundIn, *ServerboundOut, state, proto_base.ToServer, compressionThreshold)
+		_, err = processFile(*ServerboundIn, *ServerboundOut, state, proto_base.ToServer, compressionThreshold, *UseConfig)
 		if err != nil {
 			return fmt.Errorf("serverbound: %w", err)
 		}
@@ -208,7 +220,7 @@ func Run(args []string) (err error) {
 	return
 }
 
-func processFile(inPath, outPath string, initial proto_base.State, dir proto_base.Direction, initialThreshold int32) (finalThreshold int32, err error) {
+func processFile(inPath, outPath string, initial proto_base.State, dir proto_base.Direction, initialThreshold int32, useConfig bool) (finalThreshold int32, err error) {
 	in, err := os.Open(inPath)
 	if err != nil {
 		return initialThreshold, fmt.Errorf("open input: %w", err)
@@ -228,6 +240,7 @@ func processFile(inPath, outPath string, initial proto_base.State, dir proto_bas
 		threshold: -1,
 		direction: dir,
 		pendingThreshold: initialThreshold,
+		useConfig: useConfig,
 	}
 	if dir == proto_base.ToClient {
 		cr.threshold = initialThreshold
