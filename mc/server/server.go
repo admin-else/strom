@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"net"
+	"sync/atomic"
 
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
@@ -68,8 +69,9 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 		return
 	}
 	defer l.Close()
-	running := true
-	for running {
+	running := atomic.Bool{}
+	running.Store(true)
+	for running.Load() {
 		var cNet net.Conn
 		cNet, err = l.Accept()
 		if err != nil {
@@ -80,7 +82,7 @@ func StartServerWithOnConn(listenAddr string, onConn func(c *proto.Conn) (err er
 			defer c.Close()
 			connErr := onConn(c)
 			if errors.Is(connErr, ShutDownServerErr) {
-				running = false
+				running.Store(false)
 			}
 			c.Log.Error("closing connection", "err", connErr)
 			if connErr != nil {

@@ -87,6 +87,7 @@ func ArrayEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 	}
 	s2, err := g.VisitEncoder(Index(varToSet, Ident(iName)), data.Type, name+"Inner")
 	if err != nil {
+		return
 	}
 	s2 = Stmts(ForRange(Ident(iName), Call(Ident("len"), varToSet), NewBlock(s2)))
 	s = append(s1, s2...)

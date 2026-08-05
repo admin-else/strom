@@ -23,7 +23,7 @@ type Timer struct {
 	Interval []IntervalTask
 }
 
-func (t *Timer) Trigger(ch chan any) {
+func (t *Timer) Trigger(ch chan any) (didWork bool) {
 	triggerAt := time.Time{}
 	found := false
 	iOnce, iInterval := -1, -1
@@ -46,7 +46,7 @@ func (t *Timer) Trigger(ch chan any) {
 	}
 
 	if !found {
-		return
+		return false
 	}
 	now := time.Now()
 	sleepFor := triggerAt.Sub(now)
@@ -55,12 +55,12 @@ func (t *Timer) Trigger(ch chan any) {
 	if iOnce >= 0 {
 		ch <- CallFunc{F: reflect.ValueOf(t.Once[iOnce].F), Args: []reflect.Value{}}
 		t.Once = slices.Delete(t.Once, iOnce, iOnce+1)
-		return
+		return true
 	}
 	if iInterval >= 0 {
 		t.Interval[iInterval].LastTrigger = triggerAt
 		ch <- CallFunc{F: reflect.ValueOf(t.Interval[iInterval].F), Args: []reflect.Value{}}
-		return
+		return true
 	}
 	panic("unreachable")
 }
@@ -83,11 +83,12 @@ func (t *Timer) MakeEventSource(ctx context.Context) (chSending <-chan any) {
 	ch := make(chan any)
 	go func() {
 		for {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				t.Trigger(ch)
+			if !t.Trigger(ch) {
+				select {
+				case <-ctx.Done():
+					return
+				case <-time.After(100 * time.Millisecond):
+				}
 			}
 		}
 	}()

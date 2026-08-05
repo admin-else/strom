@@ -212,6 +212,10 @@ func Run(args []string) (err error) {
 		}
 		totalPackets++
 	}
-	fmt.Printf("Total packets: %d, failed packets: %d, %%failed: %.2f%%\n", totalPackets, failedPackets, float64(failedPackets)/float64(totalPackets)*100)
+	if totalPackets > 0 {
+		fmt.Printf("Total packets: %d, failed packets: %d, %%failed: %.2f%%\n", totalPackets, failedPackets, float64(failedPackets)/float64(totalPackets)*100)
+	} else {
+		fmt.Printf("Total packets: %d, failed packets: %d\n", totalPackets, failedPackets)
+	}
 	return
 }
