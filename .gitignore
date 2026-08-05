@@ -1,4 +1,4 @@
 .devres/
 .idea/
 .failed_packets/
-.vscode/
+.vscode/proto_generator

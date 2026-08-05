@@ -225,7 +225,7 @@ func (g *Generator) RegisterNatives() {
 		"string":                   MakeIdentVisitor("string"),
 		"restBuffer":               MakeSelectorVisitor("proto_base", "RestBuffer"),
 		"bitflags":                 VisitBitFlagsType,
-		"topBitSetTerminatedArray": VisitToDoType,
+		"topBitSetTerminatedArray": VisitArrayTypeVisitorType,
 		"todo":                     VisitToDoType,
 		"lpVec3":                   MakeSelectorVisitor("proto_base", "LpVec3d"),
 	}

@@ -68,6 +68,9 @@ func (s *Tag) Decode(r io.Reader) (err error) {
 	if err != nil {
 		return
 	}
+	if id == End {
+		return
+	}
 	var name any
 	name, err = readPayload(String, r)
 	if err != nil {

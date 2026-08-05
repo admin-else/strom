@@ -619,6 +619,56 @@ func EntityMetadataLoopDecoder(g *Generator, varToSet ast.Expr, dataRaw any, nam
 	return
 }
 
+func TopBitSetTerminatedArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	var data struct {
+		Type any
+	}
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+
+	normalType, err := g.VisitType(data.Type)
+	if err != nil {
+		return
+	}
+	arrayType, err := g.VisitNameAndData("array", dataRaw)
+	if err != nil {
+		return
+	}
+
+	tName := name + "Element"
+	hasMore := name + "HasMore"
+	headerName := name + "Header"
+
+	peekStmts := Stmts(
+		VarStmt(headerName, Ident("uint8")),
+		Assign(Exprs(Ident("err")), Exprs(Call(Selector("binary", "Read"), Ident("r"), Selector("binary", "BigEndian"), AddrOf(Ident(headerName))))),
+		If(Equals(Ident("err"), Selector("io", "EOF")),
+			NewBlockEllipsis(Assign121(Ident("err"), Nil()), Break())),
+		IfErrNil(),
+		Assign(Exprs(Ident("_"), Ident("err")), Exprs(Call(Selector("r", "Seek"), NumLit(-1), Selector("io", "SeekCurrent")))),
+		IfErrNil(),
+		Define121(Ident(hasMore), NotEquals(BinAnd(Ident(headerName), NumLit(0x80)), NumLit(0))),
+	)
+
+	rangeStatements := Stmts(VarStmt(tName, normalType))
+	s5, err := g.VisitDecoder(Ident(tName), data.Type, tName)
+	if err != nil {
+		return
+	}
+	rangeStatements = append(rangeStatements, s5...)
+	rangeStatements = append(rangeStatements, Assign121(varToSet, Call(Ident("append"), varToSet, Ident(tName))))
+	rangeStatements = append(rangeStatements, If(Not(Ident(hasMore)), NewBlockEllipsis(Break())))
+
+	loopStmts := append(peekStmts, rangeStatements...)
+	s = Stmts(
+		Assign121(varToSet, CompLit(arrayType, Exprs())),
+		ForStmt(nil, nil, nil, NewBlock(loopStmts)),
+	)
+	return
+}
+
 func (g *Generator) RegisterDecoderNatives() {
 	g.DecoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerDecoder,
@@ -657,7 +707,7 @@ func (g *Generator) RegisterDecoderNatives() {
 		"registryEntryHolder":      RegistryEntryHolderDecoder,
 		"registryEntryHolderSet":   ToDoDecoder, // RegistryEntryHolderSetDecoder
 		"entityMetadataLoop":       EntityMetadataLoopDecoder,
-		"topBitSetTerminatedArray": ToDoDecoder,
+		"topBitSetTerminatedArray": TopBitSetTerminatedArrayDecoder,
 		"todo":                     ToDoDecoder,
 	}
 }
