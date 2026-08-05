@@ -225,7 +225,7 @@ func MultiTypeFix(s string, t *CaseExprType) (e ast.Expr) {
 		*t = ct
 		return
 	}
-	if *t == ct {
+	if *t == ct || (*t == CaseExprTypeOnlyNumber && ct == CaseExprTypeNumber) || (*t == CaseExprTypeOnlyBool && ct == CaseExprTypeBool) || (*t == CaseExprTypeNumber && ct == CaseExprTypeOnlyNumber) || (*t == CaseExprTypeBool && ct == CaseExprTypeOnlyBool) {
 		return
 	}
 
@@ -400,6 +400,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	}
 	s = append(s, packedVarStmt)
 	s = append(s, stmts...)
+	slices.Reverse(data)
 	lShiftBy := 0
 	for _, field := range data {
 		var fieldTypeProtodef string
@@ -413,16 +414,13 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 			return
 		}
 
-		rShiftBy := totalSize - field.Size
 		fieldToSet := SelectorExprAndStr(varToSet, util2.CamelCase(field.Name))
 
+		mask := (1 << field.Size) - 1
 		var getDataExpr ast.Expr
-		getDataExpr = RightShift(
-			LeftShift(
-				Ident(packed),
-				NumLit(lShiftBy)),
-			NumLit(rShiftBy),
-		)
+		getDataExpr = BinAnd(
+			RightShift(Ident(packed), NumLit(lShiftBy)),
+			NumLit(mask))
 		if fieldTypeProtodef == "bool" {
 			getDataExpr = Equals(getDataExpr, NumLit(1))
 		} else if fieldTypeProtodef != packedTypeProtodef {

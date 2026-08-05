@@ -2804,11 +2804,6 @@
             "bitfield",
             [
               {
-                "name": "unused",
-                "size": 2,
-                "signed": false
-              },
-              {
                 "name": "allows_restricted",
                 "size": 1,
                 "signed": false

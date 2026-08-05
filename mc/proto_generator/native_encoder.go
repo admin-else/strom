@@ -4,7 +4,6 @@ import (
 	"go/ast"
 	"go/token"
 	"slices"
-	"strconv"
 
 	"github.com/admin-else/strom/mc/proto_generator/protodef"
 	util2 "github.com/admin-else/strom/mc/util"
@@ -152,7 +151,16 @@ func BitFieldEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	}
 	packedVarName := name + "Packed"
 	packedExpr := Ident(packedVarName)
-	packedTypeStr := "uint" + strconv.Itoa(totalSize)
+	packedTypeStr := "uint8"
+	if totalSize > 8 {
+		packedTypeStr = "uint16"
+	}
+	if totalSize > 16 {
+		packedTypeStr = "uint32"
+	}
+	if totalSize > 32 {
+		packedTypeStr = "uint64"
+	}
 
 	s = append(s, VarStmt(packedVarName, Ident(packedTypeStr)))
 
@@ -185,7 +193,17 @@ func BitFieldEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 		shiftBy += field.Size
 	}
 
-	encodePacked, err := g.VisitEncoder(packedExpr, "u"+strconv.Itoa(totalSize), name)
+	packedProtoType := "u8"
+	if totalSize > 8 {
+		packedProtoType = "u16"
+	}
+	if totalSize > 16 {
+		packedProtoType = "u32"
+	}
+	if totalSize > 32 {
+		packedProtoType = "u64"
+	}
+	encodePacked, err := g.VisitEncoder(packedExpr, packedProtoType, name)
 	if err != nil {
 		return
 	}
