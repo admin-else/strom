@@ -2,3 +2,4 @@
 .idea/
 .failed_packets/
 .vscode/proto_generator
+proto_generator
