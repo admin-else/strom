@@ -10,9 +10,9 @@ import (
 // Error: EOF
 func TestFailedPacket66F6FC8839ACD758(t *testing.T) {
 	p := &generated.PlayToClientPacketEntityEquipment{}
-	b := bytes.NewBuffer([]byte{0xcf, 0x1d, 0x0, 0x0, 0x1, 0x5, 0x1, 0x0, 0x0, 0x0})
+	b := bytes.NewReader([]byte{0xcf, 0x1d, 0x0, 0x0, 0x1, 0x5, 0x1, 0x0, 0x0, 0x0})
 	err := p.Decode(b)
 	if err == nil {
-		t.Fatal("expected decode error %!q(MISSING) but got nil", "EOF")
+		t.Fatalf("expected decode error but got nil")
 	}
 }
