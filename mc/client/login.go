@@ -283,6 +283,8 @@ func Login(connectTo string, account *api.Account, settings ...func(ls *loginSet
 		setting(ls)
 	}
 
+	hostAddr := connectTo
+
 	if ls.Conn != nil {
 		if ls.Version == "" {
 			return nil, ErrWithConnRequiresVersion
@@ -324,7 +326,7 @@ func Login(connectTo string, account *api.Account, settings ...func(ls *loginSet
 		}
 	}
 
-	err = LoginRawAddr(c, account, connectTo)
+	err = LoginRawAddr(c, account, hostAddr)
 	if err != nil {
 		return
 	}
