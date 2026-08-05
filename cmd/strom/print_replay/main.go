@@ -15,7 +15,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/admin-else/strom/mc/data"
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 )
@@ -46,11 +45,8 @@ func SaveUnCodeAbleAsTest(packet *proto.UnCodablePacket) (err error) {
 		return
 	}
 
-	ret, err := data.LookUpVersionByProtocolVersion(packet.Info.ProtocolVersion)
-	if err != nil {
-		return
-	}
-	goPackage := "v" + strings.ReplaceAll(ret.MinecraftVersion, ".", "_")
+	typeStr := reflect.TypeOf(packet.Info.Type).String()
+	goPackage := typeStr[1:strings.LastIndex(typeStr, ".")]
 	typeName := reflect.TypeOf(packet.Info.Type).Elem().Name()
 
 	src := fmt.Sprintf(TestSrcF, goPackage, packet.Err, h, typeName, packet.Data)
