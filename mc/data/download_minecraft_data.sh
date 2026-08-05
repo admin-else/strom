@@ -6,7 +6,7 @@ set -xeuo pipefail
 cd "$(dirname "$0")"
 
 rm -rf minecraft-data/
-git clone --depth 1 git@github.com:PrismarineJS/minecraft-data.git
+git clone --depth 1 git@github.com:admin-else/minecraft-data.git
 mv minecraft-data minecraft-data-untrimmed
 
 mkdir minecraft-data
@@ -20,8 +20,16 @@ copy-mc() {
 
 copy-mc common
 
+# Legacy versions
+copy-mc 1.8
+copy-mc 1.12.2
+copy-mc 1.14.4
+
+# Modern versions
 copy-mc 1.21.8
 copy-mc 1.21.9
 copy-mc 1.21.11
+copy-mc 26.1
+copy-mc 26.2
 
 rm -rf minecraft-data-untrimmed

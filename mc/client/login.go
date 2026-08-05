@@ -176,7 +176,7 @@ func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err err
 	lc.RegisterUntil("26.2", lc.OnCompress, lc.OnDisconnect, lc.OnEncrypt)
 	lc.RegisterUntil("26.1", lc.OnSuccess)
 	lc.RegisterUntilLatest(lc.OnSuccess26_2)
-	lc.RegisterUntil("1.12.2", lc.OnEncryptV1_8, lc.OnSuccessV1_8)
+	lc.RegisterUntil("1.14.4", lc.OnEncryptV1_8, lc.OnSuccessV1_8)
 
 	var p proto_base.EncodeDecodeAble
 	if hostAddr != "" {
