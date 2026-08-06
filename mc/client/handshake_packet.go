@@ -4,9 +4,9 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
 )
 
 // MakeHandshakePacket creates a handshake packet using the connection's remote address as the server host.

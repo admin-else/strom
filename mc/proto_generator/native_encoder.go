@@ -5,8 +5,8 @@ import (
 	"go/token"
 	"slices"
 
-	"github.com/admin-else/strom/mc/proto_generator/protodef"
-	util2 "github.com/admin-else/strom/mc/util"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generator/protodef"
+	util2 "git.anygate.cloud/anygatecloud/strom/mc/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 

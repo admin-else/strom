@@ -5,9 +5,9 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/admin-else/strom/mc/level"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
+	"git.anygate.cloud/anygatecloud/strom/mc/level"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_11"
 )
 
 var (

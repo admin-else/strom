@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/admin-else/strom/mc/api"
+	"git.anygate.cloud/anygatecloud/strom/mc/api"
 )
 
 var cmd = flag.NewFlagSet("api", flag.ContinueOnError)

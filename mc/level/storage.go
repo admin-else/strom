@@ -7,7 +7,7 @@ import (
 	"math"
 	"slices"
 
-	"github.com/admin-else/strom/mc/util"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 type StorageFormat struct {

@@ -3,8 +3,8 @@ package proto
 import (
 	"reflect"
 
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated"
 )
 
 type PidEtc struct {

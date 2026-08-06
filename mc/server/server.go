@@ -5,9 +5,9 @@ import (
 	"net"
 	"sync/atomic"
 
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/text"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/text"
 )
 
 // Servee wraps a net.Conn in a new proto.Conn configured for the servee side.

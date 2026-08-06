@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
 )
 
 func assertClientSendConvertible(t *testing.T, srcType reflect.Type, name string, state proto_base.State, direction proto_base.Direction, targetVersion int32) {

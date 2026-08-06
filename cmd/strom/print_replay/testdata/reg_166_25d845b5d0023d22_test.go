@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	generated "github.com/admin-else/strom/mc/proto_generated/v26_2"
+	generated "git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v26_2"
 )
 
 // Decode regression: recipe_book_add (26.2) - SlotDisplay type fix

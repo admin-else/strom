@@ -8,12 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/admin-else/strom/mc/level"
-	"github.com/admin-else/strom/mc/level/anvil"
-	"github.com/admin-else/strom/mc/nbt"
-	"github.com/admin-else/strom/mc/proto/replay"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
-	"github.com/admin-else/strom/mc/util"
+	"git.anygate.cloud/anygatecloud/strom/mc/level"
+	"git.anygate.cloud/anygatecloud/strom/mc/level/anvil"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto/replay"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_11"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 var (

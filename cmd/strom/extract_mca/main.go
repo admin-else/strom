@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/admin-else/strom/mc/level/anvil"
-	"github.com/admin-else/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/level/anvil"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
 )
 
 var (

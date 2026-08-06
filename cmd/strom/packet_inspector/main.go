@@ -7,15 +7,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/admin-else/strom/mc/api"
-	"github.com/admin-else/strom/mc/client"
-	"github.com/admin-else/strom/mc/event"
-	"github.com/admin-else/strom/mc/nbt"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
-	"github.com/admin-else/strom/mc/server"
-	"github.com/admin-else/strom/mc/text"
+	"git.anygate.cloud/anygatecloud/strom/mc/api"
+	"git.anygate.cloud/anygatecloud/strom/mc/client"
+	"git.anygate.cloud/anygatecloud/strom/mc/event"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_11"
+	"git.anygate.cloud/anygatecloud/strom/mc/server"
+	"git.anygate.cloud/anygatecloud/strom/mc/text"
 )
 
 var Cmd = flag.NewFlagSet("packet-inspector", flag.ContinueOnError)

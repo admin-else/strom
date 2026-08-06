@@ -15,8 +15,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
 )
 
 var (

@@ -5,10 +5,10 @@ import (
 	"errors"
 	"net"
 
-	"github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/server"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/server"
 )
 
 // Connect connects to the given address note that it does not resolve the SRV records it's just a raw net.Dial

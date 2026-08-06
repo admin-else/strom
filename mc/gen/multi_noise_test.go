@@ -3,7 +3,7 @@ package gen
 import (
 	"testing"
 
-	"github.com/admin-else/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
 )
 
 func TestBiomeNoise_SampleBiome(t *testing.T) {

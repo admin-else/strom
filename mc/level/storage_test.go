@@ -3,7 +3,7 @@ package level_test
 import (
 	"testing"
 
-	"github.com/admin-else/strom/mc/level"
+	"git.anygate.cloud/anygatecloud/strom/mc/level"
 )
 
 func heightmapFormat() level.StorageFormat {

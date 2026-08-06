@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/admin-else/strom/mc/crypto"
+	"git.anygate.cloud/anygatecloud/strom/mc/crypto"
 )
 
 // NewOfflineAccount creates an offline-mode Account with a UUID derived from the

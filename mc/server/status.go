@@ -3,9 +3,9 @@ package server
 import (
 	"encoding/json"
 
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
-	"github.com/admin-else/strom/mc/text"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/text"
 )
 
 // These are separate types so a status definition looks less ugly

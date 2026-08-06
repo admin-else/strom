@@ -1,12 +1,12 @@
 package server
 
 import (
-	"github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/event"
-	"github.com/admin-else/strom/mc/nbt"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/event"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
 )
 
 type ConfigServer struct {

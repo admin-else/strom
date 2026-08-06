@@ -3,7 +3,7 @@ package util_test
 import (
 	"testing"
 
-	"github.com/admin-else/strom/mc/util"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 func TestCamelCase(t *testing.T) {

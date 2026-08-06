@@ -4,8 +4,8 @@ import (
 	"embed"
 	"testing"
 
-	data2 "github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/level/litematic"
+	data2 "git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/level/litematic"
 )
 
 //go:embed testdata

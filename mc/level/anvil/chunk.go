@@ -4,9 +4,9 @@ import (
 	"strings"
 	"unsafe"
 
-	data2 "github.com/admin-else/strom/mc/data"
-	level2 "github.com/admin-else/strom/mc/level"
-	"github.com/admin-else/strom/mc/util"
+	data2 "git.anygate.cloud/anygatecloud/strom/mc/data"
+	level2 "git.anygate.cloud/anygatecloud/strom/mc/level"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 type Chunk struct {

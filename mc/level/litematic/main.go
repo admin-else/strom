@@ -7,10 +7,10 @@ import (
 	"strings"
 	"unsafe"
 
-	data2 "github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/level"
-	"github.com/admin-else/strom/mc/nbt"
-	"github.com/admin-else/strom/mc/util"
+	data2 "git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/level"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 

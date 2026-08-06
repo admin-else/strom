@@ -12,10 +12,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/admin-else/strom/mc/api"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
-	"github.com/admin-else/strom/mc/proto_generated/v1_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/api"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_11"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_8"
 	"github.com/google/uuid"
 )
 

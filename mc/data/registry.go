@@ -3,7 +3,7 @@ package data
 import (
 	"embed"
 
-	nbt2 "github.com/admin-else/strom/mc/nbt"
+	nbt2 "git.anygate.cloud/anygatecloud/strom/mc/nbt"
 )
 
 // TODO: this is stupid loginPacket.json exists next version migrate to that

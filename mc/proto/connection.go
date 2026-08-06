@@ -12,10 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/event"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/event"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated"
 )
 
 const (

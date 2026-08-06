@@ -9,11 +9,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/admin-else/strom/mc/event"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto/replay"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
-	"github.com/admin-else/strom/mc/server"
+	"git.anygate.cloud/anygatecloud/strom/mc/event"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto/replay"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/server"
 )
 
 type Server struct {
