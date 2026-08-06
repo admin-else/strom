@@ -1,0 +1,18 @@
+package failed_packets_test
+
+import (
+	"bytes"
+	"testing"
+
+	generated "git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_8"
+)
+
+// Decode regression: entity_metadata (1.8) - entityMetadataLoop mergeCompareTo
+func TestRegressionPacketDF2DF88561529208(t *testing.T) {
+	p := &generated.PlayToClientPacketEntityMetadata{}
+	b := bytes.NewReader([]byte{0x69, 0x0, 0x0, 0x21, 0x1, 0x2c, 0x82, 0x0, 0x3, 0x0, 0x4, 0x0, 0x66, 0x40, 0x80, 0x0, 0x0, 0x47, 0x0, 0x0, 0x0, 0x0, 0x8, 0x0, 0x9, 0x0, 0xc, 0x0, 0xf, 0x0, 0x7f})
+	err := p.Decode(b)
+	if err != nil {
+		t.Fatalf("regression: decode failed: %v", err)
+	}
+}
