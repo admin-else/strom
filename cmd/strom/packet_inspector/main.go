@@ -26,6 +26,7 @@ var Token = Cmd.String("token", "", "token to use")
 var TargetAddr = Cmd.String("addr", "127.0.0.1:25565", "address to connect to")
 var ListenAddr = Cmd.String("listen", "127.0.0.1:25566", "address to listen on")
 var TrueForward = Cmd.Bool("true-forward", false, "forward packets without modification -name and custom server status wont work")
+var Version = Cmd.String("protocol-version", "", "protocol version to use; empty for auto")
 
 type Proxy struct {
 	Client, Servee *proto.Conn
@@ -182,7 +183,7 @@ func Run(args []string) (err error) {
 		if err != nil {
 			return
 		}
-		c, err := client.Connect(nil, *TargetAddr, "")
+		c, err := client.Connect(nil, *TargetAddr, *Version)
 		if err != nil {
 			return
 		}
