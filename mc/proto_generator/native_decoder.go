@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"slices"
@@ -124,13 +125,14 @@ func ArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 			return
 		}
 	} else {
+		countStr := fmt.Sprint(data.Count)
 		var n int
-		n, err = strconv.Atoi(data.Count)
+		n, err = strconv.Atoi(countStr)
 		var e ast.Expr
 		if err == nil {
 			e = NumLit(n)
 		} else {
-			e, _, err = g.ParseCompareTo(data.Count)
+			e, _, err = g.ParseCompareTo(countStr)
 		}
 		s2 = append(s2, Assign121(Ident(lName), e))
 	}
@@ -223,7 +225,7 @@ func MultiTypeFix(s string, t *CaseExprType) (e ast.Expr) {
 		*t = ct
 		return
 	}
-	if *t == ct {
+	if *t == ct || (*t == CaseExprTypeOnlyNumber && ct == CaseExprTypeNumber) || (*t == CaseExprTypeOnlyBool && ct == CaseExprTypeBool) || (*t == CaseExprTypeNumber && ct == CaseExprTypeOnlyNumber) || (*t == CaseExprTypeBool && ct == CaseExprTypeOnlyBool) {
 		return
 	}
 
@@ -398,6 +400,7 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	}
 	s = append(s, packedVarStmt)
 	s = append(s, stmts...)
+	slices.Reverse(data)
 	lShiftBy := 0
 	for _, field := range data {
 		var fieldTypeProtodef string
@@ -411,16 +414,13 @@ func BitFieldDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 			return
 		}
 
-		rShiftBy := totalSize - field.Size
 		fieldToSet := SelectorExprAndStr(varToSet, util2.CamelCase(field.Name))
 
+		mask := (1 << field.Size) - 1
 		var getDataExpr ast.Expr
-		getDataExpr = RightShift(
-			LeftShift(
-				Ident(packed),
-				NumLit(lShiftBy)),
-			NumLit(rShiftBy),
-		)
+		getDataExpr = BinAnd(
+			RightShift(Ident(packed), NumLit(lShiftBy)),
+			NumLit(mask))
 		if fieldTypeProtodef == "bool" {
 			getDataExpr = Equals(getDataExpr, NumLit(1))
 		} else if fieldTypeProtodef != packedTypeProtodef {
@@ -454,56 +454,38 @@ func RegistryEntryHolderSetDecoder(g *Generator, varToSet ast.Expr, dataRaw any,
 	if err != nil {
 		return
 	}
-	var countType ast.Expr
-	countType, err = g.VisitType("varint")
+	idName := name + "Id"
+	varIntType, err := g.VisitNameAndData("varint", nil)
 	if err != nil {
 		return
 	}
+	IdVar := VarStmt(idName, varIntType)
+	idDecodeStatements, err := g.VisitDecoder(Ident(idName), "varint", name)
+	if err != nil {
+		return
+	}
+
 	baseType, err := g.VisitType(data.Base.Type)
 	if err != nil {
 		return
 	}
-	otherwiseArrayType, err := g.VisitNameAndData("array", map[string]any{"type": data.Otherwise.Type})
+	resName := name + "Result"
+	var basePath []ast.Stmt
+	basePath = append(basePath, VarStmt(resName, baseType))
+	baseDecodeStatements, err := g.VisitDecoder(Ident(resName), data.Base.Type, name+"Base")
 	if err != nil {
 		return
 	}
-	otherwiseType, err := g.VisitType(data.Otherwise.Type)
-	if err != nil {
-		return
-	}
-	lName := "l" + util2.CamelCase(name)
-	s1 := VarStmt(lName, countType)
-	s2, err := g.VisitDecoder(Ident(lName), "varint", name)
-	if err != nil {
-		return
-	}
-	s3 := Assign121(Ident(lName), Sub(Ident(lName), NumLit(1)))
-	resultName := name + "Result"
-	b1s1 := VarStmt(resultName, baseType)
-	b1s2, err := g.VisitDecoder(Ident(resultName), data.Base.Type, resultName)
-	b1s3 := Assign121(varToSet, Ident(resultName))
-	b1s4 := Return()
-	var b1 []ast.Stmt
-	b1 = append(b1, b1s1)
-	b1 = append(b1, b1s2...)
-	b1 = append(b1, b1s3)
-	b1 = append(b1, b1s4)
+	basePath = append(basePath, baseDecodeStatements...)
+	basePath = append(basePath, Assign121(varToSet, Ident(resName)))
 
-	tName := name + "Element"
-	rangeStatements := Stmts(VarStmt(tName, otherwiseType))
-	rangeStatementsDecode, err := g.VisitDecoder(Ident(tName), data.Otherwise.Type, tName)
-	rangeStatements = append(rangeStatements, rangeStatementsDecode...)
-	rangeStatements = append(rangeStatements, Assign121(Ident(resultName), Call(Ident("append"), Ident(resultName), Ident(tName))))
+	idPath := IfElse(NotEquals(Ident(idName), NumLit(0)),
+		NewBlockEllipsis(Assign121(varToSet, Ident(idName))),
+		NewBlock(basePath))
 
-	s5 := If(Equals(Ident(lName), NumLit(-1)), NewBlock(b1))
-	s6 := VarStmt(resultName, otherwiseArrayType)
-	s7 := ForRange(nil, Ident(lName), NewBlock(rangeStatements))
-	s = append(s, s1)
-	s = append(s, s2...)
-	s = append(s, s3)
-	s = append(s, s5)
-	s = append(s, s6)
-	s = append(s, s7)
+	s = Stmts(IdVar)
+	s = append(s, idDecodeStatements...)
+	s = append(s, idPath)
 	return
 }
 
@@ -617,6 +599,56 @@ func EntityMetadataLoopDecoder(g *Generator, varToSet ast.Expr, dataRaw any, nam
 	return
 }
 
+func TopBitSetTerminatedArrayDecoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	var data struct {
+		Type any
+	}
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+
+	normalType, err := g.VisitType(data.Type)
+	if err != nil {
+		return
+	}
+	arrayType, err := g.VisitNameAndData("array", dataRaw)
+	if err != nil {
+		return
+	}
+
+	tName := name + "Element"
+	hasMore := name + "HasMore"
+	headerName := name + "Header"
+
+	peekStmts := Stmts(
+		VarStmt(headerName, Ident("uint8")),
+		Assign(Exprs(Ident("err")), Exprs(Call(Selector("binary", "Read"), Ident("r"), Selector("binary", "BigEndian"), AddrOf(Ident(headerName))))),
+		If(Equals(Ident("err"), Selector("io", "EOF")),
+			NewBlockEllipsis(Assign121(Ident("err"), Nil()), Break())),
+		IfErrNil(),
+		Assign(Exprs(Ident("_"), Ident("err")), Exprs(Call(Selector("r", "Seek"), NumLit(-1), Selector("io", "SeekCurrent")))),
+		IfErrNil(),
+		Define121(Ident(hasMore), NotEquals(BinAnd(Ident(headerName), NumLit(0x80)), NumLit(0))),
+	)
+
+	rangeStatements := Stmts(VarStmt(tName, normalType))
+	s5, err := g.VisitDecoder(Ident(tName), data.Type, tName)
+	if err != nil {
+		return
+	}
+	rangeStatements = append(rangeStatements, s5...)
+	rangeStatements = append(rangeStatements, Assign121(varToSet, Call(Ident("append"), varToSet, Ident(tName))))
+	rangeStatements = append(rangeStatements, If(Not(Ident(hasMore)), NewBlockEllipsis(Break())))
+
+	loopStmts := append(peekStmts, rangeStatements...)
+	s = Stmts(
+		Assign121(varToSet, CompLit(arrayType, Exprs())),
+		ForStmt(nil, nil, nil, NewBlock(loopStmts)),
+	)
+	return
+}
+
 func (g *Generator) RegisterDecoderNatives() {
 	g.DecoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerDecoder,
@@ -634,6 +666,8 @@ func (g *Generator) RegisterDecoderNatives() {
 		"varlong":         VarLongDecoder,
 		"anonymousNbt":    DefaultDecoder,
 		"anonOptionalNbt": DefaultDecoder, // I have no idea what the difference is between these two
+		"optionalNbt":     DefaultDecoder,
+		"nbt":             DefaultDecoder,
 		"lpVec3":          DefaultDecoder,
 		"UUID":            UUIDDecoder,
 		"restBuffer":      DefaultDecoder,
@@ -651,9 +685,9 @@ func (g *Generator) RegisterDecoderNatives() {
 		"bool": SimpleTypeDecoder,
 
 		"registryEntryHolder":      RegistryEntryHolderDecoder,
-		"registryEntryHolderSet":   ToDoDecoder, // RegistryEntryHolderSetDecoder
+		"registryEntryHolderSet":   RegistryEntryHolderSetDecoder,
 		"entityMetadataLoop":       EntityMetadataLoopDecoder,
-		"topBitSetTerminatedArray": ToDoDecoder,
+		"topBitSetTerminatedArray": TopBitSetTerminatedArrayDecoder,
 		"todo":                     ToDoDecoder,
 	}
 }

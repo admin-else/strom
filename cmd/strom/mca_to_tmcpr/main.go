@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/admin-else/strom/mc/level"
 	"github.com/admin-else/strom/mc/level/anvil"
@@ -51,7 +52,7 @@ func GetChunkFromMca(x, z int32, version string) (b []byte, err error) {
 		z += anvil.ChunksWidthRegionFile
 	}
 
-	f, err := os.Open(fmt.Sprintf("./.devres/anvil_testdata/securechattestworld/region/r.%v.%v.mca", xmca, zmca))
+	f, err := os.Open(filepath.Join(*worldPath, "region", fmt.Sprintf("r.%v.%v.mca", xmca, zmca)))
 	if err != nil {
 		return
 	}

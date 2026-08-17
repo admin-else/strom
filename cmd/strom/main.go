@@ -19,8 +19,8 @@ import (
 	"github.com/admin-else/strom/cmd/strom/packet_inspector"
 	"github.com/admin-else/strom/cmd/strom/print_nbt"
 	"github.com/admin-else/strom/cmd/strom/print_replay"
-	"github.com/admin-else/strom/cmd/strom/raw_capture"
-	"github.com/admin-else/strom/cmd/strom/registry_data_hunter"
+	// "github.com/admin-else/strom/cmd/strom/raw_capture" // removed: use tcpflow instead for raw TCP capture
+	"github.com/admin-else/strom/cmd/strom/raw_to_tmcpr"
 	"github.com/admin-else/strom/cmd/strom/serve_tmcpr"
 	"github.com/admin-else/strom/cmd/strom/serve_world"
 	"github.com/admin-else/strom/cmd/strom/status"
@@ -61,8 +61,8 @@ var subcommands = map[string]func(args []string) error{
 	"extract-mca":          extract_mca.Run,
 	"data":                 data.Run,
 	"print-replay":         print_replay.Run,
-	"raw-capture":          raw_capture.Run,
-	"registry-data-hunter": registry_data_hunter.Run,
+	// "raw-capture":          raw_capture.Run, // removed: use tcpflow instead for raw TCP capture, then raw-to-tmcpr
+	"raw-to-tmcpr":         raw_to_tmcpr.Run,
 	"serve-world":          serve_world.Run,
 	"mca-to-tmcpr":         mca_to_tmcpr.Run,
 	"serve-tmcpr":          serve_tmcpr.Run,

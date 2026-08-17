@@ -4,22 +4,22 @@ import (
 	"go/ast"
 	"go/token"
 	"slices"
-	"strconv"
 
 	"github.com/admin-else/strom/mc/proto_generator/protodef"
 	util2 "github.com/admin-else/strom/mc/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 
-func DefaultEncoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.Stmt, err error) {
+func DefaultEncoder(_ *Generator, varToSet ast.Expr, _ any, name string) (s []ast.Stmt, err error) {
+	tmpName := name + "EncTmp"
 	s = Stmts(
+		Define121(Ident(tmpName), varToSet),
 		Assign121(
 			Ident("err"),
-			Call(SelectorExprAndStr(varToSet, "Encode"), Ident("w")),
+			Call(SelectorExprAndStr(Ident(tmpName), "Encode"), Ident("w")),
 		),
 		IfErrNil(),
 	)
-
 	return
 }
 
@@ -78,7 +78,7 @@ func ArrayEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 	iName := "i" + name
 	//s, err = g.VisitEncoder(varToSet, data.Type, name)
 	var s1 []ast.Stmt
-	if data.Count == "" {
+	if data.Count == nil {
 		s1, err = g.VisitEncoder(Call(ct, Call(Ident("len"), varToSet)), data.CountType, name)
 		if err != nil {
 			return
@@ -86,6 +86,7 @@ func ArrayEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s 
 	}
 	s2, err := g.VisitEncoder(Index(varToSet, Ident(iName)), data.Type, name+"Inner")
 	if err != nil {
+		return
 	}
 	s2 = Stmts(ForRange(Ident(iName), Call(Ident("len"), varToSet), NewBlock(s2)))
 	s = append(s1, s2...)
@@ -150,7 +151,16 @@ func BitFieldEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 	}
 	packedVarName := name + "Packed"
 	packedExpr := Ident(packedVarName)
-	packedTypeStr := "uint" + strconv.Itoa(totalSize)
+	packedTypeStr := "uint8"
+	if totalSize > 8 {
+		packedTypeStr = "uint16"
+	}
+	if totalSize > 16 {
+		packedTypeStr = "uint32"
+	}
+	if totalSize > 32 {
+		packedTypeStr = "uint64"
+	}
 
 	s = append(s, VarStmt(packedVarName, Ident(packedTypeStr)))
 
@@ -183,7 +193,17 @@ func BitFieldEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) 
 		shiftBy += field.Size
 	}
 
-	encodePacked, err := g.VisitEncoder(packedExpr, "u"+strconv.Itoa(totalSize), name)
+	packedProtoType := "u8"
+	if totalSize > 8 {
+		packedProtoType = "u16"
+	}
+	if totalSize > 16 {
+		packedProtoType = "u32"
+	}
+	if totalSize > 32 {
+		packedProtoType = "u64"
+	}
+	encodePacked, err := g.VisitEncoder(packedExpr, packedProtoType, name)
 	if err != nil {
 		return
 	}
@@ -386,6 +406,151 @@ func EntityMetadataLoopEncoder(g *Generator, vts ast.Expr, dataRaw any, name str
 	return
 }
 
+func TopBitSetTerminatedArrayEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	var data struct {
+		Type any
+	}
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+
+	iName := "i" + name
+	elemName := name + "Elem"
+
+	_, tData, err := ParseType(data.Type)
+	if err != nil {
+		return
+	}
+
+	var containerData protodef.Container
+	if err = mapstructure.Decode(tData, &containerData); err != nil || len(containerData) == 0 {
+		s2, err := g.VisitEncoder(SelectorExprAndStr(Ident(elemName), "Val"), data.Type, name+"Inner")
+		if err != nil {
+			return nil, err
+		}
+		s = Stmts(ForRangeKV(Ident(iName), Ident(elemName), varToSet, NewBlock(s2)))
+		return s, nil
+	}
+
+	elemExpr := Ident(elemName)
+	firstField := containerData[0]
+	firstCName := util2.CamelCase(firstField.Name)
+	firstVar := SelectorExprAndStr(elemExpr, firstCName)
+	notLast := NotEquals(Ident(iName), Sub(Call(Ident("len"), varToSet), NumLit(1)))
+
+	var firstByteExpr ast.Expr
+	if firstField.Anon {
+		firstByteExpr = SelectorExprAndStr(firstVar, "Type") // or "Key"... need to handle bitfield
+	} else {
+		firstByteExpr = firstVar
+	}
+
+	firstTypeName, _, _ := ParseType(firstField.Type)
+
+	var firstFieldStmts []ast.Stmt
+	const msb = 0x80
+	switch firstTypeName {
+	case "i8":
+		firstFieldStmts = Stmts(
+			IfElse(notLast,
+				NewBlock(Stmts(
+					Assign121(Ident("err"),
+						Call(Selector("binary", "Write"), Ident("w"), Selector("binary", "BigEndian"),
+							Call(Ident("int8"),
+								&ast.BinaryExpr{X: Call(Ident("uint8"), firstByteExpr), Op: token.OR, Y: NumLit(msb)}))),
+					IfErrNil(),
+				)),
+				NewBlock(Stmts(
+					Assign121(Ident("err"),
+						Call(Selector("binary", "Write"), Ident("w"), Selector("binary", "BigEndian"), firstByteExpr)),
+					IfErrNil(),
+				))),
+		)
+	case "u8":
+		firstFieldStmts = Stmts(
+			IfElse(notLast,
+				NewBlock(Stmts(
+					Assign121(Ident("err"),
+						Call(Selector("binary", "Write"), Ident("w"), Selector("binary", "BigEndian"),
+							&ast.BinaryExpr{X: firstByteExpr, Op: token.OR, Y: NumLit(msb)})),
+					IfErrNil(),
+				)),
+				NewBlock(Stmts(
+					Assign121(Ident("err"),
+						Call(Selector("binary", "Write"), Ident("w"), Selector("binary", "BigEndian"), firstByteExpr)),
+					IfErrNil(),
+				))),
+		)
+	default:
+		firstFieldStmts, err = g.VisitEncoder(firstByteExpr, firstField.Type, name+firstCName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var restStmts []ast.Stmt
+	for _, field := range containerData[1:] {
+		cName := util2.CamelCase(field.Name)
+		if field.Anon {
+			cName = "Anon"
+		}
+		fieldVar := SelectorExprAndStr(elemExpr, cName)
+		fieldStmts, err := g.VisitEncoder(fieldVar, field.Type, name+util2.CamelCase(cName))
+		if err != nil {
+			return nil, err
+		}
+		restStmts = append(restStmts, fieldStmts...)
+	}
+
+	elementStmts := append(firstFieldStmts, restStmts...)
+	s = Stmts(ForRangeKV(Ident(iName), Ident(elemName), varToSet, NewBlock(elementStmts)))
+	return
+}
+
+func RegistryEntryHolderSetEncoder(g *Generator, varToSet ast.Expr, dataRaw any, name string) (s []ast.Stmt, err error) {
+	var data protodef.RegistryEntryHolderSet
+	err = mapstructure.Decode(dataRaw, &data)
+	if err != nil {
+		return
+	}
+
+	baseType, err := g.VisitType(data.Base.Type)
+	if err != nil {
+		return
+	}
+	otherwiseType, err := g.VisitType(data.Otherwise.Type)
+	if err != nil {
+		return
+	}
+
+	knownTypeName := name + "KnownType"
+
+	zeroEncode, err := g.VisitEncoder(NumLit(0), "varint", name+"Zero")
+	if err != nil {
+		return
+	}
+
+	baseEncodeStatements, err := g.VisitEncoder(Ident(knownTypeName), data.Base.Type, name+"Base")
+	if err != nil {
+		return
+	}
+	baseEncodeStatements = append(zeroEncode, baseEncodeStatements...)
+
+	otherwiseEncodeStatements, err := g.VisitEncoder(Ident(knownTypeName), data.Otherwise.Type, name+"Otherwise")
+	if err != nil {
+		return
+	}
+
+	statements := Stmts()
+	statements = append(statements, Case(Exprs(baseType), baseEncodeStatements))
+	statements = append(statements, Case(Exprs(otherwiseType), otherwiseEncodeStatements))
+	statements = append(statements, Case(nil, Stmts(Assign121(Ident("err"), Selector("proto_base", "BadTypeError")))))
+
+	s = Stmts(TypeSwitch(Define121(Ident(knownTypeName), TypeAssert(varToSet, Ident("type"))), NewBlock(statements)))
+	return
+}
+
 func (g *Generator) RegisterEncoderNatives() {
 	g.EncoderNatives = map[string]FunctionGeneratorFunc{
 		"container": ContainerEncoder,
@@ -402,6 +567,8 @@ func (g *Generator) RegisterEncoderNatives() {
 		"varlong":         VarLongEncoder,
 		"anonymousNbt":    DefaultEncoder,
 		"anonOptionalNbt": DefaultEncoder, // I have no idea what the difference is between these two
+		"optionalNbt":     DefaultEncoder,
+		"nbt":             DefaultEncoder,
 		"UUID":            UUIDEncoder,
 		"restBuffer":      DefaultEncoder,
 		"lpVec3":          DefaultEncoder,
@@ -420,9 +587,9 @@ func (g *Generator) RegisterEncoderNatives() {
 		"bool": SimpleTypeEncoder,
 
 		"registryEntryHolder":      RegistryEntryHolderEncoder,
-		"registryEntryHolderSet":   ToDoEncoder,
+		"registryEntryHolderSet":   RegistryEntryHolderSetEncoder,
 		"entityMetadataLoop":       EntityMetadataLoopEncoder,
-		"topBitSetTerminatedArray": ToDoEncoder,
+		"topBitSetTerminatedArray": TopBitSetTerminatedArrayEncoder,
 		"todo":                     ToDoEncoder,
 	}
 }

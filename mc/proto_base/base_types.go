@@ -113,7 +113,7 @@ func (a Actor) ReceiveDirection() Direction {
 
 type (
 	// ToDo is a placeholder type for unimplemented packet fields.
-	ToDo       struct{}
+	ToDo struct{}
 	// RestBuffer represents the remaining unread bytes in a packet buffer.
 	RestBuffer []byte
 )
@@ -259,6 +259,12 @@ func ErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
 	if !ok {
 		err = errors.New("index not found")
 	}
+	return
+}
+
+// NonErroringIndex looks up key k in map m and returns the zero value without error if not found.
+func NonErroringIndex[K comparable, V any, M map[K]V](m M, i K) (v V, err error) {
+	v, _ = m[i]
 	return
 }
 

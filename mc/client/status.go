@@ -9,6 +9,7 @@ import (
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/mc/proto_generated/v1_8"
 	"github.com/admin-else/strom/mc/server"
 )
 
@@ -19,7 +20,7 @@ type StatusClient struct {
 	DoPingRoundTripTime           bool
 }
 
-func (s *StatusClient) OnStatus(p *v1_21_8.StatusToClientPacketServerInfo) (err error) {
+func (s *StatusClient) OnStatus(p *v1_8.StatusToClientPacketServerInfo) (err error) {
 	s.Status = p.Response
 	s.PingSendTime = time.Now()
 	if s.DoPingRoundTripTime {
@@ -30,7 +31,7 @@ func (s *StatusClient) OnStatus(p *v1_21_8.StatusToClientPacketServerInfo) (err 
 	return
 }
 
-func (s *StatusClient) OnPong(p *v1_21_8.StatusToClientPacketPing) (err error) {
+func (s *StatusClient) OnPong(p *v1_8.StatusToClientPacketPing) (err error) {
 	s.PingReceiveTime = time.Now()
 	err = event.HandlerDoneErr{}
 	return
@@ -57,8 +58,7 @@ func StatusRawWithVersion(ctx context.Context, addr, version string) (s *StatusC
 	s = &StatusClient{
 		Conn: c,
 	}
-	s.RegisterCriticalUntilLatest(s.OnStatus)
-	s.RegisterCriticalUntilLatest(s.OnPong)
+	s.RegisterUntil("26.2", s.OnStatus, s.OnPong) 
 
 	p, err := MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {

@@ -14,9 +14,12 @@ import (
 	"github.com/admin-else/strom/mc/event"
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
+	"github.com/admin-else/strom/mc/proto_generated/v1_16_5"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/mc/proto_generated/v1_8"
 	"github.com/admin-else/strom/mc/proto_generated/v26_2"
 	"github.com/admin-else/strom/mc/text"
+	"github.com/google/uuid"
 )
 
 type LoginClient struct {
@@ -54,28 +57,36 @@ func (s *LoginClient) OnClose(_ event.Close) (err error) {
 	return
 }
 
-func (s *LoginClient) OnCompress(compress *v1_21_8.LoginToClientPacketCompress) (err error) {
-	s.SetCompressionThreshold(compress.Threshold)
+func (s *LoginClient) OnCompress(packet *v1_8.LoginToClientPacketCompress) (err error) {
+	s.SetCompressionThreshold(packet.Threshold)
 	return
 }
 
+func (s *LoginClient) OnEncryptV1_8(packet *v1_8.LoginToClientPacketEncryptionBegin) (err error) {
+	return s.doEncrypt(packet.ServerId, packet.PublicKey, packet.VerifyToken, true)
+}
+
 func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBegin) (err error) {
+	return s.doEncrypt(packet.ServerId, packet.PublicKey, packet.VerifyToken, packet.ShouldAuthenticate)
+}
+
+func (s *LoginClient) doEncrypt(serverId string, publicKey []byte, verifyToken []byte, shouldAuthenticate bool) (err error) {
 	sharedSecret := make([]byte, 16)
 	_, _ = rand.Read(sharedSecret) //never fails
 
-	if packet.ShouldAuthenticate {
+	if shouldAuthenticate {
 		if s.Account.Ygg == "" {
 			err = NoTokenErr
 			return
 		}
-		serverId := crypto.AuthDigest([]byte(packet.ServerId), sharedSecret, packet.PublicKey)
-		err = s.Account.JoinServer(serverId)
+		hash := crypto.AuthDigest([]byte(serverId), sharedSecret, publicKey)
+		err = s.Account.JoinServer(hash)
 		if err != nil {
 			return
 		}
 	}
 
-	pubAny, err := x509.ParsePKIXPublicKey(packet.PublicKey)
+	pubAny, err := x509.ParsePKIXPublicKey(publicKey)
 	if err != nil {
 		return
 	}
@@ -84,7 +95,7 @@ func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBeg
 		err = BadPublicKeyTypeErr
 		return
 	}
-	verifyTokenEnc, err := rsa.EncryptPKCS1v15(rand.Reader, pub, packet.VerifyToken)
+	verifyTokenEnc, err := rsa.EncryptPKCS1v15(rand.Reader, pub, verifyToken)
 	if err != nil {
 		return
 	}
@@ -99,10 +110,9 @@ func (s *LoginClient) OnEncrypt(packet *v1_21_8.LoginToClientPacketEncryptionBeg
 	}
 	err = s.SetSecret(sharedSecret)
 	return
-
 }
 
-func (s *LoginClient) OnDisconnect(packet *v1_21_8.LoginToClientPacketDisconnect) (err error) {
+func (s *LoginClient) OnDisconnect(packet *v1_8.LoginToClientPacketDisconnect) (err error) {
 	var reason text.Component
 	err = json.Unmarshal([]byte(packet.Reason), &reason)
 	if err != nil {
@@ -112,13 +122,27 @@ func (s *LoginClient) OnDisconnect(packet *v1_21_8.LoginToClientPacketDisconnect
 	return
 }
 
+func (s *LoginClient) OnSuccessV1_8(success *v1_8.LoginToClientPacketSuccess) (err error) {
+	s.GivenAccount = &v1_21_8.LoginToClientPacketSuccess{
+		Uuid:     uuid.MustParse(success.Uuid),
+		Username: success.Username,
+	}
+	s.SetState(proto_base.Play)
+	err = event.HandlerDoneErr{}
+	return
+}
+
 func (s *LoginClient) OnSuccess(success *v1_21_8.LoginToClientPacketSuccess) (err error) {
 	s.GivenAccount = success
-	err = s.Send(&v1_21_8.LoginToServerPacketLoginAcknowledged{})
-	if err != nil {
-		return
+	if s.ProtocolVersion >= 764 {
+		err = s.Send(&v1_21_8.LoginToServerPacketLoginAcknowledged{})
+		if err != nil {
+			return
+		}
+		s.SetState(proto_base.Configuration)
+	} else {
+		s.SetState(proto_base.Play)
 	}
-	s.SetState(proto_base.Configuration)
 	err = event.HandlerDoneErr{}
 	return
 }
@@ -128,6 +152,13 @@ func (s *LoginClient) OnSuccess26_2(success *v26_2.LoginToClientPacketSuccess) (
 		Uuid:       success.Uuid,
 		Username:   success.Username,
 		Properties: success.Properties,
+	})
+}
+
+func (s *LoginClient) OnSuccess1_16_5(success *v1_16_5.LoginToClientPacketSuccess) (err error) {
+	return s.OnSuccess(&v1_21_8.LoginToClientPacketSuccess{
+		Uuid:     success.Uuid,
+		Username: success.Username,
 	})
 }
 
@@ -150,11 +181,11 @@ func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err err
 	}
 	lc.RegisterCritical(lc.OnDefault)
 	lc.RegisterCritical(lc.OnClose)
-	lc.RegisterCriticalUntilLatest(lc.OnCompress)
-	lc.RegisterCriticalUntilLatest(lc.OnEncrypt)
-	lc.RegisterCriticalUntilLatest(lc.OnDisconnect)
-	lc.RegisterCriticalUntil("26.1", lc.OnSuccess)
-	lc.RegisterCriticalUntilLatest(lc.OnSuccess26_2)
+	lc.RegisterUntil("26.2", lc.OnCompress, lc.OnDisconnect, lc.OnEncrypt)
+	lc.RegisterUntil("26.1", lc.OnSuccess)
+	lc.RegisterUntilLatest(lc.OnSuccess26_2)
+	lc.RegisterUntil("1.14.4", lc.OnEncryptV1_8, lc.OnSuccessV1_8)
+	lc.RegisterUntil("1.16.5", lc.OnSuccess1_16_5)
 
 	var p proto_base.EncodeDecodeAble
 	if hostAddr != "" {
@@ -171,7 +202,11 @@ func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err err
 		return
 	}
 	lc.SetState(proto_base.Login)
-	err = lc.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: lc.Account.Name, PlayerUUID: lc.Account.Uuid})
+	if lc.Conn.ProtocolVersion < 759 {
+		err = lc.Send(&v1_8.LoginToServerPacketLoginStart{Username: lc.Account.Name})
+	} else {
+		err = lc.Send(&v1_21_8.LoginToServerPacketLoginStart{Username: lc.Account.Name, PlayerUUID: lc.Account.Uuid})
+	}
 
 	err = lc.StartConn()
 	if err != nil {
@@ -248,6 +283,8 @@ func Login(connectTo string, account *api.Account, settings ...func(ls *loginSet
 		setting(ls)
 	}
 
+	hostAddr := connectTo
+
 	if ls.Conn != nil {
 		if ls.Version == "" {
 			return nil, ErrWithConnRequiresVersion
@@ -289,11 +326,11 @@ func Login(connectTo string, account *api.Account, settings ...func(ls *loginSet
 		}
 	}
 
-	err = LoginRawAddr(c, account, connectTo)
+	err = LoginRawAddr(c, account, hostAddr)
 	if err != nil {
 		return
 	}
-	if !ls.IgnoreConfig {
+	if !ls.IgnoreConfig && c.ProtocolVersion >= 764 {
 		err = IgnoreConfig(c)
 	}
 	return

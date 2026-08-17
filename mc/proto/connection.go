@@ -346,6 +346,7 @@ func (c *Conn) Receive() (packet proto_base.EncodeDecodeAble, err error) {
 	}
 	return
 }
+
 // NewConn creates a new Conn with default settings and a background context.
 func NewConn() (ret *Conn) {
 	return NewConnCtx(context.Background())

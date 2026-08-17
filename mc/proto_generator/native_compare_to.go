@@ -12,6 +12,10 @@ import (
 )
 
 func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, cet CaseExprType, err error) {
+	if strings.HasPrefix(compareTo, "$") {
+		err = fmt.Errorf("parameterized type placeholder: %s", compareTo)
+		return
+	}
 	parts := strings.Split(compareTo, "/")
 	downPrefixCount := 0
 	for _, part := range parts {
@@ -54,6 +58,13 @@ func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw a
 	for _, field := range data {
 		if field.Name == name {
 			return g.VisitCompareTo(parts, SelectorExprAndStr(inExpr, util2.CamelCase(field.Name)), field.Type)
+		}
+		if field.Anon {
+			anonParts := append([]string{name}, parts...)
+			e, cet, err2 := g.VisitCompareTo(anonParts, SelectorExprAndStr(inExpr, "Anon"), field.Type)
+			if err2 == nil {
+				return e, cet, nil
+			}
 		}
 	}
 	err = errors.New("field not found")
@@ -124,6 +135,12 @@ func (g *Generator) RegisterCompareToNatives() {
 		"bitfield":  BitfieldCompareTo,
 		"u8":        ReturnInputCompareTo,
 		"i8":        ReturnInputCompareTo,
+		"i16":       ReturnInputCompareTo,
+		"i32":       ReturnInputCompareTo,
+		"i64":       ReturnInputCompareTo,
+		"u16":       ReturnInputCompareTo,
+		"u32":       ReturnInputCompareTo,
+		"string":    ReturnInputCompareTo,
 		"bitflags":  BitflagsCompareTo,
 		"switch":    ReturnInputCompareTo,
 		"varlong":   ReturnInputCompareTo,

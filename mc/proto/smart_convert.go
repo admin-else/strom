@@ -116,6 +116,9 @@ func (c *Conn) RegisterUntilLow(eventType reflect.Type, hv reflect.Value, until 
 	}
 	startIndex := slices.Index(proto_generated.SupportedVersions, versionInfo.MinecraftVersion)
 	endIndex := slices.Index(proto_generated.SupportedVersions, until)
+	if startIndex > endIndex {
+		panic(fmt.Sprintf("handler version %s is above until version %s", versionInfo.MinecraftVersion, until))
+	}
 	for i := startIndex + 1; i <= endIndex; i++ {
 		versionName := proto_generated.SupportedVersions[i]
 		versionInfo, err = data.LookUpVersionByName(versionName)
@@ -125,7 +128,7 @@ func (c *Conn) RegisterUntilLow(eventType reflect.Type, hv reflect.Value, until 
 		var newPacketInfo proto_base.PacketInfo
 		newPacketInfo, found = LookupPacketInfoByNameProtocolVersionStateAndDirection(packetInfo.Name, versionInfo.Version, packetInfo.State, packetInfo.Direction)
 		if !found {
-			panic("packet not found in future version")
+			panic("packet not found in version " + versionName)
 		}
 		newT := reflect.TypeOf(newPacketInfo.Type)
 		if !SmartConvertibleTo(newT, reflect.TypeOf(packetInfo.Type)) {

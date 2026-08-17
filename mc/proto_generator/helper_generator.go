@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"os"
 	"strconv"
@@ -38,8 +39,14 @@ func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err er
 			typeExpr = Selector(vUnderscore, typeName)
 		}
 
-		packetId, _ := strconv.ParseInt(p.PacketId, 0, 32)
-		protocolVersion, _ := strconv.Atoi(p.ProtocolVersion)
+		packetId, err := strconv.ParseInt(p.PacketId, 0, 32)
+		if err != nil {
+			panic(fmt.Errorf("failed to parse packet ID %q: %w", p.PacketId, err))
+		}
+		protocolVersion, err := strconv.Atoi(p.ProtocolVersion)
+		if err != nil {
+			panic(fmt.Errorf("failed to parse protocol version %q: %w", p.ProtocolVersion, err))
+		}
 
 		packetInfoExprs = append(packetInfoExprs, CompLit(nil, []ast.Expr{
 			KeyValueExpr(Ident("Type"), AddrOf(CompLit(typeExpr, nil))),

@@ -200,6 +200,8 @@ func (g *Generator) RegisterNatives() {
 		"native":                   VisitDontGenerateType,
 		"anonymousNbt":             MakeSelectorVisitor("nbt", "Anon"),
 		"anonOptionalNbt":          MakeSelectorVisitor("nbt", "Anon"), // I have no idea what the difference is between these two
+		"optionalNbt":              MakeSelectorVisitor("nbt", "Tag"),
+		"nbt":                      MakeSelectorVisitor("nbt", "Tag"),
 		"void":                     VoidType,
 		"bool":                     MakeIdentVisitor("bool"),
 		"u8":                       MakeIdentVisitor("uint8"),
@@ -223,7 +225,7 @@ func (g *Generator) RegisterNatives() {
 		"string":                   MakeIdentVisitor("string"),
 		"restBuffer":               MakeSelectorVisitor("proto_base", "RestBuffer"),
 		"bitflags":                 VisitBitFlagsType,
-		"topBitSetTerminatedArray": VisitToDoType,
+		"topBitSetTerminatedArray": VisitArrayTypeVisitorType,
 		"todo":                     VisitToDoType,
 		"lpVec3":                   MakeSelectorVisitor("proto_base", "LpVec3d"),
 	}
