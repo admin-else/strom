@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/admin-else/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
 )
 
 // FIXME: this should use the mapstruct thing

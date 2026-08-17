@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated"
 )
 
 func TestPacketRoundTripAllVersions(t *testing.T) {

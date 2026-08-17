@@ -4,11 +4,11 @@ import (
 	"reflect"
 	"testing"
 
-	proto2 "github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_9"
-	"github.com/admin-else/strom/mc/proto_generated/v26_2"
+	proto2 "git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_11"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_9"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v26_2"
 )
 
 func TestCanSmartConvert(t *testing.T) {

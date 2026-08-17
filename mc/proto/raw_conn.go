@@ -10,8 +10,8 @@ import (
 	"net"
 	"sync"
 
-	"github.com/admin-else/strom/mc/crypto"
-	"github.com/admin-else/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/crypto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
 )
 
 type RawConn struct {

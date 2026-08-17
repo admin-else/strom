@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"strings"
 
-	data2 "github.com/admin-else/strom/mc/data"
-	util2 "github.com/admin-else/strom/mc/util"
+	data2 "git.anygate.cloud/anygatecloud/strom/mc/data"
+	util2 "git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 var ToDoError = errors.New("to do")
@@ -453,7 +453,7 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 		sourcePath, sourceHash, toolVersion, goVersion)
 	AddFileComment(g.File, comment)
 
-	AppendDecl(g.File, Import("encoding/binary", "io", "github.com/admin-else/strom/mc/proto_base", "github.com/admin-else/strom/mc/nbt", "github.com/google/uuid"))
+	AppendDecl(g.File, Import("encoding/binary", "io", "git.anygate.cloud/anygatecloud/strom/mc/proto_base", "git.anygate.cloud/anygatecloud/strom/mc/nbt", "github.com/google/uuid"))
 	g.RegisterNatives()
 	g.RegisterDecoderNatives()
 	g.RegisterEncoderNatives()

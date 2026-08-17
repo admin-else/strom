@@ -1,8 +1,8 @@
 package anvil_test
 
 import (
-	"github.com/admin-else/strom/mc/nbt"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_11"
 )
 
 // in seperate file not to lag my ide

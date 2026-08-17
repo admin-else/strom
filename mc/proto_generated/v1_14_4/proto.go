@@ -6,8 +6,8 @@ package v1_14_4
 import (
 	"encoding/binary"
 	"io"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
 	"github.com/google/uuid"
 )
 

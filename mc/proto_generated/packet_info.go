@@ -1,16 +1,16 @@
 package proto_generated
 
 import (
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated/v1_8"
-	"github.com/admin-else/strom/mc/proto_generated/v1_12_2"
-	"github.com/admin-else/strom/mc/proto_generated/v1_14_4"
-	"github.com/admin-else/strom/mc/proto_generated/v1_16_5"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_9"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
-	"github.com/admin-else/strom/mc/proto_generated/v26_1"
-	"github.com/admin-else/strom/mc/proto_generated/v26_2"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_12_2"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_14_4"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_16_5"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_9"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_11"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v26_1"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v26_2"
 )
 
 var SupportedVersions = []string{"1.8", "1.12.2", "1.14.4", "1.16.5", "1.21.8", "1.21.9", "1.21.11", "26.1", "26.2"}

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	generated "github.com/admin-else/strom/mc/proto_generated/v1_8"
+	generated "git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_8"
 )
 
 // Decode regression: entity_metadata (1.8) - entityMetadataLoop mergeCompareTo

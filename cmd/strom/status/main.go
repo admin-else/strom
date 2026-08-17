@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/admin-else/strom/mc/client"
-	"github.com/admin-else/strom/mc/event"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/client"
+	"git.anygate.cloud/anygatecloud/strom/mc/event"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
 )
 
 var cmd = flag.NewFlagSet("status", flag.ContinueOnError)

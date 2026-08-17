@@ -15,8 +15,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
 )
 
 var (
@@ -27,8 +27,6 @@ var (
 	StateFlag       = cmd.String("state", "login", "Initial state: handshake, login, config, status, play")
 	DirectionFlag   = cmd.String("direction", "clientbound", "Packet direction: clientbound (ToClient) or serverbound (ToServer)")
 )
-
-// TODO: maybe use the proto replay api
 
 //go:embed failed_packet.go.tmpl
 var TestSrcF string

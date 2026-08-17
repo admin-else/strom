@@ -6,8 +6,8 @@ import (
 	"io"
 	"reflect"
 
-	proto2 "github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
+	proto2 "git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
 )
 
 type Reader struct {

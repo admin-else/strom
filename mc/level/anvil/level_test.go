@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/admin-else/strom/mc/level"
-	anvil2 "github.com/admin-else/strom/mc/level/anvil"
-	"github.com/admin-else/strom/mc/util"
+	"git.anygate.cloud/anygatecloud/strom/mc/level"
+	anvil2 "git.anygate.cloud/anygatecloud/strom/mc/level/anvil"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 func TestLevel(t *testing.T) {

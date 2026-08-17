@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"math"
 
-	data2 "github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/util"
+	data2 "git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 type BlockState struct {

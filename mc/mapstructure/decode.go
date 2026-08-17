@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/admin-else/strom/mc/util"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 func (f *Format) decode(m map[string]any, target reflect.Value) error {

@@ -8,14 +8,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/admin-else/strom/mc/event"
-	"github.com/admin-else/strom/mc/level"
-	"github.com/admin-else/strom/mc/level/anvil"
-	"github.com/admin-else/strom/mc/nbt"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
-	"github.com/admin-else/strom/mc/server"
-	"github.com/admin-else/strom/mc/util"
+	"git.anygate.cloud/anygatecloud/strom/mc/event"
+	"git.anygate.cloud/anygatecloud/strom/mc/level"
+	"git.anygate.cloud/anygatecloud/strom/mc/level/anvil"
+	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/server"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 type Server struct {

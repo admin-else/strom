@@ -10,14 +10,14 @@ import (
 	"log/slog"
 	"slices"
 
-	api2 "github.com/admin-else/strom/mc/api"
-	"github.com/admin-else/strom/mc/crypto"
-	"github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/event"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_base"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
-	"github.com/admin-else/strom/mc/proto_generated/v26_2"
+	api2 "git.anygate.cloud/anygatecloud/strom/mc/api"
+	"git.anygate.cloud/anygatecloud/strom/mc/crypto"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/event"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v26_2"
 	"github.com/google/uuid"
 )
 

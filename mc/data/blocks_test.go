@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/admin-else/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
 )
 
 func TestLookupBlockByStateId(t *testing.T) {

@@ -21,10 +21,10 @@ type PacketInfo struct {
 
 func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err error) {
 	f := NewFile("proto_generated")
-	imports := []string{"github.com/admin-else/strom/mc/proto_base"}
+	imports := []string{"git.anygate.cloud/anygatecloud/strom/mc/proto_base"}
 	for _, v := range versions {
 		vUnderscore := strings.ReplaceAll(v, ".", "_")
-		imports = append(imports, "github.com/admin-else/strom/mc/proto_generated/v"+vUnderscore)
+		imports = append(imports, "git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v"+vUnderscore)
 	}
 	AppendDecl(f, Import(imports...))
 

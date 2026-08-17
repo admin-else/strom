@@ -9,21 +9,21 @@ import (
 	"runtime/debug"
 	"slices"
 
-	"github.com/admin-else/strom/cmd/strom/api"
-	"github.com/admin-else/strom/cmd/strom/data"
-	"github.com/admin-else/strom/cmd/strom/extract_mca"
-	"github.com/admin-else/strom/cmd/strom/mca_to_tmcpr"
-	"github.com/admin-else/strom/cmd/strom/messenger"
-	"github.com/admin-else/strom/cmd/strom/offline_uuid"
-	"github.com/admin-else/strom/cmd/strom/packet_info"
-	"github.com/admin-else/strom/cmd/strom/packet_inspector"
-	"github.com/admin-else/strom/cmd/strom/print_nbt"
-	"github.com/admin-else/strom/cmd/strom/print_replay"
-	// "github.com/admin-else/strom/cmd/strom/raw_capture" // removed: use tcpflow instead for raw TCP capture
-	"github.com/admin-else/strom/cmd/strom/raw_to_tmcpr"
-	"github.com/admin-else/strom/cmd/strom/serve_tmcpr"
-	"github.com/admin-else/strom/cmd/strom/serve_world"
-	"github.com/admin-else/strom/cmd/strom/status"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/api"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/data"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/extract_mca"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/mca_to_tmcpr"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/messenger"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/offline_uuid"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/packet_info"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/packet_inspector"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/print_nbt"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/print_replay"
+	// "git.anygate.cloud/anygatecloud/strom/cmd/strom/raw_capture" // removed: use tcpflow instead for raw TCP capture
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/raw_to_tmcpr"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/serve_tmcpr"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/serve_world"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/status"
 )
 
 var ExpectedASubcommandErr = errors.New("expected a subcommand")

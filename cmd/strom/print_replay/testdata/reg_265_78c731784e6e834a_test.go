@@ -3,7 +3,7 @@ package failed_packets_test
 import (
 	"bytes"
 	"testing"
-	generated "github.com/admin-else/strom/mc/proto_generated/v26_2"
+	generated "git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v26_2"
 )
 
 // Decode regression: declare_commands (26.2) - bitfield + extraNodeData fix

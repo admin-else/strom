@@ -7,9 +7,9 @@ import (
 	"os"
 	"slices"
 
-	mcdata "github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/proto_generated"
-	"github.com/admin-else/strom/mc/util"
+	mcdata "git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 )
 
 // strom data 1.21.11 blocks id 0 name => air

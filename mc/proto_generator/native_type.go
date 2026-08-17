@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"go/ast"
 
-	"github.com/admin-else/strom/mc/proto_generator/protodef"
-	"github.com/admin-else/strom/mc/util"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generator/protodef"
+	"git.anygate.cloud/anygatecloud/strom/mc/util"
 	"github.com/go-viper/mapstructure/v2"
 )
 

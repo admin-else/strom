@@ -7,16 +7,16 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/admin-else/strom/cmd/strom/cmd_util"
-	"github.com/admin-else/strom/mc/bot/chat"
-	"github.com/admin-else/strom/mc/bot/keepalive"
-	"github.com/admin-else/strom/mc/bot/world"
-	"github.com/admin-else/strom/mc/client"
-	"github.com/admin-else/strom/mc/data"
-	"github.com/admin-else/strom/mc/event"
-	"github.com/admin-else/strom/mc/proto"
-	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
-	"github.com/admin-else/strom/mc/proto_generated/v1_8"
+	"git.anygate.cloud/anygatecloud/strom/cmd/strom/cmd_util"
+	"git.anygate.cloud/anygatecloud/strom/mc/bot/chat"
+	"git.anygate.cloud/anygatecloud/strom/mc/bot/keepalive"
+	"git.anygate.cloud/anygatecloud/strom/mc/bot/world"
+	"git.anygate.cloud/anygatecloud/strom/mc/client"
+	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"git.anygate.cloud/anygatecloud/strom/mc/event"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_11"
+	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_8"
 )
 
 func stror(a, b string) string {
