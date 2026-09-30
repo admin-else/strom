@@ -1,4 +1,4 @@
-module git.anygate.cloud/anygatecloud/strom
+module github.com/admin-else/strom
 
 go 1.26.2
 

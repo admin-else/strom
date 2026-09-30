@@ -5,9 +5,9 @@ import (
 	"math"
 	"testing"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/data"
-	"git.anygate.cloud/anygatecloud/strom/mc/proto"
-	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"github.com/admin-else/strom/mc/data"
+	"github.com/admin-else/strom/mc/proto"
+	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )

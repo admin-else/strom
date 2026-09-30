@@ -3,7 +3,7 @@ package anvil
 import (
 	"io"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/nbt"
 )
 
 type Level struct {

@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/nbt"
 	"github.com/google/go-cmp/cmp"
 )
 

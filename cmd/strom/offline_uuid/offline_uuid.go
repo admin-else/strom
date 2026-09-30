@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/crypto"
+	"github.com/admin-else/strom/mc/crypto"
 )
 
 var cmd = flag.NewFlagSet("offline-uuid", flag.ContinueOnError)

@@ -3,7 +3,7 @@ package gen
 import (
 	"math"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"github.com/admin-else/strom/mc/data"
 )
 
 type NoiseParam int

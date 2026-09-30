@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	generated "git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v26_2"
+	generated "github.com/admin-else/strom/mc/proto_generated/v26_2"
 )
 
 // Error: index not found

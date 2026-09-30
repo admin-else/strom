@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/level"
+	"github.com/admin-else/strom/mc/level"
 )
 
 func FuzzReadChunkFromChunkPacketData(f *testing.F) {

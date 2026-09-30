@@ -3,7 +3,7 @@ package data_test
 import (
 	"testing"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/data"
+	"github.com/admin-else/strom/mc/data"
 )
 
 func TestLookupBiomeById(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 	"io"
 	"os"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/nbt"
 )
 
 type CompressionStrategy uint8

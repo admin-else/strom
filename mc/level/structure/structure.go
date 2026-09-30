@@ -1,7 +1,7 @@
 package structure
 
 import (
-	"git.anygate.cloud/anygatecloud/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/nbt"
 	"github.com/go-viper/mapstructure/v2"
 )
 

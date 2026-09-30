@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/mapstructure"
+	"github.com/admin-else/strom/mc/mapstructure"
 )
 
 var Format = mapstructure.NewFormat("nbt", mapstructure.WithRequireAll(), mapstructure.WithTrySnakeCase(), mapstructure.WithTryLowCase())

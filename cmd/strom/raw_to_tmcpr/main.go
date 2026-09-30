@@ -10,8 +10,8 @@ import (
 	"os"
 	"time"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/proto/replay"
-	"git.anygate.cloud/anygatecloud/strom/mc/proto_base"
+	"github.com/admin-else/strom/mc/proto/replay"
+	"github.com/admin-else/strom/mc/proto_base"
 )
 
 var Cmd = flag.NewFlagSet("raw-to-tmcpr", flag.ContinueOnError)

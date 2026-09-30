@@ -1,8 +1,8 @@
 package keepalive
 
 import (
-	"git.anygate.cloud/anygatecloud/strom/mc/proto"
-	"git.anygate.cloud/anygatecloud/strom/mc/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/mc/proto"
+	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
 )
 
 type mod struct {

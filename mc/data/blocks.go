@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strconv"
 
-	"git.anygate.cloud/anygatecloud/strom/mc/util"
+	"github.com/admin-else/strom/mc/util"
 )
 
 //  {
