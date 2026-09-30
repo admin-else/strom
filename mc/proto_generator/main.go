@@ -14,8 +14,8 @@ import (
 	"strconv"
 	"strings"
 
-	data2 "git.anygate.cloud/anygatecloud/strom/mc/data"
-	util2 "git.anygate.cloud/anygatecloud/strom/mc/util"
+	data2 "github.com/admin-else/strom/mc/data"
+	util2 "github.com/admin-else/strom/mc/util"
 )
 
 var ToDoError = errors.New("to do")
@@ -453,7 +453,7 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 		sourcePath, sourceHash, toolVersion, goVersion)
 	AddFileComment(g.File, comment)
 
-	AppendDecl(g.File, Import("encoding/binary", "io", "git.anygate.cloud/anygatecloud/strom/mc/proto_base", "git.anygate.cloud/anygatecloud/strom/mc/nbt", "github.com/google/uuid"))
+	AppendDecl(g.File, Import("encoding/binary", "io", "github.com/admin-else/strom/mc/proto_base", "github.com/admin-else/strom/mc/nbt", "github.com/google/uuid"))
 	g.RegisterNatives()
 	g.RegisterDecoderNatives()
 	g.RegisterEncoderNatives()
@@ -514,8 +514,68 @@ func GenerateVersions(versions []string) (err error) {
 	return GeneratePacketInfoFile(versions, packetInfos)
 }
 
+// We support every Minecraft release with protocol data. Keep in sync with
+// mc/data/download_minecraft_data.sh and mc/data/copy_local_minecraft_data.sh.
+var SupportedVersions = []string{
+	"1.8",
+	"1.9",
+	"1.9.2",
+	"1.9.4",
+	"1.10",
+	"1.10.1",
+	"1.10.2",
+	"1.11",
+	"1.11.2",
+	"1.12",
+	"1.12.1",
+	"1.12.2",
+	"1.13",
+	"1.13.1",
+	"1.13.2",
+	"1.14",
+	"1.14.1",
+	"1.14.3",
+	"1.14.4",
+	"1.15",
+	"1.15.1",
+	"1.15.2",
+	"1.16",
+	"1.16.1",
+	"1.16.2",
+	"1.16.3",
+	"1.16.4",
+	"1.16.5",
+	"1.17",
+	"1.17.1",
+	"1.18",
+	"1.18.1",
+	"1.18.2",
+	"1.19",
+	"1.19.2",
+	"1.19.3",
+	"1.19.4",
+	"1.20",
+	"1.20.1",
+	"1.20.2",
+	"1.20.3",
+	"1.20.4",
+	"1.20.5",
+	"1.20.6",
+	"1.21",
+	"1.21.1",
+	"1.21.3",
+	"1.21.4",
+	"1.21.5",
+	"1.21.6",
+	"1.21.8",
+	"1.21.9",
+	"1.21.11",
+	"26.1",
+	"26.2",
+}
+
 func main() {
-	err := GenerateVersions([]string{"1.8", "1.12.2", "1.14.4", "1.16.5", "1.21.8", "1.21.9", "1.21.11", "26.1", "26.2"})
+	err := GenerateVersions(SupportedVersions)
 	if err != nil {
 		panic(err)
 	}
