@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -79,7 +80,7 @@ func ValidatePath(path ...string) error {
 	}
 	for _, segment := range path {
 		if !IsValidPathSegment(segment) {
-			return fmt.Errorf("Illegal segment %s in path %v", segment, path)
+			return fmt.Errorf("Illegal segment %s in path [%s]", segment, strings.Join(path, ", "))
 		}
 	}
 	return nil
