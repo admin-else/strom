@@ -13,25 +13,25 @@ func TestComponent_JSON(t *testing.T) {
 	tests := []struct {
 		name    string
 		json    string
-		want    Component
+		want    RawComponent
 		wantErr bool
 	}{
 		{
 			name: "simple text",
 			json: `"hello"`,
-			want: Component{Text: "hello"},
+			want: RawComponent{Text: "hello"},
 		},
 		{
 			name: "object text",
 			json: `{"text":"hello","bold":true}`,
-			want: Component{Text: "hello", Bold: ptr(true)},
+			want: RawComponent{Text: "hello", Bold: ptr(true)},
 		},
 		{
 			name: "array of components",
 			json: `["hello", {"text":" world","color":"red"}]`,
-			want: Component{
+			want: RawComponent{
 				Text: "hello",
-				Extra: []Component{
+				Extra: []RawComponent{
 					{Text: " world", Color: "red"},
 				},
 			},
@@ -39,9 +39,9 @@ func TestComponent_JSON(t *testing.T) {
 		{
 			name: "complex translation",
 			json: `{"translate":"chat.type.text","with":["Player",{"text":"hello","italic":true}]}`,
-			want: Component{
+			want: RawComponent{
 				Translate: "chat.type.text",
-				With: []Component{
+				With: []RawComponent{
 					{Text: "Player"},
 					{Text: "hello", Italic: ptr(true)},
 				},
@@ -51,7 +51,7 @@ func TestComponent_JSON(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got Component
+			var got RawComponent
 			if err := json.Unmarshal([]byte(tt.json), &got); (err != nil) != tt.wantErr {
 				t.Fatalf("UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -64,7 +64,7 @@ func TestComponent_JSON(t *testing.T) {
 				t.Fatalf("MarshalJSON() error = %v", err)
 			}
 
-			var got2 Component
+			var got2 RawComponent
 			if err := json.Unmarshal(marshaled, &got2); err != nil {
 				t.Fatalf("UnmarshalJSON() back error = %v", err)
 			}
@@ -79,12 +79,12 @@ func TestComponent_NBT(t *testing.T) {
 	tests := []struct {
 		name string
 		nbt  any
-		want Component
+		want RawComponent
 	}{
 		{
 			name: "simple text",
 			nbt:  "hello",
-			want: Component{Text: "hello"},
+			want: RawComponent{Text: "hello"},
 		},
 		{
 			name: "object text",
@@ -92,7 +92,7 @@ func TestComponent_NBT(t *testing.T) {
 				"text": "hello",
 				"bold": int8(1),
 			},
-			want: Component{Text: "hello", Bold: ptr(true)},
+			want: RawComponent{Text: "hello", Bold: ptr(true)},
 		},
 		{
 			name: "extra components",
@@ -102,9 +102,9 @@ func TestComponent_NBT(t *testing.T) {
 					map[string]any{"text": " world", "color": "red"},
 				},
 			},
-			want: Component{
+			want: RawComponent{
 				Text: "hello",
-				Extra: []Component{
+				Extra: []RawComponent{
 					{Text: " world", Color: "red"},
 				},
 			},
@@ -113,7 +113,7 @@ func TestComponent_NBT(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var got Component
+			var got RawComponent
 			if err := got.FromNBT(tt.nbt); err != nil {
 				t.Fatalf("FromNBT() error = %v", err)
 			}
@@ -122,7 +122,7 @@ func TestComponent_NBT(t *testing.T) {
 			}
 
 			nbtVal := got.ToNBT()
-			var got2 Component
+			var got2 RawComponent
 			if err := got2.FromNBT(nbtVal); err != nil {
 				t.Fatalf("FromNBT() back error = %v", err)
 			}
@@ -137,18 +137,18 @@ func TestPretty(t *testing.T) {
 	tests := []struct {
 		name string
 		s    string
-		want Component
+		want RawComponent
 	}{
 		{
 			name: "simple text",
 			s:    "Hello",
-			want: Component{Text: "Hello"},
+			want: RawComponent{Text: "Hello"},
 		},
 		{
 			name: "color and bold",
 			s:    "§c§lHello",
-			want: Component{
-				Extra: []Component{
+			want: RawComponent{
+				Extra: []RawComponent{
 					{Text: "Hello", Color: "red", Bold: ptr(true)},
 				},
 			},
@@ -170,9 +170,9 @@ func TestPretty(t *testing.T) {
 
 func TestPrettyF(t *testing.T) {
 	got := PrettyF("Hello §b%s", "World")
-	want := &Component{
+	want := &RawComponent{
 		Text: "Hello ",
-		Extra: []Component{
+		Extra: []RawComponent{
 			{Text: "World", Color: "aqua"},
 		},
 	}
@@ -184,18 +184,18 @@ func TestPrettyF(t *testing.T) {
 func TestComponent_String(t *testing.T) {
 	tests := []struct {
 		name string
-		comp Component
+		comp RawComponent
 		want string
 	}{
 		{
 			name: "simple text",
-			comp: Component{Text: "Hello"},
+			comp: RawComponent{Text: "Hello"},
 			want: "Hello",
 		},
 		{
 			name: "color and bold",
-			comp: Component{
-				Extra: []Component{
+			comp: RawComponent{
+				Extra: []RawComponent{
 					{Text: "Hello", Color: "red", Bold: ptr(true)},
 				},
 			},
@@ -203,7 +203,7 @@ func TestComponent_String(t *testing.T) {
 		},
 		{
 			name: "hex color",
-			comp: Component{
+			comp: RawComponent{
 				Color: "#ff0000",
 				Text:  "Red",
 			},
@@ -214,7 +214,7 @@ func TestComponent_String(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.comp.String(); got != tt.want {
-				t.Errorf("Component.String() = %v, want %v", got, tt.want)
+				t.Errorf("RawComponent.String() = %v, want %v", got, tt.want)
 			}
 		})
 	}

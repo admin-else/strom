@@ -10,56 +10,56 @@ import (
 
 // FIXME: this should use the mapstruct thing
 
-// Component represents a Minecraft text component.
+// RawComponent represents a Minecraft text component.
 // https://minecraft.wiki/w/Text_component_format
-type Component struct {
+type RawComponent struct {
 	// Common fields
-	Bold          *bool       `json:"bold,omitempty" nbt:"bold,omitempty"`
-	Italic        *bool       `json:"italic,omitempty" nbt:"italic,omitempty"`
-	Underlined    *bool       `json:"underlined,omitempty" nbt:"underlined,omitempty"`
-	Strikethrough *bool       `json:"strikethrough,omitempty" nbt:"strikethrough,omitempty"`
-	Obfuscated    *bool       `json:"obfuscated,omitempty" nbt:"obfuscated,omitempty"`
-	Font          string      `json:"font,omitempty" nbt:"font,omitempty"`
-	Color         string      `json:"color,omitempty" nbt:"color,omitempty"`
-	Insertion     string      `json:"insertion,omitempty" nbt:"insertion,omitempty"`
-	ClickEvent    *ClickEvent `json:"clickEvent,omitempty" nbt:"clickEvent,omitempty"`
-	HoverEvent    *HoverEvent `json:"hoverEvent,omitempty" nbt:"hoverEvent,omitempty"`
-	Extra         []Component `json:"extra,omitempty" nbt:"extra,omitempty"`
+	Bold          *bool          `json:"bold,omitempty" nbt:"bold,omitempty"`
+	Italic        *bool          `json:"italic,omitempty" nbt:"italic,omitempty"`
+	Underlined    *bool          `json:"underlined,omitempty" nbt:"underlined,omitempty"`
+	Strikethrough *bool          `json:"strikethrough,omitempty" nbt:"strikethrough,omitempty"`
+	Obfuscated    *bool          `json:"obfuscated,omitempty" nbt:"obfuscated,omitempty"`
+	Font          string         `json:"font,omitempty" nbt:"font,omitempty"`
+	Color         string         `json:"color,omitempty" nbt:"color,omitempty"`
+	Insertion     string         `json:"insertion,omitempty" nbt:"insertion,omitempty"`
+	ClickEvent    *RawClickEvent `json:"clickEvent,omitempty" nbt:"clickEvent,omitempty"`
+	HoverEvent    *RawHoverEvent `json:"hoverEvent,omitempty" nbt:"hoverEvent,omitempty"`
+	Extra         []RawComponent `json:"extra,omitempty" nbt:"extra,omitempty"`
 
 	// Content fields (one of these should be set)
-	Text      string      `json:"text,omitempty" nbt:"text,omitempty"`
-	Translate string      `json:"translate,omitempty" nbt:"translate,omitempty"`
-	With      []Component `json:"with,omitempty" nbt:"with,omitempty"`
-	Score     *Score      `json:"score,omitempty" nbt:"score,omitempty"`
-	Selector  string      `json:"selector,omitempty" nbt:"selector,omitempty"`
-	Keybind   string      `json:"keybind,omitempty" nbt:"keybind,omitempty"`
-	NBT       string      `json:"nbt,omitempty" nbt:"nbt,omitempty"`
-	Interpret bool        `json:"interpret,omitempty" nbt:"interpret,omitempty"`
-	Block     string      `json:"block,omitempty" nbt:"block,omitempty"`
-	Entity    string      `json:"entity,omitempty" nbt:"entity,omitempty"`
-	Storage   string      `json:"storage,omitempty" nbt:"storage,omitempty"`
-	Separator *Component  `json:"separator,omitempty" nbt:"separator,omitempty"`
+	Text      string         `json:"text,omitempty" nbt:"text,omitempty"`
+	Translate string         `json:"translate,omitempty" nbt:"translate,omitempty"`
+	With      []RawComponent `json:"with,omitempty" nbt:"with,omitempty"`
+	Score     *RawScore      `json:"score,omitempty" nbt:"score,omitempty"`
+	Selector  string         `json:"selector,omitempty" nbt:"selector,omitempty"`
+	Keybind   string         `json:"keybind,omitempty" nbt:"keybind,omitempty"`
+	NBT       string         `json:"nbt,omitempty" nbt:"nbt,omitempty"`
+	Interpret bool           `json:"interpret,omitempty" nbt:"interpret,omitempty"`
+	Block     string         `json:"block,omitempty" nbt:"block,omitempty"`
+	Entity    string         `json:"entity,omitempty" nbt:"entity,omitempty"`
+	Storage   string         `json:"storage,omitempty" nbt:"storage,omitempty"`
+	Separator *RawComponent  `json:"separator,omitempty" nbt:"separator,omitempty"`
 }
 
-type ClickEvent struct {
+type RawClickEvent struct {
 	Action string `json:"action" nbt:"action"`
 	Value  string `json:"value" nbt:"value"`
 }
 
-type HoverEvent struct {
+type RawHoverEvent struct {
 	Action   string `json:"action" nbt:"action"`
 	Contents any    `json:"contents,omitempty" nbt:"contents,omitempty"`
 	Value    any    `json:"value,omitempty" nbt:"value,omitempty"` // Legacy
 }
 
-type Score struct {
+type RawScore struct {
 	Name      string `json:"name" nbt:"name"`
 	Objective string `json:"objective" nbt:"objective"`
 	Value     string `json:"value,omitempty" nbt:"value,omitempty"`
 }
 
 // MarshalJSON implements json.Marshaler.
-func (c *Component) MarshalJSON() ([]byte, error) {
+func (c *RawComponent) MarshalJSON() ([]byte, error) {
 	// If it's just a simple text component with no formatting, we can marshal it as a string
 	if c.isSimpleText() {
 		return json.Marshal(c.Text)
@@ -67,41 +67,41 @@ func (c *Component) MarshalJSON() ([]byte, error) {
 	if c.hasFormattingButNoContent() {
 		// just like component but text does not have omitempty
 		type AliasWithText struct {
-			Bold          *bool       `json:"bold,omitempty"`
-			Italic        *bool       `json:"italic,omitempty"`
-			Underlined    *bool       `json:"underlined,omitempty"`
-			Strikethrough *bool       `json:"strikethrough,omitempty"`
-			Obfuscated    *bool       `json:"obfuscated,omitempty"`
-			Font          string      `json:"font,omitempty"`
-			Color         string      `json:"color,omitempty"`
-			Insertion     string      `json:"insertion,omitempty"`
-			ClickEvent    *ClickEvent `json:"clickEvent,omitempty"`
-			HoverEvent    *HoverEvent `json:"hoverEvent,omitempty"`
-			Extra         []Component `json:"extra,omitempty"`
+			Bold          *bool          `json:"bold,omitempty"`
+			Italic        *bool          `json:"italic,omitempty"`
+			Underlined    *bool          `json:"underlined,omitempty"`
+			Strikethrough *bool          `json:"strikethrough,omitempty"`
+			Obfuscated    *bool          `json:"obfuscated,omitempty"`
+			Font          string         `json:"font,omitempty"`
+			Color         string         `json:"color,omitempty"`
+			Insertion     string         `json:"insertion,omitempty"`
+			ClickEvent    *RawClickEvent `json:"clickEvent,omitempty"`
+			HoverEvent    *RawHoverEvent `json:"hoverEvent,omitempty"`
+			Extra         []RawComponent `json:"extra,omitempty"`
 
 			Text string `json:"text"`
 
-			Translate string      `json:"translate,omitempty"`
-			With      []Component `json:"with,omitempty"`
-			Score     *Score      `json:"score,omitempty"`
-			Selector  string      `json:"selector,omitempty"`
-			Keybind   string      `json:"keybind,omitempty"`
-			NBT       string      `json:"nbt,omitempty"`
-			Interpret bool        `json:"interpret,omitempty"`
-			Block     string      `json:"block,omitempty"`
-			Entity    string      `json:"entity,omitempty"`
-			Storage   string      `json:"storage,omitempty"`
-			Separator *Component  `json:"separator,omitempty"`
+			Translate string         `json:"translate,omitempty"`
+			With      []RawComponent `json:"with,omitempty"`
+			Score     *RawScore      `json:"score,omitempty"`
+			Selector  string         `json:"selector,omitempty"`
+			Keybind   string         `json:"keybind,omitempty"`
+			NBT       string         `json:"nbt,omitempty"`
+			Interpret bool           `json:"interpret,omitempty"`
+			Block     string         `json:"block,omitempty"`
+			Entity    string         `json:"entity,omitempty"`
+			Storage   string         `json:"storage,omitempty"`
+			Separator *RawComponent  `json:"separator,omitempty"`
 		}
 		return json.Marshal(AliasWithText(*c))
 	}
-	type Alias Component
+	type Alias RawComponent
 
 	return json.Marshal(Alias(*c))
 }
 
 // hasFormattingButNoContent checks if the component has formatting/styling but no content fields
-func (c *Component) hasFormattingButNoContent() bool {
+func (c *RawComponent) hasFormattingButNoContent() bool {
 	hasFormatting := c.Bold != nil || c.Italic != nil || c.Underlined != nil ||
 		c.Strikethrough != nil || c.Obfuscated != nil || c.Font != "" ||
 		c.Color != "" || c.Insertion != "" || c.ClickEvent != nil ||
@@ -114,7 +114,7 @@ func (c *Component) hasFormattingButNoContent() bool {
 	return hasFormatting && !hasContent
 }
 
-func (c *Component) isSimpleText() bool {
+func (c *RawComponent) isSimpleText() bool {
 	return c.Text != "" &&
 		c.Bold == nil && c.Italic == nil && c.Underlined == nil && c.Strikethrough == nil && c.Obfuscated == nil &&
 		c.Font == "" && c.Color == "" && c.Insertion == "" && c.ClickEvent == nil && c.HoverEvent == nil &&
@@ -123,7 +123,7 @@ func (c *Component) isSimpleText() bool {
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (c *Component) UnmarshalJSON(data []byte) error {
+func (c *RawComponent) UnmarshalJSON(data []byte) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -136,7 +136,7 @@ func (c *Component) UnmarshalJSON(data []byte) error {
 	}
 
 	// Try array
-	var arr []Component
+	var arr []RawComponent
 	if err := json.Unmarshal(data, &arr); err == nil {
 		if len(arr) > 0 {
 			*c = arr[0]
@@ -148,17 +148,17 @@ func (c *Component) UnmarshalJSON(data []byte) error {
 	}
 
 	// Try object
-	type Alias Component
+	type Alias RawComponent
 	var aux Alias
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
 	}
-	*c = Component(aux)
+	*c = RawComponent(aux)
 	return nil
 }
 
 // ToNBT converts the component to a format suitable for the nbt package.
-func (c *Component) ToNBT() any {
+func (c *RawComponent) ToNBT() any {
 	m := make(map[string]any)
 	if c.Bold != nil {
 		m["bold"] = boolToByte(*c.Bold)
@@ -273,7 +273,7 @@ func boolToByte(b bool) int8 {
 }
 
 // FromNBT populates the component from an NBT-like structure (map[string]any or string).
-func (c *Component) FromNBT(v any) error {
+func (c *RawComponent) FromNBT(v any) error {
 	switch v := v.(type) {
 	case string:
 		c.Text = v
@@ -304,7 +304,7 @@ func (c *Component) FromNBT(v any) error {
 			c.Insertion = val
 		}
 		if val, ok := v["clickEvent"].(map[string]any); ok {
-			c.ClickEvent = &ClickEvent{}
+			c.ClickEvent = &RawClickEvent{}
 			if a, ok := val["action"].(string); ok {
 				c.ClickEvent.Action = a
 			}
@@ -313,7 +313,7 @@ func (c *Component) FromNBT(v any) error {
 			}
 		}
 		if val, ok := v["hoverEvent"].(map[string]any); ok {
-			c.HoverEvent = &HoverEvent{}
+			c.HoverEvent = &RawHoverEvent{}
 			if a, ok := val["action"].(string); ok {
 				c.HoverEvent.Action = a
 			}
@@ -325,7 +325,7 @@ func (c *Component) FromNBT(v any) error {
 			}
 		}
 		if val, ok := v["extra"].([]any); ok {
-			c.Extra = make([]Component, len(val))
+			c.Extra = make([]RawComponent, len(val))
 			for i, e := range val {
 				if err := c.Extra[i].FromNBT(e); err != nil {
 					return err
@@ -339,7 +339,7 @@ func (c *Component) FromNBT(v any) error {
 			c.Translate = val
 		}
 		if val, ok := v["with"].([]any); ok {
-			c.With = make([]Component, len(val))
+			c.With = make([]RawComponent, len(val))
 			for i, e := range val {
 				if err := c.With[i].FromNBT(e); err != nil {
 					return err
@@ -347,7 +347,7 @@ func (c *Component) FromNBT(v any) error {
 			}
 		}
 		if val, ok := v["score"].(map[string]any); ok {
-			c.Score = &Score{}
+			c.Score = &RawScore{}
 			if n, ok := val["name"].(string); ok {
 				c.Score.Name = n
 			}
@@ -380,7 +380,7 @@ func (c *Component) FromNBT(v any) error {
 			c.Storage = val
 		}
 		if val, ok := v["separator"]; ok {
-			c.Separator = &Component{}
+			c.Separator = &RawComponent{}
 			if err := c.Separator.FromNBT(val); err != nil {
 				return err
 			}
@@ -408,12 +408,12 @@ func ptr[T any](v T) *T {
 	return &v
 }
 
-// Pretty parses a legacy formatted string into a Component.
+// Pretty parses a legacy formatted string into a RawComponent.
 // It uses the § symbol for color and formatting codes.
-func Pretty(s string) *Component {
+func Pretty(s string) *RawComponent {
 	parts := strings.Split(s, "§")
 
-	root := Component{Text: parts[0]}
+	root := RawComponent{Text: parts[0]}
 
 	var current = &root
 	for i := 1; i < len(parts); i++ {
@@ -425,7 +425,7 @@ func Pretty(s string) *Component {
 		code := part[0]
 		text := part[1:]
 
-		newComp := Component{}
+		newComp := RawComponent{}
 		// Inherit formatting from current if it's just a style change
 		if current != &root {
 			newComp.Bold = current.Bold
@@ -456,7 +456,7 @@ func Pretty(s string) *Component {
 		case 'o':
 			newComp.Italic = ptr(true)
 		case 'r':
-			newComp = Component{} // Reset
+			newComp = RawComponent{} // Reset
 		case 'x':
 			// Hex color §x§r§r§g§g§b§b
 			if i+6 < len(parts) {
@@ -490,8 +490,8 @@ func Pretty(s string) *Component {
 	return &root
 }
 
-// PrettyF returns a Component from a formatted string.
-func PrettyF(format string, args ...any) *Component {
+// PrettyF returns a RawComponent from a formatted string.
+func PrettyF(format string, args ...any) *RawComponent {
 	s := fmt.Sprintf(format, args...)
 	return Pretty(s)
 }
@@ -526,8 +526,8 @@ func replacePlaceholders(s string, values map[string]any) string {
 	return result
 }
 
-// PrettyPlaceholders parses a legacy formatted string with named placeholders replaced from the given map, returning a Component.
-func PrettyPlaceholders(format string, placeholders map[string]any) *Component {
+// PrettyPlaceholders parses a legacy formatted string with named placeholders replaced from the given map, returning a RawComponent.
+func PrettyPlaceholders(format string, placeholders map[string]any) *RawComponent {
 	s := replacePlaceholders(format, placeholders)
 	return Pretty(s)
 }
@@ -570,13 +570,13 @@ var codeToColor = map[byte]string{
 	'f': "white",
 }
 
-func (c *Component) String() string {
+func (c *RawComponent) String() string {
 	var sb strings.Builder
 	c.writePretty(&sb)
 	return sb.String()
 }
 
-func (c *Component) writePretty(sb *strings.Builder) {
+func (c *RawComponent) writePretty(sb *strings.Builder) {
 	if c.Color != "" {
 		if code, ok := colorToCode[strings.ToLower(c.Color)]; ok {
 			sb.WriteString("§")
@@ -628,11 +628,11 @@ func (c *Component) writePretty(sb *strings.Builder) {
 	}
 }
 
-func (c *Component) AsNBT() nbt.Anon {
+func (c *RawComponent) AsNBT() nbt.Anon {
 	return nbt.Anon{Value: c.ToNBT()}
 }
 
-func (c *Component) AsOldNBT() nbt.Tag {
+func (c *RawComponent) AsOldNBT() nbt.Tag {
 	return nbt.Tag{
 		Name:  "",
 		Value: c.ToNBT(),

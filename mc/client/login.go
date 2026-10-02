@@ -38,7 +38,7 @@ var (
 )
 
 type KickedDuringLoginErr struct {
-	text.Component
+	text.RawComponent
 }
 
 func (k KickedDuringLoginErr) Error() string {
@@ -113,7 +113,7 @@ func (s *LoginClient) doEncrypt(serverId string, publicKey []byte, verifyToken [
 }
 
 func (s *LoginClient) OnDisconnect(packet *v1_8.LoginToClientPacketDisconnect) (err error) {
-	var reason text.Component
+	var reason text.RawComponent
 	err = json.Unmarshal([]byte(packet.Reason), &reason)
 	if err != nil {
 		return

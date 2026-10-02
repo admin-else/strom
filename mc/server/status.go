@@ -11,12 +11,12 @@ import (
 // These are separate types so a status definition looks less ugly
 
 type StatusResponseVersion struct {
-	Name     *text.Component `json:"name"`
+	Name     *text.RawComponent `json:"name"`
 	Protocol int32           `json:"protocol"`
 }
 
 type StatusResponseSample struct {
-	Name *text.Component `json:"name"`
+	Name *text.RawComponent `json:"name"`
 	ID   string          `json:"id"`
 }
 type StatusResponsePlayers struct {
@@ -29,7 +29,7 @@ type StatusResponsePlayers struct {
 type StatusResponse struct {
 	Version            StatusResponseVersion `json:"version"`
 	Players            StatusResponsePlayers `json:"players"`
-	Description        *text.Component       `json:"description"`
+	Description        *text.RawComponent       `json:"description"`
 	Favicon            string                `json:"favicon"`
 	EnforcesSecureChat bool                  `json:"enforcesSecureChat"`
 }
