@@ -3,6 +3,7 @@ package mapstructure
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/admin-else/strom/mc/util"
 )
@@ -33,6 +34,14 @@ func (f *Format) decode(m map[string]any, target reflect.Value) error {
 		}
 		if !exists && f.tryLowCase {
 			val, exists = m[util.FirstLetterLower(key)]
+		}
+		if !exists && f.tryCaseInsensitive {
+			for mapKey, mapVal := range m {
+				if strings.EqualFold(mapKey, key) {
+					val, exists = mapVal, true
+					break
+				}
+			}
 		}
 		if !exists {
 			if tag.Required || (f.requireAll && !tag.OmitEmpty) {
@@ -157,17 +166,17 @@ func (f *Format) setBool(target reflect.Value, value any) error {
 }
 
 func (f *Format) setSlice(target reflect.Value, value any) error {
-	src, ok := value.([]any)
-	if !ok {
+	src := reflect.ValueOf(value)
+	if src.Kind() != reflect.Slice && src.Kind() != reflect.Array {
 		return fmt.Errorf("cannot map %T to slice", value)
 	}
 
 	elemType := target.Type().Elem()
-	slice := reflect.MakeSlice(target.Type(), 0, len(src))
+	slice := reflect.MakeSlice(target.Type(), 0, src.Len())
 
-	for _, item := range src {
+	for i := 0; i < src.Len(); i++ {
 		elem := reflect.New(elemType).Elem()
-		if err := f.setField(elem, item, tagOptions{}); err != nil {
+		if err := f.setField(elem, src.Index(i).Interface(), tagOptions{}); err != nil {
 			return err
 		}
 		slice = reflect.Append(slice, elem)

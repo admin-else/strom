@@ -5,9 +5,9 @@ import (
 	"go/token"
 	"slices"
 
+	"github.com/admin-else/strom/mc/mapstructure"
 	"github.com/admin-else/strom/mc/proto_generator/protodef"
 	util2 "github.com/admin-else/strom/mc/util"
-	"github.com/go-viper/mapstructure/v2"
 )
 
 func DefaultEncoder(_ *Generator, varToSet ast.Expr, _ any, name string) (s []ast.Stmt, err error) {

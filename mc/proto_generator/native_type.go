@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"go/ast"
 
+	"github.com/admin-else/strom/mc/mapstructure"
 	"github.com/admin-else/strom/mc/proto_generator/protodef"
 	"github.com/admin-else/strom/mc/util"
-	"github.com/go-viper/mapstructure/v2"
 )
 
 func VisitContainerType(g *Generator, dataRaw any) (ast.Expr, error) {

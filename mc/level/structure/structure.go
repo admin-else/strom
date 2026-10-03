@@ -1,8 +1,8 @@
 package structure
 
 import (
+	"github.com/admin-else/strom/mc/mapstructure"
 	"github.com/admin-else/strom/mc/nbt"
-	"github.com/go-viper/mapstructure/v2"
 )
 
 // Load reads a structure NBT file and returns the decoded Structure.

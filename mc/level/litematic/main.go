@@ -9,9 +9,9 @@ import (
 
 	data2 "github.com/admin-else/strom/mc/data"
 	"github.com/admin-else/strom/mc/level"
+	"github.com/admin-else/strom/mc/mapstructure"
 	"github.com/admin-else/strom/mc/nbt"
 	"github.com/admin-else/strom/mc/util"
-	"github.com/go-viper/mapstructure/v2"
 )
 
 var OutOfBoundsErr = errors.New("out of bounds")

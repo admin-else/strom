@@ -6,9 +6,9 @@ import (
 	"go/ast"
 	"strings"
 
+	"github.com/admin-else/strom/mc/mapstructure"
 	"github.com/admin-else/strom/mc/proto_generator/protodef"
 	util2 "github.com/admin-else/strom/mc/util"
-	"github.com/go-viper/mapstructure/v2"
 )
 
 func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, cet CaseExprType, err error) {

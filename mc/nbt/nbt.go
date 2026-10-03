@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"unicode/utf16"
 )
 
 const (
@@ -37,12 +38,18 @@ type Anon struct {
 }
 
 func (s *Anon) Decode(r io.Reader) (err error) {
+	return s.DecodeAccounter(r, NbtAccounterUnlimitedHeap())
+}
+
+// DecodeAccounter mirrors Anon.Decode with a caller-supplied NbtAccounter, which
+// bounds the heap and nesting depth like Java's NbtIo read path.
+func (s *Anon) DecodeAccounter(r io.Reader, accounter *NbtAccounter) (err error) {
 	id := int8(0)
 	err = binary.Read(r, Order, &id)
 	if err != nil {
 		return
 	}
-	s.Value, err = readPayload(id, r)
+	s.Value, err = readPayload(id, r, accounter)
 	if err != nil {
 		return
 	}
@@ -63,6 +70,13 @@ func (s *Anon) Encode(w io.Writer) (err error) {
 }
 
 func (s *Tag) Decode(r io.Reader) (err error) {
+	return s.DecodeAccounter(r, NbtAccounterUnlimitedHeap())
+}
+
+// DecodeAccounter mirrors Tag.Decode with a caller-supplied NbtAccounter. The
+// root tag's name is read but not accounted, mirroring NbtIo.readUnnamedTag's
+// StringTag.skipString.
+func (s *Tag) DecodeAccounter(r io.Reader, accounter *NbtAccounter) (err error) {
 	id := int8(0)
 	err = binary.Read(r, Order, &id)
 	if err != nil {
@@ -71,16 +85,16 @@ func (s *Tag) Decode(r io.Reader) (err error) {
 	if id == End {
 		return
 	}
-	var name any
-	name, err = readPayload(String, r)
+	name := ""
+	name, err = readNbtString(r)
 	if err != nil {
 		return
 	}
-	s.Value, err = readPayload(id, r)
+	s.Value, err = readPayload(id, r, accounter)
 	if err != nil {
 		return
 	}
-	s.Name = name.(string)
+	s.Name = name
 	return
 }
 
@@ -135,35 +149,59 @@ func getId(v any) (id int8, err error) {
 	return
 }
 
-func readPayload(id int8, r io.Reader) (ret any, err error) {
+func readPayload(id int8, r io.Reader, accounter *NbtAccounter) (ret any, err error) {
 	switch id {
 	case End:
+		if err = accounter.AccountBytes(8); err != nil {
+			return
+		}
 		ret = struct{}{}
 	case Byte:
+		if err = accounter.AccountBytes(9); err != nil {
+			return
+		}
 		rett := int8(0)
 		err = binary.Read(r, Order, &rett)
 		ret = rett
 	case Short:
+		if err = accounter.AccountBytes(10); err != nil {
+			return
+		}
 		rett := int16(0)
 		err = binary.Read(r, Order, &rett)
 		ret = rett
 	case Int:
+		if err = accounter.AccountBytes(12); err != nil {
+			return
+		}
 		rett := int32(0)
 		err = binary.Read(r, Order, &rett)
 		ret = rett
 	case Long:
+		if err = accounter.AccountBytes(16); err != nil {
+			return
+		}
 		rett := int64(0)
 		err = binary.Read(r, Order, &rett)
 		ret = rett
 	case Float:
+		if err = accounter.AccountBytes(12); err != nil {
+			return
+		}
 		rett := float32(0)
 		err = binary.Read(r, Order, &rett)
 		ret = rett
 	case Double:
+		if err = accounter.AccountBytes(16); err != nil {
+			return
+		}
 		rett := float64(0)
 		err = binary.Read(r, Order, &rett)
 		ret = rett
 	case ByteArray:
+		if err = accounter.AccountBytes(24); err != nil {
+			return
+		}
 		var l int32
 		err = binary.Read(r, Order, &l)
 		if err != nil {
@@ -171,6 +209,9 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 		}
 		if l < 0 {
 			err = errors.New("bad array length")
+			return
+		}
+		if err = accounter.AccountBytesN(1, int64(l)); err != nil {
 			return
 		}
 		var rett []int8
@@ -184,22 +225,26 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 		}
 		ret = rett
 	case String:
-		var l uint16
-		err = binary.Read(r, Order, &l)
+		if err = accounter.AccountBytes(36); err != nil {
+			return
+		}
+		s := ""
+		s, err = readNbtString(r)
 		if err != nil {
 			return
 		}
-		var s []byte
-		s, err = io.ReadAll(io.LimitReader(r, int64(l)))
-		if err != nil {
+		if err = accounter.AccountBytesN(2, nbtStringCodeUnits(s)); err != nil {
 			return
 		}
-		if len(s) != int(l) {
-			err = BadStringLengthError
-			return
-		}
-		ret = string(s)
+		ret = s
 	case List:
+		if err = accounter.PushDepth(); err != nil {
+			return
+		}
+		defer accounter.PopDepth()
+		if err = accounter.AccountBytes(36); err != nil {
+			return
+		}
 		var id int8
 		err = binary.Read(r, Order, &id)
 		if err != nil {
@@ -210,14 +255,25 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 		if err != nil {
 			return
 		}
-		if l <= 0 || id == End {
+		if l < 0 {
+			err = &NbtFormatException{Message: "ListTag length cannot be negative: " + fmt.Sprint(l)}
+			return
+		}
+		if id == End && l > 0 {
+			err = &NbtFormatException{Message: "Missing type on ListTag"}
+			return
+		}
+		if err = accounter.AccountBytesN(4, int64(l)); err != nil {
+			return
+		}
+		if l == 0 {
 			ret = []any{}
 			return
 		}
 		var rett []any
 		for range l {
 			var result any
-			result, err = readPayload(id, r)
+			result, err = readPayload(id, r, accounter)
 			if err != nil {
 				return
 			}
@@ -225,6 +281,13 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 		}
 		ret = rett
 	case Compound:
+		if err = accounter.PushDepth(); err != nil {
+			return
+		}
+		defer accounter.PopDepth()
+		if err = accounter.AccountBytes(48); err != nil {
+			return
+		}
 		rett := map[string]any{}
 		for {
 			id := int8(0)
@@ -235,19 +298,32 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 			if id == End {
 				break
 			}
-			var namea any
-			namea, err = readPayload(String, r)
+			if err = accounter.AccountBytes(28); err != nil {
+				return
+			}
+			name := ""
+			name, err = readNbtString(r)
 			if err != nil {
 				return
 			}
-			name := namea.(string)
-			rett[name], err = readPayload(id, r)
+			if err = accounter.AccountBytesN(2, nbtStringCodeUnits(name)); err != nil {
+				return
+			}
+			if _, exists := rett[name]; !exists {
+				if err = accounter.AccountBytes(36); err != nil {
+					return
+				}
+			}
+			rett[name], err = readPayload(id, r, accounter)
 			if err != nil {
 				return
 			}
 		}
 		ret = rett
 	case IntArray:
+		if err = accounter.AccountBytes(24); err != nil {
+			return
+		}
 		var l int32
 		err = binary.Read(r, Order, &l)
 		if err != nil {
@@ -255,6 +331,9 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 		}
 		if l < 0 {
 			err = errors.New("bad array length")
+			return
+		}
+		if err = accounter.AccountBytesN(4, int64(l)); err != nil {
 			return
 		}
 		var rett []int32
@@ -268,6 +347,9 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 		}
 		ret = rett
 	case LongArray:
+		if err = accounter.AccountBytes(24); err != nil {
+			return
+		}
 		var l int32
 		err = binary.Read(r, Order, &l)
 		if err != nil {
@@ -275,6 +357,9 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 		}
 		if l < 0 {
 			err = errors.New("bad array length")
+			return
+		}
+		if err = accounter.AccountBytesN(8, int64(l)); err != nil {
 			return
 		}
 		var rett []int64
@@ -288,10 +373,40 @@ func readPayload(id int8, r io.Reader) (ret any, err error) {
 		}
 		ret = rett
 	default:
-		err = errors.New("unkown nbt type id")
+		err = errors.New("unknown nbt type id")
 		return
 	}
 	return
+}
+
+// readNbtString reads a length-prefixed NBT string.
+//
+// Java's DataInput.writeUTF/readUTF use modified UTF-8 (CESU-8): U+0000 is the
+// two-byte C0 80 and supplementary code points are encoded as UTF-16 surrogate
+// pairs (six bytes) rather than Go's four-byte UTF-8. This package stores the
+// raw bytes as a Go string, so ASCII round-trips exactly but other encodings
+// must be checked before interoperating with Java NBT.
+func readNbtString(r io.Reader) (s string, err error) {
+	var l uint16
+	if err = binary.Read(r, Order, &l); err != nil {
+		return
+	}
+	var data []byte
+	data, err = io.ReadAll(io.LimitReader(r, int64(l)))
+	if err != nil {
+		return
+	}
+	if len(data) != int(l) {
+		err = BadStringLengthError
+		return
+	}
+	return string(data), nil
+}
+
+// nbtStringCodeUnits is the UTF-16 code-unit count Java uses for NbtAccounter
+// string accounting.
+func nbtStringCodeUnits(s string) int64 {
+	return int64(len(utf16.Encode([]rune(s))))
 }
 
 var UnknownTagTypeErr = errors.New("unknown nbt type")
@@ -320,6 +435,8 @@ func writePayload(v any, w io.Writer) (err error) {
 		}
 		err = binary.Write(w, Order, v)
 	case string:
+		// Raw Go string bytes; see readNbtString for the Java modified UTF-8
+		// (CESU-8) interop caveat.
 		err = binary.Write(w, Order, uint16(len(v)))
 		if err != nil {
 			return

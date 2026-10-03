@@ -1,8 +1,8 @@
 package mapstructure
 
-var DefaultFormat = NewFormat("mapstructure", WithRequireAll(), WithTrySnakeCase(), WithTryLowCase())
+var DefaultFormat = NewFormat("mapstructure", WithTrySnakeCase(), WithTryLowCase(), WithTryCaseInsensitive())
 
-// Decode is a stub placeholder. Use Format.Decode instead.
+// Decode populates v from data using DefaultFormat.
 func Decode(data any, v any) error {
-	return nil
+	return DefaultFormat.Decode(data, v)
 }

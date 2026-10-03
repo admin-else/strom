@@ -5,7 +5,7 @@ import (
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
 )
 
-// in seperate file not to lag my ide
+// in separate file not to lag my ide
 
 var chunk00 = &v1_21_11.PlayToClientPacketMapChunk{X: 0, Z: 0, Heightmaps: []struct {
 	Type string

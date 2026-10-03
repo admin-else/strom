@@ -15,11 +15,12 @@ var (
 )
 
 type Format struct {
-	Name         string
-	requireAll   bool
-	errorOnExtra bool
-	trySnakeCase bool
-	tryLowCase   bool
+	Name               string
+	requireAll         bool
+	errorOnExtra       bool
+	trySnakeCase       bool
+	tryLowCase         bool
+	tryCaseInsensitive bool
 
 	decoders map[reflect.Type]func(any, string) (any, error)
 	encoders map[reflect.Type]func(any, string) (any, error)
@@ -68,6 +69,14 @@ func WithTryLowCase() Option {
 	}
 }
 
+// WithTryCaseInsensitive returns an Option that tries to match struct fields
+// ignoring case, mirroring go-viper/mapstructure's default name matching.
+func WithTryCaseInsensitive() Option {
+	return func(f *Format) {
+		f.tryCaseInsensitive = true
+	}
+}
+
 // WithTypeCodec returns an Option that registers custom decode/encode functions for a type.
 func WithTypeCodec(decodeFn, encodeFn any) Option {
 	dt := reflect.TypeOf(decodeFn)
@@ -100,21 +109,27 @@ func WithTypeCodec(decodeFn, encodeFn any) Option {
 	}
 }
 
-// Decode populates target (a pointer to a struct) from data (a map[string]any).
+// Decode populates target (a pointer to a struct, slice or map) from data.
 func (f *Format) Decode(data any, target any) error {
 	v := reflect.ValueOf(target)
 	if v.Kind() != reflect.Pointer || v.IsNil() {
 		return ErrNotPointer
 	}
 	v = v.Elem()
-	if v.Kind() != reflect.Struct {
+	switch v.Kind() {
+	case reflect.Struct:
+		m, ok := data.(map[string]any)
+		if !ok {
+			return ErrNotMap
+		}
+		return f.decode(m, v)
+	case reflect.Slice:
+		return f.setSlice(v, data)
+	case reflect.Map:
+		return f.setMap(v, data)
+	default:
 		return ErrNotStruct
 	}
-	m, ok := data.(map[string]any)
-	if !ok {
-		return ErrNotMap
-	}
-	return f.decode(m, v)
 }
 
 // Encode converts source (a struct or pointer to a struct) into a map[string]any.

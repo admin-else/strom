@@ -7,9 +7,9 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/admin-else/strom/mc/mapstructure"
 	"github.com/admin-else/strom/mc/proto_generator/protodef"
 	util2 "github.com/admin-else/strom/mc/util"
-	"github.com/go-viper/mapstructure/v2"
 )
 
 func DefaultDecoder(_ *Generator, varToSet ast.Expr, _ any, _ string) (s []ast.Stmt, err error) {
