@@ -8,6 +8,7 @@ import (
 	"io"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/util"
 	"github.com/google/uuid"
 )
 
@@ -1850,7 +1851,8 @@ func (ret *EntityMetadata) Decode(r io.ReadSeeker) (err error) {
 var EntityMetadataTypeReverseMap = map[string]int32{"byte": 0, "int": 1, "block_pos": 10, "optional_block_pos": 11, "direction": 12, "optional_uuid": 13, "block_state": 14, "optional_block_state": 15, "compound_tag": 16, "particle": 17, "villager_data": 18, "optional_unsigned_int": 19, "long": 2, "pose": 20, "cat_variant": 21, "frog_variant": 22, "optional_global_pos": 23, "painting_variant": 24, "sniffer_state": 25, "vector3": 26, "quaternion": 27, "float": 3, "string": 4, "component": 5, "optional_component": 6, "item_stack": 7, "boolean": 8, "rotations": 9}
 
 func (ret *EntityMetadata) Encode(w io.Writer) (err error) {
-	for _, v := range ret.Val {
+	for _, idEntityMetadata := range util.OrderedKeys(ret.Val) {
+		v := ret.Val[idEntityMetadata]
 		err = binary.Write(w, binary.BigEndian, v.Key)
 		if err != nil {
 			return

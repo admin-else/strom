@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -89,6 +90,19 @@ func ValidatePath(path ...string) error {
 // IsPathPartPortable mirrors FileUtil.isPathPartPortable(String).
 func IsPathPartPortable(name string) bool {
 	return !reservedWindowsFilenames.MatchString(name)
+}
+
+// CreateDirectoriesSafe mirrors FileUtil.createDirectoriesSafe(Path): create
+// the directory tree of dir.toRealPath() when dir already exists, otherwise of
+// dir itself.
+func CreateDirectoriesSafe(dir string) (err error) {
+	target := dir
+	if _, statErr := os.Lstat(dir); statErr == nil {
+		if real, realErr := filepath.EvalSymlinks(dir); realErr == nil {
+			target = real
+		}
+	}
+	return os.MkdirAll(target, 0o755)
 }
 
 func containsAllowedCharactersOnly(segment string) bool {

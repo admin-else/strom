@@ -8,6 +8,7 @@ import (
 	"io"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/nbt"
+	"github.com/admin-else/strom/mc/util"
 	"github.com/google/uuid"
 )
 
@@ -3181,7 +3182,8 @@ func (ret *EntityMetadata) Decode(r io.ReadSeeker) (err error) {
 	return
 }
 func (ret *EntityMetadata) Encode(w io.Writer) (err error) {
-	for _, v := range ret.Val {
+	for _, idEntityMetadata := range util.OrderedKeys(ret.Val) {
+		v := ret.Val[idEntityMetadata]
 		EntityMetadataEncTmp := v
 		err = EntityMetadataEncTmp.Encode(w)
 		if err != nil {

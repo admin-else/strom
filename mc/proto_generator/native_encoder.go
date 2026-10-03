@@ -384,7 +384,8 @@ func EntityMetadataLoopEncoder(g *Generator, vts ast.Expr, dataRaw any, name str
 	}
 
 	/*
-		for _, v := range vts.Val {
+		for _, id := range util.OrderedKeys(vts.Val) {
+			v := vts.Val[id]
 			WriteData(w, v)
 		}
 		WriteU8(w, 0xFF)
@@ -393,7 +394,12 @@ func EntityMetadataLoopEncoder(g *Generator, vts ast.Expr, dataRaw any, name str
 	if err != nil {
 		return
 	}
-	forStmt := ForRangeKV(Ident("_"), Ident("v"), vts, NewBlock(encodeV))
+	idName := "id" + name
+	assignV := Define121(Ident("v"), Index(vts, Ident(idName)))
+	loopBody := Stmts(assignV)
+	loopBody = append(loopBody, encodeV...)
+	orderedKeys := Call(Selector("util", "OrderedKeys"), vts)
+	forStmt := ForRangeKV(Ident("_"), Ident(idName), orderedKeys, NewBlock(loopBody))
 
 	encodeEndId, err := g.VisitEncoder(Call(Ident("uint8"), NumLit(data.EndVal)), "u8", name)
 	if err != nil {

@@ -453,7 +453,7 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 		sourcePath, sourceHash, toolVersion, goVersion)
 	AddFileComment(g.File, comment)
 
-	AppendDecl(g.File, Import("encoding/binary", "io", "github.com/admin-else/strom/mc/proto_base", "github.com/admin-else/strom/mc/nbt", "github.com/google/uuid"))
+	AppendDecl(g.File, Import("encoding/binary", "io", "github.com/admin-else/strom/mc/proto_base", "github.com/admin-else/strom/mc/nbt", "github.com/admin-else/strom/mc/util", "github.com/google/uuid"))
 	g.RegisterNatives()
 	g.RegisterDecoderNatives()
 	g.RegisterEncoderNatives()
