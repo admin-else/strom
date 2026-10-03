@@ -46,6 +46,18 @@ func StatusRaw(ctx context.Context, addr string) (s *StatusClient, err error) {
 
 // StatusRawWithVersion is like StatusRaw but uses the given Minecraft version for the handshake.
 func StatusRawWithVersion(ctx context.Context, addr, version string) (s *StatusClient, err error) {
+	return statusRawWithVersion(ctx, addr, version, false)
+}
+
+// StatusRawWithVersionAndPing is like StatusRawWithVersion but also sends the
+// ping packet and records PingSendTime/PingReceiveTime, so PingMillis returns a
+// real round-trip. It is opt-in: StatusRawWithVersion keeps the
+// status-response-only behaviour and avoids the extra round-trip.
+func StatusRawWithVersionAndPing(ctx context.Context, addr, version string) (s *StatusClient, err error) {
+	return statusRawWithVersion(ctx, addr, version, true)
+}
+
+func statusRawWithVersion(ctx context.Context, addr, version string, ping bool) (s *StatusClient, err error) {
 	c, err := ConnectVersionLess(ctx, addr)
 	if err != nil {
 		return
@@ -56,9 +68,10 @@ func StatusRawWithVersion(ctx context.Context, addr, version string) (s *StatusC
 		return
 	}
 	s = &StatusClient{
-		Conn: c,
+		Conn:                c,
+		DoPingRoundTripTime: ping,
 	}
-	s.RegisterUntil("26.2", s.OnStatus, s.OnPong) 
+	s.RegisterUntil("26.2", s.OnStatus, s.OnPong)
 
 	p, err := MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {
@@ -73,6 +86,15 @@ func StatusRawWithVersion(ctx context.Context, addr, version string) (s *StatusC
 
 	err = s.StartConn()
 	return
+}
+
+// PingMillis returns the pong round-trip in milliseconds, or 0 when the ping was
+// not requested or no pong was received.
+func (s *StatusClient) PingMillis() int64 {
+	if s.PingSendTime.IsZero() || s.PingReceiveTime.IsZero() {
+		return 0
+	}
+	return s.PingReceiveTime.Sub(s.PingSendTime).Milliseconds()
 }
 
 // StatusNoDns is like Status but does not resolve SRV records.
