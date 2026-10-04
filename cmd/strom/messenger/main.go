@@ -1,8 +1,10 @@
 package messenger
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 	"strings"
@@ -10,6 +12,7 @@ import (
 	"github.com/admin-else/strom/cmd/strom/cmd_util"
 	"github.com/admin-else/strom/mc/bot/chat"
 	"github.com/admin-else/strom/mc/bot/keepalive"
+	"github.com/admin-else/strom/mc/bot/player"
 	"github.com/admin-else/strom/mc/bot/world"
 	"github.com/admin-else/strom/mc/client"
 	"github.com/admin-else/strom/mc/data"
@@ -37,10 +40,8 @@ type Messenger struct {
 	*proto.Conn
 	chat   *chat.Module
 	world  *world.Module
+	player *player.Module
 	legacy bool
-
-	posX, posY, posZ float64
-	hasPos           bool
 }
 
 func (m *Messenger) OnChat(e *v1_21_11.PlayToClientPacketPlayerChat) (err error) {
@@ -63,9 +64,13 @@ func (m *Messenger) OnChatLegacy(e *v1_8.PlayToClientPacketChat) (err error) {
 	return
 }
 
-func (m *Messenger) OnPosition(e *v1_21_11.PlayToClientPacketPosition) (err error) {
-	m.posX, m.posY, m.posZ = e.X, e.Y, e.Z
-	m.hasPos = true
+// OnUnhandled surfaces packets that reached a registered decoder but could not
+// be decoded. Packets with no handler are silently dropped by the connection.
+func (m *Messenger) OnUnhandled(e event.Unhandled) (err error) {
+	u, ok := e.Val.(*proto.UnCodablePacket)
+	if ok && !errors.Is(u.Err, proto.NoHandlerRegisteredErr) {
+		m.Log.Debug("undecodable packet", "name", u.Info.Name, "err", u.Err.Error())
+	}
 	return
 }
 
@@ -84,6 +89,12 @@ func (m *Messenger) OnStdin(e event.Stdin) (err error) {
 		return m.sendChat(args)
 	case "pos":
 		return m.handlePos()
+	case "look":
+		return m.handleLook(args)
+	case "tp":
+		return m.handleTp(args)
+	case "fly":
+		return m.handleFly(args)
 	case "getblock":
 		return m.handleGetBlock(args)
 	case "light":
@@ -108,8 +119,80 @@ func (m *Messenger) sendChat(message string) (err error) {
 }
 
 func (m *Messenger) handlePos() (err error) {
-	m.Log.Info("pos", "x", m.posX, "y", m.posY, "z", m.posZ, "known", m.hasPos, "center", m.world.World().Center())
+	if m.player == nil {
+		m.Log.Info("pos", "known", false)
+		return
+	}
+	x, y, z := m.player.Position()
+	yaw, pitch := m.player.Rotation()
+	m.Log.Info("pos",
+		"x", x, "y", y, "z", z,
+		"yaw", yaw, "pitch", pitch,
+		"gamemode", m.player.Gamemode(),
+		"flying", m.player.Flying(),
+		"center", m.world.World().Center(),
+	)
 	return
+}
+
+func parseFloats(fields []string, n int) (values []float64, err error) {
+	if len(fields) != n {
+		return nil, fmt.Errorf("expected %d numbers", n)
+	}
+	values = make([]float64, n)
+	for i, f := range fields {
+		values[i], err = strconv.ParseFloat(f, 64)
+		if err != nil {
+			return nil, fmt.Errorf("bad number %q", f)
+		}
+	}
+	return values, nil
+}
+
+func (m *Messenger) handleLook(args string) (err error) {
+	if m.player == nil {
+		m.Log.Info("look", "error", "player unavailable for this version")
+		return nil
+	}
+	values, err := parseFloats(strings.Fields(args), 2)
+	if err != nil {
+		m.Log.Info("look", "error", err.Error())
+		return nil
+	}
+	m.player.Look(float32(values[0]), float32(values[1]))
+	m.Log.Info("look", "yaw", values[0], "pitch", values[1])
+	return nil
+}
+
+func (m *Messenger) handleTp(args string) (err error) {
+	if m.player == nil {
+		m.Log.Info("tp", "error", "player unavailable for this version")
+		return nil
+	}
+	values, err := parseFloats(strings.Fields(args), 3)
+	if err != nil {
+		m.Log.Info("tp", "error", err.Error())
+		return nil
+	}
+	m.player.SetPosition(values[0], values[1], values[2])
+	m.Log.Info("tp", "x", values[0], "y", values[1], "z", values[2])
+	return nil
+}
+
+func (m *Messenger) handleFly(args string) (err error) {
+	if m.player == nil {
+		m.Log.Info("fly", "error", "player unavailable for this version")
+		return nil
+	}
+	values, err := parseFloats(strings.Fields(args), 3)
+	if err != nil {
+		m.Log.Info("fly", "error", err.Error())
+		return nil
+	}
+	m.player.Fly(values[0], values[1], values[2])
+	x, y, z := m.player.Position()
+	m.Log.Info("fly", "dx", values[0], "dy", values[1], "dz", values[2], "x", x, "y", y, "z", z)
+	return nil
 }
 
 func parseCoords(fields []string, n int) (coords []int32, err error) {
@@ -206,7 +289,6 @@ func (m *Messenger) handleChunks() (err error) {
 	return nil
 }
 
-
 func Run(args []string) (err error) {
 	err = cmd.Parse(args)
 	if err != nil {
@@ -239,19 +321,27 @@ func Run(args []string) (err error) {
 		legacy: isLegacy,
 	}
 
+	if debugPackets := os.Getenv("STROM_DEBUG_PACKETS"); debugPackets != "" {
+		logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
+		slog.SetDefault(logger)
+		c.Log = logger
+		m.DebugPrintPackets = strings.Split(debugPackets, ",")
+	}
+
 	if !isLegacy {
 		w := world.NewWorld(c.Version, -64, 384)
 		m.world = world.Start(c, w)
+		m.player = player.Start(c)
 	}
 
 	event.StartListingStdin(m.Loop)
 	m.Register(m.OnStdin)
+	m.Register(m.OnUnhandled)
 
 	if isLegacy {
 		m.Register(m.OnChatLegacy)
 	} else {
 		m.RegisterUntilLatest(m.OnChat, m.OnChatUnsigned, m.OnChatSystem)
-		m.RegisterUntilLatest(m.OnPosition)
 	}
 
 	if !isLegacy {
