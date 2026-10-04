@@ -38,6 +38,9 @@ type Messenger struct {
 	chat   *chat.Module
 	world  *world.Module
 	legacy bool
+
+	posX, posY, posZ float64
+	hasPos           bool
 }
 
 func (m *Messenger) OnChat(e *v1_21_11.PlayToClientPacketPlayerChat) (err error) {
@@ -60,15 +63,41 @@ func (m *Messenger) OnChatLegacy(e *v1_8.PlayToClientPacketChat) (err error) {
 	return
 }
 
+func (m *Messenger) OnPosition(e *v1_21_11.PlayToClientPacketPosition) (err error) {
+	m.posX, m.posY, m.posZ = e.X, e.Y, e.Z
+	m.hasPos = true
+	return
+}
+
 func (m *Messenger) OnStdin(e event.Stdin) (err error) {
 	input := strings.TrimSpace(e.Val)
-	if strings.HasPrefix(input, ">say ") {
-		return m.sendChat(strings.TrimSpace(strings.TrimPrefix(input, ">say")))
+	if input == "" {
+		return nil
 	}
-	if !m.legacy && strings.HasPrefix(input, ">getblock ") {
-		return m.handleGetBlock(strings.TrimSpace(strings.TrimPrefix(input, ">getblock")))
+	if !strings.HasPrefix(input, ">") {
+		return m.sendChat(input)
 	}
-	return m.sendChat(input)
+	command, args, _ := strings.Cut(strings.TrimPrefix(input, ">"), " ")
+	args = strings.TrimSpace(args)
+	switch command {
+	case "say":
+		return m.sendChat(args)
+	case "pos":
+		return m.handlePos()
+	case "getblock":
+		return m.handleGetBlock(args)
+	case "light":
+		return m.handleLight(args)
+	case "height":
+		return m.handleHeight(args)
+	case "chunk":
+		return m.handleChunk(args)
+	case "chunks":
+		return m.handleChunks()
+	default:
+		m.Log.Info("unknown command", "command", command)
+		return nil
+	}
 }
 
 func (m *Messenger) sendChat(message string) (err error) {
@@ -78,37 +107,105 @@ func (m *Messenger) sendChat(message string) (err error) {
 	return m.chat.SendMessage(message)
 }
 
-func (m *Messenger) handleGetBlock(args string) (err error) {
-	fields := strings.Fields(args)
-	if len(fields) != 3 {
-		m.Log.Info("getblock", "error", "expected >getblock <x> <y> <z>")
-		return nil
-	}
+func (m *Messenger) handlePos() (err error) {
+	m.Log.Info("pos", "x", m.posX, "y", m.posY, "z", m.posZ, "known", m.hasPos, "center", m.world.World().Center())
+	return
+}
 
-	coords := make([]int64, 3)
+func parseCoords(fields []string, n int) (coords []int32, err error) {
+	if len(fields) != n {
+		return nil, fmt.Errorf("expected %d coordinates", n)
+	}
+	coords = make([]int32, n)
 	for i, f := range fields {
-		coords[i], err = strconv.ParseInt(f, 10, 32)
+		var v int64
+		v, err = strconv.ParseInt(f, 10, 32)
 		if err != nil {
-			m.Log.Info("getblock", "error", fmt.Sprintf("bad coordinate %q", f))
-			return nil
+			return nil, fmt.Errorf("bad coordinate %q", f)
 		}
+		coords[i] = int32(v)
 	}
+	return coords, nil
+}
 
-	stateId, err := m.world.GetBlock(int32(coords[0]), int32(coords[1]), int32(coords[2]))
+func (m *Messenger) handleGetBlock(args string) (err error) {
+	coords, err := parseCoords(strings.Fields(args), 3)
 	if err != nil {
 		m.Log.Info("getblock", "error", err.Error())
 		return nil
 	}
-
-	block, ok := data.LookupBlockByStateId(m.Version, stateId)
-	if !ok {
-		m.Log.Info("getblock", "stateId", stateId, "name", "unknown")
+	stateId, err := m.world.GetBlock(coords[0], coords[1], coords[2])
+	if err != nil {
+		m.Log.Info("getblock", "error", err.Error())
 		return nil
 	}
-
-	m.Log.Info("getblock", "x", coords[0], "y", coords[1], "z", coords[2], "name", block.Name, "stateId", stateId)
+	block, props, err := data.FromBlockState(m.Version, stateId)
+	if err != nil {
+		m.Log.Info("getblock", "x", coords[0], "y", coords[1], "z", coords[2], "stateId", stateId, "error", err.Error())
+		return nil
+	}
+	m.Log.Info("getblock", "x", coords[0], "y", coords[1], "z", coords[2], "name", block.Name, "stateId", stateId, "properties", props)
 	return nil
 }
+
+func (m *Messenger) handleLight(args string) (err error) {
+	coords, err := parseCoords(strings.Fields(args), 3)
+	if err != nil {
+		m.Log.Info("light", "error", err.Error())
+		return nil
+	}
+	block, sky, err := m.world.World().LightAt(coords[0], coords[1], coords[2])
+	if err != nil {
+		m.Log.Info("light", "error", err.Error())
+		return nil
+	}
+	m.Log.Info("light", "x", coords[0], "y", coords[1], "z", coords[2], "block", block, "sky", sky)
+	return nil
+}
+
+func (m *Messenger) handleHeight(args string) (err error) {
+	coords, err := parseCoords(strings.Fields(args), 2)
+	if err != nil {
+		m.Log.Info("height", "error", err.Error())
+		return nil
+	}
+	kind := "world_surface"
+	h, err := m.world.World().HeightAt(kind, coords[0], coords[1])
+	if err != nil {
+		m.Log.Info("height", "error", err.Error())
+		return nil
+	}
+	m.Log.Info("height", "kind", kind, "x", coords[0], "z", coords[1], "value", h)
+	return nil
+}
+
+func (m *Messenger) handleChunk(args string) (err error) {
+	coords, err := parseCoords(strings.Fields(args), 2)
+	if err != nil {
+		m.Log.Info("chunk", "error", err.Error())
+		return nil
+	}
+	chunk, err := m.world.World().ChunkAt(coords[0], coords[1])
+	if err != nil {
+		m.Log.Info("chunk", "error", err.Error())
+		return nil
+	}
+	sectionsWithLight := 0
+	for _, s := range chunk.Light {
+		if s.Sky.Data != nil || s.Block.Data != nil {
+			sectionsWithLight++
+		}
+	}
+	m.Log.Info("chunk", "cx", coords[0], "cz", coords[1], "sections", len(chunk.Sections), "lightSections", sectionsWithLight, "heightmaps", len(chunk.Heightmaps), "blockEntities", len(chunk.BlockEntities))
+	return nil
+}
+
+func (m *Messenger) handleChunks() (err error) {
+	w := m.world.World()
+	m.Log.Info("chunks", "count", w.ChunkCount(), "center", w.Center(), "minY", w.MinY(), "height", w.Height())
+	return nil
+}
+
 
 func Run(args []string) (err error) {
 	err = cmd.Parse(args)
@@ -154,6 +251,7 @@ func Run(args []string) (err error) {
 		m.Register(m.OnChatLegacy)
 	} else {
 		m.RegisterUntilLatest(m.OnChat, m.OnChatUnsigned, m.OnChatSystem)
+		m.RegisterUntilLatest(m.OnPosition)
 	}
 
 	if !isLegacy {
