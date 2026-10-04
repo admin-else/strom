@@ -7143,43 +7143,19 @@
             },
             {
               "name": "skyLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "blockLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "emptySkyLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "emptyBlockLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "skyLight",
@@ -7187,13 +7163,7 @@
                 "array",
                 {
                   "countType": "varint",
-                  "type": [
-                    "array",
-                    {
-                      "countType": "varint",
-                      "type": "u8"
-                    }
-                  ]
+                  "type": "ByteArray"
                 }
               ]
             },
@@ -7203,13 +7173,7 @@
                 "array",
                 {
                   "countType": "varint",
-                  "type": [
-                    "array",
-                    {
-                      "countType": "varint",
-                      "type": "u8"
-                    }
-                  ]
+                  "type": "ByteArray"
                 }
               ]
             }
@@ -7298,43 +7262,19 @@
             },
             {
               "name": "skyLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "blockLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "emptySkyLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "emptyBlockLightMask",
-              "type": [
-                "array",
-                {
-                  "countType": "varint",
-                  "type": "i64"
-                }
-              ]
+              "type": "ByteArray"
             },
             {
               "name": "skyLight",
@@ -7342,13 +7282,7 @@
                 "array",
                 {
                   "countType": "varint",
-                  "type": [
-                    "array",
-                    {
-                      "countType": "varint",
-                      "type": "u8"
-                    }
-                  ]
+                  "type": "ByteArray"
                 }
               ]
             },
@@ -7358,13 +7292,7 @@
                 "array",
                 {
                   "countType": "varint",
-                  "type": [
-                    "array",
-                    {
-                      "countType": "varint",
-                      "type": "u8"
-                    }
-                  ]
+                  "type": "ByteArray"
                 }
               ]
             }
