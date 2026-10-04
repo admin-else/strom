@@ -152,7 +152,7 @@ func FromBlockState(version string, stateId int32) (b *Block, stateData map[stri
 func mcDataBlockStateTypeParse(n int32, s *BlockState) (v string, err error) {
 	switch s.Type {
 	case "int":
-		v = strconv.Itoa(int(n))
+		v = strconv.Itoa(int(n) + int(s.MinValue))
 	case "enum":
 		v = s.Values[n]
 	case "bool":
