@@ -5,7 +5,6 @@ import (
 	"go/ast"
 	"os"
 	"strconv"
-	"strings"
 )
 
 type TypesInfo struct {
@@ -23,14 +22,13 @@ func GeneratePacketInfoFile(versions []string, packetInfos []PacketInfo) (err er
 	f := NewFile("proto_generated")
 	imports := []string{"github.com/admin-else/strom/mc/proto_base"}
 	for _, v := range versions {
-		vUnderscore := strings.ReplaceAll(v, ".", "_")
-		imports = append(imports, "github.com/admin-else/strom/mc/proto_generated/v"+vUnderscore)
+		imports = append(imports, "github.com/admin-else/strom/mc/proto_generated/"+versionIdentifier(v))
 	}
 	AppendDecl(f, Import(imports...))
 
 	var packetInfoExprs []ast.Expr
 	for _, p := range packetInfos {
-		vUnderscore := "v" + strings.ReplaceAll(p.MinecraftVersion, ".", "_")
+		vUnderscore := versionIdentifier(p.MinecraftVersion)
 		typeName := p.TName
 		var typeExpr ast.Expr
 		if p.PacketDef == "void" {

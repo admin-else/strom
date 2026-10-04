@@ -355,6 +355,57 @@ func (g *Generator) GenerateProtocol(protocol Protocol, version string) (err err
 		}
 	}
 
+	// Drop packet_* type definitions that no state's "packet" mapper actually
+	// references. Patched protocol.json files may carry stale packet_* entries
+	// for packets that no longer exist in the target version; keeping them would
+	// emit unreferenced Go types and break the packet-info invariants.
+	referenced := make(map[string]bool)
+	for _, prefix := range util2.OrderedKeys(prefixTypeMap) {
+		types := prefixTypeMap[prefix]
+		for _, k := range util2.OrderedKeys(types.Types.Types) {
+			if k != "packet" {
+				continue
+			}
+			container, ok := types.Types.Types[k].([]any)
+			if !ok || len(container) < 2 {
+				continue
+			}
+			containerParts, ok := container[1].([]any)
+			if !ok || len(containerParts) < 2 {
+				continue
+			}
+			params, ok := containerParts[1].(map[string]any)
+			if !ok {
+				continue
+			}
+			paramsType, ok := params["type"].([]any)
+			if !ok || len(paramsType) < 2 {
+				continue
+			}
+			switchData, ok := paramsType[1].(map[string]any)
+			if !ok {
+				continue
+			}
+			fields, ok := switchData["fields"].(map[string]any)
+			if !ok {
+				continue
+			}
+			for _, ref := range fields {
+				if name, ok := ref.(string); ok {
+					referenced[name] = true
+				}
+			}
+		}
+	}
+	for _, prefix := range util2.OrderedKeys(prefixTypeMap) {
+		types := prefixTypeMap[prefix]
+		for _, k := range util2.OrderedKeys(types.Types.Types) {
+			if strings.HasPrefix(k, "packet_") && !referenced[k] {
+				delete(types.Types.Types, k)
+			}
+		}
+	}
+
 	for _, prefix := range util2.OrderedKeys(prefixTypeMap) {
 		types := prefixTypeMap[prefix]
 		for _, k := range util2.OrderedKeys(types.Types.Types) {
@@ -443,7 +494,7 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 		}
 	}
 
-	g.File = NewFile("v" + strings.ReplaceAll(version, ".", "_"))
+	g.File = NewFile(versionIdentifier(version))
 
 	// Add file header comment for IDE recognition and reproducibility
 	sourcePath := "minecraft-data/" + data2.Paths.Data[version]["protocol"] + "/protocol.json"
@@ -467,13 +518,28 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 	return
 }
 
+// versionIdentifier converts a Minecraft version string into a valid Go
+// identifier and directory name, e.g. "26.4-snapshot-2" -> "v26_4_snapshot_2".
+func versionIdentifier(version string) string {
+	var b strings.Builder
+	b.WriteString("v")
+	for _, r := range version {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+		} else {
+			b.WriteByte('_')
+		}
+	}
+	return b.String()
+}
+
 func generateVersion(v string) (packetInfos []PacketInfo, err error) {
-	vUnderscore := strings.ReplaceAll(v, ".", "_")
-	err = os.MkdirAll("mc/proto_generated/v"+vUnderscore, 0755)
+	vUnderscore := versionIdentifier(v)
+	err = os.MkdirAll("mc/proto_generated/"+vUnderscore, 0755)
 	if err != nil {
 		return
 	}
-	f, err := os.Create("mc/proto_generated/v" + vUnderscore + "/proto.go")
+	f, err := os.Create("mc/proto_generated/" + vUnderscore + "/proto.go")
 	if err != nil {
 		return
 	}
@@ -572,6 +638,7 @@ var SupportedVersions = []string{
 	"1.21.11",
 	"26.1",
 	"26.2",
+	"26.4-snapshot-2",
 }
 
 func main() {
