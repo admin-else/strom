@@ -71,7 +71,7 @@ func statusRawWithVersion(ctx context.Context, addr, version string, ping bool) 
 		Conn:                c,
 		DoPingRoundTripTime: ping,
 	}
-	s.RegisterUntil("26.2", s.OnStatus, s.OnPong)
+	s.RegisterUntil("26.4-snapshot-2", s.OnStatus, s.OnPong)
 
 	p, err := MakeHandshakePacketAddr(s.Conn, proto_base.Status, addr)
 	if err != nil {

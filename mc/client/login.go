@@ -18,6 +18,7 @@ import (
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
 	"github.com/admin-else/strom/mc/proto_generated/v1_8"
 	"github.com/admin-else/strom/mc/proto_generated/v26_2"
+	"github.com/admin-else/strom/mc/proto_generated/v26_4_snapshot_2"
 	"github.com/admin-else/strom/mc/text"
 	"github.com/google/uuid"
 )
@@ -155,6 +156,33 @@ func (s *LoginClient) OnSuccess26_2(success *v26_2.LoginToClientPacketSuccess) (
 	})
 }
 
+func (s *LoginClient) OnCompress26_4(packet *v26_4_snapshot_2.LoginToClientPacketCompress) (err error) {
+	s.SetCompressionThreshold(packet.Threshold)
+	return
+}
+
+func (s *LoginClient) OnEncrypt26_4(packet *v26_4_snapshot_2.LoginToClientPacketEncryptionBegin) (err error) {
+	return s.doEncrypt(packet.ServerId, packet.PublicKey, packet.VerifyToken, packet.ShouldAuthenticate)
+}
+
+func (s *LoginClient) OnDisconnect26_4(packet *v26_4_snapshot_2.LoginToClientPacketDisconnect) (err error) {
+	var reason text.RawComponent
+	err = json.Unmarshal([]byte(packet.Reason), &reason)
+	if err != nil {
+		return
+	}
+	err = KickedDuringLoginErr{reason}
+	return
+}
+
+func (s *LoginClient) OnSuccess26_4(success *v26_4_snapshot_2.LoginToClientPacketSuccess) (err error) {
+	return s.OnSuccess(&v1_21_8.LoginToClientPacketSuccess{
+		Uuid:       success.Uuid,
+		Username:   success.Username,
+		Properties: success.Properties,
+	})
+}
+
 func (s *LoginClient) OnSuccess1_16_5(success *v1_16_5.LoginToClientPacketSuccess) (err error) {
 	return s.OnSuccess(&v1_21_8.LoginToClientPacketSuccess{
 		Uuid:     success.Uuid,
@@ -182,8 +210,10 @@ func LoginRawAddr(c *proto.Conn, account *api.Account, hostAddr string) (err err
 	lc.RegisterCritical(lc.OnDefault)
 	lc.RegisterCritical(lc.OnClose)
 	lc.RegisterUntil("26.2", lc.OnCompress, lc.OnDisconnect, lc.OnEncrypt)
+	lc.RegisterUntil("26.4-snapshot-2", lc.OnCompress26_4, lc.OnDisconnect26_4, lc.OnEncrypt26_4)
 	lc.RegisterUntil("26.1", lc.OnSuccess)
-	lc.RegisterUntilLatest(lc.OnSuccess26_2)
+	lc.RegisterUntil("26.2", lc.OnSuccess26_2)
+	lc.RegisterUntil("26.4-snapshot-2", lc.OnSuccess26_4)
 	lc.RegisterUntil("1.14.4", lc.OnEncryptV1_8, lc.OnSuccessV1_8)
 	lc.RegisterUntil("1.16.5", lc.OnSuccess1_16_5)
 
