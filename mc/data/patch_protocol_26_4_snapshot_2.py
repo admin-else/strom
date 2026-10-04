@@ -81,6 +81,49 @@ FIELD_FIXES = {
         ("serverPort", "u16"),
         ("nextState", "varint"),
     ],
+    # ClientboundLoginPacket gained onlineMode before enforcesSecureChat.
+    ("play", "toClient", "login"): [
+        ("entityId", "i32"),
+        ("isHardcore", "bool"),
+        ("worldNames", ["array", {"countType": "varint", "type": "string"}]),
+        ("maxPlayers", "varint"),
+        ("viewDistance", "varint"),
+        ("simulationDistance", "varint"),
+        ("reducedDebugInfo", "bool"),
+        ("enableRespawnScreen", "bool"),
+        ("doLimitedCrafting", "bool"),
+        ("worldState", "SpawnInfo"),
+        ("onlineMode", "bool"),
+        ("enforcesSecureChat", "bool"),
+    ],
+    # ServerboundAcceptTeleportationPacket now carries the accepted position.
+    ("play", "toServer", "teleport_confirm"): [
+        ("teleportId", "varint"),
+        ("x", "f64"),
+        ("y", "f64"),
+        ("z", "f64"),
+        ("yRot", "f32"),
+        ("xRot", "f32"),
+    ],
+}
+
+# Helper-type replacements not tied to a packet name (decompiler diff).
+# CommonPlayerSpawnInfo dropped the seed long and encodes GameType as a varint.
+TYPE_FIXES = {
+    ("play", "toClient", "SpawnInfo"): [
+        ("dimension", "varint"),
+        ("name", "string"),
+        (
+            "gamemode",
+            ["mapper", {"type": "varint", "mappings": {"0": "survival", "1": "creative", "2": "adventure", "3": "spectator"}}],
+        ),
+        ("previousGamemode", "varint"),
+        ("isDebug", "bool"),
+        ("isFlat", "bool"),
+        ("death", ["option", "GlobalPos"]),
+        ("portalCooldown", "varint"),
+        ("seaLevel", "varint"),
+    ],
 }
 
 # shared top-level defs for wiki packet names with no per-state definition
@@ -170,6 +213,9 @@ def main():
 
     for (wst, wdir, wname), fields in FIELD_FIXES.items():
         proto[wst][wdir]["types"]["packet_" + wname] = wiki_to_container(fields)
+
+    for (wst, wdir, tname), fields in TYPE_FIXES.items():
+        proto[wst][wdir]["types"][tname] = wiki_to_container(fields)
 
     json.dump(proto, open(OUT, "w"), indent=2)
     print("wrote", OUT)

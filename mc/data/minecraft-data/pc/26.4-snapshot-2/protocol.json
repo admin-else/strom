@@ -6017,15 +6017,11 @@
               "type": "string"
             },
             {
-              "name": "hashedSeed",
-              "type": "i64"
-            },
-            {
               "name": "gamemode",
               "type": [
                 "mapper",
                 {
-                  "type": "i8",
+                  "type": "varint",
                   "mappings": {
                     "0": "survival",
                     "1": "creative",
@@ -6037,7 +6033,7 @@
             },
             {
               "name": "previousGamemode",
-              "type": "u8"
+              "type": "varint"
             },
             {
               "name": "isDebug",
@@ -7346,6 +7342,10 @@
             {
               "name": "worldState",
               "type": "SpawnInfo"
+            },
+            {
+              "name": "onlineMode",
+              "type": "bool"
             },
             {
               "name": "enforcesSecureChat",
@@ -10355,6 +10355,26 @@
             {
               "name": "teleportId",
               "type": "varint"
+            },
+            {
+              "name": "x",
+              "type": "f64"
+            },
+            {
+              "name": "y",
+              "type": "f64"
+            },
+            {
+              "name": "z",
+              "type": "f64"
+            },
+            {
+              "name": "yRot",
+              "type": "f32"
+            },
+            {
+              "name": "xRot",
+              "type": "f32"
             }
           ]
         ],
