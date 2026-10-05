@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	ChunkNotLoadedErr = errors.New("chunk not loaded")
-	OutOfBoundsErr    = errors.New("coordinates out of bounds")
+	ChunkNotLoadedErr  = errors.New("chunk not loaded")
+	OutOfBoundsErr     = errors.New("coordinates out of bounds")
 	HeightmapAbsentErr = errors.New("heightmap not present")
 )
 
@@ -26,22 +26,24 @@ type ChunkPos struct {
 // Multiple bots can subscribe to the same World and update it from their
 // respective connections.
 type World struct {
-	mu      sync.RWMutex
-	chunks  map[ChunkPos]*level.Chunk
-	version string
-	minY    int
-	height  int
-	center  ChunkPos
+	mu        sync.RWMutex
+	chunks    map[ChunkPos]*level.Chunk
+	revisions map[ChunkPos]int64
+	version   string
+	minY      int
+	height    int
+	center    ChunkPos
 }
 
 // NewWorld creates a new World for the given protocol version and vertical
 // bounds. For a 1.21 overworld use minY=-64 and height=384.
 func NewWorld(version string, minY, height int) *World {
 	return &World{
-		chunks:  make(map[ChunkPos]*level.Chunk),
-		version: version,
-		minY:    minY,
-		height:  height,
+		chunks:    make(map[ChunkPos]*level.Chunk),
+		revisions: make(map[ChunkPos]int64),
+		version:   version,
+		minY:      minY,
+		height:    height,
 	}
 }
 
@@ -171,6 +173,15 @@ func (w *World) HeightAt(kind string, x, z int32) (h int32, err error) {
 	return hv + int32(w.minY), nil
 }
 
+// ChunkRevision returns a per-chunk counter that is bumped whenever the stored
+// chunk changes (a new chunk packet or a block update). Consumers compare it
+// against the revision they last read to detect stale cached data.
+func (w *World) ChunkRevision(cx, cz int32) (revision int64) {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	return w.revisions[ChunkPos{cx, cz}]
+}
+
 // SetBlock updates the global block state ID at the given world coordinates.
 func (w *World) SetBlock(x, y, z int32, stateId int32) (err error) {
 	w.mu.Lock()
@@ -190,13 +201,18 @@ func (w *World) SetBlock(x, y, z int32, stateId int32) (err error) {
 
 	lx, ly, lz := blockToLocal(x, y, z)
 	index := ly*level.ChunkWidth*level.ChunkWidth + lz*level.ChunkWidth + lx
-	return chunk.Sections[sectionIndex].Blocks.Set(index, stateId)
+	if err = chunk.Sections[sectionIndex].Blocks.Set(index, stateId); err != nil {
+		return
+	}
+	w.revisions[ChunkPos{chunkX, chunkZ}]++
+	return nil
 }
 
 func (w *World) storeChunk(pos ChunkPos, chunk *level.Chunk) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.chunks[pos] = chunk
+	w.revisions[pos]++
 }
 
 // updateLight applies a standalone light-update packet to a loaded chunk. Unlike
@@ -238,6 +254,7 @@ func (w *World) dropChunk(pos ChunkPos) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	delete(w.chunks, pos)
+	delete(w.revisions, pos)
 }
 
 func (w *World) setCenter(pos ChunkPos) {
@@ -250,8 +267,8 @@ func (w *World) setCenter(pos ChunkPos) {
 // World. Multiple Modules can point to the same World.
 type Module struct {
 	*proto.Conn
-	world         *World
-	desiredBatch  float32
+	world        *World
+	desiredBatch float32
 }
 
 // NewModule creates a Module around an existing World without registering handlers.
