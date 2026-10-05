@@ -6,6 +6,7 @@ import (
 
 	"github.com/admin-else/strom/mc/event"
 	"github.com/admin-else/strom/mc/proto"
+	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
 	"github.com/admin-else/strom/mc/proto_generated/v26_4_snapshot_2"
 )
@@ -29,8 +30,96 @@ const (
 
 	// First version whose ServerboundAcceptTeleportationPacket carries the
 	// accepted position, so the older teleport-id-only shape cannot be used.
+	// Its CommonSettings packet also gained ParticleStatus, matching the 26.4
+	// generated shape.
 	firstPositionTeleportConfirmVersion = "26.4-snapshot-2"
+
+	// Options.renderDistance IntRange(2, 32) in 26.4.
+	minViewDistance = 2
+	maxViewDistance = 32
+
+	// ClientInformation.createDefault().
+	clientInformationDefaultLanguage    = "en_us"
+	clientInformationDefaultViewDist    = 2
+	clientInformationChatVisibilityFull = 0
+	// HumanoidArm.RIGHT.id, Player.DEFAULT_MAIN_HAND.
+	clientInformationRightHand      = 1
+	clientInformationParticleStatus = "all"
 )
+
+// ClientInformation mirrors net.minecraft.server.level.ClientInformation, the
+// payload of ServerboundClientInformationPacket (generated CommonSettings).
+type ClientInformation struct {
+	Language             string
+	ViewDistance         int
+	ChatVisibility       int32
+	ChatColors           bool
+	ModelCustomisation   uint8
+	MainHand             int32
+	TextFilteringEnabled bool
+	AllowsListing        bool
+	ParticleStatus       string
+}
+
+// DefaultClientInformation returns ClientInformation.createDefault(). The
+// vanilla client derives its settings from Options.buildPlayerInformation, but
+// a headless bot has no options screen, so the record default is the baseline.
+func DefaultClientInformation() (info ClientInformation) {
+	return ClientInformation{
+		Language:             clientInformationDefaultLanguage,
+		ViewDistance:         clientInformationDefaultViewDist,
+		ChatVisibility:       clientInformationChatVisibilityFull,
+		ChatColors:           true,
+		ModelCustomisation:   0,
+		MainHand:             clientInformationRightHand,
+		TextFilteringEnabled: false,
+		AllowsListing:        false,
+		ParticleStatus:       clientInformationParticleStatus,
+	}
+}
+
+// clampViewDistance bounds a render distance to the vanilla range and the
+// int8 CommonSettings field.
+func clampViewDistance(distance int) (clamped int) {
+	if distance < minViewDistance {
+		return minViewDistance
+	}
+	if distance > maxViewDistance {
+		return maxViewDistance
+	}
+	return distance
+}
+
+// commonSettingsPacket builds the ServerboundClientInformationPacket for the
+// given connection version. Every version this module handles (>= 1.21.11)
+// uses the CommonSettings shape; the field set is identical, so the 1.21.11
+// type is converted by the connection for all versions except 26.4.
+func commonSettingsPacket(version string, info ClientInformation) (packet proto_base.EncodeDecodeAble) {
+	if version == firstPositionTeleportConfirmVersion {
+		return &v26_4_snapshot_2.PlayToServerPacketCommonSettings{
+			Locale:              info.Language,
+			ViewDistance:        int8(info.ViewDistance),
+			ChatFlags:           info.ChatVisibility,
+			ChatColors:          info.ChatColors,
+			SkinParts:           info.ModelCustomisation,
+			MainHand:            info.MainHand,
+			EnableTextFiltering: info.TextFilteringEnabled,
+			EnableServerListing: info.AllowsListing,
+			ParticleStatus:      info.ParticleStatus,
+		}
+	}
+	return &v1_21_11.PlayToServerPacketCommonSettings{
+		Locale:              info.Language,
+		ViewDistance:        int8(info.ViewDistance),
+		ChatFlags:           info.ChatVisibility,
+		ChatColors:          info.ChatColors,
+		SkinParts:           info.ModelCustomisation,
+		MainHand:            info.MainHand,
+		EnableTextFiltering: info.TextFilteringEnabled,
+		EnableServerListing: info.AllowsListing,
+		ParticleStatus:      info.ParticleStatus,
+	}
+}
 
 // Module tracks the local player and drives movement for a connection.
 type Module struct {
@@ -70,11 +159,16 @@ type Module struct {
 	health         float32
 	food           int32
 	foodSaturation float32
+
+	clientInformation      ClientInformation
+	clientInformationDirty bool
 }
 
 // NewModule creates a player module without registering handlers.
 func NewModule(c *proto.Conn) (m *Module) {
-	return &Module{Conn: c}
+	m = &Module{Conn: c}
+	m.clientInformation = DefaultClientInformation()
+	return
 }
 
 // Start tracks the local player on c and begins flushing movement at the
@@ -125,6 +219,7 @@ func (m *Module) applyJoin(entityId int32, worldName string, dimension int32, ga
 	m.simulationDistance = simulationDistance
 	m.enforcesSecureChat = enforcesSecureChat
 	m.joined = true
+	m.clientInformationDirty = true
 	m.Log.Info("player joined", "entityId", entityId, "world", worldName, "gamemode", gamemode, "viewDistance", viewDistance, "simulationDistance", simulationDistance)
 	return
 }
@@ -241,6 +336,13 @@ func (m *Module) tick() (err error) {
 		return nil
 	}
 
+	if m.clientInformationDirty {
+		if err = m.Send(commonSettingsPacket(m.Conn.Version, m.clientInformation)); err != nil {
+			return
+		}
+		m.clientInformationDirty = false
+	}
+
 	deltaX := m.position.X - m.lastSentPosition.X
 	deltaY := m.position.Y - m.lastSentPosition.Y
 	deltaZ := m.position.Z - m.lastSentPosition.Z
@@ -308,6 +410,44 @@ func (m *Module) SetRotation(yaw, pitch float32) {
 // Look sets the client rotation, matching the vanilla camera look direction.
 func (m *Module) Look(yaw, pitch float32) {
 	m.SetRotation(yaw, pitch)
+}
+
+// SetViewDistance sets the render distance, in chunks, reported to the server
+// in ServerboundClientInformationPacket. The value is clamped to the vanilla
+// Options.renderDistance range and flushed on the next tick.
+func (m *Module) SetViewDistance(distance int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.setViewDistanceLocked(distance)
+}
+
+func (m *Module) setViewDistanceLocked(distance int) {
+	m.clientInformation.ViewDistance = clampViewDistance(distance)
+	m.clientInformationDirty = true
+}
+
+// SetClientInformation replaces the client settings sent to the server and
+// flushes them on the next tick.
+func (m *Module) SetClientInformation(info ClientInformation) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	info.ViewDistance = clampViewDistance(info.ViewDistance)
+	m.clientInformation = info
+	m.clientInformationDirty = true
+}
+
+// ClientInformation returns the settings queued for the server.
+func (m *Module) ClientInformation() (info ClientInformation) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.clientInformation
+}
+
+// ViewDistance returns the queued render distance in chunks.
+func (m *Module) ViewDistance() (distance int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.clientInformation.ViewDistance
 }
 
 // Move adds a delta to the client position flushed on the next tick.
