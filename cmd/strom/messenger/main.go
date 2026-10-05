@@ -95,6 +95,8 @@ func (m *Messenger) OnStdin(e event.Stdin) (err error) {
 		return m.handleTp(args)
 	case "fly":
 		return m.handleFly(args)
+	case "viewdistance":
+		return m.handleViewDistance(args)
 	case "getblock":
 		return m.handleGetBlock(args)
 	case "light":
@@ -192,6 +194,28 @@ func (m *Messenger) handleFly(args string) (err error) {
 	m.player.Fly(values[0], values[1], values[2])
 	x, y, z := m.player.Position()
 	m.Log.Info("fly", "dx", values[0], "dy", values[1], "dz", values[2], "x", x, "y", y, "z", z)
+	return nil
+}
+
+// handleViewDistance queues a new render distance, which the player module sends
+// in its next ServerboundClientInformationPacket.
+func (m *Messenger) handleViewDistance(args string) (err error) {
+	if m.player == nil {
+		m.Log.Info("viewdistance", "error", "player unavailable for this version")
+		return nil
+	}
+	fields := strings.Fields(args)
+	if len(fields) != 1 {
+		m.Log.Info("viewdistance", "error", "expected one integer")
+		return nil
+	}
+	distance, err := strconv.Atoi(fields[0])
+	if err != nil {
+		m.Log.Info("viewdistance", "error", "bad number "+fields[0])
+		return nil
+	}
+	m.player.SetViewDistance(distance)
+	m.Log.Info("viewdistance", "distance", m.player.ViewDistance())
 	return nil
 }
 
