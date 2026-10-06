@@ -15,10 +15,12 @@ import (
 )
 
 // Level implements entity.CollisionGetter on top of a bot world plus
-// minecraft-data collision shapes. Entity collisions are not modelled yet.
+// minecraft-data collision shapes. Entity collisions are supplied by an
+// optional EntityProvider.
 type Level struct {
-	World   *world.World
-	Version string
+	World    *world.World
+	Version  string
+	Entities EntityProvider
 }
 
 // NewLevel wraps a shared world for the given protocol version.
@@ -28,6 +30,9 @@ func NewLevel(w *world.World, version string) (ret *Level) {
 
 // GetEntityCollisions mirrors Level.getEntityCollisions for the collision slice.
 func (l *Level) GetEntityCollisions(source *entity.Entity, box phys.AABB) (ret []*shapes.VoxelShape) {
+	if l.Entities != nil {
+		return l.Entities.EntityCollisionShapes(source, box)
+	}
 	return nil
 }
 

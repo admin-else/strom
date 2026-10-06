@@ -13,6 +13,7 @@ import (
 	"github.com/admin-else/strom/cmd/strom/cmd_util"
 	"github.com/admin-else/strom/mc/bot/chat"
 	"github.com/admin-else/strom/mc/bot/control"
+	botentity "github.com/admin-else/strom/mc/bot/entity"
 	"github.com/admin-else/strom/mc/bot/keepalive"
 	"github.com/admin-else/strom/mc/bot/player"
 	"github.com/admin-else/strom/mc/bot/world"
@@ -518,7 +519,9 @@ func Run(args []string) (err error) {
 		w := world.NewWorld(c.Version, -64, 384)
 		m.world = world.Start(c, w)
 		m.player = player.Start(c)
-		m.control = control.New(control.NewLevel(w, c.Version), m.player)
+		level := control.NewLevel(w, c.Version)
+		level.Entities = control.NewEntityTracker(botentity.Start(c))
+		m.control = control.New(level, m.player)
 		ticker := &event.Timer{}
 		ticker.Every(50*time.Millisecond, m.control.Tick)
 		ticker.Start(m.Conn.Loop)
