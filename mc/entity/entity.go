@@ -57,7 +57,7 @@ type Entity struct {
 
 	// Movement state mirroring LivingEntity/Player.
 	attributes map[Attribute]float64
-	effects    map[MobEffect]int
+	effects    map[MobEffect]EffectInstance
 	fallFlying bool
 	noGravity  bool
 
@@ -79,7 +79,7 @@ func NewEntity(level CollisionGetter, x float64, y float64, z float64, width flo
 		MaxUpStep:  0.6,
 		level:      level,
 		attributes: DefaultAttributes(),
-		effects:    make(map[MobEffect]int),
+		effects:    make(map[MobEffect]EffectInstance),
 		Abilities:  DefaultAbilities(),
 	}
 	ret.RecomputeBoundingBox()

@@ -61,7 +61,17 @@ func New(level entity.CollisionGetter, playerMod PlayerTarget) (ret *Controller)
 	yaw, pitch := playerMod.Rotation()
 	ent := entity.NewEntity(level, x, y, z, playerWidth, playerHeight)
 	ent.SetRotation(yaw, pitch)
-	return &Controller{level: level, player: playerMod, ent: ent, yaw: yaw, pitch: pitch}
+	controller := &Controller{level: level, player: playerMod, ent: ent, yaw: yaw, pitch: pitch}
+	if sink, ok := playerMod.(VelocitySink); ok {
+		sink.SetVelocityHandler(controller.ApplyServerVelocity)
+	}
+	return controller
+}
+
+// VelocitySink is implemented by a player target that can deliver server-pushed
+// velocities (net.minecraft.client.player.LocalPlayer via ClientPacketListener).
+type VelocitySink interface {
+	SetVelocityHandler(handler func(x float64, y float64, z float64))
 }
 
 // Level returns the collision source backing the controller.
@@ -131,6 +141,15 @@ func (c *Controller) SetSneak(sneak bool) { c.mu.Lock(); c.sneak = sneak; c.mu.U
 
 // SetSprint toggles sprinting.
 func (c *Controller) SetSprint(sprint bool) { c.mu.Lock(); c.sprint = sprint; c.mu.Unlock() }
+
+// ApplyServerVelocity mirrors Entity.lerpMotion: the server pushed a velocity
+// to this player (ClientboundSetEntityMotionPacket), so replace the local
+// delta movement. This is the server-side half of player movement.
+func (c *Controller) ApplyServerVelocity(x float64, y float64, z float64) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.ent.SetDeltaMovement(phys.NewVec3(x, y, z))
+}
 
 // Stop clears every active action.
 func (c *Controller) Stop() {

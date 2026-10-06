@@ -112,3 +112,33 @@ func TestControllerJumpSetsUpwardVelocity(t *testing.T) {
 		t.Fatalf("jump should give upward velocity, got %v", ctrl.Entity().GetDeltaMovement().Y)
 	}
 }
+
+func TestControllerAppliesServerVelocity(t *testing.T) {
+	ctrl, _ := newTestController(t)
+	ctrl.ApplyServerVelocity(1, 2, 3)
+	if got := ctrl.Entity().GetDeltaMovement(); got != phys.NewVec3(1, 2, 3) {
+		t.Fatalf("server velocity not applied: got %+v", got)
+	}
+}
+
+type velocityTarget struct {
+	fakeTarget
+	handler func(x float64, y float64, z float64)
+}
+
+func (v *velocityTarget) SetVelocityHandler(handler func(x float64, y float64, z float64)) {
+	v.handler = handler
+}
+
+func TestControllerRegistersVelocityHandler(t *testing.T) {
+	level := fakeLevel{shapes: []*shapes.VoxelShape{shapes.Box(-10, -1, -10, 10, 0, 10)}}
+	target := &velocityTarget{}
+	ctrl := New(level, target)
+	if target.handler == nil {
+		t.Fatalf("controller must register a velocity handler")
+	}
+	target.handler(4, 5, 6)
+	if got := ctrl.Entity().GetDeltaMovement(); got != phys.NewVec3(4, 5, 6) {
+		t.Fatalf("handler velocity not applied: got %+v", got)
+	}
+}

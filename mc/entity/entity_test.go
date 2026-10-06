@@ -127,7 +127,7 @@ func TestJumpBoostIncreasesJumpPower(t *testing.T) {
 	level := testLevel{}
 	e := NewEntity(level, 0.5, 0, 0.5, 0.6, 1.8)
 	base := e.GetJumpPower(1.0, 1.0)
-	e.AddEffect(MobEffectJUMP_BOOST, 1)
+	e.AddEffect(MobEffectJUMP_BOOST, 1, -1)
 	boosted := e.GetJumpPower(1.0, 1.0)
 	if !almost(float64(base), 0.42, 1e-6) {
 		t.Fatalf("base jump power: got %v want 0.42", base)
@@ -141,7 +141,7 @@ func TestSlowFallingReducesGravity(t *testing.T) {
 	level := testLevel{}
 	e := NewEntity(level, 0.5, 0, 0.5, 0.6, 1.8)
 	e.SetDeltaMovement(phys.NewVec3(0, -1, 0))
-	e.AddEffect(MobEffectSLOW_FALLING, 0)
+	e.AddEffect(MobEffectSLOW_FALLING, 0, -1)
 	if got := e.GetEffectiveGravity(); !almost(got, 0.01, 1e-9) {
 		t.Fatalf("slow falling gravity: got %v want 0.01", got)
 	}
@@ -153,5 +153,22 @@ func TestHandleOnClimbableClampsMovement(t *testing.T) {
 	// OnClimbable is false for a plain CollisionGetter, so the delta is unchanged.
 	if got := e.HandleOnClimbable(phys.NewVec3(1, -2, 3)); got != phys.NewVec3(1, -2, 3) {
 		t.Fatalf("non-climbable delta must pass through, got %+v", got)
+	}
+}
+
+func TestTickEffectsExpires(t *testing.T) {
+	e := NewEntity(testLevel{}, 0, 0, 0, 0.6, 1.8)
+	e.AddEffect(MobEffectJUMP_BOOST, 0, 2)
+	e.TickEffects()
+	e.TickEffects()
+	if e.HasEffect(MobEffectJUMP_BOOST) {
+		t.Fatalf("timed effect should expire")
+	}
+	e.AddEffect(MobEffectSLOW_FALLING, 0, -1)
+	for i := 0; i < 5; i++ {
+		e.TickEffects()
+	}
+	if !e.HasEffect(MobEffectSLOW_FALLING) {
+		t.Fatalf("infinite effect should persist")
 	}
 }

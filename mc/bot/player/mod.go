@@ -162,6 +162,10 @@ type Module struct {
 
 	clientInformation      ClientInformation
 	clientInformationDirty bool
+
+	// onVelocity is invoked when the server pushes a velocity to the local
+	// player (ClientboundSetEntityMotionPacket).
+	onVelocity func(x float64, y float64, z float64)
 }
 
 // NewModule creates a player module without registering handlers.
@@ -191,6 +195,7 @@ func (m *Module) registerHandlers() {
 	m.RegisterUntilLatest(m.onKickDisconnect)
 	m.RegisterUntilLatest(m.onPosition)
 	m.RegisterUntilLatest(m.onPlayerRotation)
+	m.RegisterUntilLatest(m.onEntityVelocity)
 }
 
 func (m *Module) startTick() {
@@ -299,6 +304,26 @@ func (m *Module) onPlayerRotation(p *v1_21_11.PlayToClientPacketPlayerRotation) 
 	m.lastSentRotation = m.rotation
 
 	return m.Send(&v1_21_11.PlayToServerPacketLook{Yaw: yaw, Pitch: pitch})
+}
+
+// SetVelocityHandler registers a callback invoked when the server pushes a
+// velocity to the local player (ClientboundSetEntityMotionPacket), mirroring
+// ClientPacketListener.handleSetEntityMotion -> Entity.lerpMotion.
+func (m *Module) SetVelocityHandler(handler func(x float64, y float64, z float64)) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.onVelocity = handler
+}
+
+func (m *Module) onEntityVelocity(p *v1_21_11.PlayToClientPacketEntityVelocity) (err error) {
+	m.mu.Lock()
+	handler := m.onVelocity
+	entityId := m.entityId
+	m.mu.Unlock()
+	if handler != nil && p.EntityId == entityId {
+		handler(p.Velocity.X, p.Velocity.Y, p.Velocity.Z)
+	}
+	return nil
 }
 
 // acceptTeleportLocked answers a server teleport. The connection is assumed
