@@ -86,16 +86,17 @@ func (e *Entity) ApplyInput(in Input, movingSlowly bool) (xxa float32, zza float
 }
 
 // TravelWithInput is the end-to-end input -> travel wiring: it turns the key
-// state into the movement vector and runs the ground/air travel step. speed is
-// the player's movement speed (0.1 walking) and gravity the effective gravity
-// (0.08).
-func (e *Entity) TravelWithInput(in Input, movingSlowly bool, speed float32, gravity float64) {
+// state into the movement vector and runs the LivingEntity travel step. Speed
+// and gravity come from the entity attributes.
+func (e *Entity) TravelWithInput(in Input, movingSlowly bool) {
 	xxa, zza := e.ApplyInput(in, movingSlowly)
 	e.jumping = in.Jump
-	if in.Jump && e.onGround {
+	e.SetSprinting(in.Sprint)
+	e.ShiftKeyDown = in.Shift
+	if in.Jump && e.OnGround() {
 		e.JumpFromGround()
 	}
-	e.Travel(phys.NewVec3(float64(xxa), 0.0, float64(zza)), speed, gravity)
+	e.Travel(phys.NewVec3(float64(xxa), 0.0, float64(zza)))
 }
 
 func minFloat32(a float32, b float32) (ret float32) {

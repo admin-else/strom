@@ -6,6 +6,7 @@ package control
 
 import (
 	"github.com/admin-else/strom/mc/bot/world"
+	"github.com/admin-else/strom/mc/core"
 	"github.com/admin-else/strom/mc/data"
 	"github.com/admin-else/strom/mc/entity"
 	"github.com/admin-else/strom/mc/phys"
@@ -58,4 +59,70 @@ func (l *Level) GetBlockCollisions(source *entity.Entity, box phys.AABB) (ret []
 		}
 	}
 	return
+}
+
+// blockName returns the block identifier at pos, or ok=false when the chunk is
+// not loaded.
+func (l *Level) blockName(pos core.BlockPos) (name string, ok bool) {
+	stateId, err := l.World.GetBlock(int32(pos.X), int32(pos.Y), int32(pos.Z))
+	if err != nil {
+		return "", false
+	}
+	block, found := data.LookupBlockByStateId(l.Version, stateId)
+	if !found {
+		return "", false
+	}
+	return block.Name, true
+}
+
+// MovementContext implementation (net.minecraft.world.level.Level fluid/climb
+// queries). Fluids and climbables are recognised by block name; block friction
+// is approximated from the vanilla defaults.
+
+// IsInWater mirrors Level.getFluidState(pos).is(FluidTags.WATER).
+func (l *Level) IsInWater(pos core.BlockPos) (ret bool) {
+	name, ok := l.blockName(pos)
+	return ok && name == "water"
+}
+
+// IsInLava mirrors Level.getFluidState(pos).is(FluidTags.LAVA).
+func (l *Level) IsInLava(pos core.BlockPos) (ret bool) {
+	name, ok := l.blockName(pos)
+	return ok && name == "lava"
+}
+
+// IsInShallowFluid approximates LivingEntity.isInShallowFluid by treating every
+// fluid contact as shallow (the world store does not carry per-block fluid
+// heights yet).
+func (l *Level) IsInShallowFluid(pos core.BlockPos) (ret bool) { return true }
+
+// OnClimbable approximates LivingEntity.onClimbable() by block name.
+func (l *Level) OnClimbable(pos core.BlockPos) (ret bool) {
+	name, ok := l.blockName(pos)
+	if !ok {
+		return false
+	}
+	switch name {
+	case "ladder", "vine", "scaffolding", "twisting_vines", "weeping_vines",
+		"cave_vines", "cave_vines_plant", "chain":
+		return true
+	}
+	return false
+}
+
+// BlockFriction mirrors Block.getFriction() for the common blocks.
+func (l *Level) BlockFriction(pos core.BlockPos) (ret float32) {
+	name, _ := l.blockName(pos)
+	switch name {
+	case "ice", "packed_ice", "blue_ice", "frosted_ice":
+		return 0.98
+	case "slime_block":
+		return 0.8
+	}
+	return 0.6
+}
+
+// NoCollision mirrors CollisionGetter.noCollision(AABB).
+func (l *Level) NoCollision(source *entity.Entity, box phys.AABB) (ret bool) {
+	return len(l.GetBlockCollisions(source, box)) == 0
 }

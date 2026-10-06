@@ -103,3 +103,55 @@ func almost(a, b, eps float64) bool {
 	}
 	return b-a <= eps
 }
+
+func TestFallDistanceAccumulatesAndResets(t *testing.T) {
+	level := testLevel{blockColliders: []*shapes.VoxelShape{
+		shapes.Box(-10, -1, -10, 10, 0, 10),
+	}}
+	e := NewEntity(level, 0.5, 5, 0.5, 0.6, 1.8)
+	for i := 0; i < 3; i++ {
+		e.Move(MoverTypeSELF, phys.NewVec3(0, -1, 0))
+	}
+	if e.GetFallDistance() <= 0 {
+		t.Fatalf("expected accumulating fall distance, got %v", e.GetFallDistance())
+	}
+	for i := 0; i < 10; i++ {
+		e.Move(MoverTypeSELF, phys.NewVec3(0, -1, 0))
+	}
+	if !e.OnGround() || e.GetFallDistance() != 0 {
+		t.Fatalf("expected fall distance reset on landing, got %v onGround=%v", e.GetFallDistance(), e.OnGround())
+	}
+}
+
+func TestJumpBoostIncreasesJumpPower(t *testing.T) {
+	level := testLevel{}
+	e := NewEntity(level, 0.5, 0, 0.5, 0.6, 1.8)
+	base := e.GetJumpPower(1.0, 1.0)
+	e.AddEffect(MobEffectJUMP_BOOST, 1)
+	boosted := e.GetJumpPower(1.0, 1.0)
+	if !almost(float64(base), 0.42, 1e-6) {
+		t.Fatalf("base jump power: got %v want 0.42", base)
+	}
+	if !almost(float64(boosted), 0.62, 1e-6) {
+		t.Fatalf("boosted jump power: got %v want 0.62", boosted)
+	}
+}
+
+func TestSlowFallingReducesGravity(t *testing.T) {
+	level := testLevel{}
+	e := NewEntity(level, 0.5, 0, 0.5, 0.6, 1.8)
+	e.SetDeltaMovement(phys.NewVec3(0, -1, 0))
+	e.AddEffect(MobEffectSLOW_FALLING, 0)
+	if got := e.GetEffectiveGravity(); !almost(got, 0.01, 1e-9) {
+		t.Fatalf("slow falling gravity: got %v want 0.01", got)
+	}
+}
+
+func TestHandleOnClimbableClampsMovement(t *testing.T) {
+	level := testLevel{}
+	e := NewEntity(level, 0.5, 0, 0.5, 0.6, 1.8)
+	// OnClimbable is false for a plain CollisionGetter, so the delta is unchanged.
+	if got := e.HandleOnClimbable(phys.NewVec3(1, -2, 3)); got != phys.NewVec3(1, -2, 3) {
+		t.Fatalf("non-climbable delta must pass through, got %+v", got)
+	}
+}

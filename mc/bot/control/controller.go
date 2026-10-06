@@ -179,7 +179,7 @@ func (c *Controller) Tick() (err error) {
 	input.Sprint = c.sprint
 
 	c.ent.SetRotation(c.yaw, c.pitch)
-	c.ent.TravelWithInput(input, input.Shift, moveSpeed, gravity)
+	c.ent.TravelWithInput(input, input.Shift)
 
 	c.player.SetPosition(c.ent.X, c.ent.Y, c.ent.Z)
 	c.player.SetRotation(c.yaw, c.pitch)

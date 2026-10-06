@@ -54,6 +54,21 @@ type Entity struct {
 
 	jumping bool
 	level   CollisionGetter
+
+	// Movement state mirroring LivingEntity/Player.
+	attributes map[Attribute]float64
+	effects    map[MobEffect]int
+	fallFlying bool
+	noGravity  bool
+
+	speedMultiplier           float32
+	suppressSlidingDownLadder bool
+	sprinting                 bool
+
+	// Player movement state (Player.java).
+	Abilities    Abilities
+	ShiftKeyDown bool
+	fallDistance float64
 }
 
 // NewEntity mirrors Entity(EntityType, Level) for the collision slice.
@@ -61,8 +76,11 @@ func NewEntity(level CollisionGetter, x float64, y float64, z float64, width flo
 	ret = &Entity{
 		X: x, Y: y, Z: z,
 		Width: width, Height: height,
-		MaxUpStep: 0.6,
-		level:     level,
+		MaxUpStep:  0.6,
+		level:      level,
+		attributes: DefaultAttributes(),
+		effects:    make(map[MobEffect]int),
+		Abilities:  DefaultAbilities(),
 	}
 	ret.RecomputeBoundingBox()
 	return
@@ -110,6 +128,12 @@ func (e *Entity) AddDeltaMovement(movement phys.Vec3) {
 // OnGround mirrors Entity.onGround().
 func (e *Entity) OnGround() (ret bool) { return e.onGround }
 
+// GetFallDistance mirrors Entity.fallDistance.
+func (e *Entity) GetFallDistance() (ret float64) { return e.fallDistance }
+
+// ResetFallDistance mirrors Entity.resetFallDistance().
+func (e *Entity) ResetFallDistance() { e.fallDistance = 0.0 }
+
 // HorizontalCollision mirrors Entity.horizontalCollision.
 func (e *Entity) HorizontalCollision() (ret bool) { return e.horizontalCollision }
 
@@ -153,6 +177,11 @@ func (e *Entity) Move(moverType MoverType, delta phys.Vec3) {
 		e.verticalCollisionBelow = e.verticalCollision && delta.Y < 0.0
 		e.onGround = e.verticalCollisionBelow
 	}
+	if e.onGround {
+		e.fallDistance = 0.0
+	} else if movement.Y < 0.0 {
+		e.fallDistance -= movement.Y
+	}
 	if e.horizontalCollision {
 		e.minorHorizontalCollision = false
 	} else {
@@ -164,11 +193,83 @@ func (e *Entity) Move(moverType MoverType, delta phys.Vec3) {
 // A headless client drives its own player, so it is authoritative.
 func (e *Entity) IsLocalInstanceAuthoritative() (ret bool) { return true }
 
-// MaybeBackOffFromEdge mirrors Entity.maybeBackOffFromEdge(Vec3, MoverType). The
-// base implementation returns the delta unchanged; sneaking edge protection is a
-// LivingEntity/Player override.
+// MaybeBackOffFromEdge mirrors Player.maybeBackOffFromEdge(Vec3, MoverType): the
+// sneaking edge protection. Java overrides the base Entity method; the headless
+// Entity represents a player, so the override is applied directly.
 func (e *Entity) MaybeBackOffFromEdge(delta phys.Vec3, moverType MoverType) (ret phys.Vec3) {
+	maxDownStep := float32(e.MaxUpStep)
+	if !e.Abilities.Flying &&
+		!(delta.Y > 0.0) &&
+		(moverType == MoverTypeSELF || moverType == MoverTypePLAYER) &&
+		e.IsStayingOnGroundSurface() &&
+		e.IsAboveGround(maxDownStep) {
+		deltaX := delta.X
+		deltaZ := delta.Z
+		stepX := mathSign(deltaX) * 0.05
+		stepZ := mathSign(deltaZ) * 0.05
+
+		for deltaX != 0.0 && e.CanFallAtLeast(deltaX, 0.0, float64(maxDownStep)) {
+			if math.Abs(deltaX) <= 0.05 {
+				deltaX = 0.0
+				break
+			}
+			deltaX -= stepX
+		}
+		for deltaZ != 0.0 && e.CanFallAtLeast(0.0, deltaZ, float64(maxDownStep)) {
+			if math.Abs(deltaZ) <= 0.05 {
+				deltaZ = 0.0
+				break
+			}
+			deltaZ -= stepZ
+		}
+		for deltaX != 0.0 && deltaZ != 0.0 && e.CanFallAtLeast(deltaX, deltaZ, float64(maxDownStep)) {
+			if math.Abs(deltaX) <= 0.05 {
+				deltaX = 0.0
+			} else {
+				deltaX -= stepX
+			}
+			if math.Abs(deltaZ) <= 0.05 {
+				deltaZ = 0.0
+			} else {
+				deltaZ -= stepZ
+			}
+		}
+		return phys.NewVec3(deltaX, delta.Y, deltaZ)
+	}
 	return delta
+}
+
+// IsStayingOnGroundSurface mirrors Player.isStayingOnGroundSurface() for a
+// shift-key-only player.
+func (e *Entity) IsStayingOnGroundSurface() (ret bool) { return e.ShiftKeyDown }
+
+// IsAboveGround mirrors Player.isAboveGround(float).
+func (e *Entity) IsAboveGround(maxDownStep float32) (ret bool) {
+	return e.OnGround() || e.fallDistance < float64(maxDownStep) && !e.CanFallAtLeast(0.0, 0.0, float64(maxDownStep)-e.fallDistance)
+}
+
+// CanFallAtLeast mirrors Player.canFallAtLeast(double, double, double).
+func (e *Entity) CanFallAtLeast(deltaX float64, deltaZ float64, minHeight float64) (ret bool) {
+	b := e.BoundingBox
+	box := phys.NewAABB(
+		b.MinX+1.0e-7+deltaX,
+		b.MinY-minHeight-1.0e-7,
+		b.MinZ+1.0e-7+deltaZ,
+		b.MaxX-1.0e-7+deltaX,
+		b.MinY,
+		b.MaxZ-1.0e-7+deltaZ,
+	)
+	return e.canNoCollision(box)
+}
+
+func mathSign(v float64) (ret float64) {
+	if v > 0 {
+		return 1
+	}
+	if v < 0 {
+		return -1
+	}
+	return 0
 }
 
 // Collide mirrors Entity.collide(Vec3), including the maxUpStep step-up search.
@@ -282,44 +383,6 @@ func GetInputVector(input phys.Vec3, speed float32, yRot float32) (ret phys.Vec3
 		movement.Y,
 		movement.Z*float64(cos)+movement.X*float64(sin),
 	)
-}
-
-// Travel mirrors the LivingEntity.travel ground/air path for a player without
-// attributes, mob effects, fluids or climbing (all deferred). input is the
-// (xxa, yya, zza) movement vector built from the key input.
-func (e *Entity) Travel(input phys.Vec3, speed float32, gravity float64) {
-	blockFriction := float32(1.0)
-	if e.onGround {
-		blockFriction = 0.6
-	}
-	movement := e.handleRelativeFrictionAndCalculateMovement(input, blockFriction, speed)
-	movementY := movement.Y - gravity
-	friction := blockFriction * 0.91
-	verticalFriction := float32(0.98)
-	e.SetDeltaMovement(phys.NewVec3(movement.X*float64(friction), movementY*float64(verticalFriction), movement.Z*float64(friction)))
-}
-
-func (e *Entity) handleRelativeFrictionAndCalculateMovement(input phys.Vec3, blockFriction float32, speed float32) (ret phys.Vec3) {
-	e.MoveRelative(e.getFrictionInfluencedSpeed(blockFriction, speed), input)
-	e.Move(MoverTypeSELF, e.GetDeltaMovement())
-	return e.GetDeltaMovement()
-}
-
-func (e *Entity) getFrictionInfluencedSpeed(blockFriction float32, speed float32) (ret float32) {
-	if e.onGround {
-		if blockFriction > 0.6 {
-			return speed * (0.21600002 / (blockFriction * blockFriction * blockFriction))
-		}
-		return speed
-	}
-	return 0.02
-}
-
-// JumpFromGround mirrors LivingEntity.jumpFromGround() with the default jump
-// power (0.42).
-func (e *Entity) JumpFromGround() {
-	movement := e.GetDeltaMovement()
-	e.SetDeltaMovement(phys.NewVec3(movement.X, 0.42, movement.Z))
 }
 
 func mthEqual(a float64, b float64) (ret bool) { return math.Abs(b-a) < float64(float32(1.0e-5)) }
