@@ -8,9 +8,11 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/admin-else/strom/cmd/strom/cmd_util"
 	"github.com/admin-else/strom/mc/bot/chat"
+	"github.com/admin-else/strom/mc/bot/control"
 	"github.com/admin-else/strom/mc/bot/keepalive"
 	"github.com/admin-else/strom/mc/bot/player"
 	"github.com/admin-else/strom/mc/bot/world"
@@ -38,10 +40,11 @@ var (
 
 type Messenger struct {
 	*proto.Conn
-	chat   *chat.Module
-	world  *world.Module
-	player *player.Module
-	legacy bool
+	chat    *chat.Module
+	world   *world.Module
+	player  *player.Module
+	control *control.Controller
+	legacy  bool
 }
 
 func (m *Messenger) OnChat(e *v1_21_11.PlayToClientPacketPlayerChat) (err error) {
@@ -91,6 +94,18 @@ func (m *Messenger) OnStdin(e event.Stdin) (err error) {
 		return m.handlePos()
 	case "look":
 		return m.handleLook(args)
+	case "lookat", "lookhere":
+		return m.handleLookAt(args)
+	case "move", "press":
+		return m.handleMove(args)
+	case "jump":
+		return m.handleJump(args)
+	case "sneak":
+		return m.handleSneak(args)
+	case "sprint":
+		return m.handleSprint(args)
+	case "stop":
+		return m.handleStop()
 	case "tp":
 		return m.handleTp(args)
 	case "fly":
@@ -127,13 +142,19 @@ func (m *Messenger) handlePos() (err error) {
 	}
 	x, y, z := m.player.Position()
 	yaw, pitch := m.player.Rotation()
-	m.Log.Info("pos",
+	logArgs := []any{
 		"x", x, "y", y, "z", z,
 		"yaw", yaw, "pitch", pitch,
 		"gamemode", m.player.Gamemode(),
 		"flying", m.player.Flying(),
 		"center", m.world.World().Center(),
-	)
+	}
+	if m.control != nil {
+		lx, ly, lz := m.control.Position()
+		cyaw, cpitch := m.control.Rotation()
+		logArgs = append(logArgs, "localX", lx, "localY", ly, "localZ", lz, "localYaw", cyaw, "localPitch", cpitch, "onGround", m.control.Entity().OnGround())
+	}
+	m.Log.Info("pos", logArgs...)
 	return
 }
 
@@ -162,6 +183,9 @@ func (m *Messenger) handleLook(args string) (err error) {
 		return nil
 	}
 	m.player.Look(float32(values[0]), float32(values[1]))
+	if m.control != nil {
+		m.control.Look(float32(values[0]), float32(values[1]))
+	}
 	m.Log.Info("look", "yaw", values[0], "pitch", values[1])
 	return nil
 }
@@ -310,6 +334,144 @@ func (m *Messenger) handleChunk(args string) (err error) {
 func (m *Messenger) handleChunks() (err error) {
 	w := m.world.World()
 	m.Log.Info("chunks", "count", w.ChunkCount(), "center", w.Center(), "minY", w.MinY(), "height", w.Height())
+	return
+}
+
+// parseSeconds parses a seconds argument into a time.Duration.
+func parseSeconds(field string) (d time.Duration, err error) {
+	value, err := strconv.ParseFloat(field, 64)
+	if err != nil {
+		return 0, fmt.Errorf("bad seconds %q", field)
+	}
+	if value < 0 {
+		value = 0
+	}
+	return time.Duration(value * float64(time.Second)), nil
+}
+
+func (m *Messenger) controlUnavailable(command string) (err error) {
+	m.Log.Info(command, "error", "physics controller unavailable for this version")
+	return nil
+}
+
+// handleLookAt implements "look here in X time": turn toward (x, y, z) after an
+// optional delay in seconds.
+func (m *Messenger) handleLookAt(args string) (err error) {
+	if m.control == nil {
+		return m.controlUnavailable("lookat")
+	}
+	fields := strings.Fields(args)
+	if len(fields) != 3 && len(fields) != 4 {
+		m.Log.Info("lookat", "error", "expected: lookat <x> <y> <z> [delaySeconds]")
+		return nil
+	}
+	coords, err := parseFloats(fields[:3], 3)
+	if err != nil {
+		m.Log.Info("lookat", "error", err.Error())
+		return nil
+	}
+	var delay time.Duration
+	if len(fields) == 4 {
+		delay, err = parseSeconds(fields[3])
+		if err != nil {
+			m.Log.Info("lookat", "error", err.Error())
+			return nil
+		}
+	}
+	m.control.LookAt(coords[0], coords[1], coords[2], delay)
+	m.Log.Info("lookat", "x", coords[0], "y", coords[1], "z", coords[2], "delay", delay.Seconds())
+	return nil
+}
+
+// handleMove implements "press wasd for X time": hold a set of movement keys for
+// the given duration (keys is a subset of wasd, plus 'j' to jump).
+func (m *Messenger) handleMove(args string) (err error) {
+	if m.control == nil {
+		return m.controlUnavailable("move")
+	}
+	fields := strings.Fields(args)
+	if len(fields) != 2 {
+		m.Log.Info("move", "error", "expected: move <wasdj> <seconds>")
+		return nil
+	}
+	duration, err := parseSeconds(fields[1])
+	if err != nil {
+		m.Log.Info("move", "error", err.Error())
+		return nil
+	}
+	unknown := m.control.Move(strings.ToLower(fields[0]), duration)
+	m.Log.Info("move", "keys", strings.ToLower(fields[0]), "seconds", duration.Seconds(), "unknown", string(unknown))
+	return nil
+}
+
+// handleJump implements "jump X seconds": hold the jump key for the duration
+// (default 0.25s).
+func (m *Messenger) handleJump(args string) (err error) {
+	if m.control == nil {
+		return m.controlUnavailable("jump")
+	}
+	fields := strings.Fields(args)
+	duration := 250 * time.Millisecond
+	if len(fields) == 1 {
+		duration, err = parseSeconds(fields[0])
+		if err != nil {
+			m.Log.Info("jump", "error", err.Error())
+			return nil
+		}
+	} else if len(fields) > 1 {
+		m.Log.Info("jump", "error", "expected: jump [seconds]")
+		return nil
+	}
+	m.control.Jump(duration)
+	m.Log.Info("jump", "seconds", duration.Seconds())
+	return nil
+}
+
+func parseToggle(args string) (value bool, ok bool) {
+	switch strings.ToLower(strings.TrimSpace(args)) {
+	case "on", "true", "1":
+		return true, true
+	case "off", "false", "0":
+		return false, true
+	default:
+		return false, false
+	}
+}
+
+func (m *Messenger) handleSneak(args string) (err error) {
+	if m.control == nil {
+		return m.controlUnavailable("sneak")
+	}
+	value, ok := parseToggle(args)
+	if !ok {
+		m.Log.Info("sneak", "error", "expected: sneak on|off")
+		return nil
+	}
+	m.control.SetSneak(value)
+	m.Log.Info("sneak", "value", value)
+	return nil
+}
+
+func (m *Messenger) handleSprint(args string) (err error) {
+	if m.control == nil {
+		return m.controlUnavailable("sprint")
+	}
+	value, ok := parseToggle(args)
+	if !ok {
+		m.Log.Info("sprint", "error", "expected: sprint on|off")
+		return nil
+	}
+	m.control.SetSprint(value)
+	m.Log.Info("sprint", "value", value)
+	return nil
+}
+
+func (m *Messenger) handleStop() (err error) {
+	if m.control == nil {
+		return m.controlUnavailable("stop")
+	}
+	m.control.Stop()
+	m.Log.Info("stop", "ok", true)
 	return nil
 }
 
@@ -356,6 +518,10 @@ func Run(args []string) (err error) {
 		w := world.NewWorld(c.Version, -64, 384)
 		m.world = world.Start(c, w)
 		m.player = player.Start(c)
+		m.control = control.New(control.NewLevel(w, c.Version), m.player)
+		ticker := &event.Timer{}
+		ticker.Every(50*time.Millisecond, m.control.Tick)
+		ticker.Start(m.Conn.Loop)
 	}
 
 	event.StartListingStdin(m.Loop)
