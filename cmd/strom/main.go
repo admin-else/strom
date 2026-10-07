@@ -11,6 +11,7 @@ import (
 
 	"github.com/admin-else/strom/cmd/strom/api"
 	"github.com/admin-else/strom/cmd/strom/data"
+	"github.com/admin-else/strom/cmd/strom/entities"
 	"github.com/admin-else/strom/cmd/strom/extract_mca"
 	"github.com/admin-else/strom/cmd/strom/mca_to_tmcpr"
 	"github.com/admin-else/strom/cmd/strom/messenger"
@@ -71,6 +72,7 @@ var subcommands = map[string]func(args []string) error{
 	"messenger":    messenger.Run,
 	"registry":     registry.Run,
 	"weather":      weather.Run,
+	"entities":     entities.Run,
 }
 
 func Help(args []string) (err error) {
