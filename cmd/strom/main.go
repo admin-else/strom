@@ -21,6 +21,7 @@ import (
 	"github.com/admin-else/strom/cmd/strom/print_replay"
 	// "github.com/admin-else/strom/cmd/strom/raw_capture" // removed: use tcpflow instead for raw TCP capture
 	"github.com/admin-else/strom/cmd/strom/raw_to_tmcpr"
+	"github.com/admin-else/strom/cmd/strom/registry"
 	"github.com/admin-else/strom/cmd/strom/serve_tmcpr"
 	"github.com/admin-else/strom/cmd/strom/serve_world"
 	"github.com/admin-else/strom/cmd/strom/status"
@@ -67,6 +68,7 @@ var subcommands = map[string]func(args []string) error{
 	"mca-to-tmcpr":         mca_to_tmcpr.Run,
 	"serve-tmcpr":          serve_tmcpr.Run,
 	"messenger":            messenger.Run,
+	"registry":             registry.Run,
 }
 
 func Help(args []string) (err error) {
