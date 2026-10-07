@@ -19,6 +19,7 @@ import (
 	"github.com/admin-else/strom/mc/proto_generated/v1_8"
 	"github.com/admin-else/strom/mc/proto_generated/v26_2"
 	"github.com/admin-else/strom/mc/proto_generated/v26_4_snapshot_2"
+	"github.com/admin-else/strom/mc/registry"
 	"github.com/admin-else/strom/mc/text"
 	"github.com/google/uuid"
 )
@@ -272,6 +273,14 @@ func WithIgnoreConfig() func(ls *loginSettings) {
 	}
 }
 
+// WithRegistries captures the configuration-phase dynamic registries into
+// store while logging in, so the caller can resolve wire ids afterwards.
+func WithRegistries(store *registry.Store) func(ls *loginSettings) {
+	return func(ls *loginSettings) {
+		ls.Registries = store
+	}
+}
+
 // DialFunc is a context-aware dial function used by Login to establish a TCP connection.
 type DialFunc func(ctx context.Context, network, addr string) (net.Conn, error)
 
@@ -301,6 +310,7 @@ type loginSettings struct {
 	Ctx          context.Context
 	Version      string
 	IgnoreConfig bool
+	Registries   *registry.Store
 	Conn         net.Conn
 	Dialer       DialFunc
 }
@@ -361,7 +371,7 @@ func Login(connectTo string, account *api.Account, settings ...func(ls *loginSet
 		return
 	}
 	if !ls.IgnoreConfig && c.ProtocolVersion >= 764 {
-		err = IgnoreConfig(c)
+		err = IgnoreConfigStore(c, ls.Registries)
 	}
 	return
 }

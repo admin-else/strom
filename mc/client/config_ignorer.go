@@ -8,10 +8,29 @@ import (
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_8"
+	"github.com/admin-else/strom/mc/registry"
 )
 
 type ConfigIgnorer struct {
 	*proto.Conn
+	// registries, when non-nil, receives every configuration RegistryData
+	// packet in wire (id) order.
+	registries *registry.Store
+}
+
+// OnRegistryData records one dynamic registry sent during configuration. The
+// optional element payload (NBT) is consumed by the packet decoder but not
+// stored; only the ordered resource ids matter for id mapping.
+func (c *ConfigIgnorer) OnRegistryData(packet *v1_21_8.ConfigurationToClientPacketRegistryData) (err error) {
+	if c.registries == nil {
+		return
+	}
+	r := registry.NewRegistry(packet.Id)
+	for _, entry := range packet.Entries {
+		r.Add(entry.Key)
+	}
+	c.registries.Set(r)
+	return
 }
 
 func (c *ConfigIgnorer) OnStart() (err error) {
@@ -49,9 +68,17 @@ func (c *ConfigIgnorer) OnKeepAlive(packet *v1_21_8.ConfigurationToClientPacketK
 
 // IgnoreConfig acknowledges configuration packets on the connection and transitions it to the Play state once configuration is complete.
 func IgnoreConfig(c *proto.Conn) (err error) {
-	ci := &ConfigIgnorer{c}
+	return IgnoreConfigStore(c, nil)
+}
+
+// IgnoreConfigStore is IgnoreConfig plus dynamic-registry capture: every
+// configuration RegistryData packet is added to store before the connection
+// transitions to the Play state. A nil store discards the registries.
+func IgnoreConfigStore(c *proto.Conn, store *registry.Store) (err error) {
+	ci := &ConfigIgnorer{Conn: c, registries: store}
 	ci.RegisterCritical(ci.Default)
 	ci.RegisterUntilLatest(ci.OnKnownPacks)
+	ci.RegisterUntilLatest(ci.OnRegistryData)
 	ci.RegisterUntilLatest(ci.OnFinish)
 	ci.RegisterUntilLatest(ci.OnPing)
 	ci.RegisterUntilLatest(ci.OnKeepAlive)
