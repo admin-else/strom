@@ -99,6 +99,10 @@ type Entity struct {
 	Velocity Vec3
 	OnGround bool
 
+	metadata     map[uint8]any
+	equipment    [equipmentSlotCount]ItemStack
+	equipmentSet [equipmentSlotCount]bool
+
 	codec VecDeltaCodec
 }
 
@@ -210,6 +214,8 @@ func Start(c *proto.Conn) (m *Module) {
 	m.Register(m.onEntityDestroy)
 	m.Register(m.onEntityHeadRotation)
 	m.Register(m.onEntityVelocity)
+	m.Register(m.onEntityMetadata)
+	m.Register(m.onEntityEquipment)
 	return
 }
 
