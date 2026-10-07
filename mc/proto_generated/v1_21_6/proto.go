@@ -2103,12 +2103,3698 @@ type SlotComponent struct {
 	Data any
 }
 
+var SlotComponentDataAttributeModifiersTmpElementOperationMap = map[int32]string{0: "add", 1: "multiply_base", 2: "multiply_total"}
+var SlotComponentDataAttributeModifiersTmpElementSlotMap = map[int32]string{0: "any", 1: "main_hand", 10: "saddle", 2: "off_hand", 3: "hand", 4: "feet", 5: "legs", 6: "chest", 7: "head", 8: "armor", 9: "body"}
+var SlotComponentDataAttributeModifiersTmpElementDisplayTypeMap = map[int32]string{0: "default", 1: "hidden", 2: "override"}
+var SlotComponentDataConsumableTmpAnimationMap = map[int32]string{0: "none", 1: "eat", 10: "bundle", 2: "drink", 3: "block", 4: "bow", 5: "spear", 6: "crossbow", 7: "spyglass", 8: "toot_horn", 9: "brush"}
+var SlotComponentDataEquippableTmpSlotMap = map[int32]string{0: "main_hand", 1: "off_hand", 2: "feet", 3: "legs", 4: "chest", 5: "head", 6: "body", 7: "saddle"}
+var SlotComponentDataRarityTmpMap = map[int32]string{0: "common", 1: "uncommon", 2: "rare", 3: "epic"}
+
 func (ret *SlotComponent) Decode(r io.ReadSeeker) (err error) {
-	err = proto_base.ToDoError
+	err = ret.Type.Decode(r)
+	if err != nil {
+		return
+	}
+	switch ret.Type.Val {
+	case "attribute_modifiers":
+		var SlotComponentDataAttributeModifiersTmp []struct {
+			TypeId    int32
+			Name      string
+			Value     float64
+			Operation string
+			Slot      string
+			Display   struct {
+				Type      string
+				Component any
+			}
+		}
+		var lSlotComponentDataAttributeModifiersTmp int32
+		lSlotComponentDataAttributeModifiersTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataAttributeModifiersTmp = []struct {
+			TypeId    int32
+			Name      string
+			Value     float64
+			Operation string
+			Slot      string
+			Display   struct {
+				Type      string
+				Component any
+			}
+		}{}
+		for range lSlotComponentDataAttributeModifiersTmp {
+			var SlotComponentDataAttributeModifiersTmpElement struct {
+				TypeId    int32
+				Name      string
+				Value     float64
+				Operation string
+				Slot      string
+				Display   struct {
+					Type      string
+					Component any
+				}
+			}
+			SlotComponentDataAttributeModifiersTmpElement.TypeId, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataAttributeModifiersTmpElement.Name, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataAttributeModifiersTmpElement.Value)
+			if err != nil {
+				return
+			}
+			var SlotComponentDataAttributeModifiersTmpElementOperationKey int32
+			SlotComponentDataAttributeModifiersTmpElementOperationKey, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataAttributeModifiersTmpElement.Operation, err = proto_base.ErroringIndex(SlotComponentDataAttributeModifiersTmpElementOperationMap, SlotComponentDataAttributeModifiersTmpElementOperationKey)
+			if err != nil {
+				return
+			}
+			var SlotComponentDataAttributeModifiersTmpElementSlotKey int32
+			SlotComponentDataAttributeModifiersTmpElementSlotKey, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataAttributeModifiersTmpElement.Slot, err = proto_base.ErroringIndex(SlotComponentDataAttributeModifiersTmpElementSlotMap, SlotComponentDataAttributeModifiersTmpElementSlotKey)
+			if err != nil {
+				return
+			}
+			var SlotComponentDataAttributeModifiersTmpElementDisplayTypeKey int32
+			SlotComponentDataAttributeModifiersTmpElementDisplayTypeKey, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataAttributeModifiersTmpElement.Display.Type, err = proto_base.ErroringIndex(SlotComponentDataAttributeModifiersTmpElementDisplayTypeMap, SlotComponentDataAttributeModifiersTmpElementDisplayTypeKey)
+			if err != nil {
+				return
+			}
+			switch SlotComponentDataAttributeModifiersTmpElement.Display.Type {
+			case "override":
+				var SlotComponentDataAttributeModifiersTmpElementDisplayComponentOverrideTmp nbt.Anon
+				err = SlotComponentDataAttributeModifiersTmpElementDisplayComponentOverrideTmp.Decode(r)
+				if err != nil {
+					return
+				}
+				SlotComponentDataAttributeModifiersTmpElement.Display.Component = SlotComponentDataAttributeModifiersTmpElementDisplayComponentOverrideTmp
+			}
+			SlotComponentDataAttributeModifiersTmp = append(SlotComponentDataAttributeModifiersTmp, SlotComponentDataAttributeModifiersTmpElement)
+		}
+		ret.Data = SlotComponentDataAttributeModifiersTmp
+	case "axolotl/variant":
+		var SlotComponentDataAxolotlvariantTmp int32
+		SlotComponentDataAxolotlvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataAxolotlvariantTmp
+	case "banner_patterns":
+		var SlotComponentDataBannerPatternsTmp struct {
+			Layers []BannerPatternLayer
+		}
+		var lSlotComponentDataBannerPatternsTmpLayers int32
+		lSlotComponentDataBannerPatternsTmpLayers, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataBannerPatternsTmp.Layers = []BannerPatternLayer{}
+		for range lSlotComponentDataBannerPatternsTmpLayers {
+			var SlotComponentDataBannerPatternsTmpLayersElement BannerPatternLayer
+			err = SlotComponentDataBannerPatternsTmpLayersElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBannerPatternsTmp.Layers = append(SlotComponentDataBannerPatternsTmp.Layers, SlotComponentDataBannerPatternsTmpLayersElement)
+		}
+		ret.Data = SlotComponentDataBannerPatternsTmp
+	case "base_color":
+		var SlotComponentDataBaseColorTmp int32
+		SlotComponentDataBaseColorTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataBaseColorTmp
+	case "bees":
+		var SlotComponentDataBeesTmp struct {
+			Bees []struct {
+				NbtData        nbt.Anon
+				TicksInHive    int32
+				MinTicksInHive int32
+			}
+		}
+		var lSlotComponentDataBeesTmpBees int32
+		lSlotComponentDataBeesTmpBees, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataBeesTmp.Bees = []struct {
+			NbtData        nbt.Anon
+			TicksInHive    int32
+			MinTicksInHive int32
+		}{}
+		for range lSlotComponentDataBeesTmpBees {
+			var SlotComponentDataBeesTmpBeesElement struct {
+				NbtData        nbt.Anon
+				TicksInHive    int32
+				MinTicksInHive int32
+			}
+			err = SlotComponentDataBeesTmpBeesElement.NbtData.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBeesTmpBeesElement.TicksInHive, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBeesTmpBeesElement.MinTicksInHive, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBeesTmp.Bees = append(SlotComponentDataBeesTmp.Bees, SlotComponentDataBeesTmpBeesElement)
+		}
+		ret.Data = SlotComponentDataBeesTmp
+	case "block_entity_data":
+		var SlotComponentDataBlockEntityDataTmp nbt.Anon
+		err = SlotComponentDataBlockEntityDataTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataBlockEntityDataTmp
+	case "block_state":
+		var SlotComponentDataBlockStateTmp struct {
+			Properties []struct {
+				Name  string
+				Value string
+			}
+		}
+		var lSlotComponentDataBlockStateTmpProperties int32
+		lSlotComponentDataBlockStateTmpProperties, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataBlockStateTmp.Properties = []struct {
+			Name  string
+			Value string
+		}{}
+		for range lSlotComponentDataBlockStateTmpProperties {
+			var SlotComponentDataBlockStateTmpPropertiesElement struct {
+				Name  string
+				Value string
+			}
+			SlotComponentDataBlockStateTmpPropertiesElement.Name, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBlockStateTmpPropertiesElement.Value, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBlockStateTmp.Properties = append(SlotComponentDataBlockStateTmp.Properties, SlotComponentDataBlockStateTmpPropertiesElement)
+		}
+		ret.Data = SlotComponentDataBlockStateTmp
+	case "blocks_attacks":
+		var SlotComponentDataBlocksAttacksTmp struct {
+			BlockDelaySeconds    float32
+			DisableCooldownScale float32
+			DamageReductions     []struct {
+				HorizontalBlockingAngle float32
+				Type                    *IDSet
+				Base                    float32
+				Factor                  float32
+			}
+			ItemDamage struct {
+				Threshold float32
+				Base      float32
+				Factor    float32
+			}
+			BypassedBy   *string
+			BlockSound   *ItemSoundHolder
+			DisableSound *ItemSoundHolder
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmp.BlockDelaySeconds)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmp.DisableCooldownScale)
+		if err != nil {
+			return
+		}
+		var lSlotComponentDataBlocksAttacksTmpDamageReductions int32
+		lSlotComponentDataBlocksAttacksTmpDamageReductions, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataBlocksAttacksTmp.DamageReductions = []struct {
+			HorizontalBlockingAngle float32
+			Type                    *IDSet
+			Base                    float32
+			Factor                  float32
+		}{}
+		for range lSlotComponentDataBlocksAttacksTmpDamageReductions {
+			var SlotComponentDataBlocksAttacksTmpDamageReductionsElement struct {
+				HorizontalBlockingAngle float32
+				Type                    *IDSet
+				Base                    float32
+				Factor                  float32
+			}
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmpDamageReductionsElement.HorizontalBlockingAngle)
+			if err != nil {
+				return
+			}
+			var SlotComponentDataBlocksAttacksTmpDamageReductionsElementTypePresent bool
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmpDamageReductionsElementTypePresent)
+			if err != nil {
+				return
+			}
+			if SlotComponentDataBlocksAttacksTmpDamageReductionsElementTypePresent {
+				var SlotComponentDataBlocksAttacksTmpDamageReductionsElementTypePresentValue IDSet
+				err = SlotComponentDataBlocksAttacksTmpDamageReductionsElementTypePresentValue.Decode(r)
+				if err != nil {
+					return
+				}
+				SlotComponentDataBlocksAttacksTmpDamageReductionsElement.Type = &SlotComponentDataBlocksAttacksTmpDamageReductionsElementTypePresentValue
+			}
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmpDamageReductionsElement.Base)
+			if err != nil {
+				return
+			}
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmpDamageReductionsElement.Factor)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBlocksAttacksTmp.DamageReductions = append(SlotComponentDataBlocksAttacksTmp.DamageReductions, SlotComponentDataBlocksAttacksTmpDamageReductionsElement)
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmp.ItemDamage.Threshold)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmp.ItemDamage.Base)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmp.ItemDamage.Factor)
+		if err != nil {
+			return
+		}
+		var SlotComponentDataBlocksAttacksTmpBypassedByPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmpBypassedByPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataBlocksAttacksTmpBypassedByPresent {
+			var SlotComponentDataBlocksAttacksTmpBypassedByPresentValue string
+			SlotComponentDataBlocksAttacksTmpBypassedByPresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBlocksAttacksTmp.BypassedBy = &SlotComponentDataBlocksAttacksTmpBypassedByPresentValue
+		}
+		var SlotComponentDataBlocksAttacksTmpBlockSoundPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmpBlockSoundPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataBlocksAttacksTmpBlockSoundPresent {
+			var SlotComponentDataBlocksAttacksTmpBlockSoundPresentValue ItemSoundHolder
+			err = SlotComponentDataBlocksAttacksTmpBlockSoundPresentValue.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBlocksAttacksTmp.BlockSound = &SlotComponentDataBlocksAttacksTmpBlockSoundPresentValue
+		}
+		var SlotComponentDataBlocksAttacksTmpDisableSoundPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataBlocksAttacksTmpDisableSoundPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataBlocksAttacksTmpDisableSoundPresent {
+			var SlotComponentDataBlocksAttacksTmpDisableSoundPresentValue ItemSoundHolder
+			err = SlotComponentDataBlocksAttacksTmpDisableSoundPresentValue.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBlocksAttacksTmp.DisableSound = &SlotComponentDataBlocksAttacksTmpDisableSoundPresentValue
+		}
+		ret.Data = SlotComponentDataBlocksAttacksTmp
+	case "break_sound":
+		var SlotComponentDataBreakSoundTmp ItemSoundHolder
+		err = SlotComponentDataBreakSoundTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataBreakSoundTmp
+	case "bucket_entity_data":
+		var SlotComponentDataBucketEntityDataTmp nbt.Anon
+		err = SlotComponentDataBucketEntityDataTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataBucketEntityDataTmp
+	case "bundle_contents":
+		var SlotComponentDataBundleContentsTmp struct {
+			Contents []Slot
+		}
+		var lSlotComponentDataBundleContentsTmpContents int32
+		lSlotComponentDataBundleContentsTmpContents, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataBundleContentsTmp.Contents = []Slot{}
+		for range lSlotComponentDataBundleContentsTmpContents {
+			var SlotComponentDataBundleContentsTmpContentsElement Slot
+			err = SlotComponentDataBundleContentsTmpContentsElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataBundleContentsTmp.Contents = append(SlotComponentDataBundleContentsTmp.Contents, SlotComponentDataBundleContentsTmpContentsElement)
+		}
+		ret.Data = SlotComponentDataBundleContentsTmp
+	case "can_break":
+		var SlotComponentDataCanBreakTmp struct {
+			Predicates []ItemBlockPredicate
+		}
+		var lSlotComponentDataCanBreakTmpPredicates int32
+		lSlotComponentDataCanBreakTmpPredicates, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataCanBreakTmp.Predicates = []ItemBlockPredicate{}
+		for range lSlotComponentDataCanBreakTmpPredicates {
+			var SlotComponentDataCanBreakTmpPredicatesElement ItemBlockPredicate
+			err = SlotComponentDataCanBreakTmpPredicatesElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataCanBreakTmp.Predicates = append(SlotComponentDataCanBreakTmp.Predicates, SlotComponentDataCanBreakTmpPredicatesElement)
+		}
+		ret.Data = SlotComponentDataCanBreakTmp
+	case "can_place_on":
+		var SlotComponentDataCanPlaceOnTmp struct {
+			Predicates []ItemBlockPredicate
+		}
+		var lSlotComponentDataCanPlaceOnTmpPredicates int32
+		lSlotComponentDataCanPlaceOnTmpPredicates, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataCanPlaceOnTmp.Predicates = []ItemBlockPredicate{}
+		for range lSlotComponentDataCanPlaceOnTmpPredicates {
+			var SlotComponentDataCanPlaceOnTmpPredicatesElement ItemBlockPredicate
+			err = SlotComponentDataCanPlaceOnTmpPredicatesElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataCanPlaceOnTmp.Predicates = append(SlotComponentDataCanPlaceOnTmp.Predicates, SlotComponentDataCanPlaceOnTmpPredicatesElement)
+		}
+		ret.Data = SlotComponentDataCanPlaceOnTmp
+	case "cat/collar":
+		var SlotComponentDataCatcollarTmp int32
+		SlotComponentDataCatcollarTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataCatcollarTmp
+	case "cat/variant":
+		var SlotComponentDataCatvariantTmp int32
+		SlotComponentDataCatvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataCatvariantTmp
+	case "charged_projectiles":
+		var SlotComponentDataChargedProjectilesTmp struct {
+			Projectiles []Slot
+		}
+		var lSlotComponentDataChargedProjectilesTmpProjectiles int32
+		lSlotComponentDataChargedProjectilesTmpProjectiles, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataChargedProjectilesTmp.Projectiles = []Slot{}
+		for range lSlotComponentDataChargedProjectilesTmpProjectiles {
+			var SlotComponentDataChargedProjectilesTmpProjectilesElement Slot
+			err = SlotComponentDataChargedProjectilesTmpProjectilesElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataChargedProjectilesTmp.Projectiles = append(SlotComponentDataChargedProjectilesTmp.Projectiles, SlotComponentDataChargedProjectilesTmpProjectilesElement)
+		}
+		ret.Data = SlotComponentDataChargedProjectilesTmp
+	case "chicken/variant":
+		var SlotComponentDataChickenvariantTmp any
+		var SlotComponentDataChickenvariantTmpId int32
+		SlotComponentDataChickenvariantTmpId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataChickenvariantTmpId != 0 {
+			SlotComponentDataChickenvariantTmp = SlotComponentDataChickenvariantTmpId
+		} else {
+			var SlotComponentDataChickenvariantTmpResult string
+			SlotComponentDataChickenvariantTmpResult, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataChickenvariantTmp = SlotComponentDataChickenvariantTmpResult
+		}
+		ret.Data = SlotComponentDataChickenvariantTmp
+	case "consumable":
+		var SlotComponentDataConsumableTmp struct {
+			ConsumeSeconds float32
+			Animation      string
+			Sound          ItemSoundHolder
+			MakesParticles bool
+			Effects        []ItemConsumeEffect
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataConsumableTmp.ConsumeSeconds)
+		if err != nil {
+			return
+		}
+		var SlotComponentDataConsumableTmpAnimationKey int32
+		SlotComponentDataConsumableTmpAnimationKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataConsumableTmp.Animation, err = proto_base.ErroringIndex(SlotComponentDataConsumableTmpAnimationMap, SlotComponentDataConsumableTmpAnimationKey)
+		if err != nil {
+			return
+		}
+		err = SlotComponentDataConsumableTmp.Sound.Decode(r)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataConsumableTmp.MakesParticles)
+		if err != nil {
+			return
+		}
+		var lSlotComponentDataConsumableTmpEffects int32
+		lSlotComponentDataConsumableTmpEffects, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataConsumableTmp.Effects = []ItemConsumeEffect{}
+		for range lSlotComponentDataConsumableTmpEffects {
+			var SlotComponentDataConsumableTmpEffectsElement ItemConsumeEffect
+			err = SlotComponentDataConsumableTmpEffectsElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataConsumableTmp.Effects = append(SlotComponentDataConsumableTmp.Effects, SlotComponentDataConsumableTmpEffectsElement)
+		}
+		ret.Data = SlotComponentDataConsumableTmp
+	case "container":
+		var SlotComponentDataContainerTmp struct {
+			Contents []Slot
+		}
+		var lSlotComponentDataContainerTmpContents int32
+		lSlotComponentDataContainerTmpContents, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataContainerTmp.Contents = []Slot{}
+		for range lSlotComponentDataContainerTmpContents {
+			var SlotComponentDataContainerTmpContentsElement Slot
+			err = SlotComponentDataContainerTmpContentsElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataContainerTmp.Contents = append(SlotComponentDataContainerTmp.Contents, SlotComponentDataContainerTmpContentsElement)
+		}
+		ret.Data = SlotComponentDataContainerTmp
+	case "container_loot":
+		var SlotComponentDataContainerLootTmp nbt.Anon
+		err = SlotComponentDataContainerLootTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataContainerLootTmp
+	case "cow/variant":
+		var SlotComponentDataCowvariantTmp int32
+		SlotComponentDataCowvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataCowvariantTmp
+	case "creative_slot_lock":
+		var SlotComponentDataCreativeSlotLockTmp struct {
+		}
+		ret.Data = SlotComponentDataCreativeSlotLockTmp
+	case "custom_data":
+		var SlotComponentDataCustomDataTmp nbt.Anon
+		err = SlotComponentDataCustomDataTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataCustomDataTmp
+	case "custom_model_data":
+		var SlotComponentDataCustomModelDataTmp struct {
+			Floats  []float32
+			Flags   []bool
+			Strings []string
+			Colors  []int32
+		}
+		var lSlotComponentDataCustomModelDataTmpFloats int32
+		lSlotComponentDataCustomModelDataTmpFloats, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataCustomModelDataTmp.Floats = []float32{}
+		for range lSlotComponentDataCustomModelDataTmpFloats {
+			var SlotComponentDataCustomModelDataTmpFloatsElement float32
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataCustomModelDataTmpFloatsElement)
+			if err != nil {
+				return
+			}
+			SlotComponentDataCustomModelDataTmp.Floats = append(SlotComponentDataCustomModelDataTmp.Floats, SlotComponentDataCustomModelDataTmpFloatsElement)
+		}
+		var lSlotComponentDataCustomModelDataTmpFlags int32
+		lSlotComponentDataCustomModelDataTmpFlags, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataCustomModelDataTmp.Flags = []bool{}
+		for range lSlotComponentDataCustomModelDataTmpFlags {
+			var SlotComponentDataCustomModelDataTmpFlagsElement bool
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataCustomModelDataTmpFlagsElement)
+			if err != nil {
+				return
+			}
+			SlotComponentDataCustomModelDataTmp.Flags = append(SlotComponentDataCustomModelDataTmp.Flags, SlotComponentDataCustomModelDataTmpFlagsElement)
+		}
+		var lSlotComponentDataCustomModelDataTmpStrings int32
+		lSlotComponentDataCustomModelDataTmpStrings, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataCustomModelDataTmp.Strings = []string{}
+		for range lSlotComponentDataCustomModelDataTmpStrings {
+			var SlotComponentDataCustomModelDataTmpStringsElement string
+			SlotComponentDataCustomModelDataTmpStringsElement, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataCustomModelDataTmp.Strings = append(SlotComponentDataCustomModelDataTmp.Strings, SlotComponentDataCustomModelDataTmpStringsElement)
+		}
+		var lSlotComponentDataCustomModelDataTmpColors int32
+		lSlotComponentDataCustomModelDataTmpColors, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataCustomModelDataTmp.Colors = []int32{}
+		for range lSlotComponentDataCustomModelDataTmpColors {
+			var SlotComponentDataCustomModelDataTmpColorsElement int32
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataCustomModelDataTmpColorsElement)
+			if err != nil {
+				return
+			}
+			SlotComponentDataCustomModelDataTmp.Colors = append(SlotComponentDataCustomModelDataTmp.Colors, SlotComponentDataCustomModelDataTmpColorsElement)
+		}
+		ret.Data = SlotComponentDataCustomModelDataTmp
+	case "custom_name":
+		var SlotComponentDataCustomNameTmp nbt.Anon
+		err = SlotComponentDataCustomNameTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataCustomNameTmp
+	case "damage":
+		var SlotComponentDataDamageTmp int32
+		SlotComponentDataDamageTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataDamageTmp
+	case "damage_resistant":
+		var SlotComponentDataDamageResistantTmp string
+		SlotComponentDataDamageResistantTmp, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataDamageResistantTmp
+	case "death_protection":
+		var SlotComponentDataDeathProtectionTmp struct {
+			Effects []ItemConsumeEffect
+		}
+		var lSlotComponentDataDeathProtectionTmpEffects int32
+		lSlotComponentDataDeathProtectionTmpEffects, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataDeathProtectionTmp.Effects = []ItemConsumeEffect{}
+		for range lSlotComponentDataDeathProtectionTmpEffects {
+			var SlotComponentDataDeathProtectionTmpEffectsElement ItemConsumeEffect
+			err = SlotComponentDataDeathProtectionTmpEffectsElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataDeathProtectionTmp.Effects = append(SlotComponentDataDeathProtectionTmp.Effects, SlotComponentDataDeathProtectionTmpEffectsElement)
+		}
+		ret.Data = SlotComponentDataDeathProtectionTmp
+	case "debug_stick_state":
+		var SlotComponentDataDebugStickStateTmp nbt.Anon
+		err = SlotComponentDataDebugStickStateTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataDebugStickStateTmp
+	case "dyed_color":
+		var SlotComponentDataDyedColorTmp int32
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataDyedColorTmp)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataDyedColorTmp
+	case "enchantable":
+		var SlotComponentDataEnchantableTmp int32
+		SlotComponentDataEnchantableTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataEnchantableTmp
+	case "enchantment_glint_override":
+		var SlotComponentDataEnchantmentGlintOverrideTmp bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEnchantmentGlintOverrideTmp)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataEnchantmentGlintOverrideTmp
+	case "enchantments":
+		var SlotComponentDataEnchantmentsTmp struct {
+			Enchantments []struct {
+				Id    int32
+				Level int32
+			}
+		}
+		var lSlotComponentDataEnchantmentsTmpEnchantments int32
+		lSlotComponentDataEnchantmentsTmpEnchantments, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataEnchantmentsTmp.Enchantments = []struct {
+			Id    int32
+			Level int32
+		}{}
+		for range lSlotComponentDataEnchantmentsTmpEnchantments {
+			var SlotComponentDataEnchantmentsTmpEnchantmentsElement struct {
+				Id    int32
+				Level int32
+			}
+			SlotComponentDataEnchantmentsTmpEnchantmentsElement.Id, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataEnchantmentsTmpEnchantmentsElement.Level, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataEnchantmentsTmp.Enchantments = append(SlotComponentDataEnchantmentsTmp.Enchantments, SlotComponentDataEnchantmentsTmpEnchantmentsElement)
+		}
+		ret.Data = SlotComponentDataEnchantmentsTmp
+	case "entity_data":
+		var SlotComponentDataEntityDataTmp nbt.Anon
+		err = SlotComponentDataEntityDataTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataEntityDataTmp
+	case "equippable":
+		var SlotComponentDataEquippableTmp struct {
+			Slot            string
+			Sound           ItemSoundHolder
+			Model           *string
+			CameraOverlay   *string
+			AllowedEntities *IDSet
+			Dispensable     bool
+			Swappable       bool
+			Damageable      bool
+			EquipOnInteract bool
+			Shearable       bool
+			ShearingSound   ItemSoundHolder
+		}
+		var SlotComponentDataEquippableTmpSlotKey int32
+		SlotComponentDataEquippableTmpSlotKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataEquippableTmp.Slot, err = proto_base.ErroringIndex(SlotComponentDataEquippableTmpSlotMap, SlotComponentDataEquippableTmpSlotKey)
+		if err != nil {
+			return
+		}
+		err = SlotComponentDataEquippableTmp.Sound.Decode(r)
+		if err != nil {
+			return
+		}
+		var SlotComponentDataEquippableTmpModelPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEquippableTmpModelPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataEquippableTmpModelPresent {
+			var SlotComponentDataEquippableTmpModelPresentValue string
+			SlotComponentDataEquippableTmpModelPresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataEquippableTmp.Model = &SlotComponentDataEquippableTmpModelPresentValue
+		}
+		var SlotComponentDataEquippableTmpCameraOverlayPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEquippableTmpCameraOverlayPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataEquippableTmpCameraOverlayPresent {
+			var SlotComponentDataEquippableTmpCameraOverlayPresentValue string
+			SlotComponentDataEquippableTmpCameraOverlayPresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataEquippableTmp.CameraOverlay = &SlotComponentDataEquippableTmpCameraOverlayPresentValue
+		}
+		var SlotComponentDataEquippableTmpAllowedEntitiesPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEquippableTmpAllowedEntitiesPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataEquippableTmpAllowedEntitiesPresent {
+			var SlotComponentDataEquippableTmpAllowedEntitiesPresentValue IDSet
+			err = SlotComponentDataEquippableTmpAllowedEntitiesPresentValue.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataEquippableTmp.AllowedEntities = &SlotComponentDataEquippableTmpAllowedEntitiesPresentValue
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEquippableTmp.Dispensable)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEquippableTmp.Swappable)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEquippableTmp.Damageable)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEquippableTmp.EquipOnInteract)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataEquippableTmp.Shearable)
+		if err != nil {
+			return
+		}
+		err = SlotComponentDataEquippableTmp.ShearingSound.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataEquippableTmp
+	case "firework_explosion":
+		var SlotComponentDataFireworkExplosionTmp ItemFireworkExplosion
+		err = SlotComponentDataFireworkExplosionTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataFireworkExplosionTmp
+	case "fireworks":
+		var SlotComponentDataFireworksTmp struct {
+			FlightDuration int32
+			Explosions     []ItemFireworkExplosion
+		}
+		SlotComponentDataFireworksTmp.FlightDuration, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		var lSlotComponentDataFireworksTmpExplosions int32
+		lSlotComponentDataFireworksTmpExplosions, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataFireworksTmp.Explosions = []ItemFireworkExplosion{}
+		for range lSlotComponentDataFireworksTmpExplosions {
+			var SlotComponentDataFireworksTmpExplosionsElement ItemFireworkExplosion
+			err = SlotComponentDataFireworksTmpExplosionsElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataFireworksTmp.Explosions = append(SlotComponentDataFireworksTmp.Explosions, SlotComponentDataFireworksTmpExplosionsElement)
+		}
+		ret.Data = SlotComponentDataFireworksTmp
+	case "food":
+		var SlotComponentDataFoodTmp struct {
+			Nutrition          int32
+			SaturationModifier float32
+			CanAlwaysEat       bool
+		}
+		SlotComponentDataFoodTmp.Nutrition, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataFoodTmp.SaturationModifier)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataFoodTmp.CanAlwaysEat)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataFoodTmp
+	case "fox/variant":
+		var SlotComponentDataFoxvariantTmp int32
+		SlotComponentDataFoxvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataFoxvariantTmp
+	case "frog/variant":
+		var SlotComponentDataFrogvariantTmp int32
+		SlotComponentDataFrogvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataFrogvariantTmp
+	case "glider":
+		var SlotComponentDataGliderTmp struct {
+		}
+		ret.Data = SlotComponentDataGliderTmp
+	case "horse/variant":
+		var SlotComponentDataHorsevariantTmp int32
+		SlotComponentDataHorsevariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataHorsevariantTmp
+	case "instrument":
+		var SlotComponentDataInstrumentTmp struct {
+			HasHolder bool
+			Data      any
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataInstrumentTmp.HasHolder)
+		if err != nil {
+			return
+		}
+		switch SlotComponentDataInstrumentTmp.HasHolder {
+		case false:
+			var SlotComponentDataInstrumentTmpDataFalseTmp string
+			SlotComponentDataInstrumentTmpDataFalseTmp, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataInstrumentTmp.Data = SlotComponentDataInstrumentTmpDataFalseTmp
+		case true:
+			var SlotComponentDataInstrumentTmpDataTrueTmp any
+			var SlotComponentDataInstrumentTmpDataTrueTmpId int32
+			SlotComponentDataInstrumentTmpDataTrueTmpId, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			if SlotComponentDataInstrumentTmpDataTrueTmpId != 0 {
+				SlotComponentDataInstrumentTmpDataTrueTmp = SlotComponentDataInstrumentTmpDataTrueTmpId
+			} else {
+				var SlotComponentDataInstrumentTmpDataTrueTmpResult InstrumentData
+				err = SlotComponentDataInstrumentTmpDataTrueTmpResult.Decode(r)
+				if err != nil {
+					return
+				}
+				SlotComponentDataInstrumentTmpDataTrueTmp = SlotComponentDataInstrumentTmpDataTrueTmpResult
+			}
+			SlotComponentDataInstrumentTmp.Data = SlotComponentDataInstrumentTmpDataTrueTmp
+		}
+		ret.Data = SlotComponentDataInstrumentTmp
+	case "intangible_projectile":
+		var SlotComponentDataIntangibleProjectileTmp struct {
+		}
+		ret.Data = SlotComponentDataIntangibleProjectileTmp
+	case "item_model":
+		var SlotComponentDataItemModelTmp string
+		SlotComponentDataItemModelTmp, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataItemModelTmp
+	case "item_name":
+		var SlotComponentDataItemNameTmp nbt.Anon
+		err = SlotComponentDataItemNameTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataItemNameTmp
+	case "jukebox_playable":
+		var SlotComponentDataJukeboxPlayableTmp struct {
+			HasHolder bool
+			Song      any
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataJukeboxPlayableTmp.HasHolder)
+		if err != nil {
+			return
+		}
+		switch SlotComponentDataJukeboxPlayableTmp.HasHolder {
+		case false:
+			var SlotComponentDataJukeboxPlayableTmpSongFalseTmp string
+			SlotComponentDataJukeboxPlayableTmpSongFalseTmp, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataJukeboxPlayableTmp.Song = SlotComponentDataJukeboxPlayableTmpSongFalseTmp
+		case true:
+			var SlotComponentDataJukeboxPlayableTmpSongTrueTmp any
+			var SlotComponentDataJukeboxPlayableTmpSongTrueTmpId int32
+			SlotComponentDataJukeboxPlayableTmpSongTrueTmpId, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			if SlotComponentDataJukeboxPlayableTmpSongTrueTmpId != 0 {
+				SlotComponentDataJukeboxPlayableTmpSongTrueTmp = SlotComponentDataJukeboxPlayableTmpSongTrueTmpId
+			} else {
+				var SlotComponentDataJukeboxPlayableTmpSongTrueTmpResult JukeboxSongData
+				err = SlotComponentDataJukeboxPlayableTmpSongTrueTmpResult.Decode(r)
+				if err != nil {
+					return
+				}
+				SlotComponentDataJukeboxPlayableTmpSongTrueTmp = SlotComponentDataJukeboxPlayableTmpSongTrueTmpResult
+			}
+			SlotComponentDataJukeboxPlayableTmp.Song = SlotComponentDataJukeboxPlayableTmpSongTrueTmp
+		}
+		ret.Data = SlotComponentDataJukeboxPlayableTmp
+	case "llama/variant":
+		var SlotComponentDataLlamavariantTmp int32
+		SlotComponentDataLlamavariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataLlamavariantTmp
+	case "lock":
+		var SlotComponentDataLockTmp nbt.Anon
+		err = SlotComponentDataLockTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataLockTmp
+	case "lodestone_tracker":
+		var SlotComponentDataLodestoneTrackerTmp struct {
+			GlobalPosition *struct {
+				Dimension string
+				Position  Position
+			}
+			Tracked bool
+		}
+		var SlotComponentDataLodestoneTrackerTmpGlobalPositionPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataLodestoneTrackerTmpGlobalPositionPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataLodestoneTrackerTmpGlobalPositionPresent {
+			var SlotComponentDataLodestoneTrackerTmpGlobalPositionPresentValue struct {
+				Dimension string
+				Position  Position
+			}
+			SlotComponentDataLodestoneTrackerTmpGlobalPositionPresentValue.Dimension, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			err = SlotComponentDataLodestoneTrackerTmpGlobalPositionPresentValue.Position.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataLodestoneTrackerTmp.GlobalPosition = &SlotComponentDataLodestoneTrackerTmpGlobalPositionPresentValue
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataLodestoneTrackerTmp.Tracked)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataLodestoneTrackerTmp
+	case "lore":
+		var SlotComponentDataLoreTmp []nbt.Anon
+		var lSlotComponentDataLoreTmp int32
+		lSlotComponentDataLoreTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataLoreTmp = []nbt.Anon{}
+		for range lSlotComponentDataLoreTmp {
+			var SlotComponentDataLoreTmpElement nbt.Anon
+			err = SlotComponentDataLoreTmpElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataLoreTmp = append(SlotComponentDataLoreTmp, SlotComponentDataLoreTmpElement)
+		}
+		ret.Data = SlotComponentDataLoreTmp
+	case "map_color":
+		var SlotComponentDataMapColorTmp int32
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataMapColorTmp)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataMapColorTmp
+	case "map_decorations":
+		var SlotComponentDataMapDecorationsTmp nbt.Anon
+		err = SlotComponentDataMapDecorationsTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataMapDecorationsTmp
+	case "map_id":
+		var SlotComponentDataMapIdTmp int32
+		SlotComponentDataMapIdTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataMapIdTmp
+	case "map_post_processing":
+		var SlotComponentDataMapPostProcessingTmp int32
+		SlotComponentDataMapPostProcessingTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataMapPostProcessingTmp
+	case "max_damage":
+		var SlotComponentDataMaxDamageTmp int32
+		SlotComponentDataMaxDamageTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataMaxDamageTmp
+	case "max_stack_size":
+		var SlotComponentDataMaxStackSizeTmp int32
+		SlotComponentDataMaxStackSizeTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataMaxStackSizeTmp
+	case "mooshroom/variant":
+		var SlotComponentDataMooshroomvariantTmp int32
+		SlotComponentDataMooshroomvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataMooshroomvariantTmp
+	case "note_block_sound":
+		var SlotComponentDataNoteBlockSoundTmp string
+		SlotComponentDataNoteBlockSoundTmp, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataNoteBlockSoundTmp
+	case "ominous_bottle_amplifier":
+		var SlotComponentDataOminousBottleAmplifierTmp int32
+		SlotComponentDataOminousBottleAmplifierTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataOminousBottleAmplifierTmp
+	case "painting/variant":
+		var SlotComponentDataPaintingvariantTmp any
+		var SlotComponentDataPaintingvariantTmpId int32
+		SlotComponentDataPaintingvariantTmpId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataPaintingvariantTmpId != 0 {
+			SlotComponentDataPaintingvariantTmp = SlotComponentDataPaintingvariantTmpId
+		} else {
+			var SlotComponentDataPaintingvariantTmpResult EntityMetadataPaintingVariant
+			err = SlotComponentDataPaintingvariantTmpResult.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataPaintingvariantTmp = SlotComponentDataPaintingvariantTmpResult
+		}
+		ret.Data = SlotComponentDataPaintingvariantTmp
+	case "parrot/variant":
+		var SlotComponentDataParrotvariantTmp int32
+		SlotComponentDataParrotvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataParrotvariantTmp
+	case "pig/variant":
+		var SlotComponentDataPigvariantTmp int32
+		SlotComponentDataPigvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataPigvariantTmp
+	case "pot_decorations":
+		var SlotComponentDataPotDecorationsTmp struct {
+			Decorations []int32
+		}
+		var lSlotComponentDataPotDecorationsTmpDecorations int32
+		lSlotComponentDataPotDecorationsTmpDecorations, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataPotDecorationsTmp.Decorations = []int32{}
+		for range lSlotComponentDataPotDecorationsTmpDecorations {
+			var SlotComponentDataPotDecorationsTmpDecorationsElement int32
+			SlotComponentDataPotDecorationsTmpDecorationsElement, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataPotDecorationsTmp.Decorations = append(SlotComponentDataPotDecorationsTmp.Decorations, SlotComponentDataPotDecorationsTmpDecorationsElement)
+		}
+		ret.Data = SlotComponentDataPotDecorationsTmp
+	case "potion_contents":
+		var SlotComponentDataPotionContentsTmp struct {
+			PotionId      *int32
+			CustomColor   *int32
+			CustomEffects []ItemPotionEffect
+			CustomName    *string
+		}
+		var SlotComponentDataPotionContentsTmpPotionIdPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataPotionContentsTmpPotionIdPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataPotionContentsTmpPotionIdPresent {
+			var SlotComponentDataPotionContentsTmpPotionIdPresentValue int32
+			SlotComponentDataPotionContentsTmpPotionIdPresentValue, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataPotionContentsTmp.PotionId = &SlotComponentDataPotionContentsTmpPotionIdPresentValue
+		}
+		var SlotComponentDataPotionContentsTmpCustomColorPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataPotionContentsTmpCustomColorPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataPotionContentsTmpCustomColorPresent {
+			var SlotComponentDataPotionContentsTmpCustomColorPresentValue int32
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataPotionContentsTmpCustomColorPresentValue)
+			if err != nil {
+				return
+			}
+			SlotComponentDataPotionContentsTmp.CustomColor = &SlotComponentDataPotionContentsTmpCustomColorPresentValue
+		}
+		var lSlotComponentDataPotionContentsTmpCustomEffects int32
+		lSlotComponentDataPotionContentsTmpCustomEffects, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataPotionContentsTmp.CustomEffects = []ItemPotionEffect{}
+		for range lSlotComponentDataPotionContentsTmpCustomEffects {
+			var SlotComponentDataPotionContentsTmpCustomEffectsElement ItemPotionEffect
+			err = SlotComponentDataPotionContentsTmpCustomEffectsElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataPotionContentsTmp.CustomEffects = append(SlotComponentDataPotionContentsTmp.CustomEffects, SlotComponentDataPotionContentsTmpCustomEffectsElement)
+		}
+		var SlotComponentDataPotionContentsTmpCustomNamePresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataPotionContentsTmpCustomNamePresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataPotionContentsTmpCustomNamePresent {
+			var SlotComponentDataPotionContentsTmpCustomNamePresentValue string
+			SlotComponentDataPotionContentsTmpCustomNamePresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataPotionContentsTmp.CustomName = &SlotComponentDataPotionContentsTmpCustomNamePresentValue
+		}
+		ret.Data = SlotComponentDataPotionContentsTmp
+	case "potion_duration_scale":
+		var SlotComponentDataPotionDurationScaleTmp float32
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataPotionDurationScaleTmp)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataPotionDurationScaleTmp
+	case "profile":
+		var SlotComponentDataProfileTmp struct {
+			Name       *string
+			Uuid       *uuid.UUID
+			Properties []struct {
+				Name      string
+				Value     string
+				Signature *string
+			}
+		}
+		var SlotComponentDataProfileTmpNamePresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataProfileTmpNamePresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataProfileTmpNamePresent {
+			var SlotComponentDataProfileTmpNamePresentValue string
+			SlotComponentDataProfileTmpNamePresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataProfileTmp.Name = &SlotComponentDataProfileTmpNamePresentValue
+		}
+		var SlotComponentDataProfileTmpUuidPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataProfileTmpUuidPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataProfileTmpUuidPresent {
+			var SlotComponentDataProfileTmpUuidPresentValue uuid.UUID
+			_, err = io.ReadFull(r, SlotComponentDataProfileTmpUuidPresentValue[:])
+			if err != nil {
+				return
+			}
+			SlotComponentDataProfileTmp.Uuid = &SlotComponentDataProfileTmpUuidPresentValue
+		}
+		var lSlotComponentDataProfileTmpProperties int32
+		lSlotComponentDataProfileTmpProperties, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataProfileTmp.Properties = []struct {
+			Name      string
+			Value     string
+			Signature *string
+		}{}
+		for range lSlotComponentDataProfileTmpProperties {
+			var SlotComponentDataProfileTmpPropertiesElement struct {
+				Name      string
+				Value     string
+				Signature *string
+			}
+			SlotComponentDataProfileTmpPropertiesElement.Name, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataProfileTmpPropertiesElement.Value, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			var SlotComponentDataProfileTmpPropertiesElementSignaturePresent bool
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataProfileTmpPropertiesElementSignaturePresent)
+			if err != nil {
+				return
+			}
+			if SlotComponentDataProfileTmpPropertiesElementSignaturePresent {
+				var SlotComponentDataProfileTmpPropertiesElementSignaturePresentValue string
+				SlotComponentDataProfileTmpPropertiesElementSignaturePresentValue, err = proto_base.DecodeString(r)
+				if err != nil {
+					return
+				}
+				SlotComponentDataProfileTmpPropertiesElement.Signature = &SlotComponentDataProfileTmpPropertiesElementSignaturePresentValue
+			}
+			SlotComponentDataProfileTmp.Properties = append(SlotComponentDataProfileTmp.Properties, SlotComponentDataProfileTmpPropertiesElement)
+		}
+		ret.Data = SlotComponentDataProfileTmp
+	case "provides_banner_patterns":
+		var SlotComponentDataProvidesBannerPatternsTmp string
+		SlotComponentDataProvidesBannerPatternsTmp, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataProvidesBannerPatternsTmp
+	case "provides_trim_material":
+		var SlotComponentDataProvidesTrimMaterialTmp struct {
+			HasHolder bool
+			Material  any
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataProvidesTrimMaterialTmp.HasHolder)
+		if err != nil {
+			return
+		}
+		switch SlotComponentDataProvidesTrimMaterialTmp.HasHolder {
+		case false:
+			var SlotComponentDataProvidesTrimMaterialTmpMaterialFalseTmp string
+			SlotComponentDataProvidesTrimMaterialTmpMaterialFalseTmp, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataProvidesTrimMaterialTmp.Material = SlotComponentDataProvidesTrimMaterialTmpMaterialFalseTmp
+		case true:
+			var SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmp any
+			var SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmpId int32
+			SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmpId, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			if SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmpId != 0 {
+				SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmp = SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmpId
+			} else {
+				var SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmpResult ArmorTrimMaterial
+				err = SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmpResult.Decode(r)
+				if err != nil {
+					return
+				}
+				SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmp = SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmpResult
+			}
+			SlotComponentDataProvidesTrimMaterialTmp.Material = SlotComponentDataProvidesTrimMaterialTmpMaterialTrueTmp
+		}
+		ret.Data = SlotComponentDataProvidesTrimMaterialTmp
+	case "rabbit/variant":
+		var SlotComponentDataRabbitvariantTmp int32
+		SlotComponentDataRabbitvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataRabbitvariantTmp
+	case "rarity":
+		var SlotComponentDataRarityTmp string
+		var SlotComponentDataRarityTmpKey int32
+		SlotComponentDataRarityTmpKey, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataRarityTmp, err = proto_base.ErroringIndex(SlotComponentDataRarityTmpMap, SlotComponentDataRarityTmpKey)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataRarityTmp
+	case "recipes":
+		var SlotComponentDataRecipesTmp nbt.Anon
+		err = SlotComponentDataRecipesTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataRecipesTmp
+	case "repair_cost":
+		var SlotComponentDataRepairCostTmp int32
+		SlotComponentDataRepairCostTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataRepairCostTmp
+	case "repairable":
+		var SlotComponentDataRepairableTmp struct {
+			Items IDSet
+		}
+		err = SlotComponentDataRepairableTmp.Items.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataRepairableTmp
+	case "salmon/size":
+		var SlotComponentDataSalmonsizeTmp int32
+		SlotComponentDataSalmonsizeTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataSalmonsizeTmp
+	case "sheep/color":
+		var SlotComponentDataSheepcolorTmp int32
+		SlotComponentDataSheepcolorTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataSheepcolorTmp
+	case "shulker/color":
+		var SlotComponentDataShulkercolorTmp int32
+		SlotComponentDataShulkercolorTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataShulkercolorTmp
+	case "stored_enchantments":
+		var SlotComponentDataStoredEnchantmentsTmp struct {
+			Enchantments []struct {
+				Id    int32
+				Level int32
+			}
+		}
+		var lSlotComponentDataStoredEnchantmentsTmpEnchantments int32
+		lSlotComponentDataStoredEnchantmentsTmpEnchantments, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataStoredEnchantmentsTmp.Enchantments = []struct {
+			Id    int32
+			Level int32
+		}{}
+		for range lSlotComponentDataStoredEnchantmentsTmpEnchantments {
+			var SlotComponentDataStoredEnchantmentsTmpEnchantmentsElement struct {
+				Id    int32
+				Level int32
+			}
+			SlotComponentDataStoredEnchantmentsTmpEnchantmentsElement.Id, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataStoredEnchantmentsTmpEnchantmentsElement.Level, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataStoredEnchantmentsTmp.Enchantments = append(SlotComponentDataStoredEnchantmentsTmp.Enchantments, SlotComponentDataStoredEnchantmentsTmpEnchantmentsElement)
+		}
+		ret.Data = SlotComponentDataStoredEnchantmentsTmp
+	case "suspicious_stew_effects":
+		var SlotComponentDataSuspiciousStewEffectsTmp struct {
+			Effects []struct {
+				Effect   int32
+				Duration int32
+			}
+		}
+		var lSlotComponentDataSuspiciousStewEffectsTmpEffects int32
+		lSlotComponentDataSuspiciousStewEffectsTmpEffects, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataSuspiciousStewEffectsTmp.Effects = []struct {
+			Effect   int32
+			Duration int32
+		}{}
+		for range lSlotComponentDataSuspiciousStewEffectsTmpEffects {
+			var SlotComponentDataSuspiciousStewEffectsTmpEffectsElement struct {
+				Effect   int32
+				Duration int32
+			}
+			SlotComponentDataSuspiciousStewEffectsTmpEffectsElement.Effect, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataSuspiciousStewEffectsTmpEffectsElement.Duration, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataSuspiciousStewEffectsTmp.Effects = append(SlotComponentDataSuspiciousStewEffectsTmp.Effects, SlotComponentDataSuspiciousStewEffectsTmpEffectsElement)
+		}
+		ret.Data = SlotComponentDataSuspiciousStewEffectsTmp
+	case "tool":
+		var SlotComponentDataToolTmp struct {
+			Rules []struct {
+				Blocks               IDSet
+				Speed                *float32
+				CorrectDropForBlocks *bool
+			}
+			DefaultMiningSpeed         float32
+			DamagePerBlock             int32
+			CanDestroyBlocksInCreative bool
+		}
+		var lSlotComponentDataToolTmpRules int32
+		lSlotComponentDataToolTmpRules, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataToolTmp.Rules = []struct {
+			Blocks               IDSet
+			Speed                *float32
+			CorrectDropForBlocks *bool
+		}{}
+		for range lSlotComponentDataToolTmpRules {
+			var SlotComponentDataToolTmpRulesElement struct {
+				Blocks               IDSet
+				Speed                *float32
+				CorrectDropForBlocks *bool
+			}
+			err = SlotComponentDataToolTmpRulesElement.Blocks.Decode(r)
+			if err != nil {
+				return
+			}
+			var SlotComponentDataToolTmpRulesElementSpeedPresent bool
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataToolTmpRulesElementSpeedPresent)
+			if err != nil {
+				return
+			}
+			if SlotComponentDataToolTmpRulesElementSpeedPresent {
+				var SlotComponentDataToolTmpRulesElementSpeedPresentValue float32
+				err = binary.Read(r, binary.BigEndian, &SlotComponentDataToolTmpRulesElementSpeedPresentValue)
+				if err != nil {
+					return
+				}
+				SlotComponentDataToolTmpRulesElement.Speed = &SlotComponentDataToolTmpRulesElementSpeedPresentValue
+			}
+			var SlotComponentDataToolTmpRulesElementCorrectDropForBlocksPresent bool
+			err = binary.Read(r, binary.BigEndian, &SlotComponentDataToolTmpRulesElementCorrectDropForBlocksPresent)
+			if err != nil {
+				return
+			}
+			if SlotComponentDataToolTmpRulesElementCorrectDropForBlocksPresent {
+				var SlotComponentDataToolTmpRulesElementCorrectDropForBlocksPresentValue bool
+				err = binary.Read(r, binary.BigEndian, &SlotComponentDataToolTmpRulesElementCorrectDropForBlocksPresentValue)
+				if err != nil {
+					return
+				}
+				SlotComponentDataToolTmpRulesElement.CorrectDropForBlocks = &SlotComponentDataToolTmpRulesElementCorrectDropForBlocksPresentValue
+			}
+			SlotComponentDataToolTmp.Rules = append(SlotComponentDataToolTmp.Rules, SlotComponentDataToolTmpRulesElement)
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataToolTmp.DefaultMiningSpeed)
+		if err != nil {
+			return
+		}
+		SlotComponentDataToolTmp.DamagePerBlock, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataToolTmp.CanDestroyBlocksInCreative)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataToolTmp
+	case "tooltip_display":
+		var SlotComponentDataTooltipDisplayTmp struct {
+			HideTooltip      bool
+			HiddenComponents []int32
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataTooltipDisplayTmp.HideTooltip)
+		if err != nil {
+			return
+		}
+		var lSlotComponentDataTooltipDisplayTmpHiddenComponents int32
+		lSlotComponentDataTooltipDisplayTmpHiddenComponents, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataTooltipDisplayTmp.HiddenComponents = []int32{}
+		for range lSlotComponentDataTooltipDisplayTmpHiddenComponents {
+			var SlotComponentDataTooltipDisplayTmpHiddenComponentsElement int32
+			SlotComponentDataTooltipDisplayTmpHiddenComponentsElement, err = proto_base.DecodeVarInt(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataTooltipDisplayTmp.HiddenComponents = append(SlotComponentDataTooltipDisplayTmp.HiddenComponents, SlotComponentDataTooltipDisplayTmpHiddenComponentsElement)
+		}
+		ret.Data = SlotComponentDataTooltipDisplayTmp
+	case "tooltip_style":
+		var SlotComponentDataTooltipStyleTmp string
+		SlotComponentDataTooltipStyleTmp, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataTooltipStyleTmp
+	case "trim":
+		var SlotComponentDataTrimTmp struct {
+			Material any
+			Pattern  any
+		}
+		var SlotComponentDataTrimTmpMaterialId int32
+		SlotComponentDataTrimTmpMaterialId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataTrimTmpMaterialId != 0 {
+			SlotComponentDataTrimTmp.Material = SlotComponentDataTrimTmpMaterialId
+		} else {
+			var SlotComponentDataTrimTmpMaterialResult ArmorTrimMaterial
+			err = SlotComponentDataTrimTmpMaterialResult.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataTrimTmp.Material = SlotComponentDataTrimTmpMaterialResult
+		}
+		var SlotComponentDataTrimTmpPatternId int32
+		SlotComponentDataTrimTmpPatternId, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataTrimTmpPatternId != 0 {
+			SlotComponentDataTrimTmp.Pattern = SlotComponentDataTrimTmpPatternId
+		} else {
+			var SlotComponentDataTrimTmpPatternResult ArmorTrimPattern
+			err = SlotComponentDataTrimTmpPatternResult.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataTrimTmp.Pattern = SlotComponentDataTrimTmpPatternResult
+		}
+		ret.Data = SlotComponentDataTrimTmp
+	case "tropical_fish/base_color":
+		var SlotComponentDataTropicalFishbaseColorTmp int32
+		SlotComponentDataTropicalFishbaseColorTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataTropicalFishbaseColorTmp
+	case "tropical_fish/pattern":
+		var SlotComponentDataTropicalFishpatternTmp int32
+		SlotComponentDataTropicalFishpatternTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataTropicalFishpatternTmp
+	case "tropical_fish/pattern_color":
+		var SlotComponentDataTropicalFishpatternColorTmp int32
+		SlotComponentDataTropicalFishpatternColorTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataTropicalFishpatternColorTmp
+	case "unbreakable":
+		var SlotComponentDataUnbreakableTmp struct {
+		}
+		ret.Data = SlotComponentDataUnbreakableTmp
+	case "use_cooldown":
+		var SlotComponentDataUseCooldownTmp struct {
+			Seconds       float32
+			CooldownGroup *string
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataUseCooldownTmp.Seconds)
+		if err != nil {
+			return
+		}
+		var SlotComponentDataUseCooldownTmpCooldownGroupPresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataUseCooldownTmpCooldownGroupPresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataUseCooldownTmpCooldownGroupPresent {
+			var SlotComponentDataUseCooldownTmpCooldownGroupPresentValue string
+			SlotComponentDataUseCooldownTmpCooldownGroupPresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataUseCooldownTmp.CooldownGroup = &SlotComponentDataUseCooldownTmpCooldownGroupPresentValue
+		}
+		ret.Data = SlotComponentDataUseCooldownTmp
+	case "use_remainder":
+		var SlotComponentDataUseRemainderTmp Slot
+		err = SlotComponentDataUseRemainderTmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataUseRemainderTmp
+	case "villager/variant":
+		var SlotComponentDataVillagervariantTmp int32
+		SlotComponentDataVillagervariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataVillagervariantTmp
+	case "weapon":
+		var SlotComponentDataWeaponTmp struct {
+			ItemDamagePerAttack       int32
+			DisableBlockingForSeconds float32
+		}
+		SlotComponentDataWeaponTmp.ItemDamagePerAttack, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataWeaponTmp.DisableBlockingForSeconds)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataWeaponTmp
+	case "wolf/collar":
+		var SlotComponentDataWolfcollarTmp int32
+		SlotComponentDataWolfcollarTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataWolfcollarTmp
+	case "wolf/sound_variant":
+		var SlotComponentDataWolfsoundVariantTmp int32
+		SlotComponentDataWolfsoundVariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataWolfsoundVariantTmp
+	case "wolf/variant":
+		var SlotComponentDataWolfvariantTmp int32
+		SlotComponentDataWolfvariantTmp, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataWolfvariantTmp
+	case "writable_book_content":
+		var SlotComponentDataWritableBookContentTmp struct {
+			Pages []ItemBookPage
+		}
+		var lSlotComponentDataWritableBookContentTmpPages int32
+		lSlotComponentDataWritableBookContentTmpPages, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataWritableBookContentTmp.Pages = []ItemBookPage{}
+		for range lSlotComponentDataWritableBookContentTmpPages {
+			var SlotComponentDataWritableBookContentTmpPagesElement ItemBookPage
+			err = SlotComponentDataWritableBookContentTmpPagesElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataWritableBookContentTmp.Pages = append(SlotComponentDataWritableBookContentTmp.Pages, SlotComponentDataWritableBookContentTmpPagesElement)
+		}
+		ret.Data = SlotComponentDataWritableBookContentTmp
+	case "written_book_content":
+		var SlotComponentDataWrittenBookContentTmp struct {
+			RawTitle      string
+			FilteredTitle *string
+			Author        string
+			Generation    int32
+			Pages         []ItemWrittenBookPage
+			Resolved      bool
+		}
+		SlotComponentDataWrittenBookContentTmp.RawTitle, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		var SlotComponentDataWrittenBookContentTmpFilteredTitlePresent bool
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataWrittenBookContentTmpFilteredTitlePresent)
+		if err != nil {
+			return
+		}
+		if SlotComponentDataWrittenBookContentTmpFilteredTitlePresent {
+			var SlotComponentDataWrittenBookContentTmpFilteredTitlePresentValue string
+			SlotComponentDataWrittenBookContentTmpFilteredTitlePresentValue, err = proto_base.DecodeString(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataWrittenBookContentTmp.FilteredTitle = &SlotComponentDataWrittenBookContentTmpFilteredTitlePresentValue
+		}
+		SlotComponentDataWrittenBookContentTmp.Author, err = proto_base.DecodeString(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataWrittenBookContentTmp.Generation, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		var lSlotComponentDataWrittenBookContentTmpPages int32
+		lSlotComponentDataWrittenBookContentTmpPages, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		SlotComponentDataWrittenBookContentTmp.Pages = []ItemWrittenBookPage{}
+		for range lSlotComponentDataWrittenBookContentTmpPages {
+			var SlotComponentDataWrittenBookContentTmpPagesElement ItemWrittenBookPage
+			err = SlotComponentDataWrittenBookContentTmpPagesElement.Decode(r)
+			if err != nil {
+				return
+			}
+			SlotComponentDataWrittenBookContentTmp.Pages = append(SlotComponentDataWrittenBookContentTmp.Pages, SlotComponentDataWrittenBookContentTmpPagesElement)
+		}
+		err = binary.Read(r, binary.BigEndian, &SlotComponentDataWrittenBookContentTmp.Resolved)
+		if err != nil {
+			return
+		}
+		ret.Data = SlotComponentDataWrittenBookContentTmp
+	}
 	return
 }
+
+var SlotComponentDataInnerOperationReverseMap = map[string]int32{"add": 0, "multiply_base": 1, "multiply_total": 2}
+var SlotComponentDataInnerSlotReverseMap = map[string]int32{"any": 0, "main_hand": 1, "saddle": 10, "off_hand": 2, "hand": 3, "feet": 4, "legs": 5, "chest": 6, "head": 7, "armor": 8, "body": 9}
+var SlotComponentDataInnerDisplayTypeReverseMap = map[string]int32{"default": 0, "hidden": 1, "override": 2}
+var SlotComponentDataAnimationReverseMap = map[string]int32{"none": 0, "eat": 1, "bundle": 10, "drink": 2, "block": 3, "bow": 4, "spear": 5, "crossbow": 6, "spyglass": 7, "toot_horn": 8, "brush": 9}
+var SlotComponentDataSlotReverseMap = map[string]int32{"main_hand": 0, "off_hand": 1, "feet": 2, "legs": 3, "chest": 4, "head": 5, "body": 6, "saddle": 7}
+var SlotComponentDataReverseMap = map[string]int32{"common": 0, "uncommon": 1, "rare": 2, "epic": 3}
+
 func (ret *SlotComponent) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
+	SlotComponentTypeEncTmp := ret.Type
+	err = SlotComponentTypeEncTmp.Encode(w)
+	if err != nil {
+		return
+	}
+	switch ret.Type.Val {
+	case "attribute_modifiers":
+		SlotComponentData, ok := ret.Data.([]struct {
+			TypeId    int32
+			Name      string
+			Value     float64
+			Operation string
+			Slot      string
+			Display   struct {
+				Type      string
+				Component any
+			}
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentData := range len(SlotComponentData) {
+			err = proto_base.EncodeVarInt(w, SlotComponentData[iSlotComponentData].TypeId)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeString(w, SlotComponentData[iSlotComponentData].Name)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, SlotComponentData[iSlotComponentData].Value)
+			if err != nil {
+				return
+			}
+			var vSlotComponentDataInnerOperation int32
+			vSlotComponentDataInnerOperation, err = proto_base.ErroringIndex(SlotComponentDataInnerOperationReverseMap, SlotComponentData[iSlotComponentData].Operation)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, vSlotComponentDataInnerOperation)
+			if err != nil {
+				return
+			}
+			var vSlotComponentDataInnerSlot int32
+			vSlotComponentDataInnerSlot, err = proto_base.ErroringIndex(SlotComponentDataInnerSlotReverseMap, SlotComponentData[iSlotComponentData].Slot)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, vSlotComponentDataInnerSlot)
+			if err != nil {
+				return
+			}
+			var vSlotComponentDataInnerDisplayType int32
+			vSlotComponentDataInnerDisplayType, err = proto_base.ErroringIndex(SlotComponentDataInnerDisplayTypeReverseMap, SlotComponentData[iSlotComponentData].Display.Type)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, vSlotComponentDataInnerDisplayType)
+			if err != nil {
+				return
+			}
+			switch SlotComponentData[iSlotComponentData].Display.Type {
+			case "override":
+				SlotComponentDataInnerDisplayComponent, ok := SlotComponentData[iSlotComponentData].Display.Component.(nbt.Anon)
+				if !ok {
+					err = proto_base.BadTypeError
+					return
+				}
+				SlotComponentDataInnerDisplayComponentEncTmp := SlotComponentDataInnerDisplayComponent
+				err = SlotComponentDataInnerDisplayComponentEncTmp.Encode(w)
+				if err != nil {
+					return
+				}
+			}
+		}
+	case "axolotl/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "banner_patterns":
+		SlotComponentData, ok := ret.Data.(struct {
+			Layers []BannerPatternLayer
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Layers)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataLayers := range len(SlotComponentData.Layers) {
+			SlotComponentDataLayersInnerEncTmp := SlotComponentData.Layers[iSlotComponentDataLayers]
+			err = SlotComponentDataLayersInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "base_color":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "bees":
+		SlotComponentData, ok := ret.Data.(struct {
+			Bees []struct {
+				NbtData        nbt.Anon
+				TicksInHive    int32
+				MinTicksInHive int32
+			}
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Bees)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataBees := range len(SlotComponentData.Bees) {
+			SlotComponentDataBeesInnerNbtDataEncTmp := SlotComponentData.Bees[iSlotComponentDataBees].NbtData
+			err = SlotComponentDataBeesInnerNbtDataEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Bees[iSlotComponentDataBees].TicksInHive)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Bees[iSlotComponentDataBees].MinTicksInHive)
+			if err != nil {
+				return
+			}
+		}
+	case "block_entity_data":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "block_state":
+		SlotComponentData, ok := ret.Data.(struct {
+			Properties []struct {
+				Name  string
+				Value string
+			}
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Properties)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataProperties := range len(SlotComponentData.Properties) {
+			err = proto_base.EncodeString(w, SlotComponentData.Properties[iSlotComponentDataProperties].Name)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeString(w, SlotComponentData.Properties[iSlotComponentDataProperties].Value)
+			if err != nil {
+				return
+			}
+		}
+	case "blocks_attacks":
+		SlotComponentData, ok := ret.Data.(struct {
+			BlockDelaySeconds    float32
+			DisableCooldownScale float32
+			DamageReductions     []struct {
+				HorizontalBlockingAngle float32
+				Type                    *IDSet
+				Base                    float32
+				Factor                  float32
+			}
+			ItemDamage struct {
+				Threshold float32
+				Base      float32
+				Factor    float32
+			}
+			BypassedBy   *string
+			BlockSound   *ItemSoundHolder
+			DisableSound *ItemSoundHolder
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.BlockDelaySeconds)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.DisableCooldownScale)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.DamageReductions)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataDamageReductions := range len(SlotComponentData.DamageReductions) {
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.DamageReductions[iSlotComponentDataDamageReductions].HorizontalBlockingAngle)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.DamageReductions[iSlotComponentDataDamageReductions].Type != nil)
+			if err != nil {
+				return
+			}
+			if SlotComponentData.DamageReductions[iSlotComponentDataDamageReductions].Type != nil {
+				SlotComponentDataDamageReductionsInnerTypeEncTmp := *SlotComponentData.DamageReductions[iSlotComponentDataDamageReductions].Type
+				err = SlotComponentDataDamageReductionsInnerTypeEncTmp.Encode(w)
+				if err != nil {
+					return
+				}
+			}
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.DamageReductions[iSlotComponentDataDamageReductions].Base)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.DamageReductions[iSlotComponentDataDamageReductions].Factor)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.ItemDamage.Threshold)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.ItemDamage.Base)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.ItemDamage.Factor)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.BypassedBy != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.BypassedBy != nil {
+			err = proto_base.EncodeString(w, *SlotComponentData.BypassedBy)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.BlockSound != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.BlockSound != nil {
+			SlotComponentDataBlockSoundEncTmp := *SlotComponentData.BlockSound
+			err = SlotComponentDataBlockSoundEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.DisableSound != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.DisableSound != nil {
+			SlotComponentDataDisableSoundEncTmp := *SlotComponentData.DisableSound
+			err = SlotComponentDataDisableSoundEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "break_sound":
+		SlotComponentData, ok := ret.Data.(ItemSoundHolder)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "bucket_entity_data":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "bundle_contents":
+		SlotComponentData, ok := ret.Data.(struct {
+			Contents []Slot
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Contents)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataContents := range len(SlotComponentData.Contents) {
+			SlotComponentDataContentsInnerEncTmp := SlotComponentData.Contents[iSlotComponentDataContents]
+			err = SlotComponentDataContentsInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "can_break":
+		SlotComponentData, ok := ret.Data.(struct {
+			Predicates []ItemBlockPredicate
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Predicates)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataPredicates := range len(SlotComponentData.Predicates) {
+			SlotComponentDataPredicatesInnerEncTmp := SlotComponentData.Predicates[iSlotComponentDataPredicates]
+			err = SlotComponentDataPredicatesInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "can_place_on":
+		SlotComponentData, ok := ret.Data.(struct {
+			Predicates []ItemBlockPredicate
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Predicates)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataPredicates := range len(SlotComponentData.Predicates) {
+			SlotComponentDataPredicatesInnerEncTmp := SlotComponentData.Predicates[iSlotComponentDataPredicates]
+			err = SlotComponentDataPredicatesInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "cat/collar":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "cat/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "charged_projectiles":
+		SlotComponentData, ok := ret.Data.(struct {
+			Projectiles []Slot
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Projectiles)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataProjectiles := range len(SlotComponentData.Projectiles) {
+			SlotComponentDataProjectilesInnerEncTmp := SlotComponentData.Projectiles[iSlotComponentDataProjectiles]
+			err = SlotComponentDataProjectilesInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "chicken/variant":
+		SlotComponentData, ok := ret.Data.(any)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		switch SlotComponentDataKnownType := SlotComponentData.(type) {
+		case int32:
+			err = proto_base.EncodeVarInt(w, SlotComponentDataKnownType)
+			if err != nil {
+				return
+			}
+		case string:
+			err = proto_base.EncodeVarInt(w, 0)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeString(w, SlotComponentDataKnownType)
+			if err != nil {
+				return
+			}
+		default:
+			err = proto_base.BadTypeError
+		}
+	case "consumable":
+		SlotComponentData, ok := ret.Data.(struct {
+			ConsumeSeconds float32
+			Animation      string
+			Sound          ItemSoundHolder
+			MakesParticles bool
+			Effects        []ItemConsumeEffect
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.ConsumeSeconds)
+		if err != nil {
+			return
+		}
+		var vSlotComponentDataAnimation int32
+		vSlotComponentDataAnimation, err = proto_base.ErroringIndex(SlotComponentDataAnimationReverseMap, SlotComponentData.Animation)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vSlotComponentDataAnimation)
+		if err != nil {
+			return
+		}
+		SlotComponentDataSoundEncTmp := SlotComponentData.Sound
+		err = SlotComponentDataSoundEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.MakesParticles)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Effects)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataEffects := range len(SlotComponentData.Effects) {
+			SlotComponentDataEffectsInnerEncTmp := SlotComponentData.Effects[iSlotComponentDataEffects]
+			err = SlotComponentDataEffectsInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "container":
+		SlotComponentData, ok := ret.Data.(struct {
+			Contents []Slot
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Contents)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataContents := range len(SlotComponentData.Contents) {
+			SlotComponentDataContentsInnerEncTmp := SlotComponentData.Contents[iSlotComponentDataContents]
+			err = SlotComponentDataContentsInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "container_loot":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "cow/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "creative_slot_lock":
+		_, ok := ret.Data.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	case "custom_data":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "custom_model_data":
+		SlotComponentData, ok := ret.Data.(struct {
+			Floats  []float32
+			Flags   []bool
+			Strings []string
+			Colors  []int32
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Floats)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataFloats := range len(SlotComponentData.Floats) {
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.Floats[iSlotComponentDataFloats])
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Flags)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataFlags := range len(SlotComponentData.Flags) {
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.Flags[iSlotComponentDataFlags])
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Strings)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataStrings := range len(SlotComponentData.Strings) {
+			err = proto_base.EncodeString(w, SlotComponentData.Strings[iSlotComponentDataStrings])
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Colors)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataColors := range len(SlotComponentData.Colors) {
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.Colors[iSlotComponentDataColors])
+			if err != nil {
+				return
+			}
+		}
+	case "custom_name":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "damage":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "damage_resistant":
+		SlotComponentData, ok := ret.Data.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "death_protection":
+		SlotComponentData, ok := ret.Data.(struct {
+			Effects []ItemConsumeEffect
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Effects)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataEffects := range len(SlotComponentData.Effects) {
+			SlotComponentDataEffectsInnerEncTmp := SlotComponentData.Effects[iSlotComponentDataEffects]
+			err = SlotComponentDataEffectsInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "debug_stick_state":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "dyed_color":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "enchantable":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "enchantment_glint_override":
+		SlotComponentData, ok := ret.Data.(bool)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "enchantments":
+		SlotComponentData, ok := ret.Data.(struct {
+			Enchantments []struct {
+				Id    int32
+				Level int32
+			}
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Enchantments)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataEnchantments := range len(SlotComponentData.Enchantments) {
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Enchantments[iSlotComponentDataEnchantments].Id)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Enchantments[iSlotComponentDataEnchantments].Level)
+			if err != nil {
+				return
+			}
+		}
+	case "entity_data":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "equippable":
+		SlotComponentData, ok := ret.Data.(struct {
+			Slot            string
+			Sound           ItemSoundHolder
+			Model           *string
+			CameraOverlay   *string
+			AllowedEntities *IDSet
+			Dispensable     bool
+			Swappable       bool
+			Damageable      bool
+			EquipOnInteract bool
+			Shearable       bool
+			ShearingSound   ItemSoundHolder
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		var vSlotComponentDataSlot int32
+		vSlotComponentDataSlot, err = proto_base.ErroringIndex(SlotComponentDataSlotReverseMap, SlotComponentData.Slot)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vSlotComponentDataSlot)
+		if err != nil {
+			return
+		}
+		SlotComponentDataSoundEncTmp := SlotComponentData.Sound
+		err = SlotComponentDataSoundEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Model != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.Model != nil {
+			err = proto_base.EncodeString(w, *SlotComponentData.Model)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.CameraOverlay != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.CameraOverlay != nil {
+			err = proto_base.EncodeString(w, *SlotComponentData.CameraOverlay)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.AllowedEntities != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.AllowedEntities != nil {
+			SlotComponentDataAllowedEntitiesEncTmp := *SlotComponentData.AllowedEntities
+			err = SlotComponentDataAllowedEntitiesEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Dispensable)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Swappable)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Damageable)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.EquipOnInteract)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Shearable)
+		if err != nil {
+			return
+		}
+		SlotComponentDataShearingSoundEncTmp := SlotComponentData.ShearingSound
+		err = SlotComponentDataShearingSoundEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "firework_explosion":
+		SlotComponentData, ok := ret.Data.(ItemFireworkExplosion)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "fireworks":
+		SlotComponentData, ok := ret.Data.(struct {
+			FlightDuration int32
+			Explosions     []ItemFireworkExplosion
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData.FlightDuration)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Explosions)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataExplosions := range len(SlotComponentData.Explosions) {
+			SlotComponentDataExplosionsInnerEncTmp := SlotComponentData.Explosions[iSlotComponentDataExplosions]
+			err = SlotComponentDataExplosionsInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "food":
+		SlotComponentData, ok := ret.Data.(struct {
+			Nutrition          int32
+			SaturationModifier float32
+			CanAlwaysEat       bool
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData.Nutrition)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.SaturationModifier)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.CanAlwaysEat)
+		if err != nil {
+			return
+		}
+	case "fox/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "frog/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "glider":
+		_, ok := ret.Data.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	case "horse/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "instrument":
+		SlotComponentData, ok := ret.Data.(struct {
+			HasHolder bool
+			Data      any
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.HasHolder)
+		if err != nil {
+			return
+		}
+		switch SlotComponentData.HasHolder {
+		case false:
+			SlotComponentDataData, ok := SlotComponentData.Data.(string)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = proto_base.EncodeString(w, SlotComponentDataData)
+			if err != nil {
+				return
+			}
+		case true:
+			SlotComponentDataData, ok := SlotComponentData.Data.(any)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			switch SlotComponentDataDataKnownType := SlotComponentDataData.(type) {
+			case int32:
+				err = proto_base.EncodeVarInt(w, SlotComponentDataDataKnownType)
+				if err != nil {
+					return
+				}
+			case InstrumentData:
+				err = proto_base.EncodeVarInt(w, 0)
+				if err != nil {
+					return
+				}
+				SlotComponentDataDataOtherwiseEncTmp := SlotComponentDataDataKnownType
+				err = SlotComponentDataDataOtherwiseEncTmp.Encode(w)
+				if err != nil {
+					return
+				}
+			default:
+				err = proto_base.BadTypeError
+			}
+		}
+	case "intangible_projectile":
+		_, ok := ret.Data.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	case "item_model":
+		SlotComponentData, ok := ret.Data.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "item_name":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "jukebox_playable":
+		SlotComponentData, ok := ret.Data.(struct {
+			HasHolder bool
+			Song      any
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.HasHolder)
+		if err != nil {
+			return
+		}
+		switch SlotComponentData.HasHolder {
+		case false:
+			SlotComponentDataSong, ok := SlotComponentData.Song.(string)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = proto_base.EncodeString(w, SlotComponentDataSong)
+			if err != nil {
+				return
+			}
+		case true:
+			SlotComponentDataSong, ok := SlotComponentData.Song.(any)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			switch SlotComponentDataSongKnownType := SlotComponentDataSong.(type) {
+			case int32:
+				err = proto_base.EncodeVarInt(w, SlotComponentDataSongKnownType)
+				if err != nil {
+					return
+				}
+			case JukeboxSongData:
+				err = proto_base.EncodeVarInt(w, 0)
+				if err != nil {
+					return
+				}
+				SlotComponentDataSongOtherwiseEncTmp := SlotComponentDataSongKnownType
+				err = SlotComponentDataSongOtherwiseEncTmp.Encode(w)
+				if err != nil {
+					return
+				}
+			default:
+				err = proto_base.BadTypeError
+			}
+		}
+	case "llama/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "lock":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "lodestone_tracker":
+		SlotComponentData, ok := ret.Data.(struct {
+			GlobalPosition *struct {
+				Dimension string
+				Position  Position
+			}
+			Tracked bool
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.GlobalPosition != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.GlobalPosition != nil {
+			err = proto_base.EncodeString(w, (*SlotComponentData.GlobalPosition).Dimension)
+			if err != nil {
+				return
+			}
+			SlotComponentDataGlobalPositionPositionEncTmp := (*SlotComponentData.GlobalPosition).Position
+			err = SlotComponentDataGlobalPositionPositionEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Tracked)
+		if err != nil {
+			return
+		}
+	case "lore":
+		SlotComponentData, ok := ret.Data.([]nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentData := range len(SlotComponentData) {
+			SlotComponentDataInnerEncTmp := SlotComponentData[iSlotComponentData]
+			err = SlotComponentDataInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "map_color":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "map_decorations":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "map_id":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "map_post_processing":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "max_damage":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "max_stack_size":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "mooshroom/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "note_block_sound":
+		SlotComponentData, ok := ret.Data.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "ominous_bottle_amplifier":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "painting/variant":
+		SlotComponentData, ok := ret.Data.(any)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		switch SlotComponentDataKnownType := SlotComponentData.(type) {
+		case int32:
+			err = proto_base.EncodeVarInt(w, SlotComponentDataKnownType)
+			if err != nil {
+				return
+			}
+		case EntityMetadataPaintingVariant:
+			err = proto_base.EncodeVarInt(w, 0)
+			if err != nil {
+				return
+			}
+			SlotComponentDataOtherwiseEncTmp := SlotComponentDataKnownType
+			err = SlotComponentDataOtherwiseEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		default:
+			err = proto_base.BadTypeError
+		}
+	case "parrot/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "pig/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "pot_decorations":
+		SlotComponentData, ok := ret.Data.(struct {
+			Decorations []int32
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Decorations)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataDecorations := range len(SlotComponentData.Decorations) {
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Decorations[iSlotComponentDataDecorations])
+			if err != nil {
+				return
+			}
+		}
+	case "potion_contents":
+		SlotComponentData, ok := ret.Data.(struct {
+			PotionId      *int32
+			CustomColor   *int32
+			CustomEffects []ItemPotionEffect
+			CustomName    *string
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.PotionId != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.PotionId != nil {
+			err = proto_base.EncodeVarInt(w, *SlotComponentData.PotionId)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.CustomColor != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.CustomColor != nil {
+			err = binary.Write(w, binary.BigEndian, *SlotComponentData.CustomColor)
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.CustomEffects)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataCustomEffects := range len(SlotComponentData.CustomEffects) {
+			SlotComponentDataCustomEffectsInnerEncTmp := SlotComponentData.CustomEffects[iSlotComponentDataCustomEffects]
+			err = SlotComponentDataCustomEffectsInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.CustomName != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.CustomName != nil {
+			err = proto_base.EncodeString(w, *SlotComponentData.CustomName)
+			if err != nil {
+				return
+			}
+		}
+	case "potion_duration_scale":
+		SlotComponentData, ok := ret.Data.(float32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "profile":
+		SlotComponentData, ok := ret.Data.(struct {
+			Name       *string
+			Uuid       *uuid.UUID
+			Properties []struct {
+				Name      string
+				Value     string
+				Signature *string
+			}
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Name != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.Name != nil {
+			err = proto_base.EncodeString(w, *SlotComponentData.Name)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Uuid != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.Uuid != nil {
+			_, err = w.Write((*SlotComponentData.Uuid)[:])
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Properties)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataProperties := range len(SlotComponentData.Properties) {
+			err = proto_base.EncodeString(w, SlotComponentData.Properties[iSlotComponentDataProperties].Name)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeString(w, SlotComponentData.Properties[iSlotComponentDataProperties].Value)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.Properties[iSlotComponentDataProperties].Signature != nil)
+			if err != nil {
+				return
+			}
+			if SlotComponentData.Properties[iSlotComponentDataProperties].Signature != nil {
+				err = proto_base.EncodeString(w, *SlotComponentData.Properties[iSlotComponentDataProperties].Signature)
+				if err != nil {
+					return
+				}
+			}
+		}
+	case "provides_banner_patterns":
+		SlotComponentData, ok := ret.Data.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "provides_trim_material":
+		SlotComponentData, ok := ret.Data.(struct {
+			HasHolder bool
+			Material  any
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.HasHolder)
+		if err != nil {
+			return
+		}
+		switch SlotComponentData.HasHolder {
+		case false:
+			SlotComponentDataMaterial, ok := SlotComponentData.Material.(string)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			err = proto_base.EncodeString(w, SlotComponentDataMaterial)
+			if err != nil {
+				return
+			}
+		case true:
+			SlotComponentDataMaterial, ok := SlotComponentData.Material.(any)
+			if !ok {
+				err = proto_base.BadTypeError
+				return
+			}
+			switch SlotComponentDataMaterialKnownType := SlotComponentDataMaterial.(type) {
+			case int32:
+				err = proto_base.EncodeVarInt(w, SlotComponentDataMaterialKnownType)
+				if err != nil {
+					return
+				}
+			case ArmorTrimMaterial:
+				err = proto_base.EncodeVarInt(w, 0)
+				if err != nil {
+					return
+				}
+				SlotComponentDataMaterialOtherwiseEncTmp := SlotComponentDataMaterialKnownType
+				err = SlotComponentDataMaterialOtherwiseEncTmp.Encode(w)
+				if err != nil {
+					return
+				}
+			default:
+				err = proto_base.BadTypeError
+			}
+		}
+	case "rabbit/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "rarity":
+		SlotComponentData, ok := ret.Data.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		var vSlotComponentData int32
+		vSlotComponentData, err = proto_base.ErroringIndex(SlotComponentDataReverseMap, SlotComponentData)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, vSlotComponentData)
+		if err != nil {
+			return
+		}
+	case "recipes":
+		SlotComponentData, ok := ret.Data.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "repair_cost":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "repairable":
+		SlotComponentData, ok := ret.Data.(struct {
+			Items IDSet
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataItemsEncTmp := SlotComponentData.Items
+		err = SlotComponentDataItemsEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "salmon/size":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "sheep/color":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "shulker/color":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "stored_enchantments":
+		SlotComponentData, ok := ret.Data.(struct {
+			Enchantments []struct {
+				Id    int32
+				Level int32
+			}
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Enchantments)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataEnchantments := range len(SlotComponentData.Enchantments) {
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Enchantments[iSlotComponentDataEnchantments].Id)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Enchantments[iSlotComponentDataEnchantments].Level)
+			if err != nil {
+				return
+			}
+		}
+	case "suspicious_stew_effects":
+		SlotComponentData, ok := ret.Data.(struct {
+			Effects []struct {
+				Effect   int32
+				Duration int32
+			}
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Effects)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataEffects := range len(SlotComponentData.Effects) {
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Effects[iSlotComponentDataEffects].Effect)
+			if err != nil {
+				return
+			}
+			err = proto_base.EncodeVarInt(w, SlotComponentData.Effects[iSlotComponentDataEffects].Duration)
+			if err != nil {
+				return
+			}
+		}
+	case "tool":
+		SlotComponentData, ok := ret.Data.(struct {
+			Rules []struct {
+				Blocks               IDSet
+				Speed                *float32
+				CorrectDropForBlocks *bool
+			}
+			DefaultMiningSpeed         float32
+			DamagePerBlock             int32
+			CanDestroyBlocksInCreative bool
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Rules)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataRules := range len(SlotComponentData.Rules) {
+			SlotComponentDataRulesInnerBlocksEncTmp := SlotComponentData.Rules[iSlotComponentDataRules].Blocks
+			err = SlotComponentDataRulesInnerBlocksEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.Rules[iSlotComponentDataRules].Speed != nil)
+			if err != nil {
+				return
+			}
+			if SlotComponentData.Rules[iSlotComponentDataRules].Speed != nil {
+				err = binary.Write(w, binary.BigEndian, *SlotComponentData.Rules[iSlotComponentDataRules].Speed)
+				if err != nil {
+					return
+				}
+			}
+			err = binary.Write(w, binary.BigEndian, SlotComponentData.Rules[iSlotComponentDataRules].CorrectDropForBlocks != nil)
+			if err != nil {
+				return
+			}
+			if SlotComponentData.Rules[iSlotComponentDataRules].CorrectDropForBlocks != nil {
+				err = binary.Write(w, binary.BigEndian, *SlotComponentData.Rules[iSlotComponentDataRules].CorrectDropForBlocks)
+				if err != nil {
+					return
+				}
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.DefaultMiningSpeed)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData.DamagePerBlock)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.CanDestroyBlocksInCreative)
+		if err != nil {
+			return
+		}
+	case "tooltip_display":
+		SlotComponentData, ok := ret.Data.(struct {
+			HideTooltip      bool
+			HiddenComponents []int32
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.HideTooltip)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.HiddenComponents)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataHiddenComponents := range len(SlotComponentData.HiddenComponents) {
+			err = proto_base.EncodeVarInt(w, SlotComponentData.HiddenComponents[iSlotComponentDataHiddenComponents])
+			if err != nil {
+				return
+			}
+		}
+	case "tooltip_style":
+		SlotComponentData, ok := ret.Data.(string)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "trim":
+		SlotComponentData, ok := ret.Data.(struct {
+			Material any
+			Pattern  any
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		switch SlotComponentDataMaterialKnownType := SlotComponentData.Material.(type) {
+		case int32:
+			err = proto_base.EncodeVarInt(w, SlotComponentDataMaterialKnownType)
+			if err != nil {
+				return
+			}
+		case ArmorTrimMaterial:
+			err = proto_base.EncodeVarInt(w, 0)
+			if err != nil {
+				return
+			}
+			SlotComponentDataMaterialOtherwiseEncTmp := SlotComponentDataMaterialKnownType
+			err = SlotComponentDataMaterialOtherwiseEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		default:
+			err = proto_base.BadTypeError
+		}
+		switch SlotComponentDataPatternKnownType := SlotComponentData.Pattern.(type) {
+		case int32:
+			err = proto_base.EncodeVarInt(w, SlotComponentDataPatternKnownType)
+			if err != nil {
+				return
+			}
+		case ArmorTrimPattern:
+			err = proto_base.EncodeVarInt(w, 0)
+			if err != nil {
+				return
+			}
+			SlotComponentDataPatternOtherwiseEncTmp := SlotComponentDataPatternKnownType
+			err = SlotComponentDataPatternOtherwiseEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		default:
+			err = proto_base.BadTypeError
+		}
+	case "tropical_fish/base_color":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "tropical_fish/pattern":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "tropical_fish/pattern_color":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "unbreakable":
+		_, ok := ret.Data.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	case "use_cooldown":
+		SlotComponentData, ok := ret.Data.(struct {
+			Seconds       float32
+			CooldownGroup *string
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Seconds)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.CooldownGroup != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.CooldownGroup != nil {
+			err = proto_base.EncodeString(w, *SlotComponentData.CooldownGroup)
+			if err != nil {
+				return
+			}
+		}
+	case "use_remainder":
+		SlotComponentData, ok := ret.Data.(Slot)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		SlotComponentDataEncTmp := SlotComponentData
+		err = SlotComponentDataEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case "villager/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "weapon":
+		SlotComponentData, ok := ret.Data.(struct {
+			ItemDamagePerAttack       int32
+			DisableBlockingForSeconds float32
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData.ItemDamagePerAttack)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.DisableBlockingForSeconds)
+		if err != nil {
+			return
+		}
+	case "wolf/collar":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "wolf/sound_variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "wolf/variant":
+		SlotComponentData, ok := ret.Data.(int32)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData)
+		if err != nil {
+			return
+		}
+	case "writable_book_content":
+		SlotComponentData, ok := ret.Data.(struct {
+			Pages []ItemBookPage
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Pages)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataPages := range len(SlotComponentData.Pages) {
+			SlotComponentDataPagesInnerEncTmp := SlotComponentData.Pages[iSlotComponentDataPages]
+			err = SlotComponentDataPagesInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+	case "written_book_content":
+		SlotComponentData, ok := ret.Data.(struct {
+			RawTitle      string
+			FilteredTitle *string
+			Author        string
+			Generation    int32
+			Pages         []ItemWrittenBookPage
+			Resolved      bool
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		err = proto_base.EncodeString(w, SlotComponentData.RawTitle)
+		if err != nil {
+			return
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.FilteredTitle != nil)
+		if err != nil {
+			return
+		}
+		if SlotComponentData.FilteredTitle != nil {
+			err = proto_base.EncodeString(w, *SlotComponentData.FilteredTitle)
+			if err != nil {
+				return
+			}
+		}
+		err = proto_base.EncodeString(w, SlotComponentData.Author)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, SlotComponentData.Generation)
+		if err != nil {
+			return
+		}
+		err = proto_base.EncodeVarInt(w, int32(len(SlotComponentData.Pages)))
+		if err != nil {
+			return
+		}
+		for iSlotComponentDataPages := range len(SlotComponentData.Pages) {
+			SlotComponentDataPagesInnerEncTmp := SlotComponentData.Pages[iSlotComponentDataPages]
+			err = SlotComponentDataPagesInnerEncTmp.Encode(w)
+			if err != nil {
+				return
+			}
+		}
+		err = binary.Write(w, binary.BigEndian, SlotComponentData.Resolved)
+		if err != nil {
+			return
+		}
+	}
 	return
 }
 
@@ -20254,11 +23940,131 @@ type PlayToClientPacketScoreboardScore struct {
 }
 
 func (ret *PlayToClientPacketScoreboardScore) Decode(r io.ReadSeeker) (err error) {
-	err = proto_base.ToDoError
+	ret.ItemName, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.ScoreName, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Value, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketScoreboardScoreDisplayNamePresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardScoreDisplayNamePresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketScoreboardScoreDisplayNamePresent {
+		var PlayToClientPacketScoreboardScoreDisplayNamePresentValue nbt.Anon
+		err = PlayToClientPacketScoreboardScoreDisplayNamePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.DisplayName = &PlayToClientPacketScoreboardScoreDisplayNamePresentValue
+	}
+	var PlayToClientPacketScoreboardScoreNumberFormatPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardScoreNumberFormatPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketScoreboardScoreNumberFormatPresent {
+		var PlayToClientPacketScoreboardScoreNumberFormatPresentValue int32
+		PlayToClientPacketScoreboardScoreNumberFormatPresentValue, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.NumberFormat = &PlayToClientPacketScoreboardScoreNumberFormatPresentValue
+	}
+	switch proto_base.OptionalDeref(ret.NumberFormat) {
+	case 1:
+		var PlayToClientPacketScoreboardScoreStyling1Tmp nbt.Anon
+		err = PlayToClientPacketScoreboardScoreStyling1Tmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Styling = PlayToClientPacketScoreboardScoreStyling1Tmp
+	case 2:
+		var PlayToClientPacketScoreboardScoreStyling2Tmp nbt.Anon
+		err = PlayToClientPacketScoreboardScoreStyling2Tmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Styling = PlayToClientPacketScoreboardScoreStyling2Tmp
+	default:
+		var PlayToClientPacketScoreboardScoreStylingTmp struct {
+		}
+		ret.Styling = PlayToClientPacketScoreboardScoreStylingTmp
+	}
 	return
 }
 func (ret *PlayToClientPacketScoreboardScore) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
+	err = proto_base.EncodeString(w, ret.ItemName)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.ScoreName)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Value)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DisplayName != nil)
+	if err != nil {
+		return
+	}
+	if ret.DisplayName != nil {
+		PlayToClientPacketScoreboardScoreDisplayNameEncTmp := *ret.DisplayName
+		err = PlayToClientPacketScoreboardScoreDisplayNameEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = binary.Write(w, binary.BigEndian, ret.NumberFormat != nil)
+	if err != nil {
+		return
+	}
+	if ret.NumberFormat != nil {
+		err = proto_base.EncodeVarInt(w, *ret.NumberFormat)
+		if err != nil {
+			return
+		}
+	}
+	switch proto_base.OptionalDeref(ret.NumberFormat) {
+	case 1:
+		PlayToClientPacketScoreboardScoreStyling, ok := ret.Styling.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		PlayToClientPacketScoreboardScoreStylingEncTmp := PlayToClientPacketScoreboardScoreStyling
+		err = PlayToClientPacketScoreboardScoreStylingEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case 2:
+		PlayToClientPacketScoreboardScoreStyling, ok := ret.Styling.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		PlayToClientPacketScoreboardScoreStylingEncTmp := PlayToClientPacketScoreboardScoreStyling
+		err = PlayToClientPacketScoreboardScoreStylingEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Styling.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
 	return
 }
 

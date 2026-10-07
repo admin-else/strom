@@ -29,6 +29,18 @@ func AddFieldToStruct(s *ast.StructType, fieldName string, t ast.Expr) {
 	})
 }
 
+// sanitizeIdent makes a string safe to use as part of a Go identifier by
+// dropping every rune that is not a letter, digit or underscore.
+func sanitizeIdent(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		if r == '_' || (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
+}
+
 //func AddAnonFieldToStruct(s *ast.StructType, t ast.Expr) {
 //	s.Fields.List = append(s.Fields.List, &ast.Field{
 //		Names: []*ast.Ident{},

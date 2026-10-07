@@ -12730,11 +12730,131 @@ type PlayToClientPacketScoreboardScore struct {
 }
 
 func (ret *PlayToClientPacketScoreboardScore) Decode(r io.ReadSeeker) (err error) {
-	err = proto_base.ToDoError
+	ret.ItemName, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.ScoreName, err = proto_base.DecodeString(r)
+	if err != nil {
+		return
+	}
+	ret.Value, err = proto_base.DecodeVarInt(r)
+	if err != nil {
+		return
+	}
+	var PlayToClientPacketScoreboardScoreDisplayNamePresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardScoreDisplayNamePresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketScoreboardScoreDisplayNamePresent {
+		var PlayToClientPacketScoreboardScoreDisplayNamePresentValue nbt.Anon
+		err = PlayToClientPacketScoreboardScoreDisplayNamePresentValue.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.DisplayName = &PlayToClientPacketScoreboardScoreDisplayNamePresentValue
+	}
+	var PlayToClientPacketScoreboardScoreNumberFormatPresent bool
+	err = binary.Read(r, binary.BigEndian, &PlayToClientPacketScoreboardScoreNumberFormatPresent)
+	if err != nil {
+		return
+	}
+	if PlayToClientPacketScoreboardScoreNumberFormatPresent {
+		var PlayToClientPacketScoreboardScoreNumberFormatPresentValue int32
+		PlayToClientPacketScoreboardScoreNumberFormatPresentValue, err = proto_base.DecodeVarInt(r)
+		if err != nil {
+			return
+		}
+		ret.NumberFormat = &PlayToClientPacketScoreboardScoreNumberFormatPresentValue
+	}
+	switch proto_base.OptionalDeref(ret.NumberFormat) {
+	case 1:
+		var PlayToClientPacketScoreboardScoreStyling1Tmp nbt.Anon
+		err = PlayToClientPacketScoreboardScoreStyling1Tmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Styling = PlayToClientPacketScoreboardScoreStyling1Tmp
+	case 2:
+		var PlayToClientPacketScoreboardScoreStyling2Tmp nbt.Anon
+		err = PlayToClientPacketScoreboardScoreStyling2Tmp.Decode(r)
+		if err != nil {
+			return
+		}
+		ret.Styling = PlayToClientPacketScoreboardScoreStyling2Tmp
+	default:
+		var PlayToClientPacketScoreboardScoreStylingTmp struct {
+		}
+		ret.Styling = PlayToClientPacketScoreboardScoreStylingTmp
+	}
 	return
 }
 func (ret *PlayToClientPacketScoreboardScore) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
+	err = proto_base.EncodeString(w, ret.ItemName)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeString(w, ret.ScoreName)
+	if err != nil {
+		return
+	}
+	err = proto_base.EncodeVarInt(w, ret.Value)
+	if err != nil {
+		return
+	}
+	err = binary.Write(w, binary.BigEndian, ret.DisplayName != nil)
+	if err != nil {
+		return
+	}
+	if ret.DisplayName != nil {
+		PlayToClientPacketScoreboardScoreDisplayNameEncTmp := *ret.DisplayName
+		err = PlayToClientPacketScoreboardScoreDisplayNameEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	}
+	err = binary.Write(w, binary.BigEndian, ret.NumberFormat != nil)
+	if err != nil {
+		return
+	}
+	if ret.NumberFormat != nil {
+		err = proto_base.EncodeVarInt(w, *ret.NumberFormat)
+		if err != nil {
+			return
+		}
+	}
+	switch proto_base.OptionalDeref(ret.NumberFormat) {
+	case 1:
+		PlayToClientPacketScoreboardScoreStyling, ok := ret.Styling.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		PlayToClientPacketScoreboardScoreStylingEncTmp := PlayToClientPacketScoreboardScoreStyling
+		err = PlayToClientPacketScoreboardScoreStylingEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	case 2:
+		PlayToClientPacketScoreboardScoreStyling, ok := ret.Styling.(nbt.Anon)
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+		PlayToClientPacketScoreboardScoreStylingEncTmp := PlayToClientPacketScoreboardScoreStyling
+		err = PlayToClientPacketScoreboardScoreStylingEncTmp.Encode(w)
+		if err != nil {
+			return
+		}
+	default:
+		_, ok := ret.Styling.(struct {
+		})
+		if !ok {
+			err = proto_base.BadTypeError
+			return
+		}
+	}
 	return
 }
 

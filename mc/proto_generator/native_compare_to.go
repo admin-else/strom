@@ -24,9 +24,19 @@ func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, cet CaseExprTy
 		}
 	}
 	parts = parts[downPrefixCount:]
-	startingPoint := g.ContainerStack[len(g.ContainerStack)-downPrefixCount-1]
-	e, cet, err = g.VisitCompareTo(parts, startingPoint.VarToSet, util2.CombineNamAndData("container", startingPoint.Data))
-	//	return ParseCompareToLegacy(compareTo, varToSet)
+	// Protodef resolves a compareTo against the nearest enclosing scope that
+	// defines the field, so walk the container stack from the innermost outward.
+	start := len(g.ContainerStack) - downPrefixCount - 1
+	for i := start; i >= 0; i-- {
+		startingPoint := g.ContainerStack[i]
+		if startingPoint.VarToSet == nil {
+			continue
+		}
+		e, cet, err = g.VisitCompareTo(parts, startingPoint.VarToSet, util2.CombineNamAndData("container", startingPoint.Data))
+		if err == nil {
+			return
+		}
+	}
 	return
 }
 
@@ -39,8 +49,24 @@ func (g *Generator) VisitCompareTo(parts []string, inExpr ast.Expr, data any) (e
 	if found {
 		return d(g, parts, inExpr, tData)
 	}
+	// Resolve named protocol types. A named mapper renders as a struct with a Val
+	// field, so its comparison uses .Val; inline mappers stay plain strings and
+	// are handled by the "mapper" native above.
+	if def, ok := g.Protocol.Types.Types[tName]; ok && def != "native" {
+		if resolvedName, _, perr := ParseType(def); perr == nil && resolvedName == "mapper" {
+			return SelectorExprAndStr(inExpr, "Val"), CaseExprTypeString, nil
+		}
+		return g.VisitCompareTo(parts, inExpr, def)
+	}
 	err = fmt.Errorf("native compare to not implemented for %v", tName)
 	return
+}
+
+// OptionCompareTo compares a switch against the value inside an optional field.
+// The field is a pointer; OptionalDeref yields the pointed-to value or the type
+// zero value (which falls through to the switch default) when absent.
+func OptionCompareTo(_ *Generator, _ []string, inExpr ast.Expr, _ any) (e ast.Expr, cet CaseExprType, err error) {
+	return Call(Selector("proto_base", "OptionalDeref"), inExpr), CaseExprTypeUnset, nil
 }
 
 func ContainerCompareTo(g *Generator, parts []string, inExpr ast.Expr, dataRaw any) (e ast.Expr, cet CaseExprType, err error) {
@@ -131,6 +157,7 @@ func (g *Generator) RegisterCompareToNatives() {
 		"container": ContainerCompareTo,
 		"bool":      ReturnInputCompareTo,
 		"mapper":    ReturnInputCompareTo,
+		"option":    OptionCompareTo,
 		"varint":    ReturnInputCompareTo,
 		"bitfield":  BitfieldCompareTo,
 		"u8":        ReturnInputCompareTo,
