@@ -7,7 +7,6 @@ import (
 	"go/ast"
 	"go/token"
 	"io"
-	"maps"
 	"os"
 	"runtime/debug"
 	"slices"
@@ -52,13 +51,13 @@ type Generator struct {
 	packetInfos []PacketInfo
 
 	// These persist the entire generate-call
-	Natives          map[string]ExprGeneratorFunc
-	DecoderNatives   map[string]FunctionGeneratorFunc
-	EncoderNatives   map[string]FunctionGeneratorFunc
-	CompareToNatives map[string]CompareToGeneratorFunc
-	Protocol         Protocol
-	RawTypes         map[string]map[string]any
-	File             *ast.File
+	Natives            map[string]ExprGeneratorFunc
+	DecoderNatives     map[string]FunctionGeneratorFunc
+	EncoderNatives     map[string]FunctionGeneratorFunc
+	CompareToNatives   map[string]CompareToGeneratorFunc
+	Protocol           Protocol
+	ParameterizedTypes map[string]bool
+	File               *ast.File
 
 	// These persist in the current GenerateType call
 	CurrentlyGeneratingTypes Types
@@ -71,6 +70,11 @@ type Generator struct {
 	Depth          int
 	Declared       []string
 	ContainerStack []ContainerStackEntry
+
+	// TypeParameters is the stack of parameter bindings for the named type
+	// currently being instantiated, innermost last. ParseCompareTo and the
+	// type visitors resolve $placeholders against it.
+	TypeParameters []map[string]any
 }
 
 func (g *Generator) Decl(name string, t token.Token, e ast.Expr) {
@@ -115,6 +119,10 @@ func ParseType(t any) (tName string, tData any, err error) {
 }
 
 func (g *Generator) VisitType(data any) (e ast.Expr, err error) {
+	data, err = g.resolveTypeParameter(data)
+	if err != nil {
+		return
+	}
 	tName, tData, err := ParseType(data)
 	if err != nil {
 		return
@@ -131,10 +139,10 @@ func (g *Generator) VisitNameAndData(tName string, tData any) (e ast.Expr, err e
 	}
 	t, found := g.Protocol.Types.Types[tName]
 	if t != "native" && found {
-		if tData != nil {
-			if _, ok := g.mergeCompareTo(tName, t, tData); ok {
-				return Ident("any"), nil
-			}
+		if g.ParameterizedTypes[tName] {
+			// A parameterized type has no standalone Go shape: its switch cases
+			// depend on the instantiation arguments, so the field stays `any`.
+			return Ident("any"), nil
 		}
 		return Ident(util2.CamelCase(tName)), nil
 	}
@@ -151,6 +159,10 @@ func (g *Generator) VisitDecoder(varToSet ast.Expr, data any, name string) (e []
 	g.Depth += 1
 	defer func() { g.Depth -= 1 }()
 
+	data, err = g.resolveTypeParameter(data)
+	if err != nil {
+		return
+	}
 	tName, tData, err := ParseType(data)
 	if err != nil {
 		return
@@ -159,13 +171,11 @@ func (g *Generator) VisitDecoder(varToSet ast.Expr, data any, name string) (e []
 	if found {
 		return d(g, varToSet, tData, name)
 	}
-	if tData != nil {
-		if merged, ok := g.mergeCompareTo(tName, g.Protocol.Types.Types[tName], tData); ok {
-			s, found := g.DecoderNatives[merged.tName]
-			if found {
-				return s(g, varToSet, merged.data, name)
-			}
-		}
+	if def, ok := g.instantiateNamed(tName, tData); ok {
+		pop := g.pushTypeParameters(tData)
+		e, err = g.VisitDecoder(varToSet, def, name)
+		pop()
+		return
 	}
 	t, found := g.Protocol.Types.Types[tName]
 	if t == "native" {
@@ -175,59 +185,14 @@ func (g *Generator) VisitDecoder(varToSet ast.Expr, data any, name string) (e []
 	return DefaultDecoder(g, varToSet, tData, name)
 }
 
-type mergedType struct {
-	tName string
-	data  any
-}
-
-func (g *Generator) mergeCompareTo(tName string, t any, overrideData any) (mergedType, bool) {
-	overrideMap, ok := overrideData.(map[string]any)
-	if !ok {
-		return mergedType{}, false
-	}
-	overrideCompareTo, hasOverride := overrideMap["compareTo"]
-	if !hasOverride {
-		return mergedType{}, false
-	}
-	if s, ok := overrideCompareTo.(string); ok && strings.HasPrefix(s, "$") {
-		return mergedType{}, false
-	}
-	var typeMap map[string]any
-	var nativeName string
-	if m, ok := t.(map[string]any); ok {
-		typeMap = m
-		nativeName = "container"
-	} else if a, ok := t.([]any); ok && len(a) >= 2 {
-		if m, ok := a[1].(map[string]any); ok {
-			typeMap = m
-		}
-		if s, ok := a[0].(string); ok {
-			nativeName = s
-		}
-	} else {
-		m, ok := g.RawTypes[tName]
-		if !ok {
-			return mergedType{}, false
-		}
-		typeMap = m
-		nativeName = "switch"
-	}
-	typeCompareTo, hasType := typeMap["compareTo"]
-	if !hasType {
-		return mergedType{}, false
-	}
-	if s, ok := typeCompareTo.(string); !ok || !strings.HasPrefix(s, "$") {
-		return mergedType{}, false
-	}
-	merged := maps.Clone(typeMap)
-	merged["compareTo"] = overrideCompareTo
-	return mergedType{tName: nativeName, data: merged}, true
-}
-
 func (g *Generator) VisitEncoder(varToSet ast.Expr, data any, name string) (e []ast.Stmt, err error) {
 	g.Depth += 1
 	defer func() { g.Depth -= 1 }()
 
+	data, err = g.resolveTypeParameter(data)
+	if err != nil {
+		return
+	}
 	tName, tData, err := ParseType(data)
 	if err != nil {
 		return
@@ -236,13 +201,11 @@ func (g *Generator) VisitEncoder(varToSet ast.Expr, data any, name string) (e []
 	if found {
 		return d(g, varToSet, tData, name)
 	}
-	if tData != nil {
-		if merged, ok := g.mergeCompareTo(tName, g.Protocol.Types.Types[tName], tData); ok {
-			s, found := g.EncoderNatives[merged.tName]
-			if found {
-				return s(g, varToSet, merged.data, name)
-			}
-		}
+	if def, ok := g.instantiateNamed(tName, tData); ok {
+		pop := g.pushTypeParameters(tData)
+		e, err = g.VisitEncoder(varToSet, def, name)
+		pop()
+		return
 	}
 	t, found := g.Protocol.Types.Types[tName]
 	if t == "native" {
@@ -274,6 +237,11 @@ func (g *Generator) GenerateTypes(prefix string, types Types) (err error) {
 	g.CurrentlyGeneratingTypesPrefix = prefix
 	for _, k := range util2.OrderedKeys(types.Types) {
 		v := types.Types[k]
+		if g.ParameterizedTypes[k] {
+			// A parameterized type is only generated when instantiated; it has
+			// no concrete standalone Go shape.
+			continue
+		}
 		g.Depth = 0
 		e, err2 := g.VisitType(v)
 		if errors.Is(err2, ToDoError) {
@@ -477,20 +445,32 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 	if err != nil {
 		return
 	}
+	return GenerateFromProtocol(protocol, version, w, sourceHash)
+}
 
-	g := &Generator{Protocol: protocol}
+// GenerateFromProtocol generates the Go wire types for an already loaded
+// protocol. It is split out of Generate so tests can drive it with an in-memory
+// protocol.
+func GenerateFromProtocol(protocol Protocol, version string, w io.Writer, sourceHash string) (packetInfos []PacketInfo, err error) {
+	g := newGenerator(protocol, version, sourceHash)
 
-	g.RawTypes = make(map[string]map[string]any)
+	err = g.GenerateProtocol(protocol, version)
+	if err != nil {
+		return
+	}
+	packetInfos = g.packetInfos
+	err = PrintToFile(g.File, w)
+	return
+}
+
+// newGenerator builds a Generator with the native maps registered and the set of
+// parameterized type names precomputed.
+func newGenerator(protocol Protocol, version string, sourceHash string) (g *Generator) {
+	g = &Generator{Protocol: protocol}
+	g.ParameterizedTypes = make(map[string]bool)
 	for k, v := range protocol.Types.Types {
-		if m, ok := v.(map[string]any); ok {
-			g.RawTypes[k] = m
-		}
-		if a, ok := v.([]any); ok && len(a) == 2 {
-			if m, ok := a[1].(map[string]any); ok {
-				if _, has := m["fields"]; has {
-					g.RawTypes[k] = m
-				}
-			}
+		if containsTypeParameter(v) {
+			g.ParameterizedTypes[k] = true
 		}
 	}
 
@@ -509,12 +489,6 @@ func Generate(version string, w io.Writer, sourceHash string) (packetInfos []Pac
 	g.RegisterDecoderNatives()
 	g.RegisterEncoderNatives()
 	g.RegisterCompareToNatives()
-	err = g.GenerateProtocol(protocol, version)
-	if err != nil {
-		return
-	}
-	packetInfos = g.packetInfos
-	err = PrintToFile(g.File, w)
 	return
 }
 

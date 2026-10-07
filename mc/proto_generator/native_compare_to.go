@@ -13,8 +13,19 @@ import (
 
 func (g *Generator) ParseCompareTo(compareTo string) (e ast.Expr, cet CaseExprType, err error) {
 	if strings.HasPrefix(compareTo, "$") {
-		err = fmt.Errorf("parameterized type placeholder: %s", compareTo)
-		return
+		// Resolve the placeholder against the enclosing type's instantiation
+		// arguments, then continue with the ordinary field-path resolution.
+		var resolved any
+		resolved, err = g.resolveTypeParameter(compareTo)
+		if err != nil {
+			return
+		}
+		s, ok := resolved.(string)
+		if !ok {
+			err = fmt.Errorf("compareTo parameter %s is not a path: %v", compareTo, resolved)
+			return
+		}
+		return g.ParseCompareTo(s)
 	}
 	parts := strings.Split(compareTo, "/")
 	downPrefixCount := 0
