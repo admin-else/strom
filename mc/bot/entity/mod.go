@@ -12,14 +12,17 @@ import (
 	"math"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 
+	"github.com/admin-else/strom/mc/event"
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
 	"github.com/admin-else/strom/mc/proto_generated"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
 	"github.com/admin-else/strom/mc/proto_generated/v26_4_snapshot_2"
+	"github.com/admin-else/strom/mc/util"
 )
 
 // VecDeltaCodec mirrors net.minecraft.network.protocol.game.VecDeltaCodec.
@@ -88,22 +91,177 @@ func (c *VecDeltaCodec) decodePath(delta VecDelta) (ret PositionPath) {
 }
 
 // Entity is the client-side projection of a tracked entity.
+//
+// position/rotation are the live (interpolated) values, mirroring Entity's
+// x/y/z, yRot, xRot and yHeadRot. oldPosition/oldRotation are snapshotted at the
+// start of every client tick, mirroring xo/yo/zo, yRotO, xRotO and yHeadRotO;
+// the renderer lerps between the snapshot and the live value by the frame's
+// partial tick (EntityRenderer.extractRenderState). tickCount mirrors
+// Entity.tickCount.
 type Entity struct {
 	Id       int32
 	UUID     uuid.UUID
 	Type     int32
-	Position Vec3
-	Yaw      float32
-	Pitch    float32
-	HeadYaw  float32
 	Velocity Vec3
 	OnGround bool
+
+	position    Vec3
+	yaw         float32
+	pitch       float32
+	headYaw     float32
+	oldPosition Vec3
+	oldYaw      float32
+	oldPitch    float32
+	oldHeadYaw  float32
+	tickCount   int
 
 	metadata     map[uint8]any
 	equipment    [equipmentSlotCount]ItemStack
 	equipmentSet [equipmentSlotCount]bool
 
-	codec VecDeltaCodec
+	codec         VecDeltaCodec
+	interpolation InterpolationHandler
+}
+
+// defaultInterpolationSteps mirrors EntityType.Builder's updateInterval default
+// (3), the value SteppedInterpolationHandler.create reads from
+// entity.getType().updateInterval().
+const defaultInterpolationSteps = 3
+
+// newEntity builds a tracked entity with its interpolation handler wired,
+// mirroring Entity's constructor chain. The reduced port models every tracked
+// entity as a LivingEntity: it always uses the Stepped handler with the default
+// updateInterval (3), so the per-type handler selection (Display/minecart/boat
+// use the Linear handler, some types are NO_OP) and per-type updateInterval are
+// not reproduced.
+func newEntity() (e *Entity) {
+	e = &Entity{}
+	e.interpolation = NewSteppedInterpolationHandler(e, defaultInterpolationSteps)
+	return
+}
+
+// Position mirrors Entity.getPosition(float): the previous-tick position lerped
+// toward the live position by partialTick.
+func (e *Entity) Position(partialTick float32) (ret Vec3) {
+	a := float64(partialTick)
+	ret.X = util.LerpDouble(a, e.oldPosition.X, e.position.X)
+	ret.Y = util.LerpDouble(a, e.oldPosition.Y, e.position.Y)
+	ret.Z = util.LerpDouble(a, e.oldPosition.Z, e.position.Z)
+	return
+}
+
+// Yaw mirrors Entity.getYRot(float).
+func (e *Entity) Yaw(partialTick float32) (ret float32) {
+	if partialTick == 1.0 {
+		return e.yaw
+	}
+	return util.RotLerpFloat(partialTick, e.oldYaw, e.yaw)
+}
+
+// Pitch mirrors Entity.getXRot(float).
+func (e *Entity) Pitch(partialTick float32) (ret float32) {
+	if partialTick == 1.0 {
+		return e.pitch
+	}
+	return util.LerpFloat(partialTick, e.oldPitch, e.pitch)
+}
+
+// HeadYaw mirrors LivingEntity.getYHeadRot(float).
+func (e *Entity) HeadYaw(partialTick float32) (ret float32) {
+	if partialTick == 1.0 {
+		return e.headYaw
+	}
+	return util.RotLerpFloat(partialTick, e.oldHeadYaw, e.headYaw)
+}
+
+// AgeInTicks mirrors EntityRenderState.ageInTicks = tickCount + partialTicks.
+func (e *Entity) AgeInTicks(partialTick float32) (ret float32) {
+	return float32(e.tickCount) + partialTick
+}
+
+// StorePositionAndRotation mirrors Entity.storePositionAndRotation().
+func (e *Entity) StorePositionAndRotation() (ret PositionAndRotation) {
+	return PositionAndRotation{Position: e.position, YRot: e.yaw, XRot: e.pitch}
+}
+
+// SetPositionAndRotation mirrors the setPos + setRot pair the interpolation
+// handlers apply each tick. setRot wraps yRot and clamps xRot, mirroring
+// Entity.setRot -> setYRot(yRot % 360) / setXRot(clamp(xRot % 360, -90, 90)).
+func (e *Entity) SetPositionAndRotation(position Vec3, yRot, xRot float32) {
+	e.position = position
+	e.yaw = float32(math.Mod(float64(yRot), 360.0))
+	e.pitch = util.ClampFloat(float32(math.Mod(float64(xRot), 360.0)), -90.0, 90.0)
+}
+
+// SnapTo mirrors Entity.snapTo(double, double, double, float, float): set the
+// live pose and collapse the previous-tick snapshot onto it.
+func (e *Entity) SnapTo(position Vec3, yRot, xRot float32) {
+	e.SetPositionAndRotation(position, yRot, xRot)
+	e.oldPosition = position
+	e.oldYaw = e.yaw
+	e.oldPitch = e.pitch
+	e.oldHeadYaw = e.headYaw
+}
+
+// onInterpolationStart mirrors Entity.onInterpolationStart; subclasses that
+// react to a new interpolation target override it (none does in the port).
+func (e *Entity) onInterpolationStart() {}
+
+// Tick mirrors Entity.commonTick's client side: snapshot the old pose, advance
+// the interpolation one step, then bump tickCount.
+func (e *Entity) Tick() {
+	e.oldPosition = e.position
+	e.oldYaw = e.yaw
+	e.oldPitch = e.pitch
+	e.oldHeadYaw = e.headYaw
+	if e.interpolation != nil {
+		e.interpolation.Interpolate()
+	}
+	e.tickCount++
+}
+
+// MoveOrInterpolateTo mirrors Entity.moveOrInterpolateTo(PositionPath, float, float).
+func (e *Entity) MoveOrInterpolateTo(position *PositionPath, yRot, xRot float32) {
+	if e.interpolation == nil {
+		if position != nil {
+			e.position = position.EndPosition
+		}
+		e.yaw = yRot
+		e.pitch = xRot
+		return
+	}
+	if !e.interpolation.InterpolateTo(position, yRot, xRot, true) {
+		if position != nil {
+			e.position = position.EndPosition
+		}
+		e.yaw = yRot
+		e.pitch = xRot
+	}
+}
+
+// MoveOrInterpolateToPath mirrors Entity.moveOrInterpolateTo(PositionPath).
+func (e *Entity) MoveOrInterpolateToPath(position *PositionPath) {
+	if e.interpolation == nil {
+		if position != nil {
+			e.position = position.EndPosition
+		}
+		return
+	}
+	if !e.interpolation.InterpolateTo(position, 0, 0, false) {
+		if position != nil {
+			e.position = position.EndPosition
+		}
+	}
+}
+
+// MoveOrInterpolateToLinear mirrors Entity.moveOrInterpolateTo(Vec3, float, float).
+func (e *Entity) MoveOrInterpolateToLinear(position Vec3, yRot, xRot float32) {
+	e.MoveOrInterpolateTo(&PositionPath{EndPosition: position}, yRot, xRot)
+}
+
+// MoveOrInterpolateToRot mirrors Entity.moveOrInterpolateTo(float, float).
+func (e *Entity) MoveOrInterpolateToRot(yRot, xRot float32) {
+	e.MoveOrInterpolateTo(nil, yRot, xRot)
 }
 
 // unpackDegrees mirrors Mth.unpackDegrees(byte).
@@ -118,7 +276,13 @@ type Module struct {
 	mu       sync.RWMutex
 	entities map[int32]*Entity
 	order    []int32
+
+	ticker *event.Timer
 }
+
+// entityTickInterval is the vanilla client tick cadence (20 TPS), matching
+// mc/bot/player's ticker.
+const entityTickInterval = 50 * time.Millisecond
 
 // NewModule creates an entity Module around an existing connection without
 // registering handlers.
@@ -216,7 +380,29 @@ func Start(c *proto.Conn) (m *Module) {
 	m.Register(m.onEntityVelocity)
 	m.Register(m.onEntityMetadata)
 	m.Register(m.onEntityEquipment)
+	m.startTick()
 	return
+}
+
+// startTick advances every tracked entity's interpolation at the vanilla client
+// tick cadence, mirroring Minecraft's ClientLevel.tickEntities -> entity.tick()
+// -> commonTick (setOldPosAndRot + interpolate + tickCount++). player.Module
+// registers its ticker the same way.
+func (m *Module) startTick() {
+	m.ticker = &event.Timer{}
+	m.ticker.Every(entityTickInterval, m.tick)
+	m.ticker.Start(m.Conn.Loop)
+}
+
+func (m *Module) tick() (err error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, id := range m.order {
+		if entity, ok := m.entities[id]; ok {
+			entity.Tick()
+		}
+	}
+	return nil
 }
 
 func (m *Module) add(entity *Entity) {
@@ -227,17 +413,20 @@ func (m *Module) add(entity *Entity) {
 }
 
 func (m *Module) onSpawnEntity(p *v26_4_snapshot_2.PlayToClientPacketSpawnEntity) (err error) {
-	entity := &Entity{
-		Id:       p.EntityId,
-		UUID:     p.ObjectUUID,
-		Type:     p.Type,
-		Position: Vec3{p.X, p.Y, p.Z},
-		Yaw:      unpackDegrees(p.Yaw),
-		Pitch:    unpackDegrees(p.Pitch),
-		HeadYaw:  unpackDegrees(p.HeadPitch),
-		Velocity: Vec3{p.Velocity.X, p.Velocity.Y, p.Velocity.Z},
-	}
-	entity.codec.SetBase(entity.Position)
+	entity := newEntity()
+	entity.Id = p.EntityId
+	entity.UUID = p.ObjectUUID
+	entity.Type = p.Type
+	entity.position = Vec3{p.X, p.Y, p.Z}
+	entity.yaw = unpackDegrees(p.Yaw)
+	entity.pitch = unpackDegrees(p.Pitch)
+	entity.headYaw = unpackDegrees(p.HeadPitch)
+	entity.Velocity = Vec3{p.Velocity.X, p.Velocity.Y, p.Velocity.Z}
+	entity.oldPosition = entity.position
+	entity.oldYaw = entity.yaw
+	entity.oldPitch = entity.pitch
+	entity.oldHeadYaw = entity.headYaw
+	entity.codec.SetBase(entity.position)
 	m.mu.Lock()
 	m.add(entity)
 	m.mu.Unlock()
@@ -265,7 +454,7 @@ func (m *Module) onEntityDestroy(p *v26_4_snapshot_2.PlayToClientPacketEntityDes
 func (m *Module) onEntityHeadRotation(p *v26_4_snapshot_2.PlayToClientPacketEntityHeadRotation) (err error) {
 	m.mu.Lock()
 	if entity, ok := m.entities[p.EntityId]; ok {
-		entity.HeadYaw = unpackDegrees(p.HeadYaw)
+		entity.headYaw = unpackDegrees(p.HeadYaw)
 	}
 	m.mu.Unlock()
 	return nil
@@ -284,8 +473,8 @@ func (m *Module) onMoveEntityPos(p *PlayToClientPacketMoveEntityPos) (err error)
 	m.mu.Lock()
 	if entity, ok := m.entities[p.EntityId]; ok {
 		path := entity.codec.decodePath(p.Delta)
-		entity.Position = path.EndPosition
 		entity.codec.SetBase(path.EndPosition)
+		entity.MoveOrInterpolateToPath(&path)
 		entity.OnGround = p.OnGround
 	}
 	m.mu.Unlock()
@@ -295,12 +484,15 @@ func (m *Module) onMoveEntityPos(p *PlayToClientPacketMoveEntityPos) (err error)
 func (m *Module) onMoveEntityPosRot(p *PlayToClientPacketMoveEntityPosRot) (err error) {
 	m.mu.Lock()
 	if entity, ok := m.entities[p.EntityId]; ok {
+		yRot := unpackDegrees(p.YRot)
+		xRot := unpackDegrees(p.XRot)
 		path := entity.codec.decodePath(p.Delta)
-		entity.Position = path.EndPosition
 		entity.codec.SetBase(path.EndPosition)
-		entity.Yaw = unpackDegrees(p.YRot)
-		entity.Pitch = unpackDegrees(p.XRot)
-		entity.HeadYaw = entity.Yaw
+		entity.MoveOrInterpolateTo(&path, yRot, xRot)
+		// The reduced port has no LivingEntity.aiStep head-turn solver, so the
+		// head follows the body yaw on a look packet; explicit
+		// ClientboundRotateHead packets still override it via headYaw.
+		entity.headYaw = yRot
 		entity.OnGround = p.OnGround
 	}
 	m.mu.Unlock()
@@ -310,9 +502,9 @@ func (m *Module) onMoveEntityPosRot(p *PlayToClientPacketMoveEntityPosRot) (err 
 func (m *Module) onMoveEntityRot(p *PlayToClientPacketMoveEntityRot) (err error) {
 	m.mu.Lock()
 	if entity, ok := m.entities[p.EntityId]; ok {
-		entity.Yaw = unpackDegrees(p.YRot)
-		entity.Pitch = unpackDegrees(p.XRot)
-		entity.HeadYaw = entity.Yaw
+		yRot := unpackDegrees(p.YRot)
+		entity.MoveOrInterpolateToRot(yRot, unpackDegrees(p.XRot))
+		entity.headYaw = yRot
 		entity.OnGround = p.OnGround
 	}
 	m.mu.Unlock()
@@ -353,12 +545,10 @@ func (m *Module) onSyncEntityPositionOld(p *v1_21_11.PlayToClientPacketSyncEntit
 	m.mu.Lock()
 	if entity, ok := m.entities[p.EntityId]; ok {
 		position := Vec3{p.X, p.Y, p.Z}
-		entity.Position = position
 		entity.codec.SetBase(position)
 		entity.Velocity = Vec3{p.Dx, p.Dy, p.Dz}
-		entity.Yaw = p.Yaw
-		entity.Pitch = p.Pitch
-		entity.HeadYaw = p.Yaw
+		entity.MoveOrInterpolateToLinear(position, p.Yaw, p.Pitch)
+		entity.headYaw = p.Yaw
 		entity.OnGround = p.OnGround
 	}
 	m.mu.Unlock()
@@ -369,11 +559,10 @@ func (m *Module) onTeleportEntityOld(p *v1_21_11.PlayToClientPacketEntityTelepor
 	m.mu.Lock()
 	if entity, ok := m.entities[p.EntityId]; ok {
 		position := Vec3{p.X, p.Y, p.Z}
-		entity.Position = position
 		entity.codec.SetBase(position)
-		entity.Yaw = unpackDegrees(p.Yaw)
-		entity.Pitch = unpackDegrees(p.Pitch)
-		entity.HeadYaw = entity.Yaw
+		yRot := unpackDegrees(p.Yaw)
+		entity.MoveOrInterpolateToLinear(position, yRot, unpackDegrees(p.Pitch))
+		entity.headYaw = yRot
 		entity.OnGround = p.OnGround
 	}
 	m.mu.Unlock()
@@ -383,11 +572,9 @@ func (m *Module) onTeleportEntityOld(p *v1_21_11.PlayToClientPacketEntityTelepor
 func (m *Module) onEntityPositionSync(p *PlayToClientPacketEntityPositionSync) (err error) {
 	m.mu.Lock()
 	if entity, ok := m.entities[p.EntityId]; ok {
-		entity.Position = p.Position.EndPosition
 		entity.codec.SetBase(p.Position.EndPosition)
-		entity.Yaw = p.YRot
-		entity.Pitch = p.XRot
-		entity.HeadYaw = p.YRot
+		entity.MoveOrInterpolateTo(&p.Position, p.YRot, p.XRot)
+		entity.headYaw = p.YRot
 		entity.OnGround = p.OnGround
 	}
 	m.mu.Unlock()
@@ -398,17 +585,15 @@ func (m *Module) onTeleportEntity(p *PlayToClientPacketTeleportEntity) (err erro
 	m.mu.Lock()
 	if entity, ok := m.entities[p.EntityId]; ok {
 		change := calculateAbsolute(PositionMoveRotation{
-			Position:      entity.Position,
+			Position:      entity.position,
 			DeltaMovement: entity.Velocity,
-			YRot:          entity.Yaw,
-			XRot:          entity.Pitch,
+			YRot:          entity.yaw,
+			XRot:          entity.pitch,
 		}, p.Change, p.Relatives)
-		entity.Position = change.Position
 		entity.codec.SetBase(change.Position)
 		entity.Velocity = change.DeltaMovement
-		entity.Yaw = change.YRot
-		entity.Pitch = change.XRot
-		entity.HeadYaw = change.YRot
+		entity.MoveOrInterpolateToLinear(change.Position, change.YRot, change.XRot)
+		entity.headYaw = change.YRot
 		entity.OnGround = p.OnGround
 	}
 	m.mu.Unlock()

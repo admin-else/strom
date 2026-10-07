@@ -75,9 +75,10 @@ func (p *probe) waitForEntity(x, y, z, tolerance float64, timeout time.Duration)
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		for _, e := range p.entities.Entities() {
-			if math.Abs(e.Position.X-x) <= tolerance &&
-				math.Abs(e.Position.Y-y) <= tolerance &&
-				math.Abs(e.Position.Z-z) <= tolerance {
+			pos := e.Position(1.0)
+			if math.Abs(pos.X-x) <= tolerance &&
+				math.Abs(pos.Y-y) <= tolerance &&
+				math.Abs(pos.Z-z) <= tolerance {
 				return e
 			}
 		}
@@ -102,7 +103,7 @@ func (p *probe) runEquipment() {
 		return
 	}
 	fmt.Printf("armor_stand tracked id=%d type=%d pos=(%.2f,%.2f,%.2f)\n",
-		stand.Id, stand.Type, stand.Position.X, stand.Position.Y, stand.Position.Z)
+		stand.Id, stand.Type, stand.Position(1.0).X, stand.Position(1.0).Y, stand.Position(1.0).Z)
 
 	helmet, ok := data.LookupItemByName(p.Version, "diamond_helmet")
 	if !ok {
@@ -138,7 +139,7 @@ func (p *probe) runMetadata() {
 		return
 	}
 	fmt.Printf("sheep tracked id=%d type=%d pos=(%.2f,%.2f,%.2f)\n",
-		sheep.Id, sheep.Type, sheep.Position.X, sheep.Position.Y, sheep.Position.Z)
+		sheep.Id, sheep.Type, sheep.Position(1.0).X, sheep.Position(1.0).Y, sheep.Position(1.0).Z)
 
 	var flags int8
 	hasFlags := false

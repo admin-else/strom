@@ -66,7 +66,7 @@ func TestMoveEntityPosLinear(t *testing.T) {
 	if packet.EntityId != 7 || !packet.OnGround || packet.Delta.Stepped {
 		t.Fatalf("unexpected packet %+v", packet)
 	}
-	entity := &Entity{Id: 7, Position: Vec3{}}
+	entity := &Entity{Id: 7}
 	path := entity.codec.decodePath(packet.Delta)
 	if path.EndPosition.X != 1.0 || path.EndPosition.Y != -1.0 || path.EndPosition.Z != 0 {
 		t.Fatalf("unexpected end %+v", path.EndPosition)
@@ -239,8 +239,8 @@ func TestRelEntityMoveOldAdapter(t *testing.T) {
 		t.Fatalf("adapter: %v", err)
 	}
 	entity := m.entities[5]
-	if entity.Position.X != 1.0 {
-		t.Fatalf("position x = %v, want 1.0", entity.Position.X)
+	if got := entity.Position(1.0).X; got != 1.0 {
+		t.Fatalf("position x = %v, want 1.0", got)
 	}
 	if !entity.OnGround {
 		t.Fatalf("on-ground flag not applied")

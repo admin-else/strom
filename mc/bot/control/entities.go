@@ -29,9 +29,10 @@ func NewEntityTracker(module *botentity.Module) (ret EntityProvider) {
 // EntityCollisionShapes mirrors Level.getEntityCollisions.
 func (t *entityTracker) EntityCollisionShapes(source *entity.Entity, box phys.AABB) (ret []*shapes.VoxelShape) {
 	for _, tracked := range t.module.Entities() {
+		pos := tracked.Position(1.0)
 		shape := shapes.Box(
-			tracked.Position.X-0.3, tracked.Position.Y, tracked.Position.Z-0.3,
-			tracked.Position.X+0.3, tracked.Position.Y+1.8, tracked.Position.Z+0.3,
+			pos.X-0.3, pos.Y, pos.Z-0.3,
+			pos.X+0.3, pos.Y+1.8, pos.Z+0.3,
 		)
 		bounds, ok := shape.Bounds()
 		if ok && bounds.Intersects(box) {

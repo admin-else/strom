@@ -156,6 +156,40 @@ func LerpDouble(alpha float64, p0 float64, p1 float64) (ret float64) {
 	return p0 + alpha*(p1-p0)
 }
 
+// WrapDegreesFloat mirrors Mth.wrapDegrees(float): wraps into [-180, 180).
+func WrapDegreesFloat(angle float32) (ret float32) {
+	ret = float32(math.Mod(float64(angle), 360.0))
+	if ret >= 180.0 {
+		ret -= 360.0
+	}
+	if ret < -180.0 {
+		ret += 360.0
+	}
+	return
+}
+
+// WrapDegreesDouble mirrors Mth.wrapDegrees(double): wraps into [-180, 180).
+func WrapDegreesDouble(angle float64) (ret float64) {
+	ret = math.Mod(angle, 360.0)
+	if ret >= 180.0 {
+		ret -= 360.0
+	}
+	if ret < -180.0 {
+		ret += 360.0
+	}
+	return
+}
+
+// RotLerpFloat mirrors Mth.rotLerp(float, float, float).
+func RotLerpFloat(alpha float32, from float32, to float32) (ret float32) {
+	return from + alpha*WrapDegreesFloat(to-from)
+}
+
+// RotLerpDouble mirrors Mth.rotLerp(double, double, double).
+func RotLerpDouble(alpha float64, from float64, to float64) (ret float64) {
+	return from + alpha*WrapDegreesDouble(to-from)
+}
+
 // SquareFloat mirrors Mth.square(float).
 func SquareFloat(x float32) (ret float32) { return x * x }
 
