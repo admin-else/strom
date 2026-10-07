@@ -27,3 +27,25 @@ func TestWorldHeightAtMinYOffset(t *testing.T) {
 		t.Errorf("HeightAt = %d, want %d", h, 100-64)
 	}
 }
+
+// TestMotionBlockingHeightAt checks the motion_blocking shortcut returns the
+// same value as HeightAt for that kind.
+func TestMotionBlockingHeightAt(t *testing.T) {
+	data := make([]int64, 37)
+	index := 3*level.ChunkWidth + 2
+	data[index/7] = int64(70) << ((index % 7) * 9)
+
+	w := NewWorld("26.4-snapshot-2", -64, 384)
+	w.storeChunk(ChunkPos{0, 0}, &level.Chunk{
+		Sections:   make([]level.Section, 24),
+		Heightmaps: []level.Heightmap{{Type: "motion_blocking", Data: data}},
+	})
+
+	h, err := w.MotionBlockingHeightAt(2, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if h != 70-64 {
+		t.Errorf("MotionBlockingHeightAt = %d, want %d", h, 70-64)
+	}
+}
