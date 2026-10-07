@@ -1780,19 +1780,6 @@ func (ret *EntityMetadata) Encode(w io.Writer) (err error) {
 	return
 }
 
-type EntityMetadataItem struct {
-	Val any
-}
-
-func (ret *EntityMetadataItem) Decode(r io.ReadSeeker) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-func (ret *EntityMetadataItem) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-
 type Ingredient struct {
 	Val []Slot
 }
@@ -2336,19 +2323,6 @@ func (ret *Particle) Encode(w io.Writer) (err error) {
 			return
 		}
 	}
-	return
-}
-
-type ParticleData struct {
-	Val any
-}
-
-func (ret *ParticleData) Decode(r io.ReadSeeker) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-func (ret *ParticleData) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
 	return
 }
 

@@ -391,19 +391,6 @@ func (ret *EntityMetadata) Encode(w io.Writer) (err error) {
 	return
 }
 
-type EntityMetadataItem struct {
-	Val any
-}
-
-func (ret *EntityMetadataItem) Decode(r io.ReadSeeker) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-func (ret *EntityMetadataItem) Encode(w io.Writer) (err error) {
-	err = proto_base.ToDoError
-	return
-}
-
 type Position struct {
 	X int32
 	Y int16
