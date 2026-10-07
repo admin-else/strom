@@ -103,6 +103,19 @@ func LookupBlockByStateId(version string, stateId int32) (block *Block, ok bool)
 
 var UnknownBlockNameErr = errors.New("unknown block Name")
 
+// BlockStateCount returns the size of the global block state palette for the
+// version, i.e. the number of distinct block states in the registry. This is
+// the value the vanilla direct palette bits-per-entry is derived from, NOT the
+// number of block types.
+func BlockStateCount(v string) (ret int32) {
+	for _, b := range BlocksForVersion(v) {
+		if b.MaxStateId >= ret {
+			ret = b.MaxStateId + 1
+		}
+	}
+	return
+}
+
 // LookupBlockByName returns the block with the given name in the given version.
 func LookupBlockByName(version string, name string) (block *Block, ok bool) {
 	for _, b := range BlocksForVersion(version) {

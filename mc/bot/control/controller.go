@@ -200,9 +200,18 @@ func (c *Controller) Tick() (err error) {
 	c.ent.SetRotation(c.yaw, c.pitch)
 	c.ent.TravelWithInput(input, input.Shift)
 
+	if ground, ok := c.player.(GroundSink); ok {
+		ground.SetOnGround(c.ent.OnGround())
+	}
 	c.player.SetPosition(c.ent.X, c.ent.Y, c.ent.Z)
 	c.player.SetRotation(c.yaw, c.pitch)
 	return nil
+}
+
+// GroundSink is implemented by a player target that can record the simulated
+// on-ground state, which is reported to the server in the movement flags.
+type GroundSink interface {
+	SetOnGround(onGround bool)
 }
 
 func durationTicks(duration time.Duration) (ret int) {

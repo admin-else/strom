@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/admin-else/strom/mc/proto_base"
+	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
 )
 
 func putI16(t *testing.T, b *bytes.Buffer, value int16) {
@@ -203,5 +204,45 @@ func TestVecDeltaCodecRounding(t *testing.T) {
 	got := codec.Decode(4096, 0, 0)
 	if got.X != 1.5 {
 		t.Fatalf("x = %v, want 1.5", got.X)
+	}
+}
+
+func TestUsesSteppedEntityMovement(t *testing.T) {
+	if usesSteppedEntityMovement("26.2") {
+		t.Fatalf("26.2 must use short deltas")
+	}
+	if usesSteppedEntityMovement("1.21.11") {
+		t.Fatalf("1.21.11 must use short deltas")
+	}
+	if !usesSteppedEntityMovement("26.4-snapshot-2") {
+		t.Fatalf("26.4 must use the stepped VecDelta form")
+	}
+}
+
+func TestReadVecDeltaRejectsHugeStepCount(t *testing.T) {
+	var buf bytes.Buffer
+	putVarInt(t, &buf, 1<<20)
+	if _, err := readVecDelta(bytes.NewReader(buf.Bytes()), 1<<20); err == nil {
+		t.Fatalf("expected an error for an implausible step count")
+	}
+}
+
+func TestRelEntityMoveOldAdapter(t *testing.T) {
+	m := NewModule(nil)
+	m.entities[5] = &Entity{Id: 5}
+	packet := &v1_21_11.PlayToClientPacketRelEntityMove{
+		EntityId: 5,
+		DX:       4096,
+		OnGround: true,
+	}
+	if err := m.onRelEntityMoveOld(packet); err != nil {
+		t.Fatalf("adapter: %v", err)
+	}
+	entity := m.entities[5]
+	if entity.Position.X != 1.0 {
+		t.Fatalf("position x = %v, want 1.0", entity.Position.X)
+	}
+	if !entity.OnGround {
+		t.Fatalf("on-ground flag not applied")
 	}
 }

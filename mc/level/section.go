@@ -10,6 +10,7 @@ import (
 
 	data2 "github.com/admin-else/strom/mc/data"
 	"github.com/admin-else/strom/mc/proto_base"
+	"github.com/admin-else/strom/mc/proto_generated"
 	"github.com/admin-else/strom/mc/util"
 )
 
@@ -26,19 +27,35 @@ const (
 	BiomesPerChunkSection = ChunkBiomesWidth * ChunkBiomesWidth * ChunkBiomesWidth
 )
 
-// sectionFormatVersion26_4 is the first version where the section wire format
-// added the fluid count short and grew the biome container to 16^3 entries.
-const sectionFormatVersion26_4 = "26.4-snapshot-2"
+// sectionFluidCountFirstVersion is the first version whose chunk section wire
+// format stores the fluid count as a second short (ViaVersion: ChunkSection
+// fluid count is available for 26.1+).
+const sectionFluidCountFirstVersion = "26.1"
 
-// uses26_4SectionFormat reports whether the version's section wire format is the
-// 26.4 form (nonEmpty+fluid shorts, 16^3 block and biome containers).
-func uses26_4SectionFormat(version string) bool {
-	return version == sectionFormatVersion26_4
+// sectionBiome4096FirstVersion is the first version whose chunk section biome
+// container holds 16^3 = 4096 entries; earlier versions (including 26.2) still
+// use 4^3 = 64.
+const sectionBiome4096FirstVersion = "26.4-snapshot-2"
+
+// versionAtLeast reports whether version is at or after boundary in release order.
+func versionAtLeast(version, boundary string) (ret bool) {
+	i := slices.Index(proto_generated.SupportedVersions, version)
+	j := slices.Index(proto_generated.SupportedVersions, boundary)
+	if i == -1 || j == -1 {
+		return version == boundary
+	}
+	return i >= j
 }
 
-// biomeEntries returns the number of biome entries per section for the version.
-func biomeEntries(version string) int32 {
-	if uses26_4SectionFormat(version) {
+// hasSectionFluidCount reports whether the version's section wire format
+// includes the fluid count short.
+func hasSectionFluidCount(version string) (ret bool) {
+	return versionAtLeast(version, sectionFluidCountFirstVersion)
+}
+
+// sectionBiomeEntries returns the number of biome entries per section for the version.
+func sectionBiomeEntries(version string) (ret int32) {
+	if versionAtLeast(version, sectionBiome4096FirstVersion) {
 		return BlocksPerChunkSection
 	}
 	return BiomesPerChunkSection
@@ -47,28 +64,36 @@ func biomeEntries(version string) int32 {
 // makeBiomeFormatForVersion returns the StorageFormat for biome data at the given version.
 func makeBiomeFormatForVersion(version string) StorageFormat {
 	directBpe := uint8(math.Ceil(math.Log2(float64(len(data2.BiomesForVersion(version))))))
-	if uses26_4SectionFormat(version) {
-		bpes := []uint8{0, 1, 2, 3, 4, 5, 6, 7, 8}
-		if !slices.Contains(bpes, directBpe) {
-			bpes = append(bpes, directBpe)
-			slices.Sort(bpes)
-		}
-		return StorageFormat{
-			AvailableBpes: bpes,
-			BiggestDirect: true,
-			Len:           BlocksPerChunkSection,
-		}
-	}
 	return StorageFormat{
-		AvailableBpes: []uint8{0, 1, 2, 3, directBpe},
+		AvailableBpes: makeBpeRange(0, directBpe),
 		BiggestDirect: true,
-		Len:           BiomesPerChunkSection,
+		Len:           sectionBiomeEntries(version),
 	}
 }
 
+// makeBpeRange returns every bits-per-entry value a PalettedContainer can use:
+// 0 for a single-value storage, every value from minBpe up to the direct
+// (global palette) size, which is always the last element so it is read as a
+// direct palette with no inline palette.
+func makeBpeRange(minBpe, directBpe uint8) (ret []uint8) {
+	ret = []uint8{0}
+	start := minBpe
+	if start < 1 {
+		start = 1
+	}
+	for v := start; v <= directBpe; v++ {
+		ret = append(ret, v)
+	}
+	if !slices.Contains(ret, directBpe) {
+		ret = append(ret, directBpe)
+	}
+	slices.Sort(ret)
+	return slices.Compact(ret)
+}
+
 type Section struct {
-	BlockCount int16
-	FluidCount int16
+	BlockCount     int16
+	FluidCount     int16
 	Blocks, Biomes *Storage
 }
 
@@ -79,10 +104,10 @@ func MakeBiomeFormat(version string) StorageFormat {
 
 // MakeBlockFormat returns the StorageFormat for block data at the given version.
 func MakeBlockFormat(version string) StorageFormat {
-	directBpe := uint8(math.Ceil(math.Log2(float64(len(data2.BlocksForVersion(version))))))
+	directBpe := uint8(math.Ceil(math.Log2(float64(data2.BlockStateCount(version)))))
 	return StorageFormat{
 		RedirectingBpes: []uint8{1, 2, 3},
-		AvailableBpes:   []uint8{0, 4, 5, 6, 7, 8, directBpe},
+		AvailableBpes:   makeBpeRange(4, directBpe),
 		BiggestDirect:   true,
 		Len:             BlocksPerChunkSection,
 	}
@@ -170,7 +195,7 @@ func SectionDecodePacket(r io.Reader, version string) (s Section, err error) {
 	if err != nil {
 		return
 	}
-	if uses26_4SectionFormat(version) {
+	if hasSectionFluidCount(version) {
 		err = binary.Read(r, binary.BigEndian, &s.FluidCount)
 		if err != nil {
 			return
@@ -195,7 +220,7 @@ func SectionEncodePacketVersion(w io.Writer, s Section, version string) (err err
 	if err != nil {
 		return
 	}
-	if uses26_4SectionFormat(version) {
+	if hasSectionFluidCount(version) {
 		err = binary.Write(w, binary.BigEndian, s.FluidCount)
 		if err != nil {
 			return

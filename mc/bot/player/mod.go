@@ -432,6 +432,14 @@ func (m *Module) SetRotation(yaw, pitch float32) {
 	m.rotation = Rotation{yaw, pitch}
 }
 
+// SetOnGround records the simulated on-ground state, reported to the server in
+// the movement flags on the next tick.
+func (m *Module) SetOnGround(onGround bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.onGround = onGround
+}
+
 // Look sets the client rotation, matching the vanilla camera look direction.
 func (m *Module) Look(yaw, pitch float32) {
 	m.SetRotation(yaw, pitch)

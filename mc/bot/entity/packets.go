@@ -3,11 +3,16 @@ package entity
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"math"
 
 	"github.com/admin-else/strom/mc/proto_base"
 )
+
+// maxVecDeltaSteps bounds the step count read from the wire so a malformed or
+// wrong-version packet cannot allocate an unbounded slice.
+const maxVecDeltaSteps = 1 << 16
 
 // This file holds hand-written decoders for the 26.4 entity movement family.
 // The minecraft-data schema for 26.4-snapshot-2 is derived from 26.2, where
@@ -130,6 +135,10 @@ func readVecDelta(r io.ReadSeeker, stepCount int32) (ret VecDelta, err error) {
 		return
 	}
 	ret.Stepped = true
+	if stepCount > maxVecDeltaSteps {
+		err = fmt.Errorf("entity: implausible VecDelta step count %d", stepCount)
+		return
+	}
 	ret.Steps = make([]DeltaStep, 0, stepCount)
 	for range stepCount {
 		var step DeltaStep
@@ -165,6 +174,10 @@ func readPositionPath(r io.ReadSeeker) (ret PositionPath, err error) {
 		var count int32
 		count, err = proto_base.DecodeVarInt(r)
 		if err != nil {
+			return
+		}
+		if count > maxVecDeltaSteps {
+			err = fmt.Errorf("entity: implausible PositionPath step count %d", count)
 			return
 		}
 		ret.Steps = make([]PositionStep, 0, count)

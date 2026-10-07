@@ -10,12 +10,15 @@ package entity
 
 import (
 	"math"
+	"slices"
 	"sync"
 
 	"github.com/google/uuid"
 
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_base"
+	"github.com/admin-else/strom/mc/proto_generated"
+	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
 	"github.com/admin-else/strom/mc/proto_generated/v26_4_snapshot_2"
 )
 
@@ -150,31 +153,60 @@ func (m *Module) Count() (n int) {
 	return len(m.entities)
 }
 
-// Start registers the entity handlers on c and overrides the stale 26.4 packet
-// decoders.
+// steppedEntityMovementFirstVersion is the first version whose entity movement
+// packets use the stepped VecDelta wire form (a properties varint encoding the
+// on-ground bit and step count). Earlier versions still send short deltas.
+const steppedEntityMovementFirstVersion = "26.4-snapshot-2"
+
+// usesSteppedEntityMovement reports whether the version's entity movement
+// packets use the stepped VecDelta form.
+func usesSteppedEntityMovement(version string) (ret bool) {
+	i := slices.Index(proto_generated.SupportedVersions, version)
+	j := slices.Index(proto_generated.SupportedVersions, steppedEntityMovementFirstVersion)
+	if i == -1 || j == -1 {
+		return version == steppedEntityMovementFirstVersion
+	}
+	return i >= j
+}
+
+// Start registers the entity handlers on c. For 26.4-snapshot-2 the generated
+// movement decoders are stale, so the packet ids are replaced with the
+// hand-written stepped form. Older versions keep their generated decoders
+// (short deltas) and use the adapter handlers below.
 func Start(c *proto.Conn) (m *Module) {
 	m = NewModule(c)
-	// The overridden packet ids are resolved by name so this stays correct if
-	// the generated id table changes.
-	override := func(name string, packetType proto_base.EncodeDecodeAble) {
-		info, ok := proto.LookupPacketInfoByNameProtocolVersionStateAndDirection(name, c.ProtocolVersion, proto_base.Play, proto_base.ToClient)
-		if !ok {
-			return
+	if usesSteppedEntityMovement(c.Version) {
+		// The overridden packet ids are resolved by name so this stays correct
+		// if the generated id table changes.
+		override := func(name string, packetType proto_base.EncodeDecodeAble) {
+			info, ok := proto.LookupPacketInfoByNameProtocolVersionStateAndDirection(name, c.ProtocolVersion, proto_base.Play, proto_base.ToClient)
+			if !ok {
+				return
+			}
+			proto.OverridePacketType(proto_base.ToClient, proto_base.Play, info.PacketId, c.ProtocolVersion, name, packetType)
 		}
-		proto.OverridePacketType(proto_base.ToClient, proto_base.Play, info.PacketId, c.ProtocolVersion, name, packetType)
+		override("rel_entity_move", &PlayToClientPacketMoveEntityPos{})
+		override("entity_move_look", &PlayToClientPacketMoveEntityPosRot{})
+		override("entity_look", &PlayToClientPacketMoveEntityRot{})
+		override("sync_entity_position", &PlayToClientPacketEntityPositionSync{})
+		override("entity_teleport", &PlayToClientPacketTeleportEntity{})
+
+		m.Register(m.onMoveEntityPos)
+		m.Register(m.onMoveEntityPosRot)
+		m.Register(m.onMoveEntityRot)
+		m.Register(m.onEntityPositionSync)
+		m.Register(m.onTeleportEntity)
+	} else {
+		m.RegisterUntil("26.2",
+			m.onRelEntityMoveOld,
+			m.onEntityMoveLookOld,
+			m.onEntityLookOld,
+			m.onSyncEntityPositionOld,
+			m.onTeleportEntityOld,
+		)
 	}
-	override("rel_entity_move", &PlayToClientPacketMoveEntityPos{})
-	override("entity_move_look", &PlayToClientPacketMoveEntityPosRot{})
-	override("entity_look", &PlayToClientPacketMoveEntityRot{})
-	override("sync_entity_position", &PlayToClientPacketEntityPositionSync{})
-	override("entity_teleport", &PlayToClientPacketTeleportEntity{})
 
 	m.Register(m.onSpawnEntity)
-	m.Register(m.onMoveEntityPos)
-	m.Register(m.onMoveEntityPosRot)
-	m.Register(m.onMoveEntityRot)
-	m.Register(m.onEntityPositionSync)
-	m.Register(m.onTeleportEntity)
 	m.Register(m.onEntityDestroy)
 	m.Register(m.onEntityHeadRotation)
 	m.Register(m.onEntityVelocity)
@@ -274,6 +306,67 @@ func (m *Module) onMoveEntityRot(p *PlayToClientPacketMoveEntityRot) (err error)
 	if entity, ok := m.entities[p.EntityId]; ok {
 		entity.Yaw = unpackDegrees(p.YRot)
 		entity.Pitch = unpackDegrees(p.XRot)
+		entity.HeadYaw = entity.Yaw
+		entity.OnGround = p.OnGround
+	}
+	m.mu.Unlock()
+	return nil
+}
+
+// The *Old handlers adapt the pre-26.4 generated movement packets (short deltas
+// and a boolean on-ground flag) to the same entity update logic.
+
+func (m *Module) onRelEntityMoveOld(p *v1_21_11.PlayToClientPacketRelEntityMove) (err error) {
+	return m.onMoveEntityPos(&PlayToClientPacketMoveEntityPos{
+		EntityId: p.EntityId,
+		Delta:    VecDelta{Xa: p.DX, Ya: p.DY, Za: p.DZ},
+		OnGround: p.OnGround,
+	})
+}
+
+func (m *Module) onEntityMoveLookOld(p *v1_21_11.PlayToClientPacketEntityMoveLook) (err error) {
+	return m.onMoveEntityPosRot(&PlayToClientPacketMoveEntityPosRot{
+		EntityId: p.EntityId,
+		Delta:    VecDelta{Xa: p.DX, Ya: p.DY, Za: p.DZ},
+		YRot:     p.Yaw,
+		XRot:     p.Pitch,
+		OnGround: p.OnGround,
+	})
+}
+
+func (m *Module) onEntityLookOld(p *v1_21_11.PlayToClientPacketEntityLook) (err error) {
+	return m.onMoveEntityRot(&PlayToClientPacketMoveEntityRot{
+		EntityId: p.EntityId,
+		YRot:     p.Yaw,
+		XRot:     p.Pitch,
+		OnGround: p.OnGround,
+	})
+}
+
+func (m *Module) onSyncEntityPositionOld(p *v1_21_11.PlayToClientPacketSyncEntityPosition) (err error) {
+	m.mu.Lock()
+	if entity, ok := m.entities[p.EntityId]; ok {
+		position := Vec3{p.X, p.Y, p.Z}
+		entity.Position = position
+		entity.codec.SetBase(position)
+		entity.Velocity = Vec3{p.Dx, p.Dy, p.Dz}
+		entity.Yaw = p.Yaw
+		entity.Pitch = p.Pitch
+		entity.HeadYaw = p.Yaw
+		entity.OnGround = p.OnGround
+	}
+	m.mu.Unlock()
+	return nil
+}
+
+func (m *Module) onTeleportEntityOld(p *v1_21_11.PlayToClientPacketEntityTeleport) (err error) {
+	m.mu.Lock()
+	if entity, ok := m.entities[p.EntityId]; ok {
+		position := Vec3{p.X, p.Y, p.Z}
+		entity.Position = position
+		entity.codec.SetBase(position)
+		entity.Yaw = unpackDegrees(p.Yaw)
+		entity.Pitch = unpackDegrees(p.Pitch)
 		entity.HeadYaw = entity.Yaw
 		entity.OnGround = p.OnGround
 	}
