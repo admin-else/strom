@@ -30,6 +30,11 @@ Derivation rules:
     client jars (see the 26.4 diff notes).
 
 Usage: patch_protocol_26_4_snapshot_2.py <26.2 protocol.json> <26.2 packets.json> <26.4 packets.json> <out.json>
+
+This only produces the wiki-derived skeleton. The particle registry ids,
+particle option codecs and the `world_particles` field order are stale here;
+run `patch_particles_26_4_snapshot_2.py <registries.json> <out.json>` afterwards
+to rebuild them from the vanilla jar. See docs/DATA-GENERATION.md.
 """
 import json
 import sys
