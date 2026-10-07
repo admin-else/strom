@@ -35,6 +35,11 @@ type World struct {
 	height     int
 	center     ChunkPos
 	registries *registry.Store
+
+	// Weather state mirrors net.minecraft.world.level.Level. The current levels
+	// are lerped against the previous tick's levels with the partial tick.
+	oRainLevel, rainLevel       float32
+	oThunderLevel, thunderLevel float32
 }
 
 // NewWorld creates a new World for the given protocol version and vertical
@@ -338,6 +343,7 @@ func Start(c *proto.Conn, w *World) *Module {
 	m.RegisterUntilLatest(m.onUpdateViewPosition)
 	m.RegisterUntilLatest(m.onChunkBatchFinished)
 	m.RegisterUntilLatest(m.onChunkBatchStart)
+	m.RegisterUntil("26.4-snapshot-2", m.onGameStateChange)
 	return m
 }
 
