@@ -55,3 +55,17 @@ func containsBpe(bpes []uint8, value uint8) (ret bool) {
 	}
 	return false
 }
+
+// TestBiomeIndex checks the biome container index mirrors
+// PalettedContainer.Strategy.getIndex: per-block for 26.4, per-4^3-quart before.
+func TestBiomeIndex(t *testing.T) {
+	if got := BiomeIndex("26.4-snapshot-2", 3, 5, 7); got != 5*256+7*16+3 {
+		t.Errorf("26.4 biome index = %d, want %d", got, 5*256+7*16+3)
+	}
+	if got := BiomeIndex("1.21.11", 3, 5, 7); got != 1*16+1*4+0 {
+		t.Errorf("pre-26.4 biome index = %d, want %d", got, 1*16+1*4+0)
+	}
+	if got := BiomeIndex("26.2", 15, 15, 15); got != 3*16+3*4+3 {
+		t.Errorf("26.2 biome index = %d, want %d", got, 3*16+3*4+3)
+	}
+}

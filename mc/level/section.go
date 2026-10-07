@@ -61,6 +61,17 @@ func sectionBiomeEntries(version string) (ret int32) {
 	return BiomesPerChunkSection
 }
 
+// BiomeIndex returns the index into a section's biome container for the given
+// section-local coordinates, mirroring PalettedContainer.Strategy.getIndex.
+// 26.4+ stores one biome per block (16^3, bitsPerAxis 4); earlier versions store
+// one per 4^3 quartz (bitsPerAxis 2).
+func BiomeIndex(version string, lx, ly, lz int32) (ret int32) {
+	if sectionBiomeEntries(version) == BlocksPerChunkSection {
+		return (ly<<4|lz)<<4 | lx
+	}
+	return (ly>>2<<2|lz>>2)<<2 | lx>>2
+}
+
 // makeBiomeFormatForVersion returns the StorageFormat for biome data at the given version.
 func makeBiomeFormatForVersion(version string) StorageFormat {
 	directBpe := uint8(math.Ceil(math.Log2(float64(len(data2.BiomesForVersion(version))))))

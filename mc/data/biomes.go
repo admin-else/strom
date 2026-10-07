@@ -16,14 +16,14 @@ import "errors"
 //	},
 
 type Biome struct {
-	Id               int32
-	Name             string
-	Category         string
-	Temperature      float64
-	HasPrecipitation bool
-	Dimension        string
-	DisplayName      string
-	Color            int
+	Id               int32   `json:"id"`
+	Name             string  `json:"name"`
+	Category         string  `json:"category"`
+	Temperature      float64 `json:"temperature"`
+	HasPrecipitation bool    `json:"has_precipitation"`
+	Dimension        string  `json:"dimension"`
+	DisplayName      string  `json:"displayName"`
+	Color            int     `json:"color"`
 }
 
 var BiomesCache = make(map[string][]*Biome)
