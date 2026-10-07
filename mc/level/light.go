@@ -49,3 +49,9 @@ func nibbleAt(data []byte, index int) (v uint8) {
 	}
 	return b >> 4 & 0xF
 }
+
+// PackLight mirrors LightCoordsUtil.pack: the block nibble in bits 4-7 and the
+// sky nibble in bits 20-23. World.LightAt supplies the two nibbles.
+func PackLight(block, sky uint8) (ret uint32) {
+	return uint32(block)<<4 | uint32(sky)<<20
+}
