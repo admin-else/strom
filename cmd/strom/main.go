@@ -25,6 +25,7 @@ import (
 	"github.com/admin-else/strom/cmd/strom/serve_tmcpr"
 	"github.com/admin-else/strom/cmd/strom/serve_world"
 	"github.com/admin-else/strom/cmd/strom/status"
+	"github.com/admin-else/strom/cmd/strom/weather"
 )
 
 var ExpectedASubcommandErr = errors.New("expected a subcommand")
@@ -52,23 +53,24 @@ func Version(args []string) error {
 }
 
 var subcommands = map[string]func(args []string) error{
-	"offline-uuid":         offline_uuid.Run,
-	"packet-info":          packet_info.Run,
-	"print-nbt":            print_nbt.Run,
-	"status":               status.Run,
-	"packet-spy":           packet_inspector.Run,
-	"api":                  api.Run,
-	"version":              Version,
-	"extract-mca":          extract_mca.Run,
-	"data":                 data.Run,
-	"print-replay":         print_replay.Run,
+	"offline-uuid": offline_uuid.Run,
+	"packet-info":  packet_info.Run,
+	"print-nbt":    print_nbt.Run,
+	"status":       status.Run,
+	"packet-spy":   packet_inspector.Run,
+	"api":          api.Run,
+	"version":      Version,
+	"extract-mca":  extract_mca.Run,
+	"data":         data.Run,
+	"print-replay": print_replay.Run,
 	// "raw-capture":          raw_capture.Run, // removed: use tcpflow instead for raw TCP capture, then raw-to-tmcpr
-	"raw-to-tmcpr":         raw_to_tmcpr.Run,
-	"serve-world":          serve_world.Run,
-	"mca-to-tmcpr":         mca_to_tmcpr.Run,
-	"serve-tmcpr":          serve_tmcpr.Run,
-	"messenger":            messenger.Run,
-	"registry":             registry.Run,
+	"raw-to-tmcpr": raw_to_tmcpr.Run,
+	"serve-world":  serve_world.Run,
+	"mca-to-tmcpr": mca_to_tmcpr.Run,
+	"serve-tmcpr":  serve_tmcpr.Run,
+	"messenger":    messenger.Run,
+	"registry":     registry.Run,
+	"weather":      weather.Run,
 }
 
 func Help(args []string) (err error) {
