@@ -9,6 +9,7 @@ import (
 	"github.com/admin-else/strom/mc/proto"
 	"github.com/admin-else/strom/mc/proto_generated/v1_21_11"
 	"github.com/admin-else/strom/mc/proto_generated/v26_4_snapshot_2"
+	"github.com/admin-else/strom/mc/registry"
 )
 
 var (
@@ -26,13 +27,14 @@ type ChunkPos struct {
 // Multiple bots can subscribe to the same World and update it from their
 // respective connections.
 type World struct {
-	mu        sync.RWMutex
-	chunks    map[ChunkPos]*level.Chunk
-	revisions map[ChunkPos]int64
-	version   string
-	minY      int
-	height    int
-	center    ChunkPos
+	mu         sync.RWMutex
+	chunks     map[ChunkPos]*level.Chunk
+	revisions  map[ChunkPos]int64
+	version    string
+	minY       int
+	height     int
+	center     ChunkPos
+	registries *registry.Store
 }
 
 // NewWorld creates a new World for the given protocol version and vertical
@@ -55,6 +57,41 @@ func (w *World) Height() int { return w.height }
 
 // Version returns the world's protocol version string.
 func (w *World) Version() string { return w.version }
+
+// SetRegistries attaches the dynamic registries captured during configuration,
+// letting consumers resolve wire ids to resource ids and back.
+func (w *World) SetRegistries(store *registry.Store) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.registries = store
+}
+
+// Registries returns the attached registry store, or nil when none was set.
+func (w *World) Registries() (store *registry.Store) {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	return w.registries
+}
+
+// RegistryID returns the wire id of resourceID inside registryName, resolving
+// through the attached registry store.
+func (w *World) RegistryID(registryName, resourceID string) (id int, ok bool) {
+	store := w.Registries()
+	if store == nil {
+		return
+	}
+	return store.RegistryID(registryName, resourceID)
+}
+
+// ResourceID returns the resource id of wire id inside registryName, resolving
+// through the attached registry store.
+func (w *World) ResourceID(registryName string, id int) (resourceID string, ok bool) {
+	store := w.Registries()
+	if store == nil {
+		return
+	}
+	return store.ResourceID(registryName, id)
+}
 
 // Center returns the last chunk-cache center received via UpdateViewPosition.
 func (w *World) Center() ChunkPos {
