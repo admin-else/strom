@@ -2,6 +2,7 @@ package proto_test
 
 import (
 	"bytes"
+	"encoding/binary"
 	"testing"
 
 	"github.com/admin-else/strom/mc/data"
@@ -121,5 +122,91 @@ func TestWorldParticlesParameterizedDecode(t *testing.T) {
 	got := decoded.(*v1_20_4.PlayToClientPacketWorldParticles)
 	if got.Data != dust {
 		t.Errorf("particle data = %#v, want %#v", got.Data, dust)
+	}
+}
+
+// TestWorldParticles264Decode pins the jar-derived 26.4 particle protocol: the
+// particle registry ids, the optioned `dust` layout, and the
+// ClientboundLevelParticlesPacket field order. It decodes raw clientbound bytes
+// because the client never encodes this serverbound-only packet.
+func TestWorldParticles264Decode(t *testing.T) {
+	ver := data.MustLookupProtocolVersion("26.4-snapshot-2")
+	info, ok := proto.LookupPacketInfoByNameProtocolVersionStateAndDirection(
+		"world_particles", ver, proto_base.Play, proto_base.ToClient,
+	)
+	if !ok {
+		t.Fatal("world_particles packet info not found for 26.4-snapshot-2")
+	}
+
+	type center struct {
+		x, y, z float64
+	}
+	build := func(particleID int32, options func(*bytes.Buffer)) []byte {
+		var buf bytes.Buffer
+		if err := proto_base.EncodeVarInt(&buf, info.PacketId); err != nil {
+			t.Fatal(err)
+		}
+		if err := proto_base.EncodeVarInt(&buf, particleID); err != nil {
+			t.Fatal(err)
+		}
+		if options != nil {
+			options(&buf)
+		}
+		c := center{1, 2, 3}
+		buf.WriteByte(0) // overrideLimiter
+		buf.WriteByte(0) // alwaysShow
+		_ = binary.Write(&buf, binary.BigEndian, c.x)
+		_ = binary.Write(&buf, binary.BigEndian, c.y)
+		_ = binary.Write(&buf, binary.BigEndian, c.z)
+		for i := 0; i < 6; i++ {
+			_ = binary.Write(&buf, binary.BigEndian, float32(0.5))
+		}
+		_ = proto_base.EncodeVarInt(&buf, 30) // count
+		_ = proto_base.EncodeVarInt(&buf, 0)  // randomizationType
+		return buf.Bytes()
+	}
+
+	// flame = id 39, a SimpleParticleType with no options (switch default void).
+	flameRaw := build(39, nil)
+	flameDecoded, err := proto.SimpleBytesToPacket(flameRaw, info.ProtocolVersion, info.Direction, info.State)
+	if err != nil {
+		t.Fatalf("flame decode: %v", err)
+	}
+	if unc, isUnc := flameDecoded.(*proto.UnCodablePacket); isUnc {
+		t.Fatalf("flame wrapped as UnCodablePacket: %v", unc.Err)
+	}
+	flame := flameDecoded.(*v26_4_snapshot_2.PlayToClientPacketWorldParticles)
+	if flame.Particle.Type != "flame" {
+		t.Errorf("flame particle type = %q, want flame", flame.Particle.Type)
+	}
+	if flame.Particle.Data != struct{}{} {
+		t.Errorf("flame particle data = %#v, want empty struct", flame.Particle.Data)
+	}
+	if flame.Count != 30 || flame.X != 1 || flame.Y != 2 || flame.Z != 3 {
+		t.Errorf("flame core fields mismatch: %#v", flame)
+	}
+
+	// dust = id 21, DustParticleOptions streamCodec = INT color, FLOAT scale.
+	dustRaw := build(21, func(b *bytes.Buffer) {
+		_ = binary.Write(b, binary.BigEndian, int32(0x112233))
+		_ = binary.Write(b, binary.BigEndian, float32(1.5))
+	})
+	dustDecoded, err := proto.SimpleBytesToPacket(dustRaw, info.ProtocolVersion, info.Direction, info.State)
+	if err != nil {
+		t.Fatalf("dust decode: %v", err)
+	}
+	if unc, isUnc := dustDecoded.(*proto.UnCodablePacket); isUnc {
+		t.Fatalf("dust wrapped as UnCodablePacket: %v", unc.Err)
+	}
+	dust := dustDecoded.(*v26_4_snapshot_2.PlayToClientPacketWorldParticles)
+	if dust.Particle.Type != "dust" {
+		t.Errorf("dust particle type = %q, want dust", dust.Particle.Type)
+	}
+	wantDust := struct {
+		Color int32
+		Scale float32
+	}{0x112233, 1.5}
+	if dust.Particle.Data != wantDust {
+		t.Errorf("dust particle data = %#v, want %#v", dust.Particle.Data, wantDust)
 	}
 }
